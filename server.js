@@ -12,7 +12,7 @@ const io = new Server(server, {
 });
 
 // Serve static files from the current directory
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname)));
 
 io.on('connection', (socket) => {
     console.log('A user connected:', socket.id);
