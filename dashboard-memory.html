@@ -274,7 +274,8 @@
         // Socket logic for dashboard
         if (typeof io !== 'undefined') {
             const socket = io();
-            socket.on('game-updated', () => {
+            socket.on('game-updated', (newState) => {
+                MemoryGame.setGame(newState);
                 updateStatus();
                 updateEditor();
             });

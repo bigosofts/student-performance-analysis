@@ -267,6 +267,7 @@
             const socket = io();
             socket.on("game-updated", (newState) => {
                 console.log("Remote update received");
+                MemoryGame.setGame(newState);
                 updateUI();
             });
 

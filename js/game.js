@@ -99,6 +99,13 @@ function loadGame() {
     }
 }
 
+function setGame(newState) {
+    if (newState) {
+        game = newState;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(game));
+    }
+}
+
 function initializeTiles() {
     game.tiles = [];
     for (let i = 1; i <= 30; i++) {
@@ -217,6 +224,7 @@ window.MemoryGame = {
     resetGame,
     saveImage,
     getImage,
+    setGame,
     announceWinner,
     clearWinner,
     STORAGE_KEY
