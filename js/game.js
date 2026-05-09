@@ -37,7 +37,7 @@ async function saveImage(id, dataUrl) {
         store.put(dataUrl, id);
         tx.oncomplete = () => {
             resolve();
-            if (socket) socket.emit('image-saved', { id });
+            if (socket) socket.emit('image-saved', { id, dataUrl });
         };
         tx.onerror = () => reject(tx.error);
     });

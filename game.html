@@ -271,7 +271,14 @@
                 updateUI();
             });
 
-            socket.on("image-updated", (data) => {
+            socket.on("image-updated", async (data) => {
+                if (data.id === 'all') {
+                    console.log('Global image wipe received');
+                    await MemoryGame.clearImages();
+                } else if (data.dataUrl) {
+                    console.log('Remote image sync received for tile:', data.id);
+                    await MemoryGame.saveImage(data.id, data.dataUrl);
+                }
                 MemoryGame.lastImageUpdate = data.id;
                 updateUI();
             });

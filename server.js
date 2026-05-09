@@ -8,7 +8,8 @@ const server = http.createServer(app);
 const io = new Server(server, {
     cors: {
         origin: "*",
-    }
+    },
+    maxHttpBufferSize: 1e7 // 10MB limit for high-res images
 });
 
 // Serve static files from the current directory

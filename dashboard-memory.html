@@ -192,16 +192,41 @@
             MemoryGame.saveGame();
         }
 
+        async function compressImage(dataUrl) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height *= MAX_WIDTH / width;
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to JPEG 70% quality
+                };
+                img.src = dataUrl;
+            });
+        }
+
         async function handleUpload(e, id) {
             const file = e.target.files[0];
             if (!file) return;
 
             const reader = new FileReader();
             reader.onload = async (event) => {
-                await MemoryGame.saveImage(id, event.target.result);
+                const compressed = await compressImage(event.target.result);
+                await MemoryGame.saveImage(id, compressed);
                 const feedback = document.getElementById(`feedback-${id}`);
                 if (feedback) feedback.style.display = 'block';
-                MemoryGame.saveGame(); // Trigger storage event
+                MemoryGame.saveGame(); 
             };
             reader.readAsDataURL(file);
         }
@@ -222,7 +247,8 @@
                 await new Promise((resolve) => {
                     const reader = new FileReader();
                     reader.onload = async (event) => {
-                        await MemoryGame.saveImage(tileId, event.target.result);
+                        const compressed = await compressImage(event.target.result);
+                        await MemoryGame.saveImage(tileId, compressed);
                         resolve();
                     };
                     reader.readAsDataURL(file);
@@ -276,6 +302,15 @@
             const socket = io();
             socket.on('game-updated', (newState) => {
                 MemoryGame.setGame(newState);
+                updateStatus();
+                updateEditor();
+            });
+            socket.on('image-updated', async (data) => {
+                if (data.id === 'all') {
+                    await MemoryGame.clearImages();
+                } else if (data.dataUrl) {
+                    await MemoryGame.saveImage(data.id, data.dataUrl);
+                }
                 updateStatus();
                 updateEditor();
             });
