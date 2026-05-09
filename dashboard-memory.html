@@ -238,9 +238,12 @@
             
             if (files.length === 0) return;
             
-            status.innerText = `Processing ${files.length} images...`;
+            const count = Math.min(files.length, 30);
+            if (socket) socket.emit('image-saved', { id: 'sync-start', count: count });
             
-            for (let i = 0; i < files.length && i < 30; i++) {
+            status.innerText = `Processing ${count} images...`;
+            
+            for (let i = 0; i < count; i++) {
                 const file = files[i];
                 const tileId = i + 1;
                 
