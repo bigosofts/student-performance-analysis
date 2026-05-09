@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - Memory Flip</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { padding: 20px; }
+        .dashboard-header {
+            margin-bottom: 30px;
+            padding: 20px;
+            text-align: center;
+        }
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .status-strip {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px;
+            margin-bottom: 30px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 15px;
+        }
+        .editor-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .btn-small { padding: 8px 15px; font-size: 0.8rem; }
+        .btn-correct { background: #10b981; }
+        .btn-wrong { background: #ef4444; }
+        
+        .upload-feedback {
+            font-size: 0.7rem;
+            color: #10b981;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="glass-card dashboard-header">
+        <h1 style="color: var(--secondary);">Memory Flip Control</h1>
+        <p>Teacher Dashboard • <a href="dashboard.html" style="color: var(--primary); text-decoration: none;">Back to Central</a></p>
+    </div>
+
+    <div class="controls-grid">
+        <button class="btn-primary" onclick="handleInit()">RESET / CREATE 30 TILES</button>
+        <button class="btn-primary" onclick="handleShuffle()" style="background: #8b5cf6;">SHUFFLE TILES</button>
+        <button class="btn-primary" onclick="handlePreview()" style="background: #10b981;">START 10S PREVIEW</button>
+        <button class="btn-primary" onclick="handleSwitch()" style="background: #f59e0b;">SWITCH TURN</button>
+        <button class="btn-secondary" onclick="handleReset()">FULL WIPE DATA</button>
+    </div>
+
+    <div class="status-strip glass-card">
+        <div>Turn: <strong id="currentTurn">Boys</strong></div>
+        <div>Boys Score: <strong id="boysScore">0</strong></div>
+        <div>Girls Score: <strong id="girlsScore">0</strong></div>
+    </div>
+
+    <div class="glass-card" style="padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+        <div>
+            <h2 style="margin-bottom: 10px;">Announce Winner</h2>
+            <input type="text" id="className" placeholder="Class (e.g. 12)" style="margin:5px 0;">
+            <input type="text" id="sectionName" placeholder="Section (e.g. Shitolokkha)" style="margin:5px 0;">
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-primary btn-correct" onclick="handleAnnounce('boys')">BOYS WIN</button>
+                <button class="btn-secondary" onclick="handleAnnounce('girls')">GIRLS WIN</button>
+            </div>
+            <button class="btn-primary" onclick="handleClearWinner()" style="background:#64748b; margin-top:10px; width:100%;">CLOSE WINNER SCREEN</button>
+        </div>
+        <div>
+            <h2 style="margin-bottom: 10px;">Bulk Image Upload</h2>
+            <p style="font-size: 0.8rem; color: var(--text-dim);">Select up to 30 images.</p>
+            <input type="file" id="bulkUpload" multiple accept="image/*" class="btn-primary" style="width: auto;">
+            <div id="bulkStatus" style="margin-top: 10px; color: #10b981; font-weight: 600;"></div>
+        </div>
+    </div>
+
+    <div class="editor-container">
+        <h2 style="margin-bottom: 20px;">Tile Management</h2>
+        <div id="tileEditorList" class="tile-editor-list">
+            <!-- Tiles injected here -->
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        const { MemoryGame } = window;
+        const list = document.getElementById('tileEditorList');
+
+        function updateStatus() {
+            MemoryGame.loadGame();
+            document.getElementById('currentTurn').innerText = MemoryGame.game.currentTurn.toUpperCase();
+            document.getElementById('boysScore').innerText = MemoryGame.game.boysScore;
+            document.getElementById('girlsScore').innerText = MemoryGame.game.girlsScore;
+        }
+
+        async function initEditor() {
+            list.innerHTML = '';
+            for (let i = 1; i <= 30; i++) {
+                const card = document.createElement('div');
+                card.id = `editor-tile-${i}`;
+                card.className = 'glass-card editor-card';
+                list.appendChild(card);
+            }
+            await updateEditor();
+        }
+
+        async function updateEditor() {
+            for (const tile of MemoryGame.game.tiles) {
+                const card = document.getElementById(`editor-tile-${tile.id}`);
+                if (!card) continue;
+                
+                card.className = `glass-card editor-card ${tile.used ? 'used' : ''}`;
+                const imageData = await MemoryGame.getImage(tile.id);
+
+                // Use innerHTML only if content changed to avoid losing focus/flicker
+                const content = `
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <strong>TILE ${tile.id}</strong>
+                        <span style="font-size:0.8rem; color:${tile.used ? '#ef4444' : '#10b981'}">
+                            ${tile.used ? 'USED' : 'ACTIVE'}
+                        </span>
+                    </div>
+                    
+                    <div style="display:flex; gap:10px; margin:10px 0;">
+                        <div style="width:60px; height:60px; background:#000; border-radius:8px; overflow:hidden; flex-shrink:0;">
+                            ${imageData ? `<img src="${imageData}" style="width:100%; height:100%; object-fit:cover;">` : '<div style="font-size:0.5rem; text-align:center; padding-top:20px;">No Image</div>'}
+                        </div>
+                        <div style="flex-grow:1;">
+                            <input type="text" value="${tile.title}" onchange="updateTitle(${tile.id}, this.value)" placeholder="Tile Title" style="margin:0;">
+                            <input type="file" accept="image/*" onchange="handleUpload(event, ${tile.id})" style="margin:5px 0; font-size:0.7rem;">
+                        </div>
+                    </div>
+                    
+                    <div id="feedback-${tile.id}" class="upload-feedback">✓ Image Saved</div>
+
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
+                        <button class="btn-primary btn-small btn-correct" onclick="handleCorrect(${tile.id})" ${tile.used ? 'disabled' : ''}>CORRECT</button>
+                        <button class="btn-primary btn-small btn-wrong" onclick="handleWrong(${tile.id})" ${tile.used ? 'disabled' : ''}>WRONG</button>
+                    </div>
+                `;
+                
+                if (card.getAttribute('data-state') !== JSON.stringify(tile) + (imageData ? 'has-img' : 'no-img')) {
+                    card.innerHTML = content;
+                    card.setAttribute('data-state', JSON.stringify(tile) + (imageData ? 'has-img' : 'no-img'));
+                }
+            }
+        }
+
+        // Event Handlers
+        function handleInit() {
+            if(confirm("This will clear scores and reset tiles. Continue?")) {
+                MemoryGame.initializeTiles();
+                renderAll();
+            }
+        }
+
+        function handleShuffle() {
+            MemoryGame.shuffleTiles();
+            renderAll();
+            alert("Tiles Shuffled!");
+        }
+
+        function handlePreview() {
+            MemoryGame.startPreview();
+            alert("10 Second Preview Started on Game Page!");
+        }
+
+        function handleSwitch() {
+            MemoryGame.switchTurn();
+            updateStatus();
+        }
+
+        async function handleReset() {
+            if(confirm("CAUTION: This will delete ALL images and reset everything. Are you sure?")) {
+                await MemoryGame.resetGame();
+                renderAll();
+                alert("Game fully wiped! All images and data removed.");
+            }
+        }
+
+        function updateTitle(id, val) {
+            const tile = MemoryGame.game.tiles.find(t => t.id === id);
+            tile.title = val;
+            MemoryGame.saveGame();
+        }
+
+        async function handleUpload(e, id) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                await MemoryGame.saveImage(id, event.target.result);
+                const feedback = document.getElementById(`feedback-${id}`);
+                if (feedback) feedback.style.display = 'block';
+                MemoryGame.saveGame(); // Trigger storage event
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Bulk Upload Logic
+        document.getElementById('bulkUpload').addEventListener('change', async (e) => {
+            const files = Array.from(e.target.files);
+            const status = document.getElementById('bulkStatus');
+            
+            if (files.length === 0) return;
+            
+            status.innerText = `Processing ${files.length} images...`;
+            
+            for (let i = 0; i < files.length && i < 30; i++) {
+                const file = files[i];
+                const tileId = i + 1;
+                
+                await new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                        await MemoryGame.saveImage(tileId, event.target.result);
+                        resolve();
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+            
+            status.innerText = `Successfully uploaded ${Math.min(files.length, 30)} images!`;
+            MemoryGame.saveGame();
+            renderAll();
+        });
+
+        function handleAnnounce(team) {
+            const className = document.getElementById('className').value || "12";
+            const sectionName = document.getElementById('sectionName').value || "Shitolokkha";
+            MemoryGame.announceWinner(team, className, sectionName);
+        }
+
+        function handleClearWinner() {
+            MemoryGame.clearWinner();
+        }
+
+        function handleCorrect(id) {
+            MemoryGame.markCorrect(id);
+            renderAll();
+        }
+
+        function handleWrong(id) {
+            MemoryGame.markWrong(id);
+            renderAll();
+        }
+
+        function renderAll() {
+            updateStatus();
+            updateEditor();
+        }
+
+        // Initial render
+        updateStatus();
+        initEditor();
+
+        // Listen for remote updates
+        window.addEventListener('storage', (e) => {
+            if (e.key === MemoryGame.STORAGE_KEY) {
+                updateStatus();
+                updateEditor();
+            }
+        });
+
+        // Socket logic for dashboard
+        if (typeof io !== 'undefined') {
+            const socket = io();
+            socket.on('game-updated', () => {
+                updateStatus();
+                updateEditor();
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agriculture-Interactive ClassRoom</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .title-glitch {
+            font-size: 4rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            background: linear-gradient(to right, #6366f1, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+        }
+
+        .teacher-info {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px 30px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 40px;
+            font-size: 1.2rem;
+            color: var(--text-dim);
+        }
+
+        .teacher-info strong {
+            color: var(--text-main);
+        }
+
+        .game-list {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .game-card {
+            width: 300px;
+            padding: 30px;
+            text-decoration: none;
+            color: white;
+            transition: all 0.4s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .game-card:hover {
+            transform: translateY(-15px) scale(1.02);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .game-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .game-card h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+
+        .game-card p {
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+
+        .btn-launch {
+            margin-top: 10px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="hero-section">
+        <div class="teacher-info">
+            Teacher: <strong>Abdullah Al Amin</strong> | Lecturer, RCPSC
+        </div>
+        
+        <h1 class="title-glitch animate-float">Agriculture-Interactive ClassRoom</h1>
+        <p style="margin-bottom: 50px; color: var(--text-dim);">Digital Learning & Engagement Portal</p>
+
+        <div class="game-list">
+            <!-- Game 1: Memory Flip -->
+            <a href="game.html" class="glass-card game-card">
+                <div class="game-icon">🎴</div>
+                <div>
+                    <h2>Memory Flip Game</h2>
+                    <p>Boys vs Girls interactive memory challenge with 30 agricultural tiles.</p>
+                </div>
+                <button class="btn-primary btn-launch">LAUNCH GAME</button>
+            </a>
+
+            <!-- Placeholder for future games -->
+            <div class="glass-card game-card" style="opacity: 0.5; cursor: not-allowed;">
+                <div class="game-icon" style="filter: grayscale(1);">🔒</div>
+                <div>
+                    <h2>Coming Soon</h2>
+                    <p>More interactive modules are being developed.</p>
+                </div>
+                <button class="btn-primary btn-launch" disabled>LOCKED</button>
+            </div>
+        </div>
+
+        <div style="margin-top: 60px;">
+            <a href="dashboard.html" class="btn-secondary" style="text-decoration: none;">TEACHER CENTRAL</a>
+        </div>
+    </div>
+</body>
+</html>
