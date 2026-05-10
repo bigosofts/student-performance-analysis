@@ -14,72 +14,51 @@ let game = {
     sectionInfo: ""
 };
 
-// Database Setup
-let dbCache = null;
-async function initDB() {
-    if (dbCache) return dbCache;
-    return new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, 1);
-        request.onupgradeneeded = (e) => {
-            const db = e.target.result;
-            if (!db.objectStoreNames.contains(STORE_NAME)) {
-                db.createObjectStore(STORE_NAME);
-            }
-        };
-        request.onsuccess = (e) => {
-            dbCache = e.target.result;
-            resolve(dbCache);
-        };
-        request.onerror = (e) => reject(e.target.error);
-    });
-}
+// Game Logic
+async function saveImage(id, file) {
+    const formData = new FormData();
+    formData.append('image', file);
 
-async function saveImage(id, dataUrl) {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        const store = tx.objectStore(STORE_NAME);
-        store.put(dataUrl, id);
-        tx.oncomplete = () => {
-            resolve();
+
+    try {
+        const response = await fetch(`/upload/${id}`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+        if (data.status === 'ok') {
             const tile = game.tiles.find(t => t.id === id);
-            if (tile) tile.imgVersion = (tile.imgVersion || 0) + 1;
-            if (socket) socket.emit('image-saved', { id, dataUrl });
-        };
-        tx.onerror = () => reject(tx.error);
-    });
+            if (tile) {
+                tile.imageUrl = data.url;
+                tile.imgVersion = (tile.imgVersion || 0) + 1;
+            }
+            saveGame();
+            return data.url;
+        }
+    } catch (error) {
+        console.error('Upload failed:', error);
+    }
 }
 
 async function getImage(id) {
-    if (!id) return null;
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        try {
-            const tx = db.transaction(STORE_NAME, "readonly");
-            const store = tx.objectStore(STORE_NAME);
-            const request = store.get(id);
-            request.onsuccess = () => resolve(request.result || null);
-            request.onerror = () => reject(request.error);
-        } catch (e) {
-            console.error("IndexedDB Error:", e);
-            resolve(null);
-        }
-    });
+    const tile = game.tiles.find(t => t.id === id);
+    return tile ? tile.imageUrl : null;
 }
 
 async function clearImages() {
-    const db = await initDB();
-    return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, "readwrite");
-        tx.objectStore(STORE_NAME).clear();
-        tx.oncomplete = () => {
-            console.log("Images cleared from DB");
-            if (socket) socket.emit('image-updated', { id: 'all' });
-            resolve();
-        };
-        tx.onerror = () => reject(tx.error);
-    });
+    try {
+        await fetch('/clear-uploads', { method: 'POST' });
+        game.tiles.forEach(t => {
+            t.imageUrl = null;
+        });
+        saveGame();
+        console.log("Images cleared from server");
+    } catch (error) {
+        console.error('Clear failed:', error);
+    }
 }
+
 
 // Game Logic
 // Socket Initialization
@@ -120,6 +99,7 @@ function initializeTiles() {
             title: "T-" + i,
             flipped: false,
             used: false,
+            imageUrl: null,
         });
     }
     game.boysScore = 0;

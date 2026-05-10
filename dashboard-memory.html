@@ -194,44 +194,20 @@
             MemoryGame.saveGame();
         }
 
-        async function compressImage(dataUrl) {
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 600; // Smaller size for better sync stability
-                    let width = img.width;
-                    let height = img.height;
 
-                    if (width > MAX_WIDTH) {
-                        height *= MAX_WIDTH / width;
-                        width = MAX_WIDTH;
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.6)); // High compression for fast syncing
-                };
-                img.src = dataUrl;
-            });
-        }
 
         async function handleUpload(e, id) {
             const file = e.target.files[0];
             if (!file) return;
 
-            const reader = new FileReader();
-            reader.onload = async (event) => {
-                const compressed = await compressImage(event.target.result);
-                await MemoryGame.saveImage(id, compressed);
+            const url = await MemoryGame.saveImage(id, file);
+            if (url) {
                 const feedback = document.getElementById(`feedback-${id}`);
                 if (feedback) feedback.style.display = 'block';
-                MemoryGame.saveGame(); 
-            };
-            reader.readAsDataURL(file);
+                renderAll();
+            }
         }
+
 
         // Bulk Upload Logic
         document.getElementById('bulkUpload').addEventListener('change', async (e) => {
@@ -248,23 +224,11 @@
             for (let i = 0; i < count; i++) {
                 const file = files[i];
                 const tileId = i + 1;
-                
-                await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = async (event) => {
-                        const compressed = await compressImage(event.target.result);
-                        await MemoryGame.saveImage(tileId, compressed);
-                        resolve();
-                    };
-                    reader.readAsDataURL(file);
-                });
-                
-                // Add a larger delay to prevent socket congestion on mobile networks
-                await new Promise(r => setTimeout(r, 250));
+                await MemoryGame.saveImage(tileId, file);
+                status.innerText = `Uploaded ${i+1}/${count}...`;
             }
             
-            status.innerText = `Successfully uploaded ${Math.min(files.length, 30)} images!`;
-            MemoryGame.saveGame();
+            status.innerText = `Successfully uploaded ${count} images!`;
             renderAll();
         });
 
@@ -317,12 +281,11 @@
             });
             socket.on('image-updated', async (data) => {
                 if (data.id === 'all') {
-                    await MemoryGame.clearImages();
-                } else if (data.dataUrl) {
-                    await MemoryGame.saveImage(data.id, data.dataUrl);
+                    // Handled by clearImages in MemoryGame if needed, 
+                    // but usually we just want to refresh the UI
+                    MemoryGame.loadGame();
                 }
-                updateStatus();
-                updateEditor();
+                renderAll();
             });
         }
     </script>

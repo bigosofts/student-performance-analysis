@@ -213,20 +213,20 @@
 
             const back = card.querySelector(".tile-back");
             
-            // Only fetch image if needed and not cached or if it was updated
-            if (back.innerHTML === "" || MemoryGame.lastImageUpdate === tile.id || MemoryGame.lastImageUpdate === "all") {
+            // Only update image if URL or version changed
+            const currentRendered = card.getAttribute('data-img-rendered');
+            const targetState = `${tile.imageUrl}-${tile.imgVersion || 0}`;
+
+            if (currentRendered !== targetState || MemoryGame.lastImageUpdate === "all") {
                 if (MemoryGame.lastImageUpdate === "all") {
                     for (let key in imageCache) delete imageCache[key];
                 }
 
-                let imageData = imageCache[tile.id];
-                if (!imageData || MemoryGame.lastImageUpdate === tile.id) {
-                    imageData = await MemoryGame.getImage(tile.id);
-                    if (imageData) imageCache[tile.id] = imageData;
-                }
-
-                back.innerHTML = imageData ? `<img src="${imageData}" />` : '<div style="color:var(--primary); font-size: 0.6rem;">No Image</div>';
+                const imageData = tile.imageUrl;
+                back.innerHTML = imageData ? `<img src="${imageData}?v=${tile.imgVersion || 0}" />` : '<div style="color:var(--primary); font-size: 0.6rem;">No Image</div>';
+                card.setAttribute('data-img-rendered', targetState);
             }
+
         }
 
         function updateUI() {
@@ -282,17 +282,15 @@
 
                 if (data.id === 'all') {
                     console.log('Global image wipe received');
-                    await MemoryGame.clearImages();
-                    for (let key in imageCache) delete imageCache[key];
                     document.querySelectorAll('.tile-back').forEach(el => el.innerHTML = '');
-                } else if (data.dataUrl) {
+                } else if (data.url) {
                     console.log('Remote image sync received for tile:', data.id);
-                    await MemoryGame.saveImage(data.id, data.dataUrl);
-                    imageCache[data.id] = data.dataUrl; // Update cache immediately
                     
-                    // Specific tile update instead of full UI refresh
+                    // Specific tile update
                     const tile = MemoryGame.game.tiles.find(t => t.id == data.id);
                     if (tile) {
+                        tile.imageUrl = data.url;
+                        tile.imgVersion = (tile.imgVersion || 0) + 1;
                         MemoryGame.lastImageUpdate = data.id;
                         await updateTileDOM(tile);
                     }
@@ -311,7 +309,7 @@
                             }, 500);
                         }
                     }
-                    return; // Prevent fall-through to full updateUI
+                    return;
                 }
                 MemoryGame.lastImageUpdate = data.id;
                 updateUI();
