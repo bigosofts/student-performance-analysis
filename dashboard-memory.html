@@ -199,7 +199,7 @@
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800;
+                    const MAX_WIDTH = 600; // Smaller size for better sync stability
                     let width = img.width;
                     let height = img.height;
 
@@ -212,7 +212,7 @@
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    resolve(canvas.toDataURL('image/jpeg', 0.7)); // Compress to JPEG 70% quality
+                    resolve(canvas.toDataURL('image/jpeg', 0.6)); // High compression for fast syncing
                 };
                 img.src = dataUrl;
             });
@@ -259,8 +259,8 @@
                     reader.readAsDataURL(file);
                 });
                 
-                // Add a small delay to prevent browser freeze and socket congestion
-                await new Promise(r => setTimeout(r, 100));
+                // Add a larger delay to prevent socket congestion on mobile networks
+                await new Promise(r => setTimeout(r, 250));
             }
             
             status.innerText = `Successfully uploaded ${Math.min(files.length, 30)} images!`;
@@ -307,7 +307,9 @@
 
         // Socket logic for dashboard
         if (typeof io !== 'undefined') {
-            const socket = io();
+            const socket = io({
+                transports: ['polling', 'websocket']
+            });
             socket.on('game-updated', (newState) => {
                 MemoryGame.setGame(newState);
                 updateStatus();
