@@ -15,7 +15,9 @@ let game = {
 };
 
 // Database Setup
-function initDB() {
+let dbCache = null;
+async function initDB() {
+    if (dbCache) return dbCache;
     return new Promise((resolve, reject) => {
         const request = indexedDB.open(DB_NAME, 1);
         request.onupgradeneeded = (e) => {
@@ -24,7 +26,10 @@ function initDB() {
                 db.createObjectStore(STORE_NAME);
             }
         };
-        request.onsuccess = (e) => resolve(e.target.result);
+        request.onsuccess = (e) => {
+            dbCache = e.target.result;
+            resolve(dbCache);
+        };
         request.onerror = (e) => reject(e.target.error);
     });
 }
@@ -37,6 +42,8 @@ async function saveImage(id, dataUrl) {
         store.put(dataUrl, id);
         tx.oncomplete = () => {
             resolve();
+            const tile = game.tiles.find(t => t.id === id);
+            if (tile) tile.imgVersion = (tile.imgVersion || 0) + 1;
             if (socket) socket.emit('image-saved', { id, dataUrl });
         };
         tx.onerror = () => reject(tx.error);
@@ -44,21 +51,20 @@ async function saveImage(id, dataUrl) {
 }
 
 async function getImage(id) {
+    if (!id) return null;
     const db = await initDB();
-    const dbImage = await new Promise((resolve) => {
-        const tx = db.transaction(STORE_NAME, "readonly");
-        const store = tx.objectStore(STORE_NAME);
-        const request = store.get(id);
-        request.onsuccess = () => resolve(request.result);
-        request.onerror = () => resolve(null);
+    return new Promise((resolve, reject) => {
+        try {
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            const request = store.get(id);
+            request.onsuccess = () => resolve(request.result || null);
+            request.onerror = () => reject(request.error);
+        } catch (e) {
+            console.error("IndexedDB Error:", e);
+            resolve(null);
+        }
     });
-
-    if (dbImage) return dbImage;
-
-    // Fallback: Return null if no image in DB. 
-    // If you have a physical 'images/' folder with images, you can uncomment the line below.
-    // return `images/${id}.jpg`; 
-    return null;
 }
 
 async function clearImages() {

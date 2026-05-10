@@ -117,10 +117,12 @@
                 const card = document.getElementById(`editor-tile-${tile.id}`);
                 if (!card) continue;
                 
+                const currentState = JSON.stringify(tile);
+                if (card.getAttribute('data-state') === currentState) continue;
+
                 card.className = `glass-card editor-card ${tile.used ? 'used' : ''}`;
                 const imageData = await MemoryGame.getImage(tile.id);
 
-                // Use innerHTML only if content changed to avoid losing focus/flicker
                 const content = `
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <strong>TILE ${tile.id}</strong>
