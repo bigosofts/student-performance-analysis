@@ -182,6 +182,8 @@
             }
         }
 
+        const imageCache = {};
+
         async function updateTileDOM(tile) {
             const card = document.getElementById(`tile-${tile.id}`);
             if (!card) return;
@@ -210,8 +212,19 @@
             if (front.innerText !== tile.title) front.innerText = tile.title;
 
             const back = card.querySelector(".tile-back");
+            
+            // Only fetch image if needed and not cached or if it was updated
             if (back.innerHTML === "" || MemoryGame.lastImageUpdate === tile.id || MemoryGame.lastImageUpdate === "all") {
-                const imageData = await MemoryGame.getImage(tile.id);
+                if (MemoryGame.lastImageUpdate === "all") {
+                    for (let key in imageCache) delete imageCache[key];
+                }
+
+                let imageData = imageCache[tile.id];
+                if (!imageData || MemoryGame.lastImageUpdate === tile.id) {
+                    imageData = await MemoryGame.getImage(tile.id);
+                    if (imageData) imageCache[tile.id] = imageData;
+                }
+
                 back.innerHTML = imageData ? `<img src="${imageData}" />` : '<div style="color:var(--primary); font-size: 0.6rem;">No Image</div>';
             }
         }
@@ -270,15 +283,26 @@
                 if (data.id === 'all') {
                     console.log('Global image wipe received');
                     await MemoryGame.clearImages();
-                    // Force clear UI cache
+                    for (let key in imageCache) delete imageCache[key];
                     document.querySelectorAll('.tile-back').forEach(el => el.innerHTML = '');
                 } else if (data.dataUrl) {
+                    console.log('Remote image sync received for tile:', data.id);
                     await MemoryGame.saveImage(data.id, data.dataUrl);
+                    imageCache[data.id] = data.dataUrl; // Update cache immediately
+                    
+                    // Specific tile update instead of full UI refresh
+                    const tile = MemoryGame.game.tiles.find(t => t.id == data.id);
+                    if (tile) {
+                        MemoryGame.lastImageUpdate = data.id;
+                        await updateTileDOM(tile);
+                    }
+                    
                     if (syncTotal > 0) {
                         syncCurrent++;
                         const percent = (syncCurrent / syncTotal) * 100;
                         progressBar.style.width = `${percent}%`;
                         countText.innerText = `${syncCurrent} / ${syncTotal} Received`;
+                        
                         if (syncCurrent >= syncTotal) {
                             setTimeout(() => {
                                 overlay.style.display = 'none';
@@ -287,6 +311,7 @@
                             }, 500);
                         }
                     }
+                    return; // Prevent fall-through to full updateUI
                 }
                 MemoryGame.lastImageUpdate = data.id;
                 updateUI();
