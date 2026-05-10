@@ -268,7 +268,10 @@
                 }
 
                 if (data.id === 'all') {
+                    console.log('Global image wipe received');
                     await MemoryGame.clearImages();
+                    // Force clear UI cache
+                    document.querySelectorAll('.tile-back').forEach(el => el.innerHTML = '');
                 } else if (data.dataUrl) {
                     await MemoryGame.saveImage(data.id, data.dataUrl);
                     if (syncTotal > 0) {

@@ -256,6 +256,9 @@
                     };
                     reader.readAsDataURL(file);
                 });
+                
+                // Add a small delay to prevent browser freeze and socket congestion
+                await new Promise(r => setTimeout(r, 100));
             }
             
             status.innerText = `Successfully uploaded ${Math.min(files.length, 30)} images!`;

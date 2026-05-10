@@ -195,11 +195,23 @@ function checkWinner() {
 }
 
 async function resetGame() {
-    localStorage.removeItem(STORAGE_KEY);
+    // 1. Reset local state
+    game.boysScore = 0;
+    game.girlsScore = 0;
+    game.currentTurn = "boys";
+    game.previewMode = false;
+    game.winner = null;
+    game.tiles.forEach(t => {
+        t.used = false;
+        t.flipped = false;
+        t.isWrong = false;
+    });
+    
+    // 2. Clear Images (Awaited)
     await clearImages();
-    initializeTiles();
-    // Force a broad reload on clients
-    if (socket) socket.emit('game-updated', game);
+    
+    // 3. Save and Broadcast
+    saveGame();
 }
 
 function shuffleTiles() {
