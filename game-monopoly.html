@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monopoly Quiz - Live Game</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/monopoly.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { overflow: hidden; margin: 0; padding: 0; background: #020617; }
+    </style>
+</head>
+<body>
+    <div class="monopoly-container">
+        <div class="board" id="monopolyBoard">
+            <!-- Tokens -->
+            <div id="tokenBoys" class="token token-boys"></div>
+            <div id="tokenGirls" class="token token-girls"></div>
+
+            <!-- Center Area -->
+            <div class="board-center">
+                <div class="gov-box">
+                    <div class="label">GOVERNMENT FUND</div>
+                    <div class="amount" id="govVal">৳ 5000</div>
+                </div>
+
+                <div id="turnBadge" class="turn-badge boys">BOYS TURN</div>
+
+                <div class="vs-section">
+                    <div class="team-block">
+                        <div class="team-photo boys">
+                            <img id="imgBoys" src="https://via.placeholder.com/150/1e3a8a/ffffff?text=Boys" alt="Boys">
+                        </div>
+                        <div class="team-label boys">BOYS</div>
+                        <div class="team-money" id="moneyBoys">৳ 500</div>
+                    </div>
+
+                    <div class="vs-text">VS</div>
+
+                    <div class="team-block">
+                        <div class="team-photo girls">
+                            <img id="imgGirls" src="https://via.placeholder.com/150/831843/ffffff?text=Girls" alt="Girls">
+                        </div>
+                        <div class="team-label girls">GIRLS</div>
+                        <div class="team-money" id="moneyGirls">৳ 500</div>
+                    </div>
+                </div>
+
+                <div class="board-title">
+                    <h1>MONOPOLY</h1>
+                    <p>AGRICULTURE CLASSROOM</p>
+                </div>
+            </div>
+            <!-- Cells injected by JS -->
+        </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/monopoly.js"></script>
+    <script>
+        const { MonopolyGame } = window;
+        const boardElem = document.getElementById('monopolyBoard');
+
+        // Determine which side a cell index belongs to
+        function getSide(index) {
+            if (index < 11) return 'bottom';
+            if (index < 21) return 'left';
+            if (index < 31) return 'top';
+            return 'right';
+        }
+
+        // Check if index is a corner cell
+        function isCorner(index) {
+            return index === 0 || index === 10 || index === 20 || index === 30;
+        }
+
+        function createBoard() {
+            // Remove old cells
+            boardElem.querySelectorAll('.cell').forEach(c => c.remove());
+
+            const data = MonopolyGame.boardData;
+
+            data.forEach((cell, index) => {
+                const posId = index + 1;
+                const side = getSide(index);
+                const corner = isCorner(index);
+
+                const div = document.createElement('div');
+                div.className = `cell pos-${posId} side-${side}`;
+                if (corner) div.classList.add('cell-corner');
+
+                // Add type-based background class for non-property cells
+                if (!corner && cell.type !== 'property') {
+                    div.classList.add(`cell-type-${cell.type}`);
+                }
+
+                let html = '';
+
+                if (cell.type === 'property') {
+                    // Property cell: color bar + name + price
+                    html = `
+                        <div class="cell-bar bar-${cell.color}"></div>
+                        <div class="cell-inner">
+                            <div class="cell-name">${cell.name}</div>
+                            <div class="cell-price">৳ ${cell.price}</div>
+                        </div>
+                    `;
+                } else if (corner) {
+                    // Corner cell: icon + name + optional description
+                    const iconName = cell.icon || 'star';
+                    html = `
+                        <div class="cell-inner">
+                            <div class="cell-icon"><i data-lucide="${iconName}"></i></div>
+                            <div class="cell-name">${cell.name}</div>
+                            ${cell.desc ? `<div class="cell-desc">${cell.desc}</div>` : ''}
+                        </div>
+                    `;
+                } else {
+                    // Functional cell (station, utility, etc): icon + name + optional price
+                    const iconName = cell.icon || 'star';
+                    html = `
+                        <div class="cell-inner full">
+                            <div class="cell-icon"><i data-lucide="${iconName}"></i></div>
+                            <div class="cell-name">${cell.name}</div>
+                            ${cell.price ? `<div class="cell-price">৳ ${cell.price}</div>` : ''}
+                        </div>
+                    `;
+                }
+
+                div.innerHTML = html;
+                boardElem.appendChild(div);
+            });
+
+            lucide.createIcons();
+        }
+
+        function updateUI() {
+            const g = MonopolyGame.game;
+
+            // Center info
+            document.getElementById('govVal').innerText = '৳ ' + g.govScore;
+            document.getElementById('moneyBoys').innerText = '৳ ' + g.boysScore;
+            document.getElementById('moneyGirls').innerText = '৳ ' + g.girlsScore;
+
+            // Turn badge
+            const badge = document.getElementById('turnBadge');
+            badge.innerText = g.currentTurn.toUpperCase() + ' TURN';
+            badge.className = 'turn-badge ' + g.currentTurn;
+
+            // Team images
+            if (g.boysImage) document.getElementById('imgBoys').src = g.boysImage + '?v=' + g.lastUpdate;
+            if (g.girlsImage) document.getElementById('imgGirls').src = g.girlsImage + '?v=' + g.lastUpdate;
+
+            // Tokens
+            requestAnimationFrame(() => {
+                placeToken('Boys', g.boysPos);
+                placeToken('Girls', g.girlsPos);
+            });
+        }
+
+        function placeToken(team, posIndex) {
+            const cell = document.querySelector(`.pos-${posIndex + 1}`);
+            const token = document.getElementById(`token${team}`);
+            if (!cell || !token) return;
+
+            const cr = cell.getBoundingClientRect();
+            const br = boardElem.getBoundingClientRect();
+
+            const cx = cr.left - br.left + cr.width / 2;
+            const cy = cr.top - br.top + cr.height / 2;
+            const off = team === 'Boys' ? -7 : 7;
+
+            token.style.left = (cx + off - 9) + 'px';
+            token.style.top = (cy + off - 9) + 'px';
+        }
+
+        // Build and render
+        createBoard();
+        updateUI();
+
+        window.addEventListener('resize', updateUI);
+
+        // Socket sync
+        if (typeof io !== 'undefined') {
+            const socket = io();
+            socket.on('game-updated', (s) => { MonopolyGame.setGame(s); updateUI(); });
+            socket.on('image-updated', () => { MonopolyGame.loadGame(); updateUI(); });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,329 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+
+/* ===== MONOPOLY BOARD - CLEAN LAYOUT ===== */
+
+.monopoly-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #020617;
+    font-family: 'Hind Siliguri', 'Outfit', sans-serif;
+}
+
+/* ===== THE BOARD GRID ===== */
+.board {
+    display: grid;
+    grid-template-columns: 2fr repeat(9, 1fr) 2fr;
+    grid-template-rows: 2fr repeat(9, 1fr) 2fr;
+    width: 94vh;
+    height: 94vh;
+    max-width: 96vw;
+    max-height: 96vh;
+    background: #0f172a;
+    border: 3px solid #334155;
+    position: relative;
+    box-shadow: 0 0 80px rgba(0,0,0,0.7);
+}
+
+/* ===== BASE CELL ===== */
+.cell {
+    border: 1px solid #334155;
+    position: relative;
+    overflow: hidden;
+    background: #1e293b;
+}
+
+/* Inner content wrapper — always horizontal, centered, no rotation */
+.cell-inner {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 1px;
+    overflow: hidden;
+}
+
+/* ===== TEXT STYLES ===== */
+.cell-name {
+    font-weight: 700;
+    font-size: 0.6rem;
+    line-height: 1.2;
+    color: #fff;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    padding: 0 2px;
+}
+
+.cell-price {
+    font-weight: 700;
+    font-size: 0.55rem;
+    color: #fde68a;
+    white-space: nowrap;
+}
+
+.cell-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.cell-icon svg {
+    width: 16px;
+    height: 16px;
+    stroke-width: 2;
+}
+
+/* ===== COLOR BAR — positioned on the OUTER edge ===== */
+.cell-bar {
+    position: absolute;
+    z-index: 1;
+}
+
+/* BOTTOM side: bar on TOP of cell (outer = top since row 11 faces outward at bottom) */
+.side-bottom .cell-bar {
+    top: 0; left: 0; right: 0; height: 28%;
+}
+.side-bottom .cell-inner {
+    top: 28%; left: 0; right: 0; bottom: 0;
+    padding: 2px 2px;
+}
+
+/* LEFT side: bar on RIGHT of cell (facing center) */
+.side-left .cell-bar {
+    top: 0; right: 0; bottom: 0; width: 22%;
+}
+.side-left .cell-inner {
+    top: 0; left: 0; right: 22%; bottom: 0;
+    padding: 2px 3px;
+}
+
+/* TOP side: bar on BOTTOM of cell */
+.side-top .cell-bar {
+    bottom: 0; left: 0; right: 0; height: 28%;
+}
+.side-top .cell-inner {
+    top: 0; left: 0; right: 0; bottom: 28%;
+    padding: 2px 2px;
+}
+
+/* RIGHT side: bar on LEFT of cell (facing center) */
+.side-right .cell-bar {
+    top: 0; left: 0; bottom: 0; width: 22%;
+}
+.side-right .cell-inner {
+    top: 0; left: 22%; right: 0; bottom: 0;
+    padding: 2px 3px;
+}
+
+/* Side cells without a color bar: content fills the whole cell */
+.cell-inner.full {
+    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    padding: 3px;
+}
+
+/* ===== COLOR BAR COLORS ===== */
+.bar-purple   { background: #a855f7; }
+.bar-yellow   { background: #eab308; }
+.bar-reddish  { background: #ef4444; }
+.bar-bluish   { background: #3b82f6; }
+.bar-greenish { background: #22c55e; }
+.bar-orange   { background: #f97316; }
+.bar-pink     { background: #ec4899; }
+.bar-deepblue { background: #1d4ed8; }
+
+/* ===== SPECIAL CELL BACKGROUNDS ===== */
+.cell-type-station   { background: #172554; border-color: #1d4ed8; }
+.cell-type-utility   { background: #450a0a; border-color: #dc2626; }
+.cell-type-opportunity { background: #1e3a5f; border-color: #2563eb; }
+.cell-type-obstacle  { background: #451a1a; border-color: #ef4444; }
+.cell-type-tax       { background: #1c1917; border-color: #a16207; }
+
+.cell-type-station .cell-icon svg   { color: #60a5fa; }
+.cell-type-utility .cell-icon svg   { color: #fca5a5; }
+.cell-type-opportunity .cell-icon svg { color: #93c5fd; }
+.cell-type-obstacle .cell-icon svg  { color: #fca5a5; }
+.cell-type-tax .cell-icon svg       { color: #fbbf24; }
+
+/* ===== CORNER CELLS ===== */
+.cell-corner {
+    background: #0f172a !important;
+    border: 2px solid #475569;
+}
+
+.cell-corner .cell-inner {
+    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    padding: 6px;
+    gap: 2px;
+}
+
+.cell-corner .cell-name {
+    font-size: 0.6rem;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1.15;
+}
+
+.cell-corner .cell-desc {
+    font-size: 0.45rem;
+    color: #94a3b8;
+    line-height: 1.1;
+}
+
+.cell-corner .cell-icon svg {
+    width: 22px;
+    height: 22px;
+}
+
+/* ===== BOARD CENTER ===== */
+.board-center {
+    grid-column: 2 / 11;
+    grid-row: 2 / 11;
+    background: #020617;
+    border: 1px solid #1e293b;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    position: relative;
+    background-image: radial-gradient(circle at center, rgba(30, 41, 59, 0.5) 0%, #020617 70%);
+}
+
+/* Government Fund Box */
+.gov-box {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid #334155;
+    border-radius: 12px;
+    padding: 8px 30px;
+    text-align: center;
+}
+.gov-box .label { font-size: 0.65rem; color: #64748b; letter-spacing: 2px; }
+.gov-box .amount { font-size: 1.8rem; font-weight: 900; color: #10b981; }
+
+/* Turn Badge */
+.turn-badge {
+    padding: 8px 40px;
+    border-radius: 50px;
+    font-size: 1.5rem;
+    font-weight: 900;
+    letter-spacing: 3px;
+    border: 2px solid rgba(255,255,255,0.15);
+    text-transform: uppercase;
+}
+.turn-badge.boys { background: linear-gradient(135deg, #1e3a8a, #3b82f6); color: #fff; }
+.turn-badge.girls { background: linear-gradient(135deg, #831843, #ec4899); color: #fff; }
+
+/* VS Section */
+.vs-section {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+}
+
+.team-block { text-align: center; }
+
+.team-photo {
+    width: 110px; height: 110px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin: 0 auto 8px;
+    border: 3px solid #475569;
+    background: #000;
+}
+.team-photo.boys { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59,130,246,0.3); }
+.team-photo.girls { border-color: #ec4899; box-shadow: 0 0 15px rgba(236,72,153,0.3); }
+.team-photo img { width: 100%; height: 100%; object-fit: cover; }
+
+.team-label { font-size: 1.2rem; font-weight: 900; }
+.team-label.boys { color: #3b82f6; }
+.team-label.girls { color: #ec4899; }
+
+.team-money { font-size: 1.1rem; font-weight: 800; color: #e2e8f0; margin-top: 2px; }
+
+.vs-text {
+    font-size: 3rem;
+    font-weight: 900;
+    color: #334155;
+    font-style: italic;
+}
+
+/* Branding */
+.board-title {
+    text-align: center;
+    opacity: 0.3;
+    margin-top: 10px;
+}
+.board-title h1 {
+    font-size: 2.5rem; font-weight: 900; letter-spacing: 8px; color: #fff;
+    font-family: 'Outfit', sans-serif;
+}
+.board-title p { font-size: 0.7rem; letter-spacing: 4px; color: #64748b; }
+
+/* ===== PLAYER TOKENS ===== */
+.token {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    position: absolute;
+    z-index: 50;
+    box-shadow: 0 0 8px rgba(0,0,0,0.6);
+    transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.token-boys { background: #3b82f6; }
+.token-girls { background: #ec4899; }
+
+/* ===== GRID POSITION MAPPING ===== */
+/* Bottom row: right-to-left */
+.pos-1  { grid-column: 11; grid-row: 11; }
+.pos-2  { grid-column: 10; grid-row: 11; }
+.pos-3  { grid-column: 9;  grid-row: 11; }
+.pos-4  { grid-column: 8;  grid-row: 11; }
+.pos-5  { grid-column: 7;  grid-row: 11; }
+.pos-6  { grid-column: 6;  grid-row: 11; }
+.pos-7  { grid-column: 5;  grid-row: 11; }
+.pos-8  { grid-column: 4;  grid-row: 11; }
+.pos-9  { grid-column: 3;  grid-row: 11; }
+.pos-10 { grid-column: 2;  grid-row: 11; }
+.pos-11 { grid-column: 1;  grid-row: 11; }
+
+/* Left column: bottom-to-top */
+.pos-12 { grid-column: 1; grid-row: 10; }
+.pos-13 { grid-column: 1; grid-row: 9; }
+.pos-14 { grid-column: 1; grid-row: 8; }
+.pos-15 { grid-column: 1; grid-row: 7; }
+.pos-16 { grid-column: 1; grid-row: 6; }
+.pos-17 { grid-column: 1; grid-row: 5; }
+.pos-18 { grid-column: 1; grid-row: 4; }
+.pos-19 { grid-column: 1; grid-row: 3; }
+.pos-20 { grid-column: 1; grid-row: 2; }
+.pos-21 { grid-column: 1; grid-row: 1; }
+
+/* Top row: left-to-right */
+.pos-22 { grid-column: 2;  grid-row: 1; }
+.pos-23 { grid-column: 3;  grid-row: 1; }
+.pos-24 { grid-column: 4;  grid-row: 1; }
+.pos-25 { grid-column: 5;  grid-row: 1; }
+.pos-26 { grid-column: 6;  grid-row: 1; }
+.pos-27 { grid-column: 7;  grid-row: 1; }
+.pos-28 { grid-column: 8;  grid-row: 1; }
+.pos-29 { grid-column: 9;  grid-row: 1; }
+.pos-30 { grid-column: 10; grid-row: 1; }
+.pos-31 { grid-column: 11; grid-row: 1; }
+
+/* Right column: top-to-bottom */
+.pos-32 { grid-column: 11; grid-row: 2; }
+.pos-33 { grid-column: 11; grid-row: 3; }
+.pos-34 { grid-column: 11; grid-row: 4; }
+.pos-35 { grid-column: 11; grid-row: 5; }
+.pos-36 { grid-column: 11; grid-row: 6; }
+.pos-37 { grid-column: 11; grid-row: 7; }
+.pos-38 { grid-column: 11; grid-row: 8; }
+.pos-39 { grid-column: 11; grid-row: 9; }
+.pos-40 { grid-column: 11; grid-row: 10; }
