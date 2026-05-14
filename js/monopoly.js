@@ -14,8 +14,57 @@ let game = {
     winner: null,
     classInfo: "",
     sectionInfo: "",
-    cells: [] // We will store cell state if needed (ownership etc)
+    bookedCells: {} // { cellIndex: 'boys' | 'girls' }
 };
+
+// === Sound Engine (Web Audio API) ===
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+function getAudioCtx() {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    return audioCtx;
+}
+
+function playMoveSound(team) {
+    try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+
+        // Boys get a deeper tone, Girls get a higher tone
+        const baseFreq = team === 'boys' ? 440 : 587;
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(baseFreq, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.5, ctx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(baseFreq * 0.8, ctx.currentTime + 0.2);
+
+        gain.gain.setValueAtTime(0.3, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.25);
+    } catch(e) { /* audio not supported */ }
+}
+
+function playBookSound() {
+    try {
+        const ctx = getAudioCtx();
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(523, ctx.currentTime);
+        osc.frequency.setValueAtTime(659, ctx.currentTime + 0.1);
+        osc.frequency.setValueAtTime(784, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.25, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + 0.35);
+    } catch(e) {}
+}
 
 // Board Configuration
 const BOARD_DATA = [
@@ -117,10 +166,31 @@ async function saveTeamImage(team, file) {
 
 function movePlayer(team, steps) {
     if (team === 'boys') {
-        game.boysPos = (game.boysPos + steps) % 40;
+        game.boysPos = (game.boysPos + steps + 40) % 40;
     } else {
-        game.girlsPos = (game.girlsPos + steps) % 40;
+        game.girlsPos = (game.girlsPos + steps + 40) % 40;
     }
+    playMoveSound(team);
+    saveGame();
+}
+
+function bookPlace(team) {
+    const pos = team === 'boys' ? game.boysPos : game.girlsPos;
+    if (!game.bookedCells) game.bookedCells = {};
+    game.bookedCells[pos] = team;
+    playBookSound();
+    saveGame();
+}
+
+function announceWinner(team, className, sectionName) {
+    game.winner = team;
+    game.classInfo = className;
+    game.sectionInfo = sectionName;
+    saveGame();
+}
+
+function clearWinner() {
+    game.winner = null;
     saveGame();
 }
 
@@ -136,7 +206,7 @@ function switchTurn() {
     saveGame();
 }
 
-function resetGame() {
+async function resetGame() {
     game = {
         boysScore: 500,
         girlsScore: 500,
@@ -150,8 +220,14 @@ function resetGame() {
         winner: null,
         classInfo: "",
         sectionInfo: "",
-        cells: []
+        bookedCells: {}
     };
+    // Delete all uploaded images from server
+    try {
+        await fetch('/clear-uploads', { method: 'POST' });
+    } catch(e) {
+        console.error('Failed to clear uploads:', e);
+    }
     saveGame();
 }
 
@@ -167,6 +243,9 @@ window.MonopolyGame = {
     updateScore,
     switchTurn,
     resetGame,
+    bookPlace,
+    announceWinner,
+    clearWinner,
     STORAGE_KEY
 };
 
