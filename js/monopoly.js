@@ -2,8 +2,8 @@
 const STORAGE_KEY = "monopoly-game-v1";
 
 let game = {
-    boysScore: 500,
-    girlsScore: 500,
+    boysScore: 2500,
+    girlsScore: 2500,
     govScore: 5000,
     currentTurn: "boys",
     boysPos: 0,
@@ -45,7 +45,7 @@ function playMoveSound(team) {
 
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.25);
-    } catch(e) { /* audio not supported */ }
+    } catch (e) { /* audio not supported */ }
 }
 
 function playBookSound() {
@@ -63,55 +63,75 @@ function playBookSound() {
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.35);
-    } catch(e) {}
+    } catch (e) { }
 }
 
 // Board Configuration
 const BOARD_DATA = [
     { name: "যাত্রা শুরু, ৫০০ টাকা পাবে", type: "start", icon: "arrow-right-circle" },
     { name: "লামা বাজার", price: 60, color: "purple", type: "property" },
-    { name: "জীবন চলার পথে বাধা", type: "obstacle", icon: "help-circle", color: "darkred" },
+    { name: "জীবন চলার পথে বাধা", type: "obstacle", icon: "alert-triangle", color: "darkred" },
     { name: "মীরা বাজার", price: 60, color: "purple", type: "property" },
-    { name: "আয়কর", price: 200, type: "tax", icon: "bank" },
+    { name: "আয়কর", price: 200, type: "tax", icon: "bank" },
     { name: "সিলেট স্টেশন", price: 200, type: "station", icon: "train", color: "darkblue" },
     { name: "রাজেন্দ্রপুর", price: 120, color: "yellow", type: "property" },
-    { name: "জীবনে পাওয়া সুযোগ", type: "opportunity", icon: "help-circle", color: "darkblue" },
-    { name: "কাপাসিয়া", price: 100, color: "yellow", type: "property" },
+    { name: "জীবনে পাওয়া সুযোগ", type: "opportunity", icon: "gift", color: "darkblue" },
+    { name: "কাপাসিয়া", price: 100, color: "yellow", type: "property" },
     { name: "গাজীপুর চৌরাস্তা", price: 150, color: "yellow", type: "property" },
     { name: "জেলখানা", type: "jail", icon: "lock", desc: "২ প্রশ্ন আটকে থাকবে" },
-    
+
     { name: "মাওনা", price: 150, color: "reddish", type: "property" },
     { name: "বিদ্যুৎ সুবিধা", type: "utility", icon: "zap", color: "darkred" },
-    { name: "মাস্টারবাড়ি", price: 120, color: "reddish", type: "property" },
+    { name: "মাস্টারবাড়ি", price: 120, color: "reddish", type: "property" },
     { name: "শিমুলতলী", price: 100, color: "reddish", type: "property" },
-    { name: "ময়মনসিংহ স্টেশন", price: 200, type: "station", icon: "train", color: "darkblue" },
+    { name: "ময়মনসিংহ স্টেশন", price: 200, type: "station", icon: "train", color: "darkblue" },
     { name: "উত্তরা", price: 250, color: "bluish", type: "property" },
-    { name: "জীবন চলার পথে বাধা", type: "obstacle", icon: "help-circle", color: "darkred" },
+    { name: "জীবন চলার পথে বাধা", type: "obstacle", icon: "alert-triangle", color: "darkred" },
     { name: "আব্দুল্লাহপুর", price: 200, color: "bluish", type: "property" },
     { name: "মিরপুর", price: 220, color: "bluish", type: "property" },
     { name: "বিশ্রামাগার", type: "rest", icon: "coffee", desc: "২ প্রশ্ন পর্যন্ত বিশ্রামের সুযোগ" },
 
-    { name: "ধলাদিয়া", price: 100, color: "greenish", type: "property" },
-    { name: "জীবনে পাওয়া সুযোগ", type: "opportunity", icon: "help-circle", color: "darkblue" },
-    { name: "রাজাবাড়ি", price: 150, color: "greenish", type: "property" },
-    { name: "সাটিয়াবাড়ি", price: 120, color: "greenish", type: "property" },
+    { name: "ধলাদিয়া", price: 100, color: "greenish", type: "property" },
+    { name: "জীবনে পাওয়া সুযোগ", type: "opportunity", icon: "gift", color: "darkblue" },
+    { name: "রাজাবাড়ি", price: 150, color: "greenish", type: "property" },
+    { name: "সাটিয়াবাড়ি", price: 120, color: "greenish", type: "property" },
     { name: "চট্রগ্রাম স্টেশন", price: 200, type: "station", icon: "train", color: "darkblue" },
     { name: "সাভার", price: 200, color: "orange", type: "property" },
     { name: "জিরানী", price: 180, color: "orange", type: "property" },
     { name: "পানি সুবিধা", type: "utility", icon: "droplet", color: "darkred" },
     { name: "গাবতলী", price: 250, color: "orange", type: "property" },
-    { name: "পুলিশের কাছে ধরা", type: "police", icon: "whistle", desc: "জেলখানায় যাও" },
+    { name: "পুলিশের কাছে ধরা", type: "police", icon: "whistle", desc: "জেলখানায় যাও" },
 
-    { name: "ওয়ারী", price: 300, color: "pink", type: "property" },
+    { name: "ওয়ারী", price: 300, color: "pink", type: "property" },
     { name: "মতিঝিল", price: 300, color: "pink", type: "property" },
-    { name: "জীবন চলার পথে বাধা", type: "obstacle", icon: "help-circle", color: "darkred" },
+    { name: "জীবন চলার পথে বাধা", type: "obstacle", icon: "alert-triangle", color: "darkred" },
     { name: "ধানমন্ডি", price: 320, color: "pink", type: "property" },
     { name: "ঢাকা স্টেশন", price: 200, type: "station", icon: "train", color: "darkblue" },
-    { name: "জীবনে পাওয়া সুযোগ", type: "opportunity", icon: "help-circle", color: "darkblue" },
+    { name: "জীবনে পাওয়া সুযোগ", type: "opportunity", icon: "gift", color: "darkblue" },
     { name: "বনানী", price: 350, color: "deepblue", type: "property" },
     { name: "কর পরিশোধ", price: 100, type: "tax", icon: "bank" },
     { name: "গুলশান", price: 400, color: "deepblue", type: "property" }
 ];
+
+// === Opportunity & Obstacle Data ===
+const OPPORTUNITY_EVENTS = [
+    "পরবর্তী যাত্রা শুরু পজিশন অতিক্রম করলে ১০০০ টাকা বেতন বৃদ্ধি পাবে 💰",
+    "ঈদ বোনাস হিসেবে ১০০০ টাকা পাবে 🎉",
+    "তোমার কেনা জায়গায় ১০০% কর পাবে 🏠",
+    "যেকোনো পজিশনে যেতে পারবে, তবে বেতন পাবে না 🚀"
+];
+
+const OBSTACLE_EVENTS = [
+    "১০০০ টাকা ঋণ পরিশোধ করো 💸",
+    "১০০০ টাকা হাসপাতাল বিল দাও 🏥",
+    "৫০০ টাকা রাস্তার পুলিশের জরিমানা পরিশোধ করো 🚔",
+    "মাদকাসক্তির জন্য জেলে যাও ⛓️"
+];
+
+function getRandomEvent(type) {
+    const list = type === 'opportunity' ? OPPORTUNITY_EVENTS : OBSTACLE_EVENTS;
+    return list[Math.floor(Math.random() * list.length)];
+}
 
 // Socket Initialization
 let socket;
@@ -130,7 +150,23 @@ function saveGame() {
 function loadGame() {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-        game = JSON.parse(saved);
+        const loaded = JSON.parse(saved);
+        // Merge with defaults so missing fields don't break anything
+        game = {
+            boysScore: loaded.boysScore !== undefined ? loaded.boysScore : 2500,
+            girlsScore: loaded.girlsScore !== undefined ? loaded.girlsScore : 2500,
+            govScore: loaded.govScore !== undefined ? loaded.govScore : 5000,
+            currentTurn: loaded.currentTurn || "boys",
+            boysPos: loaded.boysPos || 0,
+            girlsPos: loaded.girlsPos || 0,
+            boysImage: loaded.boysImage || null,
+            girlsImage: loaded.girlsImage || null,
+            lastUpdate: loaded.lastUpdate || Date.now(),
+            winner: loaded.winner || null,
+            classInfo: loaded.classInfo || "",
+            sectionInfo: loaded.sectionInfo || "",
+            bookedCells: loaded.bookedCells || {}
+        };
     }
 }
 
@@ -164,14 +200,27 @@ async function saveTeamImage(team, file) {
     }
 }
 
+// Move player with auto-deduction of 100 taka per step
 function movePlayer(team, steps) {
+    const absSteps = Math.abs(steps);
+    const cost = absSteps * 100;
+
     if (team === 'boys') {
+        game.boysScore -= cost;
         game.boysPos = (game.boysPos + steps + 40) % 40;
     } else {
+        game.girlsScore -= cost;
         game.girlsPos = (game.girlsPos + steps + 40) % 40;
     }
+    // Movement cost goes to government fund
+    game.govScore += cost;
+
     playMoveSound(team);
     saveGame();
+
+    // Return the landed tile type for event handling
+    const pos = team === 'boys' ? game.boysPos : game.girlsPos;
+    return BOARD_DATA[pos];
 }
 
 function bookPlace(team) {
@@ -183,7 +232,7 @@ function bookPlace(team) {
 }
 
 function announceWinner(team, className, sectionName) {
-    game.winner = team;
+    game.winner = team; // 'boys', 'girls', or 'draw'
     game.classInfo = className;
     game.sectionInfo = sectionName;
     saveGame();
@@ -194,10 +243,17 @@ function clearWinner() {
     saveGame();
 }
 
+// Update score - team money changes are linked to government fund
 function updateScore(team, amount) {
-    if (team === 'boys') game.boysScore += amount;
-    else if (team === 'girls') game.girlsScore += amount;
-    else if (team === 'gov') game.govScore += amount;
+    if (team === 'boys') {
+        game.boysScore += amount;
+        game.govScore -= amount; // Inverse: adding to team deducts from gov
+    } else if (team === 'girls') {
+        game.girlsScore += amount;
+        game.govScore -= amount; // Inverse: adding to team deducts from gov
+    } else if (team === 'gov') {
+        game.govScore += amount; // Direct gov adjustment (standalone)
+    }
     saveGame();
 }
 
@@ -207,9 +263,12 @@ function switchTurn() {
 }
 
 async function resetGame() {
+    // Clear old data first
+    localStorage.removeItem(STORAGE_KEY);
+    
     game = {
-        boysScore: 500,
-        girlsScore: 500,
+        boysScore: 2500,
+        girlsScore: 2500,
         govScore: 5000,
         currentTurn: "boys",
         boysPos: 0,
@@ -225,7 +284,7 @@ async function resetGame() {
     // Delete all uploaded images from server
     try {
         await fetch('/clear-uploads', { method: 'POST' });
-    } catch(e) {
+    } catch (e) {
         console.error('Failed to clear uploads:', e);
     }
     saveGame();
@@ -235,6 +294,9 @@ async function resetGame() {
 window.MonopolyGame = {
     get game() { return game; },
     get boardData() { return BOARD_DATA; },
+    OPPORTUNITY_EVENTS,
+    OBSTACLE_EVENTS,
+    getRandomEvent,
     saveGame,
     loadGame,
     setGame,

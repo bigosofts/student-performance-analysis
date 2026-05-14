@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,89 +16,42 @@
             max-width: 1400px;
             margin: 0 auto;
         }
+
         .team-card {
             padding: 25px;
             text-align: center;
             border-radius: 24px;
         }
-        .team-card.boys { border-top: 8px solid var(--primary); }
-        .team-card.girls { border-top: 8px solid var(--secondary); }
-        
+
+        .team-card.boys {
+            border-top: 8px solid var(--primary);
+        }
+
+        .team-card.girls {
+            border-top: 8px solid var(--secondary);
+        }
+
         .btn-group {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 15px;
         }
+
         .btn-group-3col {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
             gap: 8px;
             margin-top: 10px;
         }
-        .btn-small { padding: 8px; font-size: 0.8rem; }
-        .btn-tiny { padding: 6px 4px; font-size: 0.7rem; border-radius: 8px; cursor: pointer; border: none; color: #fff; font-weight: 700; transition: all 0.2s; }
-        .btn-tiny:hover { transform: scale(1.05); filter: brightness(1.2); }
-        .btn-add { background: linear-gradient(135deg, #10b981, #059669); }
-        .btn-sub { background: linear-gradient(135deg, #ef4444, #dc2626); }
-        .move-input {
-            width: 80px !important;
-            display: inline-block !important;
-            margin: 0 5px !important;
-            text-align: center;
-            font-weight: 800;
-            color: var(--accent) !important;
+
+        .btn-small {
+            padding: 8px;
+            font-size: 0.8rem;
         }
-        .stat-label {
-            font-size: 0.7rem;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 5px;
-        }
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: 900;
-            color: #fff;
-        }
-        .book-btn {
-            margin-top: 12px;
-            padding: 10px 20px;
-            font-size: 0.85rem;
-            font-weight: 800;
-            letter-spacing: 1px;
-            border: 2px dashed rgba(255,255,255,0.3);
-            background: rgba(255,255,255,0.05);
-            color: #fff;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-        }
-        .book-btn:hover {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.5);
-            transform: scale(1.02);
-        }
-        .book-btn.boys:hover { border-color: var(--primary); box-shadow: 0 0 15px var(--primary-glow); }
-        .book-btn.girls:hover { border-color: var(--secondary); box-shadow: 0 0 15px var(--secondary-glow); }
-        .booked-info {
-            margin-top: 8px;
-            font-size: 0.7rem;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 700;
-        }
-        .booked-boys { color: #60a5fa; background: rgba(59,130,246,0.15); }
-        .booked-girls { color: #f472b6; background: rgba(236,72,153,0.15); }
-        .gov-btn-group {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 6px;
-            margin-top: 10px;
-        }
-        .gov-btn {
-            padding: 8px 4px;
+
+        .btn-tiny {
+            padding: 6px 4px;
             font-size: 0.7rem;
             border-radius: 8px;
             cursor: pointer;
@@ -106,74 +60,272 @@
             font-weight: 700;
             transition: all 0.2s;
         }
-        .gov-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
-        .gov-add { background: linear-gradient(135deg, #f59e0b, #d97706); }
-        .gov-sub { background: linear-gradient(135deg, #b45309, #92400e); }
+
+        .btn-tiny:hover {
+            transform: scale(1.05);
+            filter: brightness(1.2);
+        }
+
+        .btn-add {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .btn-sub {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+        }
+
+        .move-input {
+            width: 80px !important;
+            display: inline-block !important;
+            margin: 0 5px !important;
+            text-align: center;
+            font-weight: 800;
+            color: var(--accent) !important;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: #fff;
+        }
+
+        .book-btn {
+            margin-top: 12px;
+            padding: 10px 20px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .book-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.02);
+        }
+
+        .book-btn.boys:hover {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .book-btn.girls:hover {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px var(--secondary-glow);
+        }
+
+        .booked-info {
+            margin-top: 8px;
+            font-size: 0.7rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+        }
+
+        .booked-boys {
+            color: #60a5fa;
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .booked-girls {
+            color: #f472b6;
+            background: rgba(236, 72, 153, 0.15);
+        }
+
         .winner-section {
             padding: 20px;
             margin-top: 20px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 16px;
         }
+
         .winner-section input {
             width: 100%;
             margin: 5px 0;
             padding: 8px 12px;
             border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
             color: #fff;
             font-size: 0.85rem;
         }
+
+        .custom-input-row {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 6px;
+            margin-top: 12px;
+            align-items: center;
+        }
+
+        .custom-input-row input {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 1rem;
+            text-align: center;
+            font-weight: 800;
+            box-sizing: border-box;
+        }
+
+        .custom-input-row button {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 0.8rem;
+            color: #fff;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .custom-input-row button:hover {
+            transform: scale(1.05);
+        }
+
+        .quiz-section {
+            padding: 20px;
+            margin-top: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            border-radius: 16px;
+        }
+
+        .quiz-question-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+
+        .quiz-question-box .q-text {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 10px;
+        }
+
+        .quiz-question-box .q-options {
+            text-align: left;
+        }
+
+        .quiz-question-box .q-option {
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .quiz-question-box .q-answer {
+            margin-top: 10px;
+            padding: 8px;
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid #10b981;
+            border-radius: 8px;
+            color: #10b981;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .quiz-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 12px;
+        }
+
+        .event-info {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: none;
+        }
     </style>
 </head>
+
 <body class="dashboard-monopoly">
-    <div class="glass-card" style="margin: 20px; padding: 25px; text-align: center; border-bottom: 2px solid var(--primary);">
-        <h1 style="font-size: 2.5rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Monopoly Quiz Manager</h1>
-        <p style="color: var(--text-dim);">Teacher Control Panel • <a href="dashboard.html" style="color: var(--primary); text-decoration: none; font-weight: 800;">BACK TO HUB</a></p>
+    <div class="glass-card"
+        style="margin: 20px; padding: 25px; text-align: center; border-bottom: 2px solid var(--primary);">
+        <h1
+            style="font-size: 2.5rem; background: linear-gradient(to right, var(--primary), var(--secondary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+            Monopoly Quiz Manager</h1>
+        <p style="color: var(--text-dim);">Teacher Control Panel • <a href="dashboard.html"
+                style="color: var(--primary); text-decoration: none; font-weight: 800;">BACK TO HUB</a></p>
     </div>
 
     <div class="control-grid">
         <!-- Team Boys Control -->
         <div class="glass-card team-card boys">
             <h2 style="color: var(--primary); letter-spacing: 2px;">TEAM BOYS</h2>
-            <div id="boysImgPreview" style="width: 120px; height: 120px; border-radius: 50%; background: #000; margin: 20px auto; overflow: hidden; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow);">
+            <div id="boysImgPreview"
+                style="width: 120px; height: 120px; border-radius: 50%; background: #000; margin: 20px auto; overflow: hidden; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow);">
                 <img id="boysImg" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
                 <div id="boysNoImg" style="padding-top: 45px; font-size: 0.8rem; color: var(--text-dim);">PHOTO</div>
             </div>
-            <input type="file" accept="image/*" onchange="uploadPhoto('boys', this)" style="font-size: 0.7rem; max-width: 200px;">
-            
+            <input type="file" accept="image/*" onchange="uploadPhoto('boys', this)"
+                style="font-size: 0.7rem; max-width: 200px;">
+
             <div class="glass-card" style="padding: 20px; margin-top: 25px; background: rgba(0,0,0,0.3);">
                 <div class="stat-label">Current Balance</div>
-                <div id="boysMoney" class="stat-value" style="color: var(--accent);">৳ 500</div>
-                <div class="btn-group">
-                    <button class="btn-primary btn-small" onclick="adjustMoney('boys', 100)">+100</button>
-                    <button class="btn-secondary btn-small" onclick="adjustMoney('boys', -100)">-100</button>
-                    <button class="btn-primary btn-small" onclick="adjustMoney('boys', 50)">+50</button>
-                    <button class="btn-secondary btn-small" onclick="adjustMoney('boys', -50)">-50</button>
+                <div id="boysMoney" class="stat-value" style="color: var(--accent);">৳ 2500</div>
+                <div class="custom-input-row">
+                    <input type="number" id="boysCustomAmount" placeholder="Amount" value="100">
+                    <button style="background: linear-gradient(135deg, #10b981, #059669);"
+                        onclick="customAdjust('boys', true)">+ ADD</button>
+                    <button style="background: linear-gradient(135deg, #ef4444, #dc2626);"
+                        onclick="customAdjust('boys', false)">- CUT</button>
                 </div>
-                <div class="btn-group-3col">
-                    <button class="btn-tiny btn-add" onclick="adjustMoney('boys', 20)">+20</button>
-                    <button class="btn-tiny btn-add" onclick="adjustMoney('boys', 10)">+10</button>
-                    <button class="btn-tiny btn-add" onclick="adjustMoney('boys', 5)">+5</button>
-                    <button class="btn-tiny btn-sub" onclick="adjustMoney('boys', -20)">-20</button>
-                    <button class="btn-tiny btn-sub" onclick="adjustMoney('boys', -10)">-10</button>
-                    <button class="btn-tiny btn-sub" onclick="adjustMoney('boys', -5)">-5</button>
+                <div class="btn-group-3col" style="margin-top: 8px;">
+                    <button class="btn-tiny btn-add" onclick="adjustMoney('boys', 500)">+500</button>
+                    <button class="btn-tiny btn-add" onclick="adjustMoney('boys', 200)">+200</button>
+                    <button class="btn-tiny btn-add" onclick="adjustMoney('boys', 100)">+100</button>
+                    <button class="btn-tiny btn-sub" onclick="adjustMoney('boys', -500)">-500</button>
+                    <button class="btn-tiny btn-sub" onclick="adjustMoney('boys', -200)">-200</button>
+                    <button class="btn-tiny btn-sub" onclick="adjustMoney('boys', -100)">-100</button>
                 </div>
             </div>
 
             <div class="glass-card" style="padding: 20px; margin-top: 20px; background: rgba(0,0,0,0.3);">
                 <div class="stat-label">Position</div>
-                <div id="boysPosName" class="stat-value" style="font-size: 1.2rem; min-height: 3rem; display: flex; align-items: center; justify-content: center;">Start</div>
+                <div id="boysPosName" class="stat-value"
+                    style="font-size: 1.2rem; min-height: 3rem; display: flex; align-items: center; justify-content: center;">
+                    Start</div>
                 <div id="boysBookedStatus"></div>
+                <div id="boysEventInfo" class="event-info"></div>
                 <div style="margin-top: 15px;">
                     <button class="btn-primary" onclick="movePlayer('boys', 1)">+1</button>
                     <button class="btn-secondary" onclick="movePlayer('boys', -1)">-1</button>
                 </div>
                 <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
                     <input type="number" id="boysMoveSteps" class="move-input" value="1" min="1" max="12">
-                    <button class="btn-primary btn-small" style="width: auto;" onclick="movePlayer('boys', parseInt(document.getElementById('boysMoveSteps').value))">MOVE X STEPS</button>
+                    <button class="btn-primary btn-small" style="width: auto;"
+                        onclick="movePlayer('boys', parseInt(document.getElementById('boysMoveSteps').value))">MOVE X
+                        STEPS</button>
                 </div>
                 <button class="book-btn boys" onclick="bookPlace('boys')">📌 BOOK THIS PLACE</button>
             </div>
@@ -182,42 +334,50 @@
         <!-- Team Girls Control -->
         <div class="glass-card team-card girls">
             <h2 style="color: var(--secondary); letter-spacing: 2px;">TEAM GIRLS</h2>
-            <div id="girlsImgPreview" style="width: 120px; height: 120px; border-radius: 50%; background: #000; margin: 20px auto; overflow: hidden; border: 4px solid var(--secondary); box-shadow: 0 0 20px var(--secondary-glow);">
+            <div id="girlsImgPreview"
+                style="width: 120px; height: 120px; border-radius: 50%; background: #000; margin: 20px auto; overflow: hidden; border: 4px solid var(--secondary); box-shadow: 0 0 20px var(--secondary-glow);">
                 <img id="girlsImg" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
                 <div id="girlsNoImg" style="padding-top: 45px; font-size: 0.8rem; color: var(--text-dim);">PHOTO</div>
             </div>
-            <input type="file" accept="image/*" onchange="uploadPhoto('girls', this)" style="font-size: 0.7rem; max-width: 200px;">
+            <input type="file" accept="image/*" onchange="uploadPhoto('girls', this)"
+                style="font-size: 0.7rem; max-width: 200px;">
 
             <div class="glass-card" style="padding: 20px; margin-top: 25px; background: rgba(0,0,0,0.3);">
                 <div class="stat-label">Current Balance</div>
-                <div id="girlsMoney" class="stat-value" style="color: var(--accent);">৳ 500</div>
-                <div class="btn-group">
-                    <button class="btn-primary btn-small" onclick="adjustMoney('girls', 100)">+100</button>
-                    <button class="btn-secondary btn-small" onclick="adjustMoney('girls', -100)">-100</button>
-                    <button class="btn-primary btn-small" onclick="adjustMoney('girls', 50)">+50</button>
-                    <button class="btn-secondary btn-small" onclick="adjustMoney('girls', -50)">-50</button>
+                <div id="girlsMoney" class="stat-value" style="color: var(--accent);">৳ 2500</div>
+                <div class="custom-input-row">
+                    <input type="number" id="girlsCustomAmount" placeholder="Amount" value="100">
+                    <button style="background: linear-gradient(135deg, #10b981, #059669);"
+                        onclick="customAdjust('girls', true)">+ ADD</button>
+                    <button style="background: linear-gradient(135deg, #ef4444, #dc2626);"
+                        onclick="customAdjust('girls', false)">- CUT</button>
                 </div>
-                <div class="btn-group-3col">
-                    <button class="btn-tiny btn-add" onclick="adjustMoney('girls', 20)">+20</button>
-                    <button class="btn-tiny btn-add" onclick="adjustMoney('girls', 10)">+10</button>
-                    <button class="btn-tiny btn-add" onclick="adjustMoney('girls', 5)">+5</button>
-                    <button class="btn-tiny btn-sub" onclick="adjustMoney('girls', -20)">-20</button>
-                    <button class="btn-tiny btn-sub" onclick="adjustMoney('girls', -10)">-10</button>
-                    <button class="btn-tiny btn-sub" onclick="adjustMoney('girls', -5)">-5</button>
+                <div class="btn-group-3col" style="margin-top: 8px;">
+                    <button class="btn-tiny btn-add" onclick="adjustMoney('girls', 500)">+500</button>
+                    <button class="btn-tiny btn-add" onclick="adjustMoney('girls', 200)">+200</button>
+                    <button class="btn-tiny btn-add" onclick="adjustMoney('girls', 100)">+100</button>
+                    <button class="btn-tiny btn-sub" onclick="adjustMoney('girls', -500)">-500</button>
+                    <button class="btn-tiny btn-sub" onclick="adjustMoney('girls', -200)">-200</button>
+                    <button class="btn-tiny btn-sub" onclick="adjustMoney('girls', -100)">-100</button>
                 </div>
             </div>
 
             <div class="glass-card" style="padding: 20px; margin-top: 20px; background: rgba(0,0,0,0.3);">
                 <div class="stat-label">Position</div>
-                <div id="girlsPosName" class="stat-value" style="font-size: 1.2rem; min-height: 3rem; display: flex; align-items: center; justify-content: center;">Start</div>
+                <div id="girlsPosName" class="stat-value"
+                    style="font-size: 1.2rem; min-height: 3rem; display: flex; align-items: center; justify-content: center;">
+                    Start</div>
                 <div id="girlsBookedStatus"></div>
+                <div id="girlsEventInfo" class="event-info"></div>
                 <div style="margin-top: 15px;">
                     <button class="btn-primary" onclick="movePlayer('girls', 1)">+1</button>
                     <button class="btn-secondary" onclick="movePlayer('girls', -1)">-1</button>
                 </div>
                 <div style="margin-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;">
                     <input type="number" id="girlsMoveSteps" class="move-input" value="1" min="1" max="12">
-                    <button class="btn-primary btn-small" style="width: auto;" onclick="movePlayer('girls', parseInt(document.getElementById('girlsMoveSteps').value))">MOVE X STEPS</button>
+                    <button class="btn-primary btn-small" style="width: auto;"
+                        onclick="movePlayer('girls', parseInt(document.getElementById('girlsMoveSteps').value))">MOVE X
+                        STEPS</button>
                 </div>
                 <button class="book-btn girls" onclick="bookPlace('girls')">📌 BOOK THIS PLACE</button>
             </div>
@@ -226,35 +386,52 @@
         <!-- Global Control -->
         <div class="glass-card team-card" style="border-top: 8px solid #8b5cf6;">
             <h2 style="color: #8b5cf6; letter-spacing: 2px;">GAME COMMANDS</h2>
-            
+
             <div class="glass-card" style="padding: 20px; margin-top: 25px; background: rgba(0,0,0,0.3);">
                 <div class="stat-label">Government Fund</div>
                 <div id="govMoney" class="stat-value" style="color: #f59e0b;">৳ 5000</div>
-                <div class="btn-group">
-                    <button class="btn-primary btn-small" style="background:#f59e0b" onclick="adjustMoney('gov', 500)">+500</button>
-                    <button class="btn-secondary btn-small" style="background:#b45309" onclick="adjustMoney('gov', -500)">-500</button>
-                    <button class="btn-primary btn-small" style="background:#f59e0b" onclick="adjustMoney('gov', 200)">+200</button>
-                    <button class="btn-secondary btn-small" style="background:#b45309" onclick="adjustMoney('gov', -200)">-200</button>
-                </div>
-                <div class="gov-btn-group">
-                    <button class="gov-btn gov-add" onclick="adjustMoney('gov', 100)">+100</button>
-                    <button class="gov-btn gov-add" onclick="adjustMoney('gov', 50)">+50</button>
-                    <button class="gov-btn gov-add" onclick="adjustMoney('gov', 20)">+20</button>
-                    <button class="gov-btn gov-add" onclick="adjustMoney('gov', 10)">+10</button>
-                    <button class="gov-btn gov-add" onclick="adjustMoney('gov', 5)">+5</button>
-                    <button class="gov-btn gov-sub" onclick="adjustMoney('gov', -100)">-100</button>
-                    <button class="gov-btn gov-sub" onclick="adjustMoney('gov', -50)">-50</button>
-                    <button class="gov-btn gov-sub" onclick="adjustMoney('gov', -20)">-20</button>
-                    <button class="gov-btn gov-sub" onclick="adjustMoney('gov', -10)">-10</button>
-                    <button class="gov-btn gov-sub" onclick="adjustMoney('gov', -5)">-5</button>
-                </div>
+                <p style="font-size:0.65rem; color:#94a3b8; margin-top:5px;">Auto-linked with team transactions</p>
             </div>
 
             <div style="margin-top: 40px;">
                 <div class="stat-label">Turn Control</div>
-                <button class="btn-primary" style="width: 100%; margin-bottom: 15px; background: #8b5cf6; height: 60px; font-size: 1.2rem;" onclick="switchTurn()">
+                <button class="btn-primary"
+                    style="width: 100%; margin-bottom: 15px; background: #8b5cf6; height: 60px; font-size: 1.2rem;"
+                    onclick="switchTurn()">
                     NEXT TURN: <span id="turnText" style="font-weight: 900;">BOYS</span>
                 </button>
+            </div>
+
+            <!-- Quiz System -->
+            <div class="quiz-section">
+                <div class="stat-label" style="margin-bottom: 10px;">🎓 Quiz System</div>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <input type="file" id="quizFileInput" accept=".xlsx,.xls"
+                        style="font-size:0.7rem; flex:1; min-width:150px;">
+                    <button class="btn-primary btn-small" style="background:#a855f7; width:auto;"
+                        onclick="uploadQuiz()">📤 UPLOAD</button>
+                </div>
+                <div id="quizStatus" style="margin-top:8px; font-size:0.75rem; color:#a855f7; font-weight:700;">Loading
+                    quiz...</div>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
+                    <button class="btn-primary btn-small" style="background:#3b82f6;" onclick="triggerQuiz('boys')">📝
+                        QUIZ → BOYS</button>
+                    <button class="btn-primary btn-small" style="background:#ec4899;" onclick="triggerQuiz('girls')">📝
+                        QUIZ → GIRLS</button>
+                </div>
+
+                <div id="quizQuestionBox" class="quiz-question-box">
+                    <div class="q-text" id="dashQuizQ"></div>
+                    <div class="q-options" id="dashQuizOpts"></div>
+                    <div class="q-answer" id="dashQuizAns"></div>
+                    <div class="quiz-actions">
+                        <button class="btn-primary btn-small" style="background:#10b981; font-size:1rem;"
+                            onclick="markQuiz(true)">✅ CORRECT (+৳600)</button>
+                        <button class="btn-primary btn-small" style="background:#ef4444; font-size:1rem;"
+                            onclick="markQuiz(false)">❌ WRONG</button>
+                    </div>
+                </div>
             </div>
 
             <!-- Announce Winner Section -->
@@ -262,15 +439,21 @@
                 <div class="stat-label" style="margin-bottom: 10px;">🏆 Announce Winner</div>
                 <input type="text" id="mClassName" placeholder="Class (e.g. 12)">
                 <input type="text" id="mSectionName" placeholder="Section (e.g. Shitolokkha)">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
-                    <button class="btn-primary btn-small" style="background: #3b82f6; font-weight: 800;" onclick="handleAnnounce('boys')">🎉 BOYS WIN</button>
-                    <button class="btn-primary btn-small" style="background: #ec4899; font-weight: 800;" onclick="handleAnnounce('girls')">🎉 GIRLS WIN</button>
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px;">
+                    <button class="btn-primary btn-small" style="background: #3b82f6; font-weight: 800;"
+                        onclick="handleAnnounce('boys')">🎉 BOYS WIN</button>
+                    <button class="btn-primary btn-small" style="background: #8b5cf6; font-weight: 800;"
+                        onclick="handleAnnounce('draw')">🤝 DRAW</button>
+                    <button class="btn-primary btn-small" style="background: #ec4899; font-weight: 800;"
+                        onclick="handleAnnounce('girls')">🎉 GIRLS WIN</button>
                 </div>
-                <button class="btn-primary btn-small" onclick="handleClearWinner()" style="background: #64748b; margin-top: 10px; width: 100%;">CLOSE WINNER SCREEN</button>
+                <button class="btn-primary btn-small" onclick="handleClearWinner()"
+                    style="background: #64748b; margin-top: 10px; width: 100%;">CLOSE WINNER SCREEN</button>
             </div>
-            
+
             <div style="margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 20px;">
-                <button class="btn-secondary" style="width: 100%; opacity: 0.7;" onclick="confirmReset()">RESET ENTIRE GAME</button>
+                <button class="btn-secondary" style="width: 100%; opacity: 0.7;" onclick="confirmReset()">RESET ENTIRE
+                    GAME</button>
             </div>
         </div>
     </div>
@@ -279,65 +462,55 @@
     <script src="js/monopoly.js"></script>
     <script>
         const { MonopolyGame } = window;
+        let currentQuizTeam = null;
+        let dashSocket = null;
+
+        // Single shared socket connection
+        if (typeof io !== 'undefined') {
+            dashSocket = io();
+            dashSocket.on('game-updated', (newState) => { MonopolyGame.setGame(newState); updateUI(); });
+            dashSocket.on('image-updated', () => { MonopolyGame.loadGame(); updateUI(); });
+            dashSocket.on('quiz-loaded', (data) => {
+                document.getElementById('quizStatus').textContent = `✅ ${data.count} questions loaded!`;
+            });
+        }
 
         function updateUI() {
             const game = MonopolyGame.game;
             const board = MonopolyGame.boardData;
-
             document.getElementById('boysMoney').innerText = '৳ ' + game.boysScore;
             document.getElementById('girlsMoney').innerText = '৳ ' + game.girlsScore;
             document.getElementById('govMoney').innerText = '৳ ' + game.govScore;
-
             document.getElementById('boysPosName').innerText = board[game.boysPos].name;
             document.getElementById('girlsPosName').innerText = board[game.girlsPos].name;
-
             document.getElementById('turnText').innerText = game.currentTurn.toUpperCase();
 
-            // Booked status for boys position
             const boysBookedEl = document.getElementById('boysBookedStatus');
             const bookedCells = game.bookedCells || {};
             if (bookedCells[game.boysPos]) {
                 const owner = bookedCells[game.boysPos];
                 boysBookedEl.innerHTML = `<div class="booked-info booked-${owner}">🔒 Booked by ${owner.toUpperCase()}</div>`;
-            } else {
-                boysBookedEl.innerHTML = '';
-            }
+            } else { boysBookedEl.innerHTML = ''; }
 
-            // Booked status for girls position
             const girlsBookedEl = document.getElementById('girlsBookedStatus');
             if (bookedCells[game.girlsPos]) {
                 const owner = bookedCells[game.girlsPos];
                 girlsBookedEl.innerHTML = `<div class="booked-info booked-${owner}">🔒 Booked by ${owner.toUpperCase()}</div>`;
-            } else {
-                girlsBookedEl.innerHTML = '';
-            }
+            } else { girlsBookedEl.innerHTML = ''; }
 
-            // Images
             const bImg = document.getElementById('boysImg');
             const bNo = document.getElementById('boysNoImg');
-            if(game.boysImage) {
-                bImg.src = game.boysImage + '?v=' + Date.now();
-                bImg.style.display = 'block';
-                bNo.style.display = 'none';
-            } else {
-                bImg.style.display = 'none';
-                bNo.style.display = 'block';
-            }
+            if (game.boysImage) { bImg.src = game.boysImage + '?v=' + Date.now(); bImg.style.display = 'block'; bNo.style.display = 'none'; }
+            else { bImg.style.display = 'none'; bNo.style.display = 'block'; }
 
             const gImg = document.getElementById('girlsImg');
             const gNo = document.getElementById('girlsNoImg');
-            if(game.girlsImage) {
-                gImg.src = game.girlsImage + '?v=' + Date.now();
-                gImg.style.display = 'block';
-                gNo.style.display = 'none';
-            } else {
-                gImg.style.display = 'none';
-                gNo.style.display = 'block';
-            }
+            if (game.girlsImage) { gImg.src = game.girlsImage + '?v=' + Date.now(); gImg.style.display = 'block'; gNo.style.display = 'none'; }
+            else { gImg.style.display = 'none'; gNo.style.display = 'block'; }
         }
 
         async function uploadPhoto(team, input) {
-            if(!input.files[0]) return;
+            if (!input.files[0]) return;
             await MonopolyGame.saveTeamImage(team, input.files[0]);
             updateUI();
         }
@@ -347,9 +520,38 @@
             updateUI();
         }
 
-        function movePlayer(team, steps) {
-            MonopolyGame.movePlayer(team, steps);
+        function customAdjust(team, isAdd) {
+            const inputId = team + 'CustomAmount';
+            const val = parseInt(document.getElementById(inputId).value) || 0;
+            if (val <= 0) return alert('Enter a valid amount');
+            const amount = isAdd ? val : -val;
+            MonopolyGame.updateScore(team, amount);
             updateUI();
+        }
+
+        function movePlayer(team, steps) {
+            const landedTile = MonopolyGame.movePlayer(team, steps);
+            updateUI();
+            // Check for opportunity/obstacle tiles
+            if (landedTile && (landedTile.type === 'opportunity' || landedTile.type === 'obstacle')) {
+                const eventMsg = MonopolyGame.getRandomEvent(landedTile.type);
+                const eventType = landedTile.type;
+                const infoEl = document.getElementById(team + 'EventInfo');
+                infoEl.style.display = 'block';
+                infoEl.style.background = eventType === 'opportunity' ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)';
+                infoEl.style.color = eventType === 'opportunity' ? '#10b981' : '#ef4444';
+                infoEl.style.border = '1px solid ' + (eventType === 'opportunity' ? '#10b981' : '#ef4444');
+                infoEl.innerHTML = (eventType === 'opportunity' ? '🎁 ' : '⚠️ ') + eventMsg;
+                // Broadcast to game page via shared socket (10s display)
+                if (dashSocket) {
+                    dashSocket.emit('show-event', { type: eventType, message: eventMsg, team: team });
+                }
+            } else {
+                // Hide event info if not on event tile
+                const infoEl = document.getElementById(team + 'EventInfo');
+                infoEl.style.display = 'none';
+            }
+            // Quiz is triggered MANUALLY via the QUIZ buttons - not auto
         }
 
         function switchTurn() {
@@ -362,7 +564,7 @@
             const board = MonopolyGame.boardData;
             const pos = team === 'boys' ? game.boysPos : game.girlsPos;
             const placeName = board[pos].name;
-            if(confirm(`Book "${placeName}" for TEAM ${team.toUpperCase()}?`)) {
+            if (confirm(`Book "${placeName}" for TEAM ${team.toUpperCase()}?`)) {
                 MonopolyGame.bookPlace(team);
                 updateUI();
             }
@@ -374,30 +576,76 @@
             MonopolyGame.announceWinner(team, className, sectionName);
         }
 
-        function handleClearWinner() {
-            MonopolyGame.clearWinner();
-        }
+        function handleClearWinner() { MonopolyGame.clearWinner(); }
 
         async function confirmReset() {
-            if(confirm("CAUTION: This will reset all scores, positions, photos, bookings, and delete all uploaded images. Continue?")) {
+            if (confirm("CAUTION: This will reset all scores, positions, photos, bookings. Continue?")) {
                 await MonopolyGame.resetGame();
                 updateUI();
             }
         }
 
-        updateUI();
-
-        if (typeof io !== 'undefined') {
-            const socket = io();
-            socket.on('game-updated', (newState) => {
-                MonopolyGame.setGame(newState);
-                updateUI();
-            });
-            socket.on('image-updated', () => {
-                MonopolyGame.loadGame();
-                updateUI();
-            });
+        // === Quiz Functions ===
+        async function uploadQuiz() {
+            const fileInput = document.getElementById('quizFileInput');
+            if (!fileInput.files[0]) return alert('Select an Excel file first');
+            const formData = new FormData();
+            formData.append('quizFile', fileInput.files[0]);
+            try {
+                const res = await fetch('/upload-quiz', { method: 'POST', body: formData });
+                const data = await res.json();
+                document.getElementById('quizStatus').textContent = `✅ ${data.count} questions loaded!`;
+            } catch (e) {
+                alert('Upload failed: ' + e.message);
+            }
         }
+
+        async function triggerQuiz(team) {
+            try {
+                const res = await fetch('/api/quiz/next');
+                const q = await res.json();
+                if (!q || !q.question) { alert('No quiz questions loaded!'); return; }
+                currentQuizTeam = team;
+                const box = document.getElementById('quizQuestionBox');
+                box.style.display = 'block';
+                document.getElementById('dashQuizQ').textContent = q.question;
+                const optsEl = document.getElementById('dashQuizOpts');
+                const labels = ['A', 'B', 'C', 'D'];
+                optsEl.innerHTML = q.options.map((o, i) => `<div class="q-option">${labels[i]}) ${o}</div>`).join('');
+                document.getElementById('dashQuizAns').textContent = '✅ Correct Answer: ' + q.answer;
+                // Send to game page via shared socket (without answer)
+                if (dashSocket) {
+                    dashSocket.emit('show-quiz', { question: q.question, options: q.options, team: team });
+                }
+            } catch (e) { console.error('Quiz trigger error:', e); }
+        }
+
+        function markQuiz(correct) {
+            if (!currentQuizTeam) return;
+            if (correct) {
+                MonopolyGame.updateScore(currentQuizTeam, 600);
+            }
+            document.getElementById('quizQuestionBox').style.display = 'none';
+            updateUI();
+            // Broadcast result and close to game page via shared socket
+            if (dashSocket) {
+                dashSocket.emit('quiz-result', { team: currentQuizTeam, correct: correct });
+                setTimeout(() => { dashSocket.emit('close-quiz'); }, 2500);
+            }
+            currentQuizTeam = null;
+        }
+
+        // Load quiz info on start
+        setTimeout(() => {
+            fetch('/api/quiz/info').then(r => r.json()).then(d => {
+                document.getElementById('quizStatus').textContent = `📊 ${d.count} questions in bank`;
+            }).catch(() => {
+                document.getElementById('quizStatus').textContent = '⚠️ Could not load quiz info';
+            });
+        }, 500);
+
+        updateUI();
     </script>
 </body>
+
 </html>

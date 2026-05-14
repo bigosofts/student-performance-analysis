@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="bn">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,19 +9,25 @@
     <link rel="stylesheet" href="css/monopoly.css">
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { overflow: hidden; margin: 0; padding: 0; background: #020617; }
+        body {
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            background: #020617;
+        }
 
-        /* Booked cell outlines */
         .cell.booked-boys {
             outline: 3px solid #3b82f6 !important;
             outline-offset: -3px;
-            box-shadow: inset 0 0 12px rgba(59,130,246,0.3);
+            box-shadow: inset 0 0 12px rgba(59, 130, 246, 0.3);
         }
+
         .cell.booked-girls {
             outline: 3px solid #ec4899 !important;
             outline-offset: -3px;
-            box-shadow: inset 0 0 12px rgba(236,72,153,0.3);
+            box-shadow: inset 0 0 12px rgba(236, 72, 153, 0.3);
         }
+
         .cell .owner-tag {
             position: absolute;
             bottom: 1px;
@@ -34,15 +41,17 @@
             z-index: 10;
             white-space: nowrap;
         }
+
         .cell .owner-tag.boys-tag {
-            background: rgba(59,130,246,0.8);
+            background: rgba(59, 130, 246, 0.8);
             color: #fff;
         }
+
         .cell .owner-tag.girls-tag {
-            background: rgba(236,72,153,0.8);
+            background: rgba(236, 72, 153, 0.8);
             color: #fff;
         }
-        /* Corner cells need tag positioned differently */
+
         .cell-corner .owner-tag {
             bottom: 4px;
             font-size: 0.45rem;
@@ -51,7 +60,10 @@
         /* Winner Overlay */
         .winner-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 2000;
             display: none;
             justify-content: center;
@@ -61,14 +73,24 @@
             background: rgba(2, 6, 23, 0.95);
             backdrop-filter: blur(20px);
         }
+
         .winner-overlay.active {
             display: flex;
             animation: winnerFadeIn 0.5s ease-out;
         }
+
         @keyframes winnerFadeIn {
-            from { opacity: 0; transform: scale(0.9); }
-            to { opacity: 1; transform: scale(1); }
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
         }
+
         .winner-content {
             padding: 60px;
             border: 4px solid var(--primary);
@@ -78,59 +100,280 @@
             border-radius: 24px;
             background: rgba(15, 23, 42, 0.95);
         }
+
+        /* Quiz Overlay */
+        .quiz-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1500;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            background: rgba(2, 6, 23, 0.85);
+            backdrop-filter: blur(15px);
+        }
+
+        .quiz-overlay.active {
+            display: flex;
+            animation: quizFadeIn 0.4s ease-out;
+        }
+
+        @keyframes quizFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85) translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .quiz-card {
+            padding: 50px 60px;
+            max-width: 800px;
+            width: 90%;
+            border-radius: 24px;
+            background: rgba(15, 23, 42, 0.98);
+            border: 2px solid rgba(168, 85, 247, 0.5);
+            box-shadow: 0 0 60px rgba(168, 85, 247, 0.3);
+        }
+
+        .quiz-card .quiz-team-badge {
+            display: inline-block;
+            padding: 8px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .quiz-card .quiz-team-badge.boys {
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            color: #fff;
+        }
+
+        .quiz-card .quiz-team-badge.girls {
+            background: linear-gradient(135deg, #831843, #ec4899);
+            color: #fff;
+        }
+
+        .quiz-card .quiz-title {
+            font-size: 1.5rem;
+            color: #a855f7;
+            font-weight: 900;
+            margin-bottom: 25px;
+            letter-spacing: 2px;
+        }
+
+        .quiz-card .quiz-question {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            font-weight: 700;
+            color: #e2e8f0;
+            margin-bottom: 30px;
+            line-height: 1.5;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        .quiz-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            text-align: left;
+        }
+
+        .quiz-option {
+            padding: 18px 22px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: #cbd5e1;
+            font-weight: 600;
+            transition: all 0.3s;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
+
+        .quiz-option .opt-label {
+            color: #a855f7;
+            font-weight: 900;
+            margin-right: 10px;
+        }
+
+        .quiz-result-badge {
+            margin-top: 25px;
+            padding: 15px 30px;
+            border-radius: 14px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            display: none;
+            animation: resultPop 0.3s ease-out;
+        }
+
+        @keyframes resultPop {
+            from {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .quiz-result-badge.correct {
+            background: rgba(16, 185, 129, 0.2);
+            border: 2px solid #10b981;
+            color: #10b981;
+        }
+
+        .quiz-result-badge.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border: 2px solid #ef4444;
+            color: #ef4444;
+        }
+
+        /* Event Overlay (Opportunity/Obstacle) */
+        .event-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1400;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 40px;
+            background: rgba(2, 6, 23, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .event-overlay.active {
+            display: flex;
+            animation: quizFadeIn 0.4s ease-out;
+        }
+
+        .event-card {
+            padding: 50px 60px;
+            max-width: 700px;
+            width: 85%;
+            border-radius: 24px;
+            background: rgba(15, 23, 42, 0.98);
+        }
+
+        .event-card.opportunity {
+            border: 3px solid #10b981;
+            box-shadow: 0 0 50px rgba(16, 185, 129, 0.3);
+        }
+
+        .event-card.obstacle {
+            border: 3px solid #ef4444;
+            box-shadow: 0 0 50px rgba(239, 68, 68, 0.3);
+        }
+
+        .event-card .event-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        .event-card .event-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+        }
+
+        .event-card.opportunity .event-title {
+            color: #10b981;
+        }
+
+        .event-card.obstacle .event-title {
+            color: #ef4444;
+        }
+
+        .event-card .event-message {
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            color: #e2e8f0;
+            font-weight: 700;
+            line-height: 1.6;
+            font-family: 'Hind Siliguri', sans-serif;
+        }
     </style>
 </head>
+
 <body>
     <div class="monopoly-container">
         <div class="board" id="monopolyBoard">
-            <!-- Tokens -->
             <div id="tokenBoys" class="token token-boys"></div>
             <div id="tokenGirls" class="token token-girls"></div>
-
-            <!-- Center Area -->
             <div class="board-center">
                 <div class="gov-box">
                     <div class="label">GOVERNMENT FUND</div>
                     <div class="amount" id="govVal">৳ 5000</div>
                 </div>
-
                 <div id="turnBadge" class="turn-badge boys">BOYS TURN</div>
-
                 <div class="vs-section">
                     <div class="team-block">
-                        <div class="team-photo boys">
-                            <img id="imgBoys" src="https://via.placeholder.com/150/1e3a8a/ffffff?text=Boys" alt="Boys">
-                        </div>
+                        <div class="team-photo boys"><img id="imgBoys"
+                                src="https://via.placeholder.com/150/1e3a8a/ffffff?text=Boys" alt="Boys"></div>
                         <div class="team-label boys">BOYS</div>
-                        <div class="team-money" id="moneyBoys">৳ 500</div>
+                        <div class="team-money" id="moneyBoys">৳ 2500</div>
                     </div>
-
                     <div class="vs-text">VS</div>
-
                     <div class="team-block">
-                        <div class="team-photo girls">
-                            <img id="imgGirls" src="https://via.placeholder.com/150/831843/ffffff?text=Girls" alt="Girls">
-                        </div>
+                        <div class="team-photo girls"><img id="imgGirls"
+                                src="https://via.placeholder.com/150/831843/ffffff?text=Girls" alt="Girls"></div>
                         <div class="team-label girls">GIRLS</div>
-                        <div class="team-money" id="moneyGirls">৳ 500</div>
+                        <div class="team-money" id="moneyGirls">৳ 2500</div>
                     </div>
                 </div>
-
                 <div class="board-title">
                     <h1>MONOPOLY</h1>
                     <p>AGRICULTURE CLASSROOM</p>
                 </div>
             </div>
-            <!-- Cells injected by JS -->
         </div>
     </div>
 
     <!-- Winner Overlay -->
     <div id="winnerOverlay" class="winner-overlay">
-        <div class="winner-content glass-card" style="animation: winnerFadeIn 0.5s ease-out;">
-            <h1 id="winnerTitle" style="font-size: clamp(2rem, 8vh, 4rem); color: var(--secondary); margin-bottom: 20px;">অভিনন্দন! 🎉</h1>
-            <p id="winnerMsg" style="font-size: clamp(1rem, 4vh, 1.8rem); margin-bottom: 30px; line-height: 1.6; color: #e2e8f0;"></p>
+        <div class="winner-content glass-card">
+            <h1 id="winnerTitle"
+                style="font-size: clamp(2rem, 8vh, 4rem); color: var(--secondary); margin-bottom: 20px;">অভিনন্দন! 🎉
+            </h1>
+            <p id="winnerMsg"
+                style="font-size: clamp(1rem, 4vh, 1.8rem); margin-bottom: 30px; line-height: 1.6; color: #e2e8f0;"></p>
             <div style="font-size: 5rem;">🏆</div>
+        </div>
+    </div>
+
+    <!-- Quiz Overlay -->
+    <div id="quizOverlay" class="quiz-overlay">
+        <div class="quiz-card">
+            <div class="quiz-title">📝 QUIZ TIME!</div>
+            <div id="quizTeamBadge" class="quiz-team-badge boys">BOYS</div>
+            <div id="quizQuestionText" class="quiz-question"></div>
+            <div id="quizOptions" class="quiz-options"></div>
+            <div id="quizResultBadge" class="quiz-result-badge"></div>
+        </div>
+    </div>
+
+    <!-- Event Overlay -->
+    <div id="eventOverlay" class="event-overlay">
+        <div id="eventCard" class="event-card opportunity">
+            <div id="eventIcon" class="event-icon">🎁</div>
+            <div id="eventTitle" class="event-title">জীবনে পাওয়া সুযোগ</div>
+            <div id="eventMessage" class="event-message"></div>
         </div>
     </div>
 
@@ -140,92 +383,50 @@
         const { MonopolyGame } = window;
         const boardElem = document.getElementById('monopolyBoard');
 
-        // Determine which side a cell index belongs to
         function getSide(index) {
             if (index < 11) return 'bottom';
             if (index < 21) return 'left';
             if (index < 31) return 'top';
             return 'right';
         }
-
-        // Check if index is a corner cell
-        function isCorner(index) {
-            return index === 0 || index === 10 || index === 20 || index === 30;
-        }
+        function isCorner(index) { return index === 0 || index === 10 || index === 20 || index === 30; }
 
         function createBoard() {
-            // Remove old cells
             boardElem.querySelectorAll('.cell').forEach(c => c.remove());
-
             const data = MonopolyGame.boardData;
-
             data.forEach((cell, index) => {
                 const posId = index + 1;
                 const side = getSide(index);
                 const corner = isCorner(index);
-
                 const div = document.createElement('div');
                 div.className = `cell pos-${posId} side-${side}`;
                 div.setAttribute('data-cell-index', index);
                 if (corner) div.classList.add('cell-corner');
-
-                // Add type-based background class for non-property cells
-                if (!corner && cell.type !== 'property') {
-                    div.classList.add(`cell-type-${cell.type}`);
-                }
-
+                if (!corner && cell.type !== 'property') div.classList.add(`cell-type-${cell.type}`);
                 let html = '';
-
                 if (cell.type === 'property') {
-                    // Property cell: color bar + name + price
-                    html = `
-                        <div class="cell-bar bar-${cell.color}"></div>
-                        <div class="cell-inner">
-                            <div class="cell-name">${cell.name}</div>
-                            <div class="cell-price">৳ ${cell.price}</div>
-                        </div>
-                    `;
+                    html = `<div class="cell-bar bar-${cell.color}"></div><div class="cell-inner"><div class="cell-name">${cell.name}</div><div class="cell-price">৳ ${cell.price}</div></div>`;
                 } else if (corner) {
-                    // Corner cell: icon + name + optional description
                     const iconName = cell.icon || 'star';
-                    html = `
-                        <div class="cell-inner">
-                            <div class="cell-icon"><i data-lucide="${iconName}"></i></div>
-                            <div class="cell-name">${cell.name}</div>
-                            ${cell.desc ? `<div class="cell-desc">${cell.desc}</div>` : ''}
-                        </div>
-                    `;
+                    html = `<div class="cell-inner"><div class="cell-icon"><i data-lucide="${iconName}"></i></div><div class="cell-name">${cell.name}</div>${cell.desc ? `<div class="cell-desc">${cell.desc}</div>` : ''}</div>`;
                 } else {
-                    // Functional cell (station, utility, etc): icon + name + optional price
                     const iconName = cell.icon || 'star';
-                    html = `
-                        <div class="cell-inner full">
-                            <div class="cell-icon"><i data-lucide="${iconName}"></i></div>
-                            <div class="cell-name">${cell.name}</div>
-                            ${cell.price ? `<div class="cell-price">৳ ${cell.price}</div>` : ''}
-                        </div>
-                    `;
+                    html = `<div class="cell-inner full"><div class="cell-icon"><i data-lucide="${iconName}"></i></div><div class="cell-name">${cell.name}</div>${cell.price ? `<div class="cell-price">৳ ${cell.price}</div>` : ''}</div>`;
                 }
-
                 div.innerHTML = html;
                 boardElem.appendChild(div);
             });
-
             lucide.createIcons();
         }
 
         function updateBookedCells() {
             const g = MonopolyGame.game;
             const bookedCells = g.bookedCells || {};
-
-            // Remove old booked markers
             boardElem.querySelectorAll('.cell').forEach(cell => {
                 cell.classList.remove('booked-boys', 'booked-girls');
                 const oldTag = cell.querySelector('.owner-tag');
                 if (oldTag) oldTag.remove();
             });
-
-            // Apply booked markers
             for (const [cellIndex, team] of Object.entries(bookedCells)) {
                 const cell = boardElem.querySelector(`.pos-${parseInt(cellIndex) + 1}`);
                 if (cell) {
@@ -240,70 +441,116 @@
 
         function updateUI() {
             const g = MonopolyGame.game;
-
-            // Center info
             document.getElementById('govVal').innerText = '৳ ' + g.govScore;
             document.getElementById('moneyBoys').innerText = '৳ ' + g.boysScore;
             document.getElementById('moneyGirls').innerText = '৳ ' + g.girlsScore;
-
-            // Turn badge
             const badge = document.getElementById('turnBadge');
             badge.innerText = g.currentTurn.toUpperCase() + ' TURN';
             badge.className = 'turn-badge ' + g.currentTurn;
-
-            // Team images
             if (g.boysImage) document.getElementById('imgBoys').src = g.boysImage + '?v=' + g.lastUpdate;
             if (g.girlsImage) document.getElementById('imgGirls').src = g.girlsImage + '?v=' + g.lastUpdate;
-
-            // Booked cells
             updateBookedCells();
 
             // Winner overlay
             const overlay = document.getElementById('winnerOverlay');
             const winnerMsg = document.getElementById('winnerMsg');
+            const winnerTitle = document.getElementById('winnerTitle');
             if (g.winner) {
-                const winnerTeam = g.winner === 'boys' ? 'Boys' : 'Girls';
-                winnerMsg.innerHTML = `Congratulations to all <strong>${winnerTeam}</strong>!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`;
+                if (g.winner === 'draw') {
+                    winnerTitle.innerHTML = 'ড্র! 🤝';
+                    winnerMsg.innerHTML = `উভয় দলই সমান!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`;
+                } else {
+                    const winnerTeam = g.winner === 'boys' ? 'Boys' : 'Girls';
+                    winnerTitle.innerHTML = 'অভিনন্দন! 🎉';
+                    winnerMsg.innerHTML = `Congratulations to all <strong>${winnerTeam}</strong>!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`;
+                }
                 overlay.classList.add('active');
-            } else {
-                overlay.classList.remove('active');
-            }
+            } else { overlay.classList.remove('active'); }
 
-            // Tokens
-            requestAnimationFrame(() => {
-                placeToken('Boys', g.boysPos);
-                placeToken('Girls', g.girlsPos);
-            });
+            requestAnimationFrame(() => { placeToken('Boys', g.boysPos); placeToken('Girls', g.girlsPos); });
         }
 
         function placeToken(team, posIndex) {
             const cell = document.querySelector(`.pos-${posIndex + 1}`);
             const token = document.getElementById(`token${team}`);
             if (!cell || !token) return;
-
             const cr = cell.getBoundingClientRect();
             const br = boardElem.getBoundingClientRect();
-
             const cx = cr.left - br.left + cr.width / 2;
             const cy = cr.top - br.top + cr.height / 2;
             const off = team === 'Boys' ? -7 : 7;
-
             token.style.left = (cx + off - 9) + 'px';
             token.style.top = (cy + off - 9) + 'px';
         }
 
-        // Build and render
+        // Quiz overlay functions
+        function showQuiz(data) {
+            const overlay = document.getElementById('quizOverlay');
+            const badge = document.getElementById('quizTeamBadge');
+            badge.textContent = data.team.toUpperCase();
+            badge.className = 'quiz-team-badge ' + data.team;
+            document.getElementById('quizQuestionText').textContent = data.question;
+            const labels = ['A', 'B', 'C', 'D'];
+            document.getElementById('quizOptions').innerHTML = data.options.map((o, i) =>
+                `<div class="quiz-option"><span class="opt-label">${labels[i]})</span> ${o}</div>`
+            ).join('');
+            document.getElementById('quizResultBadge').style.display = 'none';
+            overlay.classList.add('active');
+        }
+
+        function showQuizResult(data) {
+            const badge = document.getElementById('quizResultBadge');
+            badge.style.display = 'block';
+            if (data.correct) {
+                badge.className = 'quiz-result-badge correct';
+                badge.textContent = '✅ সঠিক উত্তর! +৳600';
+            } else {
+                badge.className = 'quiz-result-badge wrong';
+                badge.textContent = '❌ ভুল উত্তর!';
+            }
+        }
+
+        function closeQuiz() {
+            document.getElementById('quizOverlay').classList.remove('active');
+        }
+
+        // Event overlay functions
+        function showEvent(data) {
+            const overlay = document.getElementById('eventOverlay');
+            const card = document.getElementById('eventCard');
+            const icon = document.getElementById('eventIcon');
+            const title = document.getElementById('eventTitle');
+            const msg = document.getElementById('eventMessage');
+            if (data.type === 'opportunity') {
+                card.className = 'event-card opportunity';
+                icon.textContent = '🎁';
+                title.textContent = 'জীবনে পাওয়া সুযোগ';
+            } else {
+                card.className = 'event-card obstacle';
+                icon.textContent = '⚠️';
+                title.textContent = 'জীবন চলার পথে বাধা';
+            }
+            msg.textContent = data.message;
+            overlay.classList.add('active');
+            // Auto close after 10 seconds
+            setTimeout(() => overlay.classList.remove('active'), 10000);
+        }
+
         createBoard();
         updateUI();
-
         window.addEventListener('resize', updateUI);
 
-        // Socket sync
         if (typeof io !== 'undefined') {
             const socket = io();
             socket.on('game-updated', (s) => { MonopolyGame.setGame(s); updateUI(); });
             socket.on('image-updated', () => { MonopolyGame.loadGame(); updateUI(); });
+            socket.on('quiz-show', (data) => { showQuiz(data); });
+            socket.on('quiz-result', (data) => { showQuizResult(data); });
+            socket.on('quiz-close', () => { closeQuiz(); });
+            socket.on('event-show', (data) => { showEvent(data); });
+            socket.on('event-close', () => { document.getElementById('eventOverlay').classList.remove('active'); });
         }
     </script>
 </body>
+
 </html>
