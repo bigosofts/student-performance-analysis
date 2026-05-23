@@ -1,5 +1,8 @@
 
 const STORAGE_KEY = "monopoly-game-v1";
+const SESSIONS_KEY = "monopoly-sessions-v1";
+const CURRENT_SESSION_KEY = "monopoly-current-session";
+let currentSessionName = null;
 
 let game = {
     boysScore: 2500,
@@ -116,9 +119,23 @@ const BOARD_DATA = [
 // === Opportunity & Obstacle Data ===
 const OPPORTUNITY_EVENTS = [
     "পরবর্তী যাত্রা শুরু পজিশন অতিক্রম করলে ১০০০ টাকা বেতন বৃদ্ধি পাবে 💰",
+    "যেকোনো পজিশনে যেতে পারবে, তবে বেতন পাবে না 🚀",
+    "লামা বাজার ও মীরা বাজার এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "রাজেন্দ্রপুর, কাপাসিয়া ও গাজীপুর চৌরাস্তা এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
     "ঈদ বোনাস হিসেবে ১০০০ টাকা পাবে 🎉",
     "তোমার কেনা জায়গায় ১০০% কর পাবে 🏠",
-    "যেকোনো পজিশনে যেতে পারবে, তবে বেতন পাবে না 🚀"
+    "মাওনা, মাস্টারবাড়ি ও শিমুলতলী এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "ওয়ারী, মতিঝিল ও ধানমন্ডি এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "বনানী, গুলশান এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "ময়মনসিংহ স্টেশন ও ঢাকা স্টেশন ফ্রিতে আজ থেকে তোমার",
+    "চট্রগ্রাম স্টেশন ও সিলেট স্টেশন ফ্রিতে আজ থেকে তোমার",
+    "পানি ও বিদ্যুৎ সুবিধা আজ থেকে তোমার",
+    "তোমার কেনা জায়গায় ২০০% কর পাবে 🏠",
+    "তোমার কেনা জায়গায় ৫০০% কর পাবে 🏠",
+    "উত্তরা, আব্দুল্লাহপুর ও মিরপুর এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "ধলাদিয়া, রাজাবাড়ি ও সাটিয়াবাড়ি এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "সাভার, জিরানী ও গাবতলী এলাকায় যাবে, জমিগুলো ফ্রিতে আজ থেকে তোমার",
+    "পরবর্তী যাত্রা শুরু পজিশন অতিক্রম করলে ২০০০ টাকা বেতন বৃদ্ধি পাবে 💰"
 ];
 
 const OBSTACLE_EVENTS = [
@@ -144,6 +161,29 @@ function saveGame() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(game));
     if (socket) {
         socket.emit('update-game', game);
+    }
+    // Auto-save to current session if one is active
+    const sessionName = localStorage.getItem(CURRENT_SESSION_KEY);
+    if (sessionName) {
+        try {
+            const sessions = JSON.parse(localStorage.getItem(SESSIONS_KEY) || '{}');
+            sessions[sessionName] = {
+                boysScore: game.boysScore,
+                girlsScore: game.girlsScore,
+                govScore: game.govScore,
+                currentTurn: game.currentTurn,
+                boysPos: game.boysPos,
+                girlsPos: game.girlsPos,
+                boysImage: game.boysImage,
+                girlsImage: game.girlsImage,
+                bookedCells: game.bookedCells || {},
+                winner: game.winner,
+                classInfo: game.classInfo,
+                sectionInfo: game.sectionInfo,
+                savedAt: new Date().toISOString()
+            };
+            localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+        } catch (e) { /* ignore session save errors */ }
     }
 }
 
@@ -265,7 +305,7 @@ function switchTurn() {
 async function resetGame() {
     // Clear old data first
     localStorage.removeItem(STORAGE_KEY);
-    
+
     game = {
         boysScore: 2500,
         girlsScore: 2500,
@@ -290,6 +330,88 @@ async function resetGame() {
     saveGame();
 }
 
+// === Session Management ===
+function getSessions() {
+    try {
+        const data = localStorage.getItem(SESSIONS_KEY);
+        return data ? JSON.parse(data) : {};
+    } catch (e) {
+        return {};
+    }
+}
+
+function saveSession(sessionName) {
+    if (!sessionName || !sessionName.trim()) return false;
+    sessionName = sessionName.trim();
+    const sessions = getSessions();
+    sessions[sessionName] = {
+        boysScore: game.boysScore,
+        girlsScore: game.girlsScore,
+        govScore: game.govScore,
+        currentTurn: game.currentTurn,
+        boysPos: game.boysPos,
+        girlsPos: game.girlsPos,
+        boysImage: game.boysImage,
+        girlsImage: game.girlsImage,
+        bookedCells: game.bookedCells || {},
+        winner: game.winner,
+        classInfo: game.classInfo,
+        sectionInfo: game.sectionInfo,
+        savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+    currentSessionName = sessionName;
+    localStorage.setItem(CURRENT_SESSION_KEY, sessionName);
+    return true;
+}
+
+function loadSession(sessionName) {
+    const sessions = getSessions();
+    const session = sessions[sessionName];
+    if (!session) return false;
+    game.boysScore = session.boysScore !== undefined ? session.boysScore : 2500;
+    game.girlsScore = session.girlsScore !== undefined ? session.girlsScore : 2500;
+    game.govScore = session.govScore !== undefined ? session.govScore : 5000;
+    game.currentTurn = session.currentTurn || "boys";
+    game.boysPos = session.boysPos || 0;
+    game.girlsPos = session.girlsPos || 0;
+    game.boysImage = session.boysImage || null;
+    game.girlsImage = session.girlsImage || null;
+    game.bookedCells = session.bookedCells || {};
+    game.winner = session.winner || null;
+    game.classInfo = session.classInfo || "";
+    game.sectionInfo = session.sectionInfo || "";
+    game.lastUpdate = Date.now();
+    currentSessionName = sessionName;
+    localStorage.setItem(CURRENT_SESSION_KEY, sessionName);
+    saveGame();
+    return true;
+}
+
+function deleteSession(sessionName) {
+    const sessions = getSessions();
+    delete sessions[sessionName];
+    localStorage.setItem(SESSIONS_KEY, JSON.stringify(sessions));
+    if (currentSessionName === sessionName) {
+        currentSessionName = null;
+        localStorage.removeItem(CURRENT_SESSION_KEY);
+    }
+}
+
+function getCurrentSessionName() {
+    if (!currentSessionName) {
+        currentSessionName = localStorage.getItem(CURRENT_SESSION_KEY) || null;
+    }
+    return currentSessionName;
+}
+
+function autoSaveCurrentSession() {
+    const name = getCurrentSessionName();
+    if (name) {
+        saveSession(name);
+    }
+}
+
 // Global Export
 window.MonopolyGame = {
     get game() { return game; },
@@ -308,6 +430,12 @@ window.MonopolyGame = {
     bookPlace,
     announceWinner,
     clearWinner,
+    getSessions,
+    saveSession,
+    loadSession,
+    deleteSession,
+    getCurrentSessionName,
+    autoSaveCurrentSession,
     STORAGE_KEY
 };
 

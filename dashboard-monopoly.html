@@ -387,7 +387,32 @@
         <div class="glass-card team-card" style="border-top: 8px solid #8b5cf6;">
             <h2 style="color: #8b5cf6; letter-spacing: 2px;">GAME COMMANDS</h2>
 
-            <div class="glass-card" style="padding: 20px; margin-top: 25px; background: rgba(0,0,0,0.3);">
+            <!-- Session Management -->
+            <div class="glass-card" style="padding: 20px; margin-top: 25px; background: rgba(0,0,0,0.3); border: 1px solid rgba(168, 85, 247, 0.25);">
+                <div class="stat-label" style="margin-bottom: 12px;">💾 Session Management</div>
+                <div id="currentSessionBadge" style="margin-bottom: 12px; padding: 8px 14px; border-radius: 10px; font-size: 0.8rem; font-weight: 800; display: none; text-align: center; letter-spacing: 1px;"></div>
+
+                <!-- Select Existing Session -->
+                <div style="margin-bottom: 10px;">
+                    <select id="sessionDropdown" onchange="handleSessionSelect(this.value)" style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.85rem; font-weight: 700; cursor: pointer; appearance: auto;">
+                        <option value="">-- Select a Session --</option>
+                    </select>
+                </div>
+
+                <!-- Create New Session -->
+                <div style="display: grid; grid-template-columns: 1fr auto; gap: 6px; margin-bottom: 10px;">
+                    <input type="text" id="newSessionName" placeholder="New session name..." style="width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.3); color: #fff; font-size: 0.85rem; font-weight: 700; box-sizing: border-box;">
+                    <button onclick="handleCreateSession()" style="padding: 10px 16px; border-radius: 8px; border: none; background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: #fff; font-weight: 800; cursor: pointer; font-size: 0.8rem; white-space: nowrap; transition: all 0.2s;">+ CREATE</button>
+                </div>
+
+                <!-- Session Actions -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                    <button onclick="handleSaveSession()" class="btn-primary btn-small" style="background: linear-gradient(135deg, #10b981, #059669); font-weight: 800;">💾 SAVE SESSION</button>
+                    <button onclick="handleDeleteSession()" class="btn-primary btn-small" style="background: linear-gradient(135deg, #ef4444, #dc2626); font-weight: 800;">🗑️ DELETE SESSION</button>
+                </div>
+            </div>
+
+            <div class="glass-card" style="padding: 20px; margin-top: 20px; background: rgba(0,0,0,0.3);">
                 <div class="stat-label">Government Fund</div>
                 <div id="govMoney" class="stat-value" style="color: #f59e0b;">৳ 5000</div>
                 <p style="font-size:0.65rem; color:#94a3b8; margin-top:5px;">Auto-linked with team transactions</p>
@@ -468,7 +493,12 @@
         // Single shared socket connection
         if (typeof io !== 'undefined') {
             dashSocket = io();
-            dashSocket.on('game-updated', (newState) => { MonopolyGame.setGame(newState); updateUI(); });
+            dashSocket.on('game-updated', (newState) => {
+                // Ignore self-echoes: dashboard is always source of changes,
+                // so only apply truly newer remote updates
+                if (newState.lastUpdate && newState.lastUpdate <= MonopolyGame.game.lastUpdate) return;
+                MonopolyGame.setGame(newState); updateUI();
+            });
             dashSocket.on('image-updated', () => { MonopolyGame.loadGame(); updateUI(); });
             dashSocket.on('quiz-loaded', (data) => {
                 document.getElementById('quizStatus').textContent = `✅ ${data.count} questions loaded!`;
@@ -635,6 +665,107 @@
             currentQuizTeam = null;
         }
 
+        // === Session Management Functions ===
+        function refreshSessionDropdown() {
+            const dropdown = document.getElementById('sessionDropdown');
+            const sessions = MonopolyGame.getSessions();
+            const currentName = MonopolyGame.getCurrentSessionName();
+            dropdown.innerHTML = '<option value="">-- Select a Session --</option>';
+            const sortedNames = Object.keys(sessions).sort((a, b) => {
+                const ta = sessions[a].savedAt || '';
+                const tb = sessions[b].savedAt || '';
+                return tb.localeCompare(ta); // newest first
+            });
+            sortedNames.forEach(name => {
+                const opt = document.createElement('option');
+                opt.value = name;
+                const savedDate = sessions[name].savedAt ? new Date(sessions[name].savedAt).toLocaleString() : '';
+                opt.textContent = `${name} (${savedDate})`;
+                if (name === currentName) opt.selected = true;
+                dropdown.appendChild(opt);
+            });
+            updateSessionBadge();
+        }
+
+        function updateSessionBadge() {
+            const badge = document.getElementById('currentSessionBadge');
+            const currentName = MonopolyGame.getCurrentSessionName();
+            if (currentName) {
+                badge.style.display = 'block';
+                badge.style.background = 'rgba(139, 92, 246, 0.2)';
+                badge.style.border = '1px solid rgba(139, 92, 246, 0.5)';
+                badge.style.color = '#c4b5fd';
+                badge.innerHTML = `🎮 Active: <strong>${currentName}</strong> <span style="font-size:0.65rem; opacity:0.7;">(auto-saving)</span>`;
+            } else {
+                badge.style.display = 'block';
+                badge.style.background = 'rgba(245, 158, 11, 0.15)';
+                badge.style.border = '1px solid rgba(245, 158, 11, 0.4)';
+                badge.style.color = '#fbbf24';
+                badge.innerHTML = '⚠️ No session active — create or select one';
+            }
+        }
+
+        function handleCreateSession() {
+            const input = document.getElementById('newSessionName');
+            const name = input.value.trim();
+            if (!name) return alert('Enter a session name!');
+            const sessions = MonopolyGame.getSessions();
+            if (sessions[name]) {
+                if (!confirm(`Session "${name}" already exists. Overwrite it?`)) return;
+            }
+            MonopolyGame.saveSession(name);
+            input.value = '';
+            refreshSessionDropdown();
+            updateUI();
+            showSessionToast(`✅ Session "${name}" created & saved!`);
+        }
+
+        function handleSessionSelect(name) {
+            if (!name) return;
+            if (confirm(`Load session "${name}"? This will replace the current game state.`)) {
+                MonopolyGame.loadSession(name);
+                updateUI();
+                refreshSessionDropdown();
+                showSessionToast(`🔄 Session "${name}" loaded!`);
+            } else {
+                // Reset dropdown to current session
+                refreshSessionDropdown();
+            }
+        }
+
+        function handleSaveSession() {
+            const currentName = MonopolyGame.getCurrentSessionName();
+            if (!currentName) {
+                return alert('No active session! Create a new session first.');
+            }
+            MonopolyGame.saveSession(currentName);
+            refreshSessionDropdown();
+            showSessionToast(`💾 Session "${currentName}" saved!`);
+        }
+
+        function handleDeleteSession() {
+            const dropdown = document.getElementById('sessionDropdown');
+            const selectedName = dropdown.value;
+            if (!selectedName) return alert('Select a session to delete!');
+            if (!confirm(`Delete session "${selectedName}"? This cannot be undone.`)) return;
+            MonopolyGame.deleteSession(selectedName);
+            refreshSessionDropdown();
+            showSessionToast(`🗑️ Session "${selectedName}" deleted.`);
+        }
+
+        function showSessionToast(message) {
+            let toast = document.getElementById('sessionToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'sessionToast';
+                toast.style.cssText = 'position:fixed; bottom:20px; left:50%; transform:translateX(-50%); padding:12px 24px; border-radius:12px; background:rgba(15,23,42,0.95); border:1px solid rgba(139,92,246,0.5); color:#c4b5fd; font-weight:700; font-size:0.85rem; z-index:9999; transition:opacity 0.3s; pointer-events:none; box-shadow:0 4px 20px rgba(0,0,0,0.5);';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.style.opacity = '1';
+            setTimeout(() => { toast.style.opacity = '0'; }, 2500);
+        }
+
         // Load quiz info on start
         setTimeout(() => {
             fetch('/api/quiz/info').then(r => r.json()).then(d => {
@@ -645,6 +776,7 @@
         }, 500);
 
         updateUI();
+        refreshSessionDropdown();
     </script>
 </body>
 

@@ -137,14 +137,15 @@ app.post('/upload-quiz', quizUpload.single('quizFile'), (req, res) => {
     res.json({ status: 'ok', count: quizQuestions.length });
 });
 
-// Get next quiz question
+// Get next quiz question (randomized)
 app.get('/api/quiz/next', (req, res) => {
     if (quizQuestions.length === 0) {
         return res.json({ question: null });
     }
-    const q = quizQuestions[currentQuizIndex % quizQuestions.length];
+    const randomIndex = Math.floor(Math.random() * quizQuestions.length);
+    const q = quizQuestions[randomIndex];
     currentQuizIndex++;
-    res.json({ ...q, index: currentQuizIndex, total: quizQuestions.length });
+    res.json({ ...q, index: randomIndex + 1, total: quizQuestions.length });
 });
 
 // Get quiz info
