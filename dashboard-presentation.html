@@ -814,13 +814,22 @@
         border-color: rgba(6, 182, 212, 0.5);
       }
 
-      .share-card.draw-share {
-        border-color: rgba(236, 72, 153, 0.25);
-      }
-      .share-card.draw-share:hover {
-        background: rgba(236, 72, 153, 0.08);
-        border-color: rgba(236, 72, 153, 0.5);
-      }
+.share-card.draw-share {
+         border-color: rgba(236, 72, 153, 0.25);
+       }
+       .share-card.draw-share:hover {
+         background: rgba(236, 72, 153, 0.08);
+         border-color: rgba(236, 72, 153, 0.5);
+       }
+
+       /* Video share card */
+       .share-card.video-share {
+         border-color: rgba(239, 68, 68, 0.25);
+       }
+       .share-card.video-share:hover {
+         background: rgba(239, 68, 68, 0.08);
+         border-color: rgba(239, 68, 68, 0.5);
+       }
 
       /* ─── MODALS ─── */
       .modal-overlay {
@@ -1488,15 +1497,20 @@
                   <div class="share-name">Notes / Text</div>
                   <div class="share-desc">Plain text or notes</div>
                 </div>
-                <div class="share-card draw-share" id="shareDrawBtn">
-                  <span class="share-icon">✏️</span>
-                  <div class="share-name">Drawing</div>
-                  <div class="share-desc">Touch/pen input</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+<div class="share-card draw-share" id="shareDrawBtn">
+                   <span class="share-icon">✏️</span>
+                   <div class="share-name">Drawing</div>
+                   <div class="share-desc">Touch/pen input</div>
+                 </div>
+                 <div class="share-card video-share" id="shareVideoBtn">
+                   <span class="share-icon">🎬</span>
+                   <div class="share-name">Share Video</div>
+                   <div class="share-desc">YouTube or upload MP4</div>
+                 </div>
+               </div>
+             </div>
+           </div>
+         </div>
 
         <!-- Live Game Screen URL -->
         <div class="panel">
@@ -1652,74 +1666,140 @@ Kingdom → Plantae
       </div>
     </div>
 
-    <!-- Drawing Modal -->
-    <div class="modal-overlay" id="drawModal">
-      <div class="modal-box wide">
-        <div class="modal-header">
-          <div class="modal-title">✏️ Drawing Board</div>
-          <button class="modal-close" onclick="closeModal('drawModal')">
-            ✕
-          </button>
-        </div>
+<!-- Drawing Modal -->
+     <div class="modal-overlay" id="drawModal">
+       <div class="modal-box wide">
+         <div class="modal-header">
+           <div class="modal-title">✏️ Drawing Board</div>
+           <button class="modal-close" onclick="closeModal('drawModal')">
+             ✕
+           </button>
+         </div>
 
-        <div class="draw-tools">
-          <div
-            class="color-btn active"
-            style="background: #ec4899"
-            data-color="#ec4899"
-            onclick="setDrawColor(this, '#ec4899')"
-          ></div>
-          <div
-            class="color-btn"
-            style="background: #60a5fa"
-            data-color="#60a5fa"
-            onclick="setDrawColor(this, '#60a5fa')"
-          ></div>
-          <div
-            class="color-btn"
-            style="background: #34d399"
-            data-color="#34d399"
-            onclick="setDrawColor(this, '#34d399')"
-          ></div>
-          <div
-            class="color-btn"
-            style="background: #fbbf24"
-            data-color="#fbbf24"
-            onclick="setDrawColor(this, '#fbbf24')"
-          ></div>
-          <div
-            class="color-btn"
-            style="background: #f8fafc"
-            data-color="#f8fafc"
-            onclick="setDrawColor(this, '#f8fafc')"
-          ></div>
-          <div
-            class="color-btn"
-            style="background: #a78bfa"
-            data-color="#a78bfa"
-            onclick="setDrawColor(this, '#a78bfa')"
-          ></div>
-          <div
-            style="
-              width: 1px;
-              background: rgba(255, 255, 255, 0.1);
-              margin: 0 4px;
-            "
-          ></div>
-          <div class="brush-slider">
-            <span>Size:</span>
-            <input type="range" id="brushSize" min="2" max="30" value="5" />
-            <span id="brushSizeVal">5</span>
-          </div>
-          <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
-        </div>
+         <div class="draw-tools">
+           <div
+             class="color-btn active"
+             style="background: #ec4899"
+             data-color="#ec4899"
+             onclick="setDrawColor(this, '#ec4899')"
+           ></div>
+           <div
+             class="color-btn"
+             style="background: #60a5fa"
+             data-color="#60a5fa"
+             onclick="setDrawColor(this, '#60a5fa')"
+           ></div>
+           <div
+             class="color-btn"
+             style="background: #34d399"
+             data-color="#34d399"
+             onclick="setDrawColor(this, '#34d399')"
+           ></div>
+           <div
+             class="color-btn"
+             style="background: #fbbf24"
+             data-color="#fbbf24"
+             onclick="setDrawColor(this, '#fbbf24')"
+           ></div>
+           <div
+             class="color-btn"
+             style="background: #f8fafc"
+             data-color="#f8fafc"
+             onclick="setDrawColor(this, '#f8fafc')"
+           ></div>
+           <div
+             class="color-btn"
+             style="background: #a78bfa"
+             data-color="#a78bfa"
+             onclick="setDrawColor(this, '#a78bfa')"
+           ></div>
+           <div
+             style="
+               width: 1px;
+               background: rgba(255, 255, 255, 0.1);
+               margin: 0 4px;
+             "
+           ></div>
+           <div class="brush-slider">
+             <span>Size:</span>
+             <input type="range" id="brushSize" min="2" max="30" value="5" />
+             <span id="brushSizeVal">5</span>
+           </div>
+           <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
+         </div>
 
-        <canvas id="drawCanvas"></canvas>
-        <button class="btn-share pink" onclick="sendDrawing()">
-          🎨 Send Drawing to Screen
-        </button>
-      </div>
-    </div>
+         <canvas id="drawCanvas"></canvas>
+         <button class="btn-share pink" onclick="sendDrawing()">
+           🎨 Send Drawing to Screen
+         </button>
+       </div>
+     </div>
+
+     <!-- Video Share Modal -->
+     <div class="modal-overlay" id="videoModal">
+       <div class="modal-box">
+         <div class="modal-header">
+           <div class="modal-title">🎬 Share Video to Screen</div>
+           <button class="modal-close" onclick="closeModal('videoModal')">
+             ✕
+           </button>
+         </div>
+         <div class="hint-text">
+           Enter a YouTube URL for instant playback, or upload an MP4 file.
+         </div>
+         <div class="form-row" style="margin-bottom: 16px">
+           <label class="form-label">YouTube URL</label>
+           <input
+             type="text"
+             id="youtubeUrlInput"
+             class="form-input"
+             placeholder="https://www.youtube.com/watch?v=..."
+           />
+         </div>
+         <div class="divider"></div>
+         <div style="margin: 16px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+           OR
+         </div>
+         <div class="upload-zone" id="videoDropZone" style="margin: 0 0 16px 0">
+           <span class="upload-icon">🎞️</span>
+           <div class="upload-title">Upload MP4 Video</div>
+           <div class="upload-hint">or click to browse — .mp4 files</div>
+           <input
+             type="file"
+             id="videoUploadInput"
+             accept="video/mp4,video/webm,video/*"
+             style="
+               position: absolute;
+               inset: 0;
+               opacity: 0;
+               cursor: pointer;
+               width: 100%;
+             "
+           />
+         </div>
+         <div class="progress-container" id="videoProgressContainer">
+           <div class="progress-label">
+             <span id="videoProgressText">Uploading...</span>
+             <span id="videoProgressPct">0%</span>
+           </div>
+           <div class="progress-bar-bg">
+             <div class="progress-bar-fill" id="videoProgressFill"></div>
+           </div>
+         </div>
+         <div id="videoPreview" style="display: none; margin-bottom: 16px">
+           <video
+             id="videoPreviewPlayer"
+             controls
+             style="width: 100%; max-height: 200px; border-radius: 10px"
+           >
+             <source id="videoPreviewSource" src="" type="video/mp4" />
+           </video>
+         </div>
+         <button class="btn-share amber" id="sendVideoBtn" disabled>
+           📡 Send to Game Screen
+         </button>
+       </div>
+     </div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -2080,10 +2160,11 @@ Kingdom → Plantae
         showToast("Presentation closed", "info");
       });
 
-      document.getElementById("btnCloseShare").addEventListener("click", () => {
-        socket.emit("pres-close-share");
-        showToast("✕ Closed shared modals on game screen", "info");
-      });
+document.getElementById("btnCloseShare").addEventListener("click", () => {
+         socket.emit("pres-close-share");
+         closeModal("videoModal");
+         showToast("✕ Closed shared modals on game screen", "info");
+       });
 
       // ════════════════════════════════════════════
       //  SHARE — IMAGE
@@ -2254,13 +2335,160 @@ Kingdom → Plantae
         document.getElementById("brushSizeVal").textContent = brushSize;
       });
 
-      function sendDrawing() {
-        if (!canvas) return;
-        const dataUrl = canvas.toDataURL("image/png");
-        socket.emit("pres-share-image", { src: dataUrl, isDrawing: true });
-        showToast("🎨 Drawing sent to game screen!", "success");
-        closeModal("drawModal");
-      }
+function sendDrawing() {
+         if (!canvas) return;
+         const dataUrl = canvas.toDataURL("image/png");
+         socket.emit("pres-share-image", { src: dataUrl, isDrawing: true });
+         showToast("🎨 Drawing sent to game screen!", "success");
+         closeModal("drawModal");
+       }
+
+       // ════════════════════════════════════════════
+       //  SHARE — VIDEO
+       // ════════════════════════════════════════════
+       let videoFile = null;
+       let videoUploadType = "youtube"; // or "file"
+
+       document.getElementById("shareVideoBtn").addEventListener("click", () => {
+         openModal("videoModal");
+         resetVideoModal();
+       });
+
+       document.getElementById("youtubeUrlInput").addEventListener("input", (e) => {
+         const url = e.target.value.trim();
+         if (isValidYouTubeUrl(url)) {
+           videoUploadType = "youtube";
+           videoFile = null;
+           document.getElementById("sendVideoBtn").disabled = false;
+           extractYouTubeId(url);
+         } else {
+           document.getElementById("sendVideoBtn").disabled = true;
+         }
+       });
+
+       document.getElementById("videoUploadInput").addEventListener("change", (e) => {
+         const file = e.target.files[0];
+         if (!file) return;
+         if (!file.type.startsWith("video/")) {
+           showToast("Please upload a valid video file", "error");
+           return;
+         }
+         videoFile = file;
+         videoUploadType = "file";
+         document.getElementById("youtubeUrlInput").value = "";
+         
+         // Show preview
+         const url = URL.createObjectURL(file);
+         const preview = document.getElementById("videoPreview");
+         const source = document.getElementById("videoPreviewSource");
+         source.src = url;
+         preview.style.display = "block";
+         document.getElementById("sendVideoBtn").disabled = false;
+       });
+
+       function resetVideoModal() {
+         document.getElementById("youtubeUrlInput").value = "";
+         document.getElementById("videoUploadInput").value = "";
+         document.getElementById("videoPreview").style.display = "none";
+         document.getElementById("videoProgressContainer").classList.remove("active");
+         document.getElementById("sendVideoBtn").disabled = true;
+         videoFile = null;
+         videoUploadType = "youtube";
+       }
+
+function isValidYouTubeUrl(url) {
+          const patterns = [
+            /youtube\.com\/watch\?v=([^&\s]+)/,
+            /youtu\.be\/([^&\s]+)/,
+            /youtube\.com\/embed\/([^&\s]+)/,
+            /youtube\.com\/shorts\/([^&\s]+)/,
+          ];
+          return patterns.some((p) => p.test(url));
+        }
+
+        function extractYouTubeId(url) {
+          if (!url) return null;
+          let id = null;
+          // Try different URL formats
+          const match1 = url.match(/[?&]v=([^&\s]+)/);
+          const match2 = url.match(/youtu\.be\/([^?&]+)/);
+          const match3 = url.match(/\/embed\/([^?&]+)/);
+          const match4 = url.match(/\/shorts\/([^?&]+)/);
+          if (match1) id = match1[1];
+          else if (match2) id = match2[1];
+          else if (match3) id = match3[1];
+          else if (match4) id = match4[1];
+          return id ? id.split(/[#&]/)[0] : null; // Clean any extra params
+        }
+
+document.getElementById("sendVideoBtn").addEventListener("click", () => {
+         console.log("Send video button clicked, type:", videoUploadType);
+         if (videoUploadType === "youtube") {
+           const url = document.getElementById("youtubeUrlInput").value.trim();
+             const videoId = extractYouTubeId(url);
+             console.log("YouTube URL:", url, "Video ID:", videoId);
+             if (!videoId) {
+               showToast("Invalid YouTube URL", "error");
+               return;
+             }
+             socket.emit("pres-share-video", { type: "youtube", videoId, url });
+             showToast("🎬 YouTube video sent to game screen!", "success");
+             closeModal("videoModal");
+           } else if (videoUploadType === "file" && videoFile) {
+             uploadVideoFile();
+           }
+       });
+
+       function uploadVideoFile() {
+         if (!videoFile) return;
+
+         const formData = new FormData();
+         formData.append("video", videoFile);
+
+         const progContainer = document.getElementById("videoProgressContainer");
+         const progFill = document.getElementById("videoProgressFill");
+         const progPct = document.getElementById("videoProgressPct");
+         const progText = document.getElementById("videoProgressText");
+         const sendBtn = document.getElementById("sendVideoBtn");
+
+         progContainer.classList.add("active");
+         sendBtn.disabled = true;
+
+         const xhr = new XMLHttpRequest();
+
+         xhr.upload.addEventListener("progress", (e) => {
+           if (e.lengthComputable) {
+             const pct = Math.round((e.loaded / e.total) * 100);
+             progFill.style.width = pct + "%";
+             progPct.textContent = pct + "%";
+             progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
+           }
+         });
+
+         xhr.addEventListener("load", () => {
+           if (xhr.status === 200) {
+             const res = JSON.parse(xhr.responseText);
+             socket.emit("pres-share-video", { type: "upload", url: res.url, filename: res.filename });
+             showToast("🎬 Video uploaded and sent to game screen!", "success");
+             progContainer.classList.remove("active");
+             progFill.style.width = "0%";
+             closeModal("videoModal");
+           } else {
+             showToast("Upload failed: " + xhr.responseText, "error");
+             progContainer.classList.remove("active");
+             sendBtn.disabled = false;
+           }
+         });
+
+         xhr.addEventListener("error", () => {
+           showToast("Network error during upload", "error");
+           progContainer.classList.remove("active");
+           sendBtn.disabled = false;
+         });
+
+         xhr.open("POST", "/api/video/upload");
+         xhr.send(formData);
+       }
 
 // ════════════════════════════════════════════
        //  MODAL HELPERS

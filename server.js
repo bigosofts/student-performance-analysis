@@ -313,6 +313,35 @@ const mazeQuizUploadStorage = multer.diskStorage({
 });
 const mazeQuizUpload = multer({ storage: mazeQuizUploadStorage });
 
+// Multer config for video uploads
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) => {
+    cb(null, "video-" + Date.now() + path.extname(file.originalname));
+  },
+});
+const videoUpload = multer({
+  storage: videoStorage,
+  fileFilter: (req, file, cb) => {
+    const ok = file.mimetype.startsWith("video/");
+    cb(ok ? null : new Error("Only video files are allowed"), ok);
+  },
+  limits: { fileSize: 500 * 1024 * 1024 }, // 500MB
+});
+
+// API to upload video
+app.post("/api/video/upload", (req, res) => {
+  videoUpload.single("video")(req, res, function(err) {
+    if (err) {
+      console.error("Video upload error:", err);
+      return res.status(400).json({ error: err.message || "Upload failed" });
+    }
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+    const url = "/uploads/" + req.file.filename;
+    res.json({ status: "ok", url, filename: req.file.filename });
+  });
+});
+
 // API to upload maze quiz Excel
 app.post("/upload-maze-quiz", mazeQuizUpload.single("quizFile"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -521,11 +550,15 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("pres-share-tree", data);
   });
 
-  socket.on("pres-share-note", (data) => {
-    socket.broadcast.emit("pres-share-note", data);
-  });
+socket.on("pres-share-note", (data) => {
+         socket.broadcast.emit("pres-share-note", data);
+       });
 
-  socket.on("pres-close-share", () => {
+socket.on("pres-share-video", (data) => {
+           io.emit("pres-share-video", data);
+       });
+
+       socket.on("pres-close-share", () => {
     socket.broadcast.emit("pres-close-share");
   });
 
