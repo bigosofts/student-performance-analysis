@@ -21,9 +21,13 @@ if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir);
 }
 
-// ========== QUIZ SYSTEM ==========
+// ========== MONOPOLY QUIZ SYSTEM ==========
 let quizQuestions = [];
 let currentQuizIndex = 0;
+
+// ========== MAZE QUIZ SYSTEM ==========
+let mazeQuizQuestions = [];
+let currentMazeQuizIndex = 0;
 
 function createDemoExcel(filePath) {
     const data = [
@@ -77,6 +81,30 @@ function initQuizSystem() {
     loadQuizFromExcel(quizPath);
 }
 
+// ── Maze quiz loader ───────────────────────────────────────────
+function loadMazeQuizFromExcel(filePath) {
+    try {
+        const wb = XLSX.readFile(filePath);
+        const ws = wb.Sheets[wb.SheetNames[0]];
+        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+        mazeQuizQuestions = [];
+        for (let i = 1; i < data.length; i++) {
+            const row = data[i];
+            if (row && row[0]) {
+                mazeQuizQuestions.push({
+                    question: row[0],
+                    options: [row[1], row[2], row[3], row[4]],
+                    answer: (row[5] || 'A').toString().toUpperCase()
+                });
+            }
+        }
+        currentMazeQuizIndex = 0;
+        console.log(`[Maze] Loaded ${mazeQuizQuestions.length} quiz questions`);
+    } catch (e) {
+        console.error('[Maze] Failed to load quiz:', e);
+    }
+}
+
 // ========== MULTER CONFIGS ==========
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -117,7 +145,7 @@ app.post('/upload/:tileId', upload.single('image'), (req, res) => {
     res.send({ status: 'ok', url: imageUrl });
 });
 
-// API to upload quiz Excel
+// API to upload monopoly quiz Excel
 app.post('/upload-quiz', quizUpload.single('quizFile'), (req, res) => {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
     
@@ -135,6 +163,47 @@ app.post('/upload-quiz', quizUpload.single('quizFile'), (req, res) => {
     
     io.emit('quiz-loaded', { count: quizQuestions.length });
     res.json({ status: 'ok', count: quizQuestions.length });
+});
+
+// Multer config for maze quiz
+const mazeQuizUploadStorage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, 'maze-quiz-upload-temp' + path.extname(file.originalname))
+});
+const mazeQuizUpload = multer({ storage: mazeQuizUploadStorage });
+
+// API to upload maze quiz Excel
+app.post('/upload-maze-quiz', mazeQuizUpload.single('quizFile'), (req, res) => {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    
+    const dest = path.join(uploadsDir, 'maze-quiz-questions.xlsx');
+    const tempPath = path.join(uploadsDir, req.file.filename);
+    
+    if (fs.existsSync(dest)) {
+        try { fs.unlinkSync(dest); } catch(e) {}
+    }
+    
+    fs.renameSync(tempPath, dest);
+    loadMazeQuizFromExcel(dest);
+    
+    io.emit('maze-quiz-loaded', { count: mazeQuizQuestions.length });
+    res.json({ status: 'ok', count: mazeQuizQuestions.length });
+});
+
+// Get next maze quiz question (randomised)
+app.get('/api/maze-quiz/next', (req, res) => {
+    if (mazeQuizQuestions.length === 0) {
+        return res.json({ question: null });
+    }
+    const randomIndex = Math.floor(Math.random() * mazeQuizQuestions.length);
+    const q = mazeQuizQuestions[randomIndex];
+    currentMazeQuizIndex++;
+    res.json({ ...q, index: randomIndex + 1, total: mazeQuizQuestions.length });
+});
+
+// Get maze quiz info
+app.get('/api/maze-quiz/info', (req, res) => {
+    res.json({ count: mazeQuizQuestions.length, currentIndex: currentMazeQuizIndex });
 });
 
 // Get next quiz question (randomized)
@@ -182,7 +251,7 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('image-updated', data);
     });
 
-    // Quiz events
+    // Monopoly quiz events
     socket.on('show-quiz', (data) => {
         socket.broadcast.emit('quiz-show', data);
     });
@@ -204,23 +273,54 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('event-close');
     });
 
+    // ── Maze game events ────────────────────────────────────
+    socket.on('maze-update-game', (gameState) => {
+        socket.broadcast.emit('maze-game-updated', gameState);
+    });
+
+    socket.on('maze-show-quiz', (data) => {
+        socket.broadcast.emit('maze-show-quiz', data);
+    });
+
+    socket.on('maze-quiz-result', (data) => {
+        socket.broadcast.emit('maze-quiz-result', data);
+    });
+
+    socket.on('maze-close-quiz', () => {
+        socket.broadcast.emit('maze-close-quiz');
+    });
+
     socket.on('disconnect', () => {
 
         console.log('User disconnected');
     });
 });
 
-// Initialize quiz system
+// Initialize quiz systems
 initQuizSystem();
+
+// Initialize maze quiz if file exists
+const mazeQuizPath = path.join(uploadsDir, 'maze-quiz-questions.xlsx');
+if (fs.existsSync(mazeQuizPath)) {
+    loadMazeQuizFromExcel(mazeQuizPath);
+}
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
     console.log(`
     🚀 Server is running!
     --------------------------------------
-    Game Page:      http://localhost:${PORT}/game.html
-    Dashboard:      http://localhost:${PORT}/dashboard.html
-    Landing Page:   http://localhost:${PORT}/index.html
+    Landing Page:     http://localhost:${PORT}/index.html
+    Teacher Hub:      http://localhost:${PORT}/dashboard.html
+    --------------------------------------
+    Memory Game:      http://localhost:${PORT}/game.html
+    Memory Dashboard: http://localhost:${PORT}/dashboard-memory.html
+    --------------------------------------
+    Monopoly Game:    http://localhost:${PORT}/game-monopoly.html
+    Monopoly Dash:    http://localhost:${PORT}/dashboard-monopoly.html
+    --------------------------------------
+    Maze Game:        http://localhost:${PORT}/game-maze.html
+    Maze Dashboard:   http://localhost:${PORT}/dashboard-maze.html
     --------------------------------------
     To access from mobile, use your PC's IP address:
     http://[YOUR-IP]:${PORT}/dashboard.html

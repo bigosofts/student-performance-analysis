@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Maze Runner Quiz — Live Game</title>
+    <meta
+      name="description"
+      content="Maze Runner Quiz game page — interactive classroom game display"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/maze.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Outfit:wght@400;600;800;900&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="game-maze">
+    <!-- HUD -->
+    <div class="maze-hud" id="mazeHud">
+      <!-- Girls Team (left) -->
+      <div class="hud-team girls" id="hudGirls">
+        <div class="hud-avatar" id="hudGirlsAvatar">
+          <div class="hud-avatar-placeholder">🏃‍♀️</div>
+        </div>
+        <div class="hud-info">
+          <div class="hud-team-name">Team Girls</div>
+          <div class="hud-credit" id="hudGirlsCredit">0 Credits</div>
+          <div class="hud-progress-bar-wrap">
+            <div
+              class="hud-progress-fill"
+              id="hudGirlsBar"
+              style="width: 0%"
+            ></div>
+            <span class="hud-progress-pct" id="hudGirlsPct">0%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Centre -->
+      <div class="hud-center">
+        <div class="hud-title">Maze Runner Quiz</div>
+        <div class="hud-turn-badge boys" id="hudTurnBadge">BOYS TURN</div>
+      </div>
+
+      <!-- Boys Team (right) -->
+      <div class="hud-team boys" id="hudBoys">
+        <div class="hud-avatar" id="hudBoysAvatar">
+          <div class="hud-avatar-placeholder">🏃‍♂️</div>
+        </div>
+        <div class="hud-info">
+          <div class="hud-team-name">Team Boys</div>
+          <div class="hud-credit" id="hudBoysCredit">0 Credits</div>
+          <div class="hud-progress-bar-wrap">
+            <div
+              class="hud-progress-fill"
+              id="hudBoysBar"
+              style="width: 0%"
+            ></div>
+            <span class="hud-progress-pct" id="hudBoysPct">0%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Maze Stage -->
+    <div class="maze-stage" id="mazeStage">
+      <div class="maze-canvas-wrap" id="mazeCanvasWrap">
+        <div class="maze-placeholder" id="mazePlaceholder">
+          <div class="maze-placeholder-icon">🗺️</div>
+          <p>Waiting for teacher to generate maze...</p>
+        </div>
+        <canvas id="mazeCanvas" style="display: none"></canvas>
+      </div>
+    </div>
+
+    <!-- Quiz Overlay -->
+    <div id="mazeQuizOverlay" class="maze-quiz-overlay">
+      <div class="maze-quiz-card">
+        <div class="maze-quiz-header">
+          <div class="maze-quiz-title">📝 QUIZ TIME!</div>
+          <div id="mazeQuizTeamBadge" class="maze-quiz-team-badge boys">
+            BOYS
+          </div>
+        </div>
+        <div id="mazeQuizQuestion" class="maze-quiz-question"></div>
+        <div id="mazeQuizOptions" class="maze-quiz-options"></div>
+        <div id="mazeQuizResultBadge" class="maze-quiz-result-badge"></div>
+      </div>
+    </div>
+
+    <!-- Winner Overlay -->
+    <div id="mazeWinnerOverlay" class="maze-winner-overlay">
+      <div class="maze-winner-content">
+        <div class="maze-winner-confetti" id="mazeWinnerConfetti">🎉</div>
+        <h1
+          id="mazeWinnerTitle"
+          style="
+            font-size: clamp(2rem, 8vh, 4rem);
+            margin: 20px 0;
+            font-family: &quot;Orbitron&quot;, sans-serif;
+            color: #00e5ff;
+            text-shadow: 0 0 30px rgba(0, 229, 255, 0.5);
+          "
+        ></h1>
+        <p
+          id="mazeWinnerMsg"
+          style="
+            font-size: clamp(1rem, 3.5vh, 1.6rem);
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin-bottom: 30px;
+            font-family: &quot;Outfit&quot;, sans-serif;
+          "
+        ></p>
+        <div style="font-size: 4rem; margin-top: 10px">🏆</div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/maze.js"></script>
+    <script>
+      // ── Canvas renderer ───────────────────────────────────────
+      const WALL_COLOR = "#00e5ff";
+      const WALL_GLOW = "rgba(0,229,255,0.4)";
+      const FLOOR_A = "#0f2d1a";
+      const FLOOR_B = "#152e17";
+      const PATH_COLOR = "rgba(0,229,255,0.08)"; // solution path tint
+      const EXIT_COLOR = "#10b981";
+      const START_COLOR = "rgba(99,102,241,0.5)";
+
+      let animFrame = null;
+      let runnerAnim = 0; // frame counter for runner animation
+
+      function drawMaze(mazeData, team) {
+        const canvas = document.getElementById("mazeCanvas");
+        const wrap = document.getElementById("mazeCanvasWrap");
+        const stage = document.getElementById("mazeStage");
+
+        if (!mazeData) {
+          canvas.style.display = "none";
+          document.getElementById("mazePlaceholder").style.display = "flex";
+          return;
+        }
+
+        document.getElementById("mazePlaceholder").style.display = "none";
+        canvas.style.display = "block";
+
+        const { size, cells, runnerPos, solutionPath, visitedSet } = mazeData;
+
+        // Fit canvas to stage, keeping aspect ratio 1:1
+        const stW = stage.clientWidth - 24;
+        const stH = stage.clientHeight - 24;
+        const cellPx = Math.floor(Math.min(stW, stH) / size);
+        const W = cellPx * size;
+        const H = cellPx * size;
+
+        canvas.width = W;
+        canvas.height = H;
+        wrap.style.width = W + "px";
+        wrap.style.height = H + "px";
+
+        const ctx = canvas.getContext("2d");
+
+        // ── Background fill ──
+        ctx.fillStyle = FLOOR_A;
+        ctx.fillRect(0, 0, W, H);
+
+        // ── Checkerboard grass ──
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            ctx.fillStyle = (x + y) % 2 === 0 ? FLOOR_A : FLOOR_B;
+            ctx.fillRect(x * cellPx, y * cellPx, cellPx, cellPx);
+          }
+        }
+
+        // ── Solution path highlight ──
+        const solutionSet = new Set(
+          (solutionPath || []).map((p) => `${p.x},${p.y}`),
+        );
+        const visitedSolutionSet = new Set(visitedSet || []);
+
+        if (solutionPath && solutionPath.length > 0) {
+          for (const p of solutionPath) {
+            ctx.fillStyle = visitedSolutionSet.has(`${p.x},${p.y}`)
+              ? team === "boys"
+                ? "rgba(59,130,246,0.18)"
+                : "rgba(236,72,153,0.18)"
+              : "rgba(0,229,255,0.06)";
+            ctx.fillRect(
+              p.x * cellPx + 1,
+              p.y * cellPx + 1,
+              cellPx - 2,
+              cellPx - 2,
+            );
+          }
+        }
+
+        // ── Start & Exit markers ──
+        ctx.fillStyle = "rgba(99,102,241,0.4)";
+        ctx.fillRect(0, 0, cellPx, cellPx);
+        ctx.fillStyle = "rgba(16,185,129,0.4)";
+        ctx.fillRect((size - 1) * cellPx, (size - 1) * cellPx, cellPx, cellPx);
+
+        // Start label
+        ctx.fillStyle = "#818cf8";
+        ctx.font = `bold ${Math.max(8, cellPx * 0.28)}px Orbitron,monospace`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText("S", cellPx / 2, cellPx / 2);
+        // End label
+        ctx.fillStyle = "#10b981";
+        ctx.fillText("G", (size - 0.5) * cellPx, (size - 0.5) * cellPx);
+
+        // ── Walls ──
+        ctx.strokeStyle = WALL_COLOR;
+        ctx.lineWidth = Math.max(1.5, cellPx * 0.08);
+        ctx.shadowColor = WALL_GLOW;
+        ctx.shadowBlur = Math.max(3, cellPx * 0.15);
+        ctx.lineCap = "square";
+
+        for (let y = 0; y < size; y++) {
+          for (let x = 0; x < size; x++) {
+            const cell = cells[y][x];
+            const px = x * cellPx;
+            const py = y * cellPx;
+
+            if (cell.walls.N) {
+              ctx.beginPath();
+              ctx.moveTo(px, py);
+              ctx.lineTo(px + cellPx, py);
+              ctx.stroke();
+            }
+            if (cell.walls.S) {
+              ctx.beginPath();
+              ctx.moveTo(px, py + cellPx);
+              ctx.lineTo(px + cellPx, py + cellPx);
+              ctx.stroke();
+            }
+            if (cell.walls.W) {
+              ctx.beginPath();
+              ctx.moveTo(px, py);
+              ctx.lineTo(px, py + cellPx);
+              ctx.stroke();
+            }
+            if (cell.walls.E) {
+              ctx.beginPath();
+              ctx.moveTo(px + cellPx, py);
+              ctx.lineTo(px + cellPx, py + cellPx);
+              ctx.stroke();
+            }
+          }
+        }
+
+        ctx.shadowBlur = 0;
+
+        // ── Runner ──
+        drawRunner(ctx, team, runnerPos.x, runnerPos.y, cellPx);
+      }
+
+      function drawRunner(ctx, team, rx, ry, cellPx) {
+        const cx = rx * cellPx + cellPx / 2;
+        const cy = ry * cellPx + cellPx / 2;
+        const r = Math.max(6, cellPx * 0.32);
+
+        // Bounce animation
+        const bounce = Math.sin(runnerAnim * 0.18) * Math.max(1, cellPx * 0.06);
+        const squeeze = 1 + Math.sin(runnerAnim * 0.18) * 0.08;
+
+        const color = team === "boys" ? "#3b82f6" : "#ec4899";
+        const glow =
+          team === "boys" ? "rgba(59,130,246,0.8)" : "rgba(236,72,153,0.8)";
+
+        // Glow ring
+        ctx.save();
+        ctx.shadowColor = glow;
+        ctx.shadowBlur = r * 1.5;
+        ctx.beginPath();
+        ctx.arc(cx, cy - bounce, r, 0, Math.PI * 2);
+        ctx.fillStyle = color;
+        ctx.fill();
+        ctx.restore();
+
+        // Inner highlight
+        ctx.beginPath();
+        ctx.arc(cx - r * 0.2, cy - bounce - r * 0.2, r * 0.35, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.4)";
+        ctx.fill();
+
+        // Runner emoji (scaled to cell)
+        const emoji = team === "boys" ? "🏃‍♂️" : "🏃‍♀️";
+        const emojiSize = Math.max(10, cellPx * 0.55);
+        ctx.font = `${emojiSize}px serif`;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(emoji, cx, cy - bounce);
+      }
+
+      // ── Animation loop ────────────────────────────────────────
+      function startRenderLoop() {
+        if (animFrame) cancelAnimationFrame(animFrame);
+        function loop() {
+          runnerAnim++;
+          const g = MazeGame.game;
+          const turn = g.currentTurn;
+          const mz = turn === "boys" ? g.boysMaze : g.girlsMaze;
+          drawMaze(mz, turn);
+          animFrame = requestAnimationFrame(loop);
+        }
+        loop();
+      }
+
+      // ── HUD update ────────────────────────────────────────────
+      function updateHUD() {
+        const g = MazeGame.game;
+
+        // Credits
+        document.getElementById("hudBoysCredit").textContent =
+          g.boysCredit + " Credits";
+        document.getElementById("hudGirlsCredit").textContent =
+          g.girlsCredit + " Credits";
+
+        // Progress bars (solution-path %)
+        const bPct = MazeGame.getMazeProgress("boys");
+        const gPct = MazeGame.getMazeProgress("girls");
+
+        document.getElementById("hudBoysBar").style.width = bPct + "%";
+        document.getElementById("hudBoysPct").textContent = bPct + "%";
+        document.getElementById("hudGirlsBar").style.width = gPct + "%";
+        document.getElementById("hudGirlsPct").textContent = gPct + "%";
+
+        // Turn badge
+        const badge = document.getElementById("hudTurnBadge");
+        badge.textContent = g.currentTurn.toUpperCase() + " TURN";
+        badge.className = "hud-turn-badge " + g.currentTurn;
+
+        // Team avatars
+        if (g.boysImage) {
+          document.getElementById("hudBoysAvatar").innerHTML =
+            `<img src="${g.boysImage}?v=${g.lastUpdate}" alt="Boys" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        }
+        if (g.girlsImage) {
+          document.getElementById("hudGirlsAvatar").innerHTML =
+            `<img src="${g.girlsImage}?v=${g.lastUpdate}" alt="Girls" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+        }
+
+        // Winner overlay
+        const winnerOverlay = document.getElementById("mazeWinnerOverlay");
+        if (g.winner) {
+          const isWin = g.winner !== "draw";
+          const team = g.winner === "boys" ? "Boys" : "Girls";
+          document.getElementById("mazeWinnerConfetti").textContent = isWin
+            ? "🎉"
+            : "🤝";
+          document.getElementById("mazeWinnerTitle").textContent = isWin
+            ? `🏆 ${team.toUpperCase()} WIN!`
+            : "DRAW! 🤝";
+          document.getElementById("mazeWinnerMsg").innerHTML = isWin
+            ? `Congratulations to all <strong>${team}</strong>!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`
+            : `Both teams gave an incredible effort!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`;
+          winnerOverlay.classList.add("active");
+        } else {
+          winnerOverlay.classList.remove("active");
+        }
+      }
+
+      // ── Quiz functions ────────────────────────────────────────
+      function showMazeQuiz(data) {
+        const overlay = document.getElementById("mazeQuizOverlay");
+        const badge = document.getElementById("mazeQuizTeamBadge");
+        badge.textContent = data.team.toUpperCase();
+        badge.className = "maze-quiz-team-badge " + data.team;
+        document.getElementById("mazeQuizQuestion").textContent = data.question;
+        const labels = ["A", "B", "C", "D"];
+        document.getElementById("mazeQuizOptions").innerHTML = data.options
+          .map(
+            (o, i) =>
+              `<div class="maze-quiz-option"><span class="maze-quiz-opt-label">${labels[i]})</span> ${o}</div>`,
+          )
+          .join("");
+        document.getElementById("mazeQuizResultBadge").style.display = "none";
+        overlay.classList.add("active");
+      }
+
+      function showMazeQuizResult(data) {
+        const badge = document.getElementById("mazeQuizResultBadge");
+        badge.style.display = "block";
+        if (data.correct) {
+          badge.className = "maze-quiz-result-badge correct";
+          badge.textContent = "✅ Correct Answer! +3000 Credits 🎉";
+          showCreditParticle("+3000 💰", data.team);
+        } else {
+          badge.className = "maze-quiz-result-badge wrong";
+          badge.textContent = "❌ Wrong Answer! No credits awarded.";
+        }
+      }
+
+      function closeMazeQuiz() {
+        document.getElementById("mazeQuizOverlay").classList.remove("active");
+      }
+
+      // ── Credit particle ───────────────────────────────────────
+      function showCreditParticle(text, team) {
+        const el = document.createElement("div");
+        el.className = "credit-particle";
+        el.textContent = text;
+        el.style.color = team === "boys" ? "#3b82f6" : "#ec4899";
+        el.style.left = window.innerWidth / 2 - 60 + "px";
+        el.style.top = window.innerHeight / 2 + "px";
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 2100);
+      }
+
+      // ── Turn switch with fade ─────────────────────────────────
+      let lastTurn = null;
+      function handleTurnChange(newTurn) {
+        if (newTurn === lastTurn) return;
+        const wrap = document.getElementById("mazeCanvasWrap");
+        wrap.classList.add("fade-out");
+        setTimeout(() => {
+          wrap.classList.remove("fade-out");
+          wrap.classList.add("fade-in");
+          lastTurn = newTurn;
+          setTimeout(() => wrap.classList.remove("fade-in"), 600);
+        }, 400);
+      }
+
+      // ── Main update ───────────────────────────────────────────
+      function fullUpdate() {
+        const g = MazeGame.game;
+        handleTurnChange(g.currentTurn);
+        updateHUD();
+        // Canvas is updated by the render loop
+      }
+
+      // ── Socket ────────────────────────────────────────────────
+      if (typeof io !== "undefined") {
+        const socket = io();
+        MazeGame.setSocket(socket);
+
+        socket.on("maze-game-updated", (newState) => {
+          MazeGame.setMazeGame(newState);
+          fullUpdate();
+        });
+
+        socket.on("maze-show-quiz", (data) => showMazeQuiz(data));
+        socket.on("maze-quiz-result", (data) => {
+          showMazeQuizResult(data);
+          fullUpdate();
+        });
+        socket.on("maze-close-quiz", () => closeMazeQuiz());
+      }
+
+      // ── Resize handler ────────────────────────────────────────
+      window.addEventListener("resize", () => {
+        /* render loop redraws naturally */
+      });
+
+      // ── Boot ──────────────────────────────────────────────────
+      fullUpdate();
+      startRenderLoop();
+    </script>
+  </body>
+</html>
