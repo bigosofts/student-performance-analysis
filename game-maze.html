@@ -175,25 +175,17 @@
           }
         }
 
-        // ── Solution path highlight ──
-        const solutionSet = new Set(
-          (solutionPath || []).map((p) => `${p.x},${p.y}`),
-        );
+        // ── Movement trail (visited cells) ──
+        // Color only cells the runner has already walked through — solution path stays invisible.
         const visitedSolutionSet = new Set(visitedSet || []);
-
-        if (solutionPath && solutionPath.length > 0) {
-          for (const p of solutionPath) {
-            ctx.fillStyle = visitedSolutionSet.has(`${p.x},${p.y}`)
-              ? team === "boys"
-                ? "rgba(59,130,246,0.18)"
-                : "rgba(236,72,153,0.18)"
-              : "rgba(0,229,255,0.06)";
-            ctx.fillRect(
-              p.x * cellPx + 1,
-              p.y * cellPx + 1,
-              cellPx - 2,
-              cellPx - 2,
-            );
+        if (visitedSolutionSet.size > 0) {
+          ctx.fillStyle =
+            team === "boys"
+              ? "rgba(59,130,246,0.25)"
+              : "rgba(236,72,153,0.25)";
+          for (const key of visitedSolutionSet) {
+            const [vx, vy] = key.split(",").map(Number);
+            ctx.fillRect(vx * cellPx + 1, vy * cellPx + 1, cellPx - 2, cellPx - 2);
           }
         }
 
