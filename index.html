@@ -1,143 +1,208 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Agriculture-Interactive ClassRoom</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css" />
     <style>
-        .hero-section {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            text-align: center;
-            padding: 20px;
-        }
+      .hero-section {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
 
-        .title-glitch {
-            font-size: 4rem;
-            font-weight: 900;
-            text-transform: uppercase;
-            background: linear-gradient(to right, #6366f1, #ec4899);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 10px;
-            filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
-        }
+        text-align: center;
+        padding: 20px;
+      }
 
-        .teacher-info {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 15px 30px;
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            margin-bottom: 40px;
-            font-size: 1.2rem;
-            color: var(--text-dim);
-        }
+      .title-glitch {
+        font-size: 4rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        background: linear-gradient(to right, #6366f1, #ec4899);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 10px;
+        filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.5));
+      }
 
-        .teacher-info strong {
-            color: var(--text-main);
-        }
+      .teacher-info {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 15px 30px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 40px;
+        font-size: 1.2rem;
+        color: var(--text-dim);
+      }
 
-        .game-list {
-            display: flex;
-            gap: 30px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
+      .teacher-info strong {
+        color: var(--text-main);
+      }
 
-        .game-card {
-            width: 300px;
-            padding: 30px;
-            text-decoration: none;
-            color: white;
-            transition: all 0.4s ease;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
+      .game-list {
+        display: flex;
+        gap: 30px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
 
-        .game-card:hover {
-            transform: translateY(-15px) scale(1.02);
-            background: rgba(255, 255, 255, 0.1);
-        }
+      .game-card {
+        width: 300px;
+        padding: 30px;
+        text-decoration: none;
+        color: white;
+        transition: all 0.4s ease;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+      }
 
-        .game-icon {
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 3rem;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
+      .game-card:hover {
+        transform: translateY(-15px) scale(1.02);
+        background: rgba(255, 255, 255, 0.1);
+      }
 
-        .game-card h2 {
-            font-size: 1.5rem;
-            font-weight: 800;
-        }
+      .game-icon {
+        width: 100px;
+        height: 100px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      }
 
-        .game-card p {
-            color: var(--text-dim);
-            font-size: 0.9rem;
-        }
+      .game-card h2 {
+        font-size: 1.5rem;
+        font-weight: 800;
+      }
 
-        .btn-launch {
-            margin-top: 10px;
-            width: 100%;
-        }
+      .game-card p {
+        color: var(--text-dim);
+        font-size: 0.9rem;
+      }
+
+      .btn-launch {
+        margin-top: 10px;
+        width: 100%;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="hero-section">
-        <div class="teacher-info">
-            Teacher: <strong>Abdullah Al Amin</strong> | Lecturer, RCPSC
-        </div>
-        
-        <h1 class="title-glitch animate-float">Agriculture-Interactive ClassRoom</h1>
-        <p style="margin-bottom: 50px; color: var(--text-dim);">Digital Learning & Engagement Portal</p>
+      <div class="teacher-info">
+        Teacher: <strong>Abdullah Al Amin</strong> | Lecturer, RCPSC
+      </div>
 
-        <div class="game-list">
-            <!-- Game 1: Memory Flip -->
-            <a href="game.html" class="glass-card game-card">
-                <div class="game-icon">🎴</div>
-                <div>
-                    <h2>Memory Flip Game</h2>
-                    <p>Boys vs Girls interactive memory challenge with 30 agricultural tiles.</p>
-                </div>
-                <button class="btn-primary btn-launch">LAUNCH GAME</button>
-            </a>
+      <h1 class="title-glitch animate-float">
+        Agriculture-Interactive ClassRoom
+      </h1>
+      <p style="margin-bottom: 50px; color: var(--text-dim)">
+        Digital Learning & Engagement Portal
+      </p>
 
-            <!-- Game 2: Monopoly Quiz -->
-            <a href="game-monopoly.html" class="glass-card game-card">
-                <div class="game-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899);">❓</div>
-                <div>
-                    <h2>Monopoly Quiz</h2>
-                    <p>Strategic classroom monopoly with Bengali locations and team challenges.</p>
-                </div>
-                <button class="btn-primary btn-launch" style="background: #a855f7;">LAUNCH GAME</button>
-            </a>
+      <div class="game-list">
+        <!-- Game 1: Memory Flip -->
+        <a href="game.html" class="glass-card game-card">
+          <div class="game-icon">🎴</div>
+          <div>
+            <h2>Memory Flip Game</h2>
+            <p>
+              Boys vs Girls interactive memory challenge with 30 agricultural
+              tiles.
+            </p>
+          </div>
+          <button class="btn-primary btn-launch">LAUNCH GAME</button>
+        </a>
 
-            <!-- Game 3: Maze Runner Quiz -->
-            <a href="game-maze.html" class="glass-card game-card">
-                <div class="game-icon" style="background: linear-gradient(135deg, #0e7490, #00e5ff);">🗯️</div>
-                <div>
-                    <h2>Maze Runner Quiz</h2>
-                    <p>Navigate through futuristic mazes — earn credits with quiz answers to unlock moves.</p>
-                </div>
-                <button class="btn-primary btn-launch" style="background: linear-gradient(135deg,#0e7490,#00e5ff); color:#000; font-weight:900;">LAUNCH GAME</button>
-            </a>
-        </div>
+        <!-- Game 2: Monopoly Quiz -->
+        <a href="game-monopoly.html" class="glass-card game-card">
+          <div
+            class="game-icon"
+            style="background: linear-gradient(135deg, #a855f7, #ec4899)"
+          >
+            ❓
+          </div>
+          <div>
+            <h2>Monopoly Quiz</h2>
+            <p>
+              Strategic classroom monopoly with Bengali locations and team
+              challenges.
+            </p>
+          </div>
+          <button class="btn-primary btn-launch" style="background: #a855f7">
+            LAUNCH GAME
+          </button>
+        </a>
 
-        <div style="margin-top: 60px;">
-            <a href="dashboard.html" class="btn-secondary" style="text-decoration: none;">TEACHER CENTRAL</a>
-        </div>
+        <!-- Game 3: Maze Runner Quiz -->
+        <a href="game-maze.html" class="glass-card game-card">
+          <div
+            class="game-icon"
+            style="background: linear-gradient(135deg, #0e7490, #00e5ff)"
+          >
+            🗯️
+          </div>
+          <div>
+            <h2>Maze Runner Quiz</h2>
+            <p>
+              Navigate through futuristic mazes — earn credits with quiz answers
+              to unlock moves.
+            </p>
+          </div>
+          <button
+            class="btn-primary btn-launch"
+            style="
+              background: linear-gradient(135deg, #0e7490, #00e5ff);
+              color: #000;
+              font-weight: 900;
+            "
+          >
+            LAUNCH GAME
+          </button>
+        </a>
+
+        <!-- Game 4: Word Puzzle Game -->
+        <a href="game-wordpuzzle.html" class="glass-card game-card">
+          <div
+            class="game-icon"
+            style="background: linear-gradient(135deg, #7c3aed, #ec4899)"
+          >
+            🔤
+          </div>
+          <div>
+            <h2>Word Puzzle Game</h2>
+            <p>
+              Boys vs Girls colour and fill the shared grid — letters build
+              words on the classroom whiteboard.
+            </p>
+          </div>
+          <button
+            class="btn-primary btn-launch"
+            style="
+              background: linear-gradient(135deg, #7c3aed, #ec4899);
+              font-weight: 900;
+            "
+          >
+            LAUNCH GAME
+          </button>
+        </a>
+      </div>
+
+      <div style="margin-top: 60px">
+        <a
+          href="dashboard.html"
+          class="btn-secondary"
+          style="text-decoration: none"
+          >TEACHER CENTRAL</a
+        >
+      </div>
     </div>
-</body>
+  </body>
 </html>

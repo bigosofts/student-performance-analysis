@@ -1,0 +1,621 @@
+/* ============================================================
+   WORD PUZZLE GAME — CSS
+   ============================================================ */
+
+/* ── CSS Variables ─────────────────────────────────────── */
+:root {
+  --boys-color : #3b82f6;
+  --boys-glow  : rgba(59,130,246,0.45);
+  --boys-light : #bfdbfe;
+  --girls-color: #ec4899;
+  --girls-glow : rgba(236,72,153,0.45);
+  --girls-light: #fce7f3;
+
+  /* Grid cell border — deep dark for projector visibility */
+  --cell-border: #1e293b;
+  --cell-border-game: #0f172a;
+}
+
+/* ── Body (Dashboard) ──────────────────────────────────── */
+body.dashboard-wp {
+  min-height: 100vh;
+  background: var(--bg-dark, #0a0a1a);
+  font-family: 'Outfit', sans-serif;
+  color: #e2e8f0;
+}
+
+/* ── Body (Game Page) ──────────────────────────────────── */
+body.game-wp {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0a0a1a 0%, #0f172a 50%, #0a0a1a 100%);
+  font-family: 'Outfit', sans-serif;
+  color: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DASHBOARD LAYOUT
+══════════════════════════════════════════════════════════ */
+
+.wp-control-grid {
+  display: grid;
+  grid-template-columns: 300px 1fr 300px;
+  gap: 18px;
+  padding: 0 20px 20px;
+  align-items: start;
+}
+
+@media (max-width: 1000px) {
+  .wp-control-grid { grid-template-columns: 1fr; }
+}
+
+/* ── Team Cards ─────────────────────────────────────────── */
+.wp-team-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px;
+  padding: 22px;
+}
+
+.wp-team-card.boys  { border-top: 4px solid var(--boys-color); }
+.wp-team-card.girls { border-top: 4px solid var(--girls-color); }
+.wp-team-card.control { border-top: 4px solid #7c3aed; }
+
+.wp-stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #64748b;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.wp-stat-value {
+  font-size: 2.8rem;
+  font-weight: 900;
+  font-family: 'Orbitron', sans-serif;
+  letter-spacing: 2px;
+}
+
+/* ── Points Input ───────────────────────────────────────── */
+.wp-points-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 6px;
+  margin-top: 10px;
+  align-items: center;
+}
+
+.wp-points-input {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.35);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 700;
+  box-sizing: border-box;
+}
+
+.wp-points-input:focus {
+  outline: none;
+  border-color: var(--boys-color);
+}
+
+/* ── Grid Size Buttons ───────────────────────────────────── */
+.wp-size-btns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.wp-size-btn {
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.06);
+  color: #94a3b8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.wp-size-btn:hover { border-color: #7c3aed; color: #c4b5fd; }
+.wp-size-btn.active {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9);
+  border-color: #7c3aed;
+  color: #fff;
+  box-shadow: 0 0 12px rgba(124,58,237,0.4);
+}
+
+/* ── Turn Buttons ───────────────────────────────────────── */
+.wp-turn-btn-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.wp-turn-btn {
+  padding: 12px 8px;
+  border-radius: 10px;
+  border: 2px solid transparent;
+  font-weight: 800;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.25s;
+  letter-spacing: 0.5px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.wp-turn-btn.boys-turn {
+  background: rgba(59,130,246,0.12);
+  border-color: rgba(59,130,246,0.3);
+  color: #93c5fd;
+}
+
+.wp-turn-btn.girls-turn {
+  background: rgba(236,72,153,0.12);
+  border-color: rgba(236,72,153,0.3);
+  color: #f9a8d4;
+}
+
+.wp-turn-btn.active-turn.boys-turn  { background: #1d4ed8; border-color: #3b82f6; color: #fff; box-shadow: 0 0 18px rgba(59,130,246,0.5); }
+.wp-turn-btn.active-turn.girls-turn { background: #be185d; border-color: #ec4899; color: #fff; box-shadow: 0 0 18px rgba(236,72,153,0.5); }
+
+/* ── Word Input Section ─────────────────────────────────── */
+.wp-word-section {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.wp-word-input-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.wp-word-input {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 2px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.4);
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  box-sizing: border-box;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+
+.wp-word-input:focus { outline: none; border-color: #7c3aed; }
+
+.wp-word-index-badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: 'Orbitron', sans-serif;
+  background: rgba(124,58,237,0.2);
+  border: 1px solid rgba(124,58,237,0.4);
+  color: #c4b5fd;
+  letter-spacing: 1px;
+}
+
+/* ── Dashboard Mini Grid ────────────────────────────────── */
+.wp-grid-section {
+  margin-top: 14px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.wp-grid-scroll-wrap {
+  overflow: auto;
+  max-height: 420px;
+  max-width: 100%;
+  border-radius: 8px;
+  border: 3px solid #1e293b;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.1);
+}
+
+.wp-dash-grid {
+  display: grid;
+  gap: 0;
+  width: max-content;
+}
+
+.wp-dash-cell {
+  box-sizing: border-box;
+  border: 1.5px solid var(--cell-border);
+  background: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.55rem;
+  font-weight: 900;
+  color: rgba(0,0,0,0.7);
+  transition: background 0.12s, transform 0.05s;
+  user-select: none;
+  position: relative;
+}
+
+.wp-dash-cell:hover { filter: brightness(0.85); transform: scale(0.95); }
+.wp-dash-cell.painted-boys  { background: #bfdbfe; }
+.wp-dash-cell.painted-girls { background: #fce7f3; }
+
+/* ── Session Section ────────────────────────────────────── */
+.wp-session-section {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+/* ── Add Points Section ─────────────────────────────────── */
+.wp-addpoints-section {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+/* ── Winner Section ─────────────────────────────────────── */
+.wp-winner-section {
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 14px;
+}
+
+.wp-winner-section input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.3);
+  color: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+/* ── Toast ──────────────────────────────────────────────── */
+.wp-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(15,23,42,0.95);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: #e2e8f0;
+  padding: 14px 28px;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.9rem;
+  z-index: 9999;
+  transition: opacity 0.4s;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+/* ══════════════════════════════════════════════════════════
+   GAME PAGE
+══════════════════════════════════════════════════════════ */
+
+/* ── Team HUD (top bar) ─────────────────────────────────── */
+.wp-hud {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: rgba(10,10,30,0.95);
+  border-bottom: 2px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5);
+  flex-shrink: 0;
+  z-index: 10;
+}
+
+.wp-hud-team {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.wp-hud-team.girls { flex-direction: row-reverse; }
+
+.wp-hud-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.wp-hud-team.boys  .wp-hud-avatar { border: 3px solid var(--boys-color); box-shadow: 0 0 18px var(--boys-glow); }
+.wp-hud-team.girls .wp-hud-avatar { border: 3px solid var(--girls-color); box-shadow: 0 0 18px var(--girls-glow); }
+
+.wp-hud-team.boys  .wp-hud-avatar { background: rgba(59,130,246,0.15); }
+.wp-hud-team.girls .wp-hud-avatar { background: rgba(236,72,153,0.15); }
+
+.wp-hud-info { display: flex; flex-direction: column; gap: 4px; }
+.wp-hud-team.girls .wp-hud-info { align-items: flex-end; }
+
+.wp-hud-team-name {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+
+.wp-hud-points {
+  font-size: 2rem;
+  font-weight: 900;
+  font-family: 'Orbitron', sans-serif;
+}
+
+.wp-hud-team.boys  .wp-hud-points { color: var(--boys-color); text-shadow: 0 0 20px var(--boys-glow); }
+.wp-hud-team.girls .wp-hud-points { color: var(--girls-color); text-shadow: 0 0 20px var(--girls-glow); }
+
+/* ── HUD Centre ─────────────────────────────────────────── */
+.wp-hud-center {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.wp-hud-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(0.8rem, 2vw, 1.1rem);
+  font-weight: 900;
+  background: linear-gradient(90deg, #7c3aed, #ec4899, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 1px;
+}
+
+.wp-turn-badge {
+  padding: 5px 16px;
+  border-radius: 20px;
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  font-family: 'Orbitron', sans-serif;
+  animation: wpPulse 2s ease-in-out infinite;
+}
+
+.wp-turn-badge.boys  { background: rgba(59,130,246,0.2); border: 2px solid var(--boys-color); color: #93c5fd; }
+.wp-turn-badge.girls { background: rgba(236,72,153,0.2); border: 2px solid var(--girls-color); color: #f9a8d4; }
+
+@keyframes wpPulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: 0.6; }
+}
+
+/* ── Game Grid Stage ────────────────────────────────────── */
+.wp-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: auto;
+  min-height: 0;
+}
+
+/* Grid frame — the beautiful border that projects well */
+.wp-game-grid-frame {
+  background: #fff;
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 4px #1e293b,
+    0 0 0 8px #3b4a6b,
+    0 0 0 12px #1e293b,
+    0 0 60px rgba(59,130,246,0.15),
+    0 0 120px rgba(124,58,237,0.1);
+  display: inline-block;
+}
+
+.wp-game-grid {
+  display: grid;
+  gap: 0;
+}
+
+.wp-game-cell {
+  box-sizing: border-box;
+  border: 2px solid var(--cell-border-game);
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  color: #1e293b;
+  font-family: 'Orbitron', monospace;
+  transition: background 0.3s;
+  position: relative;
+}
+
+/* Top-left corner cells have slightly thicker border for the frame feel */
+.wp-game-cell:first-child { border-top-left-radius: 2px; }
+
+.wp-game-cell.colored-boys {
+  background: #bfdbfe;
+  border-color: #1e40af;
+}
+
+.wp-game-cell.colored-girls {
+  background: #fce7f3;
+  border-color: #9d174d;
+}
+
+.wp-game-cell .cell-letter {
+  font-size: inherit;
+  font-weight: 900;
+  line-height: 1;
+  pointer-events: none;
+}
+
+/* ══════════════════════════════════════════════════════════
+   WINNER OVERLAY
+══════════════════════════════════════════════════════════ */
+
+.wp-winner-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s;
+}
+
+.wp-winner-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.wp-winner-content {
+  text-align: center;
+  padding: 60px;
+  animation: wpWinnerBounce 0.6s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes wpWinnerBounce {
+  from { transform: scale(0.4); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.wp-winner-confetti {
+  font-size: 5rem;
+  animation: wpConfettiSpin 1s ease-in-out infinite alternate;
+}
+
+@keyframes wpConfettiSpin {
+  from { transform: rotate(-15deg) scale(1);   }
+  to   { transform: rotate(15deg)  scale(1.1); }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ADD POINTS MODAL (game page)
+══════════════════════════════════════════════════════════ */
+
+.wp-points-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 900;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+}
+
+.wp-points-modal-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.wp-points-modal-card {
+  background: linear-gradient(135deg, #0f172a, #1e1b4b);
+  border: 2px solid rgba(255,255,255,0.15);
+  border-radius: 24px;
+  padding: 50px 60px;
+  text-align: center;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+  animation: wpModalPop 0.5s cubic-bezier(0.34,1.56,0.64,1);
+  max-width: 480px;
+  width: 90%;
+}
+
+@keyframes wpModalPop {
+  from { transform: scale(0.5) translateY(40px); opacity: 0; }
+  to   { transform: scale(1)   translateY(0);    opacity: 1; }
+}
+
+.wp-modal-team-badge {
+  display: inline-block;
+  padding: 8px 24px;
+  border-radius: 30px;
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 3px;
+  font-family: 'Orbitron', sans-serif;
+  margin-bottom: 20px;
+}
+
+.wp-modal-team-badge.boys  { background: rgba(59,130,246,0.25); border: 2px solid var(--boys-color); color: #93c5fd; }
+.wp-modal-team-badge.girls { background: rgba(236,72,153,0.25); border: 2px solid var(--girls-color); color: #f9a8d4; }
+
+.wp-modal-points-value {
+  font-size: 5rem;
+  font-weight: 900;
+  font-family: 'Orbitron', sans-serif;
+  animation: wpModalPointsGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+}
+
+@keyframes wpModalPointsGrow {
+  from { transform: scale(0.3); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.wp-modal-points-value.boys  { color: var(--boys-color); text-shadow: 0 0 40px var(--boys-glow); }
+.wp-modal-points-value.girls { color: var(--girls-color); text-shadow: 0 0 40px var(--girls-glow); }
+
+.wp-modal-total {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  font-weight: 700;
+  margin-top: 10px;
+}
+
+/* ── Dashboard Select ───────────────────────────────────── */
+select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,0,0,0.4);
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%2394a3b8' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}

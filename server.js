@@ -290,6 +290,19 @@ io.on('connection', (socket) => {
         socket.broadcast.emit('maze-close-quiz');
     });
 
+    // ── Word Puzzle game events ───────────────────────────
+    socket.on('wordpuzzle-update-game', (gameState) => {
+        socket.broadcast.emit('wordpuzzle-game-updated', gameState);
+    });
+
+    socket.on('wordpuzzle-add-points', (data) => {
+        socket.broadcast.emit('wordpuzzle-show-points-modal', data);
+    });
+
+    socket.on('wordpuzzle-close-points-modal', () => {
+        socket.broadcast.emit('wordpuzzle-close-points-modal');
+    });
+
     socket.on('disconnect', () => {
 
         console.log('User disconnected');
@@ -321,6 +334,9 @@ server.listen(PORT, () => {
     --------------------------------------
     Maze Game:        http://localhost:${PORT}/game-maze.html
     Maze Dashboard:   http://localhost:${PORT}/dashboard-maze.html
+    --------------------------------------
+    Word Puzzle Game: http://localhost:${PORT}/game-wordpuzzle.html
+    Word Puzzle Dash: http://localhost:${PORT}/dashboard-wordpuzzle.html
     --------------------------------------
     To access from mobile, use your PC's IP address:
     http://[YOUR-IP]:${PORT}/dashboard.html
