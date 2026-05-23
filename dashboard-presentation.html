@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script src="js/auth-check.js"></script>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Presentation Control — Teacher Dashboard</title>
@@ -539,6 +540,13 @@
     }
     .btn-close-pres:hover { background: rgba(239,68,68,0.2); transform: scale(1.02); }
 
+    .btn-close-share {
+      background: rgba(245,158,11,0.1);
+      color: #f59e0b;
+      border: 1px solid rgba(245,158,11,0.25);
+    }
+    .btn-close-share:hover { background: rgba(245,158,11,0.2); transform: scale(1.02); }
+
     .slide-counter {
       padding: 8px 18px;
       border-radius: 10px;
@@ -847,8 +855,10 @@
     /* Preview thumb strip */
     .thumb-strip {
       display: flex;
+      flex-wrap: wrap;
       gap: 10px;
-      overflow-x: auto;
+      max-height: 250px;
+      overflow-y: auto;
       padding: 16px 28px;
       border-top: 1px solid rgba(255,255,255,0.05);
       scrollbar-width: thin;
@@ -1066,6 +1076,7 @@
           <button class="btn-ctrl btn-next" id="btnNext">Next ➡</button>
           <button class="btn-ctrl btn-fullscreen" id="btnFullscreen">⛶ Open Fullscreen</button>
           <button class="btn-ctrl btn-close-pres" id="btnClosePres">✕ Close</button>
+          <button class="btn-ctrl btn-close-share" id="btnCloseShare">✕ Close Shared Overlay</button>
         </div>
 
         <!-- Thumbnail strip -->
@@ -1400,6 +1411,7 @@ function renderFileList(list) {
       </div>
       <div class="file-item-actions">
         <button class="icon-btn" onclick="event.stopPropagation();openPresentation(${JSON.stringify(f).replace(/"/g,'&quot;')})" title="Open">▶</button>
+        <a class="icon-btn" href="/uploads/${f.filename}" download="${f.originalname.replace(/"/g,'&quot;')}" onclick="event.stopPropagation();" title="Download" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">📥</a>
         <button class="icon-btn danger" onclick="event.stopPropagation();deleteFile('${f.filename}')" title="Delete">🗑️</button>
       </div>
     </div>
@@ -1480,10 +1492,13 @@ function updateSlideInfo() {
 
 function buildThumbStrip() {
   const strip = document.getElementById('thumbStrip');
+  if (!selectedFile) return;
+  const slideDir = `/uploads/slides-${selectedFile.filename.replace(/\.[^.]+$/, "")}`;
   strip.innerHTML = Array.from({length: totalSlides}, (_, i) => `
     <div class="thumb-item ${i === currentSlide ? 'active' : ''}" onclick="goToSlide(${i})" title="Slide ${i+1}">
-      📄
-      <span class="thumb-num">${i+1}</span>
+      <img src="${slideDir}/slide_${i+1}.png" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;">
+      <span style="position:relative; z-index:1; text-shadow: 0 2px 4px rgba(0,0,0,0.8)">📄</span>
+      <span class="thumb-num" style="z-index:2; text-shadow: 0 1px 3px rgba(0,0,0,0.8); background: rgba(0,0,0,0.5); padding: 1px 4px; border-radius: 3px;">${i+1}</span>
     </div>
   `).join('');
 }
@@ -1516,6 +1531,11 @@ document.getElementById('btnClosePres').addEventListener('click', () => {
   document.getElementById('activePresView').style.display = 'none';
   renderFileList(files);
   showToast('Presentation closed', 'info');
+});
+
+document.getElementById('btnCloseShare').addEventListener('click', () => {
+  socket.emit('pres-close-share');
+  showToast('✕ Closed shared modals on game screen', 'info');
 });
 
 // ════════════════════════════════════════════

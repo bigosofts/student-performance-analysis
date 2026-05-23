@@ -678,10 +678,13 @@
         border: 1px solid rgba(255, 255, 255, 0.1);
         border-radius: 28px;
         padding: 36px;
-        max-width: 700px;
-        width: 100%;
+        width: 85vw;
+        max-width: 1400px;
+        height: 85vh;
         max-height: 85vh;
-        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
         box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
         animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
@@ -746,7 +749,8 @@
       /* IMAGE modal */
       .shared-img {
         width: 100%;
-        max-height: 60vh;
+        flex: 1;
+        min-height: 0;
         object-fit: contain;
         border-radius: 16px;
         border: 1px solid rgba(255, 255, 255, 0.08);
@@ -756,30 +760,11 @@
       .tree-display {
         background: rgba(0, 0, 0, 0.3);
         border-radius: 16px;
-        padding: 28px;
-        font-family: "Courier New", monospace;
-        font-size: 0.88rem;
-        line-height: 1.8;
-        color: #e2e8f0;
+        padding: 20px;
         border: 1px solid rgba(16, 185, 129, 0.2);
-        white-space: pre-wrap;
-        word-break: break-word;
-      }
-
-      .tree-line {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-      }
-      .tree-connector {
-        color: #10b981;
-      }
-      .tree-label {
-        color: #f8fafc;
-      }
-      .tree-arrow {
-        color: #06b6d4;
-        font-style: normal;
+        flex: 1;
+        min-height: 0;
+        overflow: auto;
       }
 
       /* NOTE modal */
@@ -792,6 +777,9 @@
         line-height: 1.8;
         color: #e2e8f0;
         font-size: 0.95rem;
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
       }
 
       /* DRAWING modal */
@@ -799,6 +787,116 @@
         width: 100%;
         border-radius: 16px;
         border: 1px solid rgba(236, 72, 153, 0.2);
+      }
+
+      #screenFullscreenBtn:hover {
+        background: rgba(124, 58, 237, 0.5) !important;
+        border-color: rgba(124, 58, 237, 0.6) !important;
+        transform: scale(1.1);
+      }
+
+      /* ─── GRAPHICAL TREE ─── */
+      .graphical-tree {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 20px;
+        width: 100%;
+        overflow-x: auto;
+      }
+      .graphical-tree ul {
+        padding-top: 20px;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        list-style-type: none;
+      }
+      .graphical-tree li {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+        padding-top: 20px;
+        list-style-type: none;
+      }
+      /* Connectors */
+      .graphical-tree li::before, .graphical-tree li::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 50%;
+        border-top: 2px solid rgba(16, 185, 129, 0.4);
+        width: 50%;
+        height: 20px;
+        z-index: 1;
+      }
+      .graphical-tree li::after {
+        right: auto;
+        left: 50%;
+        border-left: 2px solid rgba(16, 185, 129, 0.4);
+      }
+      .graphical-tree li:only-child::after, .graphical-tree li:only-child::before {
+        display: none;
+      }
+      .graphical-tree li:only-child {
+        padding-top: 0;
+      }
+      .graphical-tree li:first-child::before, .graphical-tree li:last-child::after {
+        border: 0 none;
+      }
+      .graphical-tree li:last-child::before {
+        border-right: 2px solid rgba(16, 185, 129, 0.4);
+        border-radius: 0 5px 0 0;
+      }
+      .graphical-tree li:first-child::after {
+        border-radius: 5px 0 0 0;
+      }
+      .graphical-tree ul ul::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 50%;
+        border-left: 2px solid rgba(16, 185, 129, 0.4);
+        width: 0;
+        height: 20px;
+        z-index: 1;
+      }
+      .tree-node-card {
+        background: rgba(16, 185, 129, 0.1);
+        border: 2px solid rgba(16, 185, 129, 0.4);
+        border-radius: 12px;
+        padding: 10px 16px;
+        color: #f8fafc;
+        font-family: 'Outfit', sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s;
+        min-width: 120px;
+        max-width: 250px;
+      }
+      .tree-node-card:hover {
+        transform: translateY(-2px);
+        background: rgba(16, 185, 129, 0.2);
+        border-color: #10b981;
+        box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3);
+      }
+      .tree-node-label {
+        font-size: 0.75rem;
+        color: #a78bfa;
+        font-weight: 700;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        letter-spacing: 0.5px;
+      }
+      .tree-node-value {
+        color: #fff;
+        font-size: 0.9rem;
+        font-weight: 500;
       }
 
       /* Loading slide indicator */
@@ -963,7 +1061,10 @@
             <span class="hud-badge">▶ LIVE</span>
             <span id="hudTitle">Presentation</span>
           </div>
-          <div class="hud-counter" id="hudCounter">— / —</div>
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div class="hud-counter" id="hudCounter">— / —</div>
+            <button id="screenFullscreenBtn" style="background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15); color: white; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 1rem; transition: all 0.2s;" title="Toggle Fullscreen">⛶</button>
+          </div>
         </div>
 
         <!-- Swipe hint -->
@@ -1157,7 +1258,12 @@
 
       socket.on("pres-share-tree", (data) => {
         document.getElementById("treeModalSub").textContent = data.title;
-        document.getElementById("treeDisplay").textContent = data.data;
+        const parsed = parseTextToTree(data.data);
+        if (parsed) {
+          document.getElementById("treeDisplay").innerHTML = renderGraphicalTree(parsed);
+        } else {
+          document.getElementById("treeDisplay").textContent = data.data;
+        }
         document.getElementById("treeModal").classList.add("open");
       });
 
@@ -1165,6 +1271,12 @@
         document.getElementById("noteTitleDisplay").textContent = data.title;
         document.getElementById("noteDisplay").textContent = data.content;
         document.getElementById("noteModal").classList.add("open");
+      });
+
+      socket.on("pres-close-share", () => {
+        closeShareModal('imgModal');
+        closeShareModal('treeModal');
+        closeShareModal('noteModal');
       });
 
       // ════════════════════════════════════════════
@@ -1347,6 +1459,122 @@
           }
         });
 
+      // Fullscreen controls
+      document.getElementById('screenFullscreenBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('screenFullscreenBtn');
+        if (document.fullscreenElement) {
+          btn.textContent = '✕';
+          btn.title = 'Exit Fullscreen';
+        } else {
+          btn.textContent = '⛶';
+          btn.title = 'Enter Fullscreen';
+        }
+      });
+
+      document.getElementById('viewerScreen').addEventListener('click', (e) => {
+        if (e.target.closest('.nav-btn') || e.target.closest('.share-modal') || e.target.closest('#screenFullscreenBtn')) return;
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      function parseTextToTree(text) {
+        const lines = text.split('\n').filter(line => line.trim().length > 0);
+        if (lines.length === 0) return null;
+
+        const rootNodes = [];
+        const stack = [];
+
+        for (let line of lines) {
+          const leadingSpaces = line.search(/\S/);
+          let cleanText = line.replace(/[├└─│┌┤┐┬┴┼]+/g, '').trim();
+          
+          let label = cleanText;
+          let value = '';
+          if (cleanText.includes('→')) {
+            const parts = cleanText.split('→');
+            label = parts[0].trim();
+            value = parts.slice(1).join('→').trim();
+          } else if (cleanText.includes('->')) {
+            const parts = cleanText.split('->');
+            label = parts[0].trim();
+            value = parts.slice(1).join('->').trim();
+          }
+
+          const node = {
+            label: label,
+            value: value,
+            children: [],
+            indent: leadingSpaces
+          };
+
+          if (stack.length === 0) {
+            rootNodes.push(node);
+            stack.push(node);
+          } else {
+            while (stack.length > 0 && stack[stack.length - 1].indent >= leadingSpaces) {
+              stack.pop();
+            }
+
+            if (stack.length === 0) {
+              rootNodes.push(node);
+              stack.push(node);
+            } else {
+              const parent = stack[stack.length - 1];
+              parent.children.push(node);
+              stack.push(node);
+            }
+          }
+        }
+        return rootNodes;
+      }
+
+      function renderGraphicalTree(nodes) {
+        if (!nodes || nodes.length === 0) return '';
+        
+        function buildHtml(node) {
+          let cardContent = '';
+          if (node.value) {
+            cardContent = `<div class="tree-node-label">${node.label}</div><div class="tree-node-value">${node.value}</div>`;
+          } else {
+            cardContent = `<div class="tree-node-value">${node.label}</div>`;
+          }
+          
+          let html = `<li class="tree-node-item">
+            <div class="tree-node-card">
+              ${cardContent}
+            </div>`;
+            
+          if (node.children && node.children.length > 0) {
+            html += `<ul>`;
+            for (let child of node.children) {
+              html += buildHtml(child);
+            }
+            html += `</ul>`;
+          }
+          html += `</li>`;
+          return html;
+        }
+
+        let fullHtml = `<div class="graphical-tree"><ul>`;
+        for (let root of nodes) {
+          fullHtml += buildHtml(root);
+        }
+        fullHtml += `</ul></div>`;
+        return fullHtml;
+      }
+
       // ════════════════════════════════════════════
       //  MODAL HELPERS
       // ════════════════════════════════════════════
@@ -1356,6 +1584,12 @@
 
       // Also receive pres-updated when files change
       socket.on("pres-updated", () => loadPresentations());
+
+      socket.on('classroom-navigate', (data) => {
+        if (data && data.url) {
+          window.location.href = data.url;
+        }
+      });
 
       // Initial load
       setTimeout(loadPresentations, 300);

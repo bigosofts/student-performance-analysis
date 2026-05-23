@@ -1,115 +1,127 @@
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const path = require('path');
-const multer = require('multer');
-const fs = require('fs');
-const XLSX = require('xlsx');
-const { spawn } = require('child_process');
+const express = require("express");
+const http = require("http");
+const { Server } = require("socket.io");
+const path = require("path");
+const multer = require("multer");
+const fs = require("fs");
+const XLSX = require("xlsx");
+const { spawn } = require("child_process");
 
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: {
-        origin: "*",
-    },
-    maxHttpBufferSize: 1e7 // 10MB limit for high-res images
+  cors: {
+    origin: "*",
+  },
+  maxHttpBufferSize: 1e7, // 10MB limit for high-res images
 });
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
+  fs.mkdirSync(uploadsDir);
 }
 
 // ========== PRESENTATION SYSTEM ==========
-const PRES_META_FILE = path.join(uploadsDir, 'presentations.json');
+const PRES_META_FILE = path.join(uploadsDir, "presentations.json");
 
 function loadPresMeta() {
-    try {
-        if (fs.existsSync(PRES_META_FILE)) {
-            return JSON.parse(fs.readFileSync(PRES_META_FILE, 'utf8'));
-        }
-    } catch (e) { console.error('Error loading pres meta:', e); }
-    return [];
+  try {
+    if (fs.existsSync(PRES_META_FILE)) {
+      return JSON.parse(fs.readFileSync(PRES_META_FILE, "utf8"));
+    }
+  } catch (e) {
+    console.error("Error loading pres meta:", e);
+  }
+  return [];
 }
 
 function savePresMeta(data) {
-    try {
-        fs.writeFileSync(PRES_META_FILE, JSON.stringify(data, null, 2), 'utf8');
-    } catch (e) { console.error('Error saving pres meta:', e); }
+  try {
+    fs.writeFileSync(PRES_META_FILE, JSON.stringify(data, null, 2), "utf8");
+  } catch (e) {
+    console.error("Error saving pres meta:", e);
+  }
 }
 
 // Convert PPTX to PNG images using PowerShell + PowerPoint COM
 function convertPptxToImages(pptxPath, slideDir) {
-    return new Promise((resolve, reject) => {
-        if (!fs.existsSync(slideDir)) {
-            fs.mkdirSync(slideDir, { recursive: true });
-        }
-        // PowerShell script that uses PowerPoint COM automation
-        const psScript = [
-            '$ErrorActionPreference = "Stop"',
-            `$pptPath = "${pptxPath.replace(/\\/g, '\\\\')}"`,
-            `$outDir  = "${slideDir.replace(/\\/g, '\\\\')}"`,
-            'try {',
-            '  Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint 2>$null',
-            '  $pptApp = New-Object -ComObject PowerPoint.Application',
-            '  $pptApp.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue',
-            '  $pres = $pptApp.Presentations.Open($pptPath, $true, $false, $false)',
-            '  $count = $pres.Slides.Count',
-            '  for ($i = 1; $i -le $count; $i++) {',
-            '    $slide = $pres.Slides.Item($i)',
-            '    $slide.Export("$outDir\\slide_$i.png", "PNG", 1920, 1080)',
-            '  }',
-            '  $pres.Close()',
-            '  $pptApp.Quit()',
-            '  [System.Runtime.InteropServices.Marshal]::ReleaseComObject($pptApp) | Out-Null',
-            '  [System.GC]::Collect()',
-            '  Write-Output $count',
-            '} catch {',
-            '  Write-Error $_.Exception.Message',
-            '  exit 1',
-            '}'
-        ].join('\n');
+  return new Promise((resolve, reject) => {
+    if (!fs.existsSync(slideDir)) {
+      fs.mkdirSync(slideDir, { recursive: true });
+    }
+    // PowerShell script that uses PowerPoint COM automation
+    const psScript = [
+      '$ErrorActionPreference = "Stop"',
+      `$pptPath = "${pptxPath.replace(/\\/g, "\\\\")}"`,
+      `$outDir  = "${slideDir.replace(/\\/g, "\\\\")}"`,
+      "try {",
+      "  Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint 2>$null",
+      "  $pptApp = New-Object -ComObject PowerPoint.Application",
+      "  $pptApp.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue",
+      "  $pres = $pptApp.Presentations.Open($pptPath, $true, $false, $false)",
+      "  $count = $pres.Slides.Count",
+      "  for ($i = 1; $i -le $count; $i++) {",
+      "    $slide = $pres.Slides.Item($i)",
+      '    $slide.Export("$outDir\\slide_$i.png", "PNG", 1920, 1080)',
+      "  }",
+      "  $pres.Close()",
+      "  $pptApp.Quit()",
+      "  [System.Runtime.InteropServices.Marshal]::ReleaseComObject($pptApp) | Out-Null",
+      "  [System.GC]::Collect()",
+      "  Write-Output $count",
+      "} catch {",
+      "  Write-Error $_.Exception.Message",
+      "  exit 1",
+      "}",
+    ].join("\n");
 
-        const ps = spawn('powershell', [
-            '-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass',
-            '-Command', psScript
-        ]);
+    const ps = spawn("powershell", [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-Command",
+      psScript,
+    ]);
 
-        let stdout = '';
-        let stderr = '';
-        ps.stdout.on('data', d => stdout += d.toString());
-        ps.stderr.on('data', d => stderr += d.toString());
+    let stdout = "";
+    let stderr = "";
+    ps.stdout.on("data", (d) => (stdout += d.toString()));
+    ps.stderr.on("data", (d) => (stderr += d.toString()));
 
-        ps.on('close', code => {
-            if (code === 0) {
-                const count = parseInt(stdout.trim()) || 0;
-                resolve(count);
-            } else {
-                reject(new Error(stderr.trim() || 'PowerShell conversion failed with code ' + code));
-            }
-        });
-
-        ps.on('error', err => reject(err));
+    ps.on("close", (code) => {
+      if (code === 0) {
+        const count = parseInt(stdout.trim()) || 0;
+        resolve(count);
+      } else {
+        reject(
+          new Error(
+            stderr.trim() || "PowerShell conversion failed with code " + code,
+          ),
+        );
+      }
     });
+
+    ps.on("error", (err) => reject(err));
+  });
 }
 
 // Multer for PPTX uploads
 const presStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, uploadsDir),
-    filename: (req, file, cb) => {
-        const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, '_');
-        cb(null, `pres-${Date.now()}-${safe}`);
-    }
+  destination: (req, file, cb) => cb(null, uploadsDir),
+  filename: (req, file, cb) => {
+    const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+    cb(null, `pres-${Date.now()}-${safe}`);
+  },
 });
 const presUpload = multer({
-    storage: presStorage,
-    fileFilter: (req, file, cb) => {
-        const ok = /\.(pptx|ppt)$/i.test(file.originalname);
-        cb(ok ? null : new Error('Only .pptx and .ppt files are allowed'), ok);
-    },
-    limits: { fileSize: 200 * 1024 * 1024 } // 200MB
+  storage: presStorage,
+  fileFilter: (req, file, cb) => {
+    const ok = /\.(pptx|ppt)$/i.test(file.originalname);
+    cb(ok ? null : new Error("Only .pptx and .ppt files are allowed"), ok);
+  },
+  limits: { fileSize: 200 * 1024 * 1024 }, // 200MB
 });
 
 // ========== MONOPOLY QUIZ SYSTEM ==========
@@ -121,452 +133,517 @@ let mazeQuizQuestions = [];
 let currentMazeQuizIndex = 0;
 
 function createDemoExcel(filePath) {
-    const data = [
-        ['Question', 'Option A', 'Option B', 'Option C', 'Option D', 'Answer'],
-        ['ধান কোন ধরনের ফসল?', 'রবি ফসল', 'খরিফ ফসল', 'নগদ ফসল', 'দোফসলি', 'B'],
-        ['বাংলাদেশের প্রধান খাদ্যশস্য কোনটি?', 'গম', 'ধান', 'ভুট্টা', 'যব', 'B'],
-        ['সালোকসংশ্লেষণের জন্য কোনটি প্রয়োজন?', 'অক্সিজেন', 'নাইট্রোজেন', 'কার্বন ডাই অক্সাইড', 'হাইড্রোজেন', 'C'],
-        ['কোন মাটি ধান চাষের জন্য উপযুক্ত?', 'বেলে মাটি', 'দোঁয়াশ মাটি', 'কাদামাটি', 'পলি মাটি', 'C'],
-        ['বাংলাদেশে কোন ফসল সবচেয়ে বেশি উৎপাদিত হয়?', 'গম', 'পাট', 'ধান', 'আখ', 'C'],
-        ['জৈব সার কোনটি?', 'ইউরিয়া', 'টিএসপি', 'কম্পোস্ট', 'এমওপি', 'C'],
-        ['ফসলের পোকামাকড় দমনে কোন পদ্ধতি পরিবেশবান্ধব?', 'রাসায়নিক কীটনাশক', 'জৈবিক দমন', 'আগুন', 'কোনোটিই নয়', 'B'],
-        ['বাংলাদেশের জাতীয় ফল কোনটি?', 'আম', 'কাঁঠাল', 'লিচু', 'কলা', 'B'],
-        ['কোনটি রবি ফসল?', 'ধান', 'পাট', 'গম', 'আউশ', 'C'],
-        ['মাটির pH কত হলে ধান চাষ ভালো হয়?', '৩-৪', '৫.৫-৬.৫', '৮-৯', '১০-১১', 'B'],
-    ];
-    const ws = XLSX.utils.aoa_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Quiz Questions');
-    XLSX.writeFile(wb, filePath);
-    console.log('Demo quiz Excel created at:', filePath);
+  const data = [
+    ["Question", "Option A", "Option B", "Option C", "Option D", "Answer"],
+    ["ধান কোন ধরনের ফসল?", "রবি ফসল", "খরিফ ফসল", "নগদ ফসল", "দোফসলি", "B"],
+    ["বাংলাদেশের প্রধান খাদ্যশস্য কোনটি?", "গম", "ধান", "ভুট্টা", "যব", "B"],
+    [
+      "সালোকসংশ্লেষণের জন্য কোনটি প্রয়োজন?",
+      "অক্সিজেন",
+      "নাইট্রোজেন",
+      "কার্বন ডাই অক্সাইড",
+      "হাইড্রোজেন",
+      "C",
+    ],
+    [
+      "কোন মাটি ধান চাষের জন্য উপযুক্ত?",
+      "বেলে মাটি",
+      "দোঁয়াশ মাটি",
+      "কাদামাটি",
+      "পলি মাটি",
+      "C",
+    ],
+    [
+      "বাংলাদেশে কোন ফসল সবচেয়ে বেশি উৎপাদিত হয়?",
+      "গম",
+      "পাট",
+      "ধান",
+      "আখ",
+      "C",
+    ],
+    ["জৈব সার কোনটি?", "ইউরিয়া", "টিএসপি", "কম্পোস্ট", "এমওপি", "C"],
+    [
+      "ফসলের পোকামাকড় দমনে কোন পদ্ধতি পরিবেশবান্ধব?",
+      "রাসায়নিক কীটনাশক",
+      "জৈবিক দমন",
+      "আগুন",
+      "কোনোটিই নয়",
+      "B",
+    ],
+    ["বাংলাদেশের জাতীয় ফল কোনটি?", "আম", "কাঁঠাল", "লিচু", "কলা", "B"],
+    ["কোনটি রবি ফসল?", "ধান", "পাট", "গম", "আউশ", "C"],
+    [
+      "মাটির pH কত হলে ধান চাষ ভালো হয়?",
+      "৩-৪",
+      "৫.৫-৬.৫",
+      "৮-৯",
+      "১০-১১",
+      "B",
+    ],
+  ];
+  const ws = XLSX.utils.aoa_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Quiz Questions");
+  XLSX.writeFile(wb, filePath);
+  console.log("Demo quiz Excel created at:", filePath);
 }
 
 function loadQuizFromExcel(filePath) {
-    try {
-        const wb = XLSX.readFile(filePath);
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        quizQuestions = [];
-        for (let i = 1; i < data.length; i++) {
-            const row = data[i];
-            if (row && row[0]) {
-                quizQuestions.push({
-                    question: row[0],
-                    options: [row[1], row[2], row[3], row[4]],
-                    answer: (row[5] || 'A').toString().toUpperCase()
-                });
-            }
-        }
-        currentQuizIndex = 0;
-        console.log(`Loaded ${quizQuestions.length} quiz questions`);
-    } catch (e) {
-        console.error('Failed to load quiz:', e);
+  try {
+    const wb = XLSX.readFile(filePath);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    quizQuestions = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (row && row[0]) {
+        quizQuestions.push({
+          question: row[0],
+          options: [row[1], row[2], row[3], row[4]],
+          answer: (row[5] || "A").toString().toUpperCase(),
+        });
+      }
     }
+    currentQuizIndex = 0;
+    console.log(`Loaded ${quizQuestions.length} quiz questions`);
+  } catch (e) {
+    console.error("Failed to load quiz:", e);
+  }
 }
 
 function initQuizSystem() {
-    const quizPath = path.join(uploadsDir, 'quiz-questions.xlsx');
-    if (!fs.existsSync(quizPath)) {
-        createDemoExcel(quizPath);
-    }
-    loadQuizFromExcel(quizPath);
+  const quizPath = path.join(uploadsDir, "quiz-questions.xlsx");
+  if (!fs.existsSync(quizPath)) {
+    createDemoExcel(quizPath);
+  }
+  loadQuizFromExcel(quizPath);
 }
 
 // ── Maze quiz loader ───────────────────────────────────────────
 function loadMazeQuizFromExcel(filePath) {
-    try {
-        const wb = XLSX.readFile(filePath);
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
-        mazeQuizQuestions = [];
-        for (let i = 1; i < data.length; i++) {
-            const row = data[i];
-            if (row && row[0]) {
-                mazeQuizQuestions.push({
-                    question: row[0],
-                    options: [row[1], row[2], row[3], row[4]],
-                    answer: (row[5] || 'A').toString().toUpperCase()
-                });
-            }
-        }
-        currentMazeQuizIndex = 0;
-        console.log(`[Maze] Loaded ${mazeQuizQuestions.length} quiz questions`);
-    } catch (e) {
-        console.error('[Maze] Failed to load quiz:', e);
+  try {
+    const wb = XLSX.readFile(filePath);
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, { header: 1 });
+    mazeQuizQuestions = [];
+    for (let i = 1; i < data.length; i++) {
+      const row = data[i];
+      if (row && row[0]) {
+        mazeQuizQuestions.push({
+          question: row[0],
+          options: [row[1], row[2], row[3], row[4]],
+          answer: (row[5] || "A").toString().toUpperCase(),
+        });
+      }
     }
+    currentMazeQuizIndex = 0;
+    console.log(`[Maze] Loaded ${mazeQuizQuestions.length} quiz questions`);
+  } catch (e) {
+    console.error("[Maze] Failed to load quiz:", e);
+  }
 }
 
 // ========== MULTER CONFIGS ==========
 const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        const tileId = req.params.tileId || req.body.tileId || 'unknown';
-        const ext = path.extname(file.originalname);
-        cb(null, `tile-${tileId}-${Date.now()}${ext}`); // Added timestamp to prevent cache issues
-    }
-
+  destination: (req, file, cb) => {
+    cb(null, "uploads/");
+  },
+  filename: (req, file, cb) => {
+    const tileId = req.params.tileId || req.body.tileId || "unknown";
+    const ext = path.extname(file.originalname);
+    cb(null, `tile-${tileId}-${Date.now()}${ext}`); // Added timestamp to prevent cache issues
+  },
 });
 
 const upload = multer({ storage: storage });
 
 const quizUploadStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => cb(null, 'quiz-upload-temp' + path.extname(file.originalname))
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, "quiz-upload-temp" + path.extname(file.originalname)),
 });
 const quizUpload = multer({ storage: quizUploadStorage });
 
 // Serve static files from the current directory
 app.use(express.static(path.join(__dirname)));
 // Serve uploads folder
-app.use('/uploads', express.static(uploadsDir));
+app.use("/uploads", express.static(uploadsDir));
 app.use(express.json());
 
 // API to upload image
-app.post('/upload/:tileId', upload.single('image'), (req, res) => {
-    if (!req.file) return res.status(400).send('No file uploaded.');
-    
-    const tileId = req.params.tileId;
-    const imageUrl = `/uploads/${req.file.filename}`;
-    
-    // Broadcast to all clients
-    io.emit('image-updated', { id: tileId, url: imageUrl });
-    
-    res.send({ status: 'ok', url: imageUrl });
+app.post("/upload/:tileId", upload.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).send("No file uploaded.");
+
+  const tileId = req.params.tileId;
+  const imageUrl = `/uploads/${req.file.filename}`;
+
+  // Broadcast to all clients
+  io.emit("image-updated", { id: tileId, url: imageUrl });
+
+  res.send({ status: "ok", url: imageUrl });
 });
 
 // API to upload monopoly quiz Excel
-app.post('/upload-quiz', quizUpload.single('quizFile'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    
-    const dest = path.join(uploadsDir, 'quiz-questions.xlsx');
-    const tempPath = path.join(uploadsDir, req.file.filename);
-    
-    // Remove old quiz file
-    if (fs.existsSync(dest)) {
-        try { fs.unlinkSync(dest); } catch(e) {}
-    }
-    
-    // Rename temp to permanent
-    fs.renameSync(tempPath, dest);
-    loadQuizFromExcel(dest);
-    
-    io.emit('quiz-loaded', { count: quizQuestions.length });
-    res.json({ status: 'ok', count: quizQuestions.length });
+app.post("/upload-quiz", quizUpload.single("quizFile"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  const dest = path.join(uploadsDir, "quiz-questions.xlsx");
+  const tempPath = path.join(uploadsDir, req.file.filename);
+
+  // Remove old quiz file
+  if (fs.existsSync(dest)) {
+    try {
+      fs.unlinkSync(dest);
+    } catch (e) {}
+  }
+
+  // Rename temp to permanent
+  fs.renameSync(tempPath, dest);
+  loadQuizFromExcel(dest);
+
+  io.emit("quiz-loaded", { count: quizQuestions.length });
+  res.json({ status: "ok", count: quizQuestions.length });
 });
 
 // Multer config for maze quiz
 const mazeQuizUploadStorage = multer.diskStorage({
-    destination: (req, file, cb) => cb(null, 'uploads/'),
-    filename: (req, file, cb) => cb(null, 'maze-quiz-upload-temp' + path.extname(file.originalname))
+  destination: (req, file, cb) => cb(null, "uploads/"),
+  filename: (req, file, cb) =>
+    cb(null, "maze-quiz-upload-temp" + path.extname(file.originalname)),
 });
 const mazeQuizUpload = multer({ storage: mazeQuizUploadStorage });
 
 // API to upload maze quiz Excel
-app.post('/upload-maze-quiz', mazeQuizUpload.single('quizFile'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
-    
-    const dest = path.join(uploadsDir, 'maze-quiz-questions.xlsx');
-    const tempPath = path.join(uploadsDir, req.file.filename);
-    
-    if (fs.existsSync(dest)) {
-        try { fs.unlinkSync(dest); } catch(e) {}
-    }
-    
-    fs.renameSync(tempPath, dest);
-    loadMazeQuizFromExcel(dest);
-    
-    io.emit('maze-quiz-loaded', { count: mazeQuizQuestions.length });
-    res.json({ status: 'ok', count: mazeQuizQuestions.length });
+app.post("/upload-maze-quiz", mazeQuizUpload.single("quizFile"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+
+  const dest = path.join(uploadsDir, "maze-quiz-questions.xlsx");
+  const tempPath = path.join(uploadsDir, req.file.filename);
+
+  if (fs.existsSync(dest)) {
+    try {
+      fs.unlinkSync(dest);
+    } catch (e) {}
+  }
+
+  fs.renameSync(tempPath, dest);
+  loadMazeQuizFromExcel(dest);
+
+  io.emit("maze-quiz-loaded", { count: mazeQuizQuestions.length });
+  res.json({ status: "ok", count: mazeQuizQuestions.length });
 });
 
 // Get next maze quiz question (randomised)
-app.get('/api/maze-quiz/next', (req, res) => {
-    if (mazeQuizQuestions.length === 0) {
-        return res.json({ question: null });
-    }
-    const randomIndex = Math.floor(Math.random() * mazeQuizQuestions.length);
-    const q = mazeQuizQuestions[randomIndex];
-    currentMazeQuizIndex++;
-    res.json({ ...q, index: randomIndex + 1, total: mazeQuizQuestions.length });
+app.get("/api/maze-quiz/next", (req, res) => {
+  if (mazeQuizQuestions.length === 0) {
+    return res.json({ question: null });
+  }
+  const randomIndex = Math.floor(Math.random() * mazeQuizQuestions.length);
+  const q = mazeQuizQuestions[randomIndex];
+  currentMazeQuizIndex++;
+  res.json({ ...q, index: randomIndex + 1, total: mazeQuizQuestions.length });
 });
 
 // Get maze quiz info
-app.get('/api/maze-quiz/info', (req, res) => {
-    res.json({ count: mazeQuizQuestions.length, currentIndex: currentMazeQuizIndex });
+app.get("/api/maze-quiz/info", (req, res) => {
+  res.json({
+    count: mazeQuizQuestions.length,
+    currentIndex: currentMazeQuizIndex,
+  });
 });
 
 // Get next quiz question (randomized)
-app.get('/api/quiz/next', (req, res) => {
-    if (quizQuestions.length === 0) {
-        return res.json({ question: null });
-    }
-    const randomIndex = Math.floor(Math.random() * quizQuestions.length);
-    const q = quizQuestions[randomIndex];
-    currentQuizIndex++;
-    res.json({ ...q, index: randomIndex + 1, total: quizQuestions.length });
+app.get("/api/quiz/next", (req, res) => {
+  if (quizQuestions.length === 0) {
+    return res.json({ question: null });
+  }
+  const randomIndex = Math.floor(Math.random() * quizQuestions.length);
+  const q = quizQuestions[randomIndex];
+  currentQuizIndex++;
+  res.json({ ...q, index: randomIndex + 1, total: quizQuestions.length });
 });
 
 // Get quiz info
-app.get('/api/quiz/info', (req, res) => {
-    res.json({ count: quizQuestions.length, currentIndex: currentQuizIndex });
+app.get("/api/quiz/info", (req, res) => {
+  res.json({ count: quizQuestions.length, currentIndex: currentQuizIndex });
 });
 
 // API to clear all uploads (except quiz file)
-app.post('/clear-uploads', (req, res) => {
-    fs.readdir(uploadsDir, (err, files) => {
-        if (err) return res.status(500).send(err);
-        for (const file of files) {
-            if (file === 'quiz-questions.xlsx') continue; // keep quiz file
-            fs.unlink(path.join(uploadsDir, file), err => {
-                if (err) console.error(err);
-            });
-        }
-        // Broadcast wipe to all clients
-        io.emit('image-updated', { id: 'all' });
-        res.send({ status: 'ok' });
-    });
+app.post("/clear-uploads", (req, res) => {
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) return res.status(500).send(err);
+    for (const file of files) {
+      if (file === "quiz-questions.xlsx") continue; // keep quiz file
+      fs.unlink(path.join(uploadsDir, file), (err) => {
+        if (err) console.error(err);
+      });
+    }
+    // Broadcast wipe to all clients
+    io.emit("image-updated", { id: "all" });
+    res.send({ status: "ok" });
+  });
 });
 
-io.on('connection', (socket) => {
-    console.log('A user connected:', socket.id);
+io.on("connection", (socket) => {
+  console.log("A user connected:", socket.id);
 
-    // When teacher sends a game update
-    socket.on('update-game', (gameState) => {
-        socket.broadcast.emit('game-updated', gameState);
-    });
+  // When teacher sends a game update
+  socket.on("update-game", (gameState) => {
+    socket.broadcast.emit("game-updated", gameState);
+  });
 
-    // Forward image-saved events (used for sync-start and other UI signals)
-    socket.on('image-saved', (data) => {
-        socket.broadcast.emit('image-updated', data);
-    });
+  // Forward image-saved events (used for sync-start and other UI signals)
+  socket.on("image-saved", (data) => {
+    socket.broadcast.emit("image-updated", data);
+  });
 
-    // Monopoly quiz events
-    socket.on('show-quiz', (data) => {
-        socket.broadcast.emit('quiz-show', data);
-    });
+  // Monopoly quiz events
+  socket.on("show-quiz", (data) => {
+    socket.broadcast.emit("quiz-show", data);
+  });
 
-    socket.on('quiz-result', (data) => {
-        socket.broadcast.emit('quiz-result', data);
-    });
+  socket.on("quiz-result", (data) => {
+    socket.broadcast.emit("quiz-result", data);
+  });
 
-    socket.on('close-quiz', () => {
-        socket.broadcast.emit('quiz-close');
-    });
+  socket.on("close-quiz", () => {
+    socket.broadcast.emit("quiz-close");
+  });
 
-    // Event overlay (opportunity/obstacle)
-    socket.on('show-event', (data) => {
-        socket.broadcast.emit('event-show', data);
-    });
+  // Event overlay (opportunity/obstacle)
+  socket.on("show-event", (data) => {
+    socket.broadcast.emit("event-show", data);
+  });
 
-    socket.on('close-event', () => {
-        socket.broadcast.emit('event-close');
-    });
+  socket.on("close-event", () => {
+    socket.broadcast.emit("event-close");
+  });
 
-    // ── Maze game events ────────────────────────────────────
-    socket.on('maze-update-game', (gameState) => {
-        socket.broadcast.emit('maze-game-updated', gameState);
-    });
+  // ── Maze game events ────────────────────────────────────
+  socket.on("maze-update-game", (gameState) => {
+    socket.broadcast.emit("maze-game-updated", gameState);
+  });
 
-    socket.on('maze-show-quiz', (data) => {
-        socket.broadcast.emit('maze-show-quiz', data);
-    });
+  socket.on("maze-show-quiz", (data) => {
+    socket.broadcast.emit("maze-show-quiz", data);
+  });
 
-    socket.on('maze-quiz-result', (data) => {
-        socket.broadcast.emit('maze-quiz-result', data);
-    });
+  socket.on("maze-quiz-result", (data) => {
+    socket.broadcast.emit("maze-quiz-result", data);
+  });
 
-    socket.on('maze-close-quiz', () => {
-        socket.broadcast.emit('maze-close-quiz');
-    });
+  socket.on("maze-close-quiz", () => {
+    socket.broadcast.emit("maze-close-quiz");
+  });
 
-    // ── Word Puzzle game events ───────────────────────────
-    socket.on('wordpuzzle-update-game', (gameState) => {
-        socket.broadcast.emit('wordpuzzle-game-updated', gameState);
-    });
+  // ── Word Puzzle game events ───────────────────────────
+  socket.on("wordpuzzle-update-game", (gameState) => {
+    socket.broadcast.emit("wordpuzzle-game-updated", gameState);
+  });
 
-    socket.on('wordpuzzle-add-points', (data) => {
-        socket.broadcast.emit('wordpuzzle-show-points-modal', data);
-    });
+  socket.on("wordpuzzle-add-points", (data) => {
+    socket.broadcast.emit("wordpuzzle-show-points-modal", data);
+  });
 
-    socket.on('wordpuzzle-close-points-modal', () => {
-        socket.broadcast.emit('wordpuzzle-close-points-modal');
-    });
+  socket.on("wordpuzzle-close-points-modal", () => {
+    socket.broadcast.emit("wordpuzzle-close-points-modal");
+  });
 
-    // ── Presentation game events ──────────────────────────────
-    socket.on('pres-open', (data) => {
-        socket.broadcast.emit('pres-open', data);
-    });
+  // ── Presentation game events ──────────────────────────────
+  socket.on("pres-open", (data) => {
+    socket.broadcast.emit("pres-open", data);
+  });
 
-    socket.on('pres-goto-slide', (data) => {
-        socket.broadcast.emit('pres-goto-slide', data);
-    });
+  socket.on("pres-goto-slide", (data) => {
+    socket.broadcast.emit("pres-goto-slide", data);
+  });
 
-    socket.on('pres-fullscreen', (data) => {
-        socket.broadcast.emit('pres-fullscreen', data);
-    });
+  socket.on("pres-fullscreen", (data) => {
+    socket.broadcast.emit("pres-fullscreen", data);
+  });
 
-    socket.on('pres-close', () => {
-        socket.broadcast.emit('pres-close');
-    });
+  socket.on("pres-close", () => {
+    socket.broadcast.emit("pres-close");
+  });
 
-    socket.on('pres-share-image', (data) => {
-        socket.broadcast.emit('pres-share-image', data);
-    });
+  socket.on("pres-share-image", (data) => {
+    socket.broadcast.emit("pres-share-image", data);
+  });
 
-    socket.on('pres-share-tree', (data) => {
-        socket.broadcast.emit('pres-share-tree', data);
-    });
+  socket.on("pres-share-tree", (data) => {
+    socket.broadcast.emit("pres-share-tree", data);
+  });
 
-    socket.on('pres-share-note', (data) => {
-        socket.broadcast.emit('pres-share-note', data);
-    });
+  socket.on("pres-share-note", (data) => {
+    socket.broadcast.emit("pres-share-note", data);
+  });
 
-    socket.on('pres-slide-count', (data) => {
-        socket.broadcast.emit('pres-slide-count', data);
-    });
+  socket.on("pres-close-share", () => {
+    socket.broadcast.emit("pres-close-share");
+  });
 
-    socket.on('disconnect', () => {
-        console.log('User disconnected');
-    });
+  socket.on("classroom-navigate", (data) => {
+    socket.broadcast.emit("classroom-navigate", data);
+  });
+
+  socket.on("pres-aspect-ratio", (data) => {
+    socket.broadcast.emit("pres-aspect-ratio", data);
+  });
+
+  socket.on("pres-slide-count", (data) => {
+    socket.broadcast.emit("pres-slide-count", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected");
+  });
 });
 
 // ========== PRESENTATION REST API ==========
 
 // List all presentations
-app.get('/api/presentations', (req, res) => {
-    const meta = loadPresMeta();
-    res.json(meta);
+app.get("/api/presentations", (req, res) => {
+  const meta = loadPresMeta();
+  res.json(meta);
 });
 
 // Upload a presentation
-app.post('/api/presentation/upload', (req, res) => {
-    presUpload.single('presentation')(req, res, async (err) => {
-        if (err) return res.status(400).json({ error: err.message });
-        if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+app.post("/api/presentation/upload", (req, res) => {
+  presUpload.single("presentation")(req, res, async (err) => {
+    if (err) return res.status(400).json({ error: err.message });
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-        const subject = (req.body.subject || 'General').trim();
-        const chapter = (req.body.chapter || 'Chapter 1').trim();
-        const filename = req.file.filename;
-        const pptxPath = path.join(uploadsDir, filename);
-        const slideDirName = 'slides-' + filename.replace(/\.[^.]+$/, '');
-        const slideDir = path.join(uploadsDir, slideDirName);
+    const subject = (req.body.subject || "General").trim();
+    const chapter = (req.body.chapter || "Chapter 1").trim();
+    const filename = req.file.filename;
+    const pptxPath = path.join(uploadsDir, filename);
+    const slideDirName = "slides-" + filename.replace(/\.[^.]+$/, "");
+    const slideDir = path.join(uploadsDir, slideDirName);
 
-        const meta = loadPresMeta();
+    const meta = loadPresMeta();
 
-        // Check if same original name already exists → update it
-        const existingIdx = meta.findIndex(m => m.originalname === req.file.originalname);
-        const entry = {
-            filename,
-            originalname: req.file.originalname,
-            subject,
-            chapter,
-            size: req.file.size,
-            uploadedAt: new Date().toLocaleDateString('en-GB'),
-            slideCount: 0,
-            slideDirName,
-            converted: false
-        };
+    // Check if same original name already exists → update it
+    const existingIdx = meta.findIndex(
+      (m) => m.originalname === req.file.originalname,
+    );
+    const entry = {
+      filename,
+      originalname: req.file.originalname,
+      subject,
+      chapter,
+      size: req.file.size,
+      uploadedAt: new Date().toLocaleDateString("en-GB"),
+      slideCount: 0,
+      slideDirName,
+      converted: false,
+    };
 
-        if (existingIdx >= 0) {
-            // Remove old file and slides
-            try {
-                const old = meta[existingIdx];
-                fs.unlinkSync(path.join(uploadsDir, old.filename));
-                const oldSlideDir = path.join(uploadsDir, old.slideDirName);
-                if (fs.existsSync(oldSlideDir)) {
-                    fs.rmSync(oldSlideDir, { recursive: true, force: true });
-                }
-            } catch(e) { /* ignore */ }
-            meta[existingIdx] = entry;
-        } else {
-            meta.push(entry);
+    if (existingIdx >= 0) {
+      // Remove old file and slides
+      try {
+        const old = meta[existingIdx];
+        fs.unlinkSync(path.join(uploadsDir, old.filename));
+        const oldSlideDir = path.join(uploadsDir, old.slideDirName);
+        if (fs.existsSync(oldSlideDir)) {
+          fs.rmSync(oldSlideDir, { recursive: true, force: true });
         }
+      } catch (e) {
+        /* ignore */
+      }
+      meta[existingIdx] = entry;
+    } else {
+      meta.push(entry);
+    }
 
-        savePresMeta(meta);
-        io.emit('pres-updated');
+    savePresMeta(meta);
+    io.emit("pres-updated");
 
-        // Trigger background conversion
-        convertPptxToImages(pptxPath, slideDir)
-            .then(count => {
-                const updated = loadPresMeta();
-                const idx = updated.findIndex(m => m.filename === filename);
-                if (idx >= 0) {
-                    updated[idx].slideCount = count;
-                    updated[idx].converted = true;
-                    savePresMeta(updated);
-                    io.emit('pres-updated');
-                    console.log(`[PRES] Converted ${filename}: ${count} slides`);
-                }
-            })
-            .catch(e => {
-                console.warn('[PRES] Conversion failed (PowerPoint may not be installed):', e.message);
-            });
+    // Trigger background conversion
+    convertPptxToImages(pptxPath, slideDir)
+      .then((count) => {
+        const updated = loadPresMeta();
+        const idx = updated.findIndex((m) => m.filename === filename);
+        if (idx >= 0) {
+          updated[idx].slideCount = count;
+          updated[idx].converted = true;
+          savePresMeta(updated);
+          io.emit("pres-updated");
+          console.log(`[PRES] Converted ${filename}: ${count} slides`);
+        }
+      })
+      .catch((e) => {
+        console.warn(
+          "[PRES] Conversion failed (PowerPoint may not be installed):",
+          e.message,
+        );
+      });
 
-        res.json({ status: 'ok', filename, originalname: req.file.originalname });
-    });
+    res.json({ status: "ok", filename, originalname: req.file.originalname });
+  });
 });
 
 // Convert on demand
-app.post('/api/presentation/:filename/convert', async (req, res) => {
-    const { filename } = req.params;
-    const meta = loadPresMeta();
-    const entry = meta.find(m => m.filename === filename);
-    if (!entry) return res.status(404).json({ error: 'Not found' });
+app.post("/api/presentation/:filename/convert", async (req, res) => {
+  const { filename } = req.params;
+  const meta = loadPresMeta();
+  const entry = meta.find((m) => m.filename === filename);
+  if (!entry) return res.status(404).json({ error: "Not found" });
 
-    const pptxPath = path.join(uploadsDir, filename);
-    const slideDir = path.join(uploadsDir, entry.slideDirName);
+  const pptxPath = path.join(uploadsDir, filename);
+  const slideDir = path.join(uploadsDir, entry.slideDirName);
 
-    try {
-        const count = await convertPptxToImages(pptxPath, slideDir);
-        entry.slideCount = count;
-        entry.converted = true;
-        savePresMeta(meta);
-        io.emit('pres-updated');
-        res.json({ success: true, slideCount: count });
-    } catch(e) {
-        res.json({ success: false, slideCount: 0, error: e.message });
-    }
+  try {
+    const count = await convertPptxToImages(pptxPath, slideDir);
+    entry.slideCount = count;
+    entry.converted = true;
+    savePresMeta(meta);
+    io.emit("pres-updated");
+    res.json({ success: true, slideCount: count });
+  } catch (e) {
+    res.json({ success: false, slideCount: 0, error: e.message });
+  }
 });
 
 // Delete a presentation
-app.delete('/api/presentation/:filename', (req, res) => {
-    const { filename } = req.params;
-    const meta = loadPresMeta();
-    const idx = meta.findIndex(m => m.filename === filename);
-    if (idx < 0) return res.status(404).json({ error: 'Not found' });
+app.delete("/api/presentation/:filename", (req, res) => {
+  const { filename } = req.params;
+  const meta = loadPresMeta();
+  const idx = meta.findIndex((m) => m.filename === filename);
+  if (idx < 0) return res.status(404).json({ error: "Not found" });
 
-    const entry = meta[idx];
-    // Delete file
-    try { fs.unlinkSync(path.join(uploadsDir, entry.filename)); } catch(e) {}
-    // Delete slides dir
-    try {
-        const slideDir = path.join(uploadsDir, entry.slideDirName);
-        if (fs.existsSync(slideDir)) fs.rmSync(slideDir, { recursive: true, force: true });
-    } catch(e) {}
+  const entry = meta[idx];
+  // Delete file
+  try {
+    fs.unlinkSync(path.join(uploadsDir, entry.filename));
+  } catch (e) {}
+  // Delete slides dir
+  try {
+    const slideDir = path.join(uploadsDir, entry.slideDirName);
+    if (fs.existsSync(slideDir))
+      fs.rmSync(slideDir, { recursive: true, force: true });
+  } catch (e) {}
 
-    meta.splice(idx, 1);
-    savePresMeta(meta);
-    io.emit('pres-updated');
-    res.json({ status: 'ok' });
+  meta.splice(idx, 1);
+  savePresMeta(meta);
+  io.emit("pres-updated");
+  res.json({ status: "ok" });
 });
 
 // Serve slide images
-app.use('/uploads', express.static(uploadsDir));
+app.use("/uploads", express.static(uploadsDir));
 
 // Initialize quiz systems
 initQuizSystem();
 
 // Initialize maze quiz if file exists
-const mazeQuizPath = path.join(uploadsDir, 'maze-quiz-questions.xlsx');
+const mazeQuizPath = path.join(uploadsDir, "maze-quiz-questions.xlsx");
 if (fs.existsSync(mazeQuizPath)) {
-    loadMazeQuizFromExcel(mazeQuizPath);
+  loadMazeQuizFromExcel(mazeQuizPath);
 }
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
-    console.log(`
+  console.log(`
     🚀 Server is running!
     --------------------------------------
     Landing Page:          http://localhost:${PORT}/index.html

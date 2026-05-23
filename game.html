@@ -314,6 +314,12 @@
                 MemoryGame.lastImageUpdate = data.id;
                 updateUI();
             });
+
+            socket.on('classroom-navigate', (data) => {
+                if (data && data.url) {
+                    window.location.href = data.url;
+                }
+            });
         }
 
         window.addEventListener("storage", (e) => {

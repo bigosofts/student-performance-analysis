@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <script src="js/auth-check.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Teacher Central - Control Dashboard</title>
@@ -54,6 +55,20 @@
       <p style="color: var(--text-dim)">
         Select a game module to manage the classroom flow.
       </p>
+    </div>
+
+    <!-- Classroom Remote Navigation Control -->
+    <div class="glass-card" style="padding: 24px; max-width: 1200px; margin: -20px auto 40px; border: 1px solid rgba(124, 58, 237, 0.35); text-align: center; border-radius: 20px;">
+      <h2 style="font-size: 1.4rem; color: #a78bfa; margin-bottom: 8px; display: inline-flex; align-items: center; gap: 8px; font-weight: 800;">📱 Projector Remote Control</h2>
+      <p style="color: var(--text-dim); font-size: 0.85rem; margin-bottom: 20px;">Navigate the classroom projector screen to any game page remotely.</p>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;">
+        <button onclick="navigateProjector('index.html')" class="btn-primary" style="background: #475569; font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; font-weight: 700; border: none; color: white; cursor: pointer; transition: all 0.2s;">Lobby (Home)</button>
+        <button onclick="navigateProjector('game.html')" class="btn-primary" style="background: #3b82f6; font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; font-weight: 700; border: none; color: white; cursor: pointer; transition: all 0.2s;">Memory Flip</button>
+        <button onclick="navigateProjector('game-monopoly.html')" class="btn-primary" style="background: #a855f7; font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; font-weight: 700; border: none; color: white; cursor: pointer; transition: all 0.2s;">Monopoly Quiz</button>
+        <button onclick="navigateProjector('game-maze.html')" class="btn-primary" style="background: #0e7490; font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; font-weight: 700; border: none; color: white; cursor: pointer; transition: all 0.2s;">Maze Runner</button>
+        <button onclick="navigateProjector('game-wordpuzzle.html')" class="btn-primary" style="background: #ea580c; font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; font-weight: 700; border: none; color: white; cursor: pointer; transition: all 0.2s;">Word Puzzle</button>
+        <button onclick="navigateProjector('game-presentation.html')" class="btn-primary" style="background: #7c3aed; font-size: 0.82rem; padding: 10px 18px; border-radius: 8px; font-weight: 700; border: none; color: white; cursor: pointer; transition: all 0.2s;">Presentation Studio</button>
+      </div>
     </div>
 
     <div class="selection-grid">
@@ -149,5 +164,12 @@
         >BACK TO MAIN PORTAL</a
       >
     </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      function navigateProjector(url) {
+        socket.emit('classroom-navigate', { url: url });
+      }
+    </script>
   </body>
 </html>

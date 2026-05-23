@@ -612,6 +612,12 @@
         gameSocket.on('wordpuzzle-close-points-modal', () => {
           closePointsModal();
         });
+
+        gameSocket.on('classroom-navigate', (data) => {
+          if (data && data.url) {
+            window.location.href = data.url;
+          }
+        });
       }
 
       // ── Resize handler ───────────────────────────────────

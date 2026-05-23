@@ -442,6 +442,11 @@
           fullUpdate();
         });
         socket.on("maze-close-quiz", () => closeMazeQuiz());
+        socket.on('classroom-navigate', (data) => {
+          if (data && data.url) {
+            window.location.href = data.url;
+          }
+        });
       }
 
       // ── Resize handler ────────────────────────────────────────

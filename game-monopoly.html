@@ -549,6 +549,11 @@
             socket.on('quiz-close', () => { closeQuiz(); });
             socket.on('event-show', (data) => { showEvent(data); });
             socket.on('event-close', () => { document.getElementById('eventOverlay').classList.remove('active'); });
+            socket.on('classroom-navigate', (data) => {
+                if (data && data.url) {
+                    window.location.href = data.url;
+                }
+            });
         }
     </script>
 </body>

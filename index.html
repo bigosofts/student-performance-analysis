@@ -230,5 +230,14 @@
         >
       </div>
     </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const socket = io();
+      socket.on('classroom-navigate', (data) => {
+        if (data && data.url) {
+          window.location.href = data.url;
+        }
+      });
+    </script>
   </body>
 </html>
