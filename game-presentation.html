@@ -1413,7 +1413,7 @@ socket.on("pres-close-share", () => {
                 "Preview not available. PowerPoint may not be installed on server. " +
                   '<a href="/uploads/' +
                   f.filename +
-                  '" download style="color:#7c3aed">Download File</a>',
+                  '" download style="color:#7c3aed; z-index:999; position:relative">Download File</a>',
               );
             }
           } catch (e) {
