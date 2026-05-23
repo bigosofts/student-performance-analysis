@@ -4,7 +4,10 @@
   "description": "Interactive Classroom Memory Game",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "git:push": "git add --all && git commit -m \"update\" && git push origin main",
+    "git:pull": "git pull origin main",
+    "git:reset": "git reset --hard HEAD && git clean -fd"
   },
   "dependencies": {
     "express": "^4.18.2",
