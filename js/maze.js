@@ -363,7 +363,7 @@ async function resetMazeGame() {
     lastUpdate: Date.now(),
   };
   try {
-    await fetch("/clear-uploads", { method: "POST" });
+    await fetch("/clear-uploads?game=maze", { method: "POST" });
   } catch (e) {}
   saveMazeGame();
 }

@@ -210,8 +210,8 @@
           <div>
             <h2>Presentation Studio</h2>
             <p>
-              Full-screen PowerPoint viewer with live slide control,
-              image sharing, trees &amp; drawing overlays.
+              Full-screen PowerPoint viewer with live slide control, image
+              sharing, trees &amp; drawing overlays.
             </p>
           </div>
           <button
@@ -238,7 +238,7 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
-      socket.on('classroom-navigate', (data) => {
+      socket.on("classroom-navigate", (data) => {
         if (data && data.url) {
           window.location.href = data.url;
         }

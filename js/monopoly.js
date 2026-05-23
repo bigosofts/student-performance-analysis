@@ -321,9 +321,9 @@ async function resetGame() {
         sectionInfo: "",
         bookedCells: {}
     };
-    // Delete all uploaded images from server
+    // Delete all uploaded images from server (monopoly-specific)
     try {
-        await fetch('/clear-uploads', { method: 'POST' });
+        await fetch('/clear-uploads?game=monopoly', { method: 'POST' });
     } catch (e) {
         console.error('Failed to clear uploads:', e);
     }

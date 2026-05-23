@@ -368,19 +368,66 @@ app.get("/api/quiz/info", (req, res) => {
   res.json({ count: quizQuestions.length, currentIndex: currentQuizIndex });
 });
 
-// API to clear all uploads (except quiz file)
+// API to clear uploads with game-specific isolation
 app.post("/clear-uploads", (req, res) => {
+  const game = req.query.game || req.body.game || null;
+  
   fs.readdir(uploadsDir, (err, files) => {
     if (err) return res.status(500).send(err);
+    
     for (const file of files) {
-      if (file === "quiz-questions.xlsx") continue; // keep quiz file
-      fs.unlink(path.join(uploadsDir, file), (err) => {
-        if (err) console.error(err);
-      });
+      if (game === 'memory') {
+        // Delete files matching /^tile-\d+/ (memory tiles like tile-1-*, tile-2-*, etc.)
+        if (/^tile-\d+/.test(file)) {
+          fs.unlink(path.join(uploadsDir, file), (err) => {
+            if (err) console.error(err);
+          });
+        }
+      } else if (game === 'monopoly') {
+        // Delete tile-team-* (team photos), quiz-questions.xlsx, and quiz-upload-temp*
+        if (/^tile-team-/.test(file) || file === 'quiz-questions.xlsx' || /^quiz-upload-temp/.test(file)) {
+          fs.unlink(path.join(uploadsDir, file), (err) => {
+            if (err) console.error(err);
+          });
+        }
+      } else if (game === 'maze') {
+        // Delete tile-maze-team-* (team photos), maze-quiz-questions.xlsx, and maze-quiz-upload-temp*
+        if (/^tile-maze-team-/.test(file) || file === 'maze-quiz-questions.xlsx' || /^maze-quiz-upload-temp/.test(file)) {
+          fs.unlink(path.join(uploadsDir, file), (err) => {
+            if (err) console.error(err);
+          });
+        }
+      } else if (game === 'wordpuzzle') {
+        // Delete tile-wordpuzzle-team-* (team photos)
+        if (/^tile-wordpuzzle-team-/.test(file)) {
+          fs.unlink(path.join(uploadsDir, file), (err) => {
+            if (err) console.error(err);
+          });
+        }
+      } else {
+        // Fallback/Default: only delete tile photos and temp quiz uploads (never touch presentations or active quizzes)
+        if ((/^tile-/.test(file) && !file.includes('quiz-questions') && !file.includes('maze-quiz')) || 
+            /^quiz-upload-temp/.test(file) || 
+            /^maze-quiz-upload-temp/.test(file)) {
+          fs.unlink(path.join(uploadsDir, file), (err) => {
+            if (err) console.error(err);
+          });
+        }
+      }
     }
+    
+    // Handle game-specific cleanup
+    if (game === 'monopoly') {
+      initQuizSystem();
+    }
+    if (game === 'maze') {
+      mazeQuizQuestions = [];
+      currentMazeQuizIndex = 0;
+    }
+    
     // Broadcast wipe to all clients
     io.emit("image-updated", { id: "all" });
-    res.send({ status: "ok" });
+    res.send({ status: "ok", game: game || "default" });
   });
 });
 

@@ -263,7 +263,7 @@ async function resetWPGame() {
     sectionInfo      : '',
     lastUpdate       : Date.now(),
   };
-  try { await fetch('/clear-uploads', { method: 'POST' }); } catch (e) {}
+  try { await fetch('/clear-uploads?game=wordpuzzle', { method: 'POST' }); } catch (e) {}
   saveWPGame();
 }
 

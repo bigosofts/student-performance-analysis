@@ -48,7 +48,7 @@ async function getImage(id) {
 
 async function clearImages() {
     try {
-        await fetch('/clear-uploads', { method: 'POST' });
+        await fetch('/clear-uploads?game=memory', { method: 'POST' });
         game.tiles.forEach(t => {
             t.imageUrl = null;
         });

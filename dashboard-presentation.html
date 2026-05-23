@@ -1591,29 +1591,32 @@
             placeholder="e.g. Plant Kingdom Classification"
             style="margin-bottom: 14px"
           />
-          <label class="form-label" style="display: block; margin-bottom: 8px"
-            >Tree Data (JSON or text)</label
-          >
-          <textarea
-            id="treeData"
-            placeholder="Example:
+<label class="form-label" style="display: block; margin-bottom: 8px"
+             >Tree Data (JSON or text)</label
+           >
+           <div class="tree-helper-buttons" style="display: flex; gap: 8px; margin-bottom: 8px;">
+             <button type="button" class="btn-ctrl" style="padding: 6px 12px; font-size: 0.8rem;" onclick="insertTreeHelper('→')">Part Of →</button>
+             <button type="button" class="btn-ctrl" style="padding: 6px 12px; font-size: 0.8rem;" onclick="insertTreeHelper('└──')">Child Of └──</button>
+             <button type="button" class="btn-ctrl" style="padding: 6px 12px; font-size: 0.8rem;" onclick="insertTreeHelper('├──')">Sibling Of ├──</button>
+           </div>
+           <textarea
+             id="treeData"
+             placeholder="Example:
 Kingdom → Plantae
   ├── Division → Bryophyta (Mosses)
   ├── Division → Pteridophyta (Ferns)
-  └── Division → Spermatophyta
-        ├── Gymnospermae
-        └── Angiospermae"
-          ></textarea>
-          <div class="tree-hint">
-            📌 Use indentation with → and ├── └── to define the tree structure.
-            It will be rendered as a visual hierarchy on the game screen.
-          </div>
-          <button class="btn-share green" onclick="sendTree()">
-            🌿 Send to Game Screen
-          </button>
-        </div>
-      </div>
-    </div>
+  └── Division → Spermatophyta"
+           ></textarea>
+           <div class="tree-hint">
+             📌 Use indentation with → and ├── └── to define the tree structure.
+             It will be rendered as a visual hierarchy on the game screen.
+           </div>
+           <button class="btn-share green" onclick="sendTree()">
+             🌿 Send to Game Screen
+           </button>
+         </div>
+       </div>
+     </div>
 
     <!-- Note / Text Modal -->
     <div class="modal-overlay" id="noteModal">
@@ -2259,15 +2262,27 @@ Kingdom → Plantae
         closeModal("drawModal");
       }
 
-      // ════════════════════════════════════════════
-      //  MODAL HELPERS
-      // ════════════════════════════════════════════
-      function openModal(id) {
-        document.getElementById(id).classList.add("open");
-      }
-      function closeModal(id) {
-        document.getElementById(id).classList.remove("open");
-      }
+// ════════════════════════════════════════════
+       //  MODAL HELPERS
+       // ════════════════════════════════════════════
+       function openModal(id) {
+         document.getElementById(id).classList.add("open");
+       }
+       function closeModal(id) {
+         document.getElementById(id).classList.remove("open");
+       }
+       
+       function insertTreeHelper(character) {
+         const textarea = document.getElementById("treeData");
+         const start = textarea.selectionStart;
+         const end = textarea.selectionEnd;
+         const text = textarea.value;
+         textarea.value = text.substring(0, start) + character + text.substring(end);
+         const newCursorPos = start + character.length;
+         textarea.selectionStart = newCursorPos;
+         textarea.selectionEnd = newCursorPos;
+         textarea.focus();
+       }
 
       document.querySelectorAll(".modal-overlay").forEach((el) => {
         el.addEventListener("click", (e) => {
