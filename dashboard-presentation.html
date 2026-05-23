@@ -1,1403 +1,1927 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <script src="js/auth-check.js"></script>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Presentation Control — Teacher Dashboard</title>
-  <link rel="stylesheet" href="css/style.css"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --pres-primary: #7c3aed;
-      --pres-secondary: #06b6d4;
-      --pres-accent: #f59e0b;
-      --pres-danger: #ef4444;
-      --pres-success: #10b981;
-      --pres-glow: rgba(124, 58, 237, 0.4);
-      --pres-cyan-glow: rgba(6, 182, 212, 0.4);
-    }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: #050714;
-      background-image:
-        radial-gradient(ellipse at 10% 10%, rgba(124,58,237,0.3) 0%, transparent 45%),
-        radial-gradient(ellipse at 90% 90%, rgba(6,182,212,0.25) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 50%, rgba(245,158,11,0.08) 0%, transparent 60%);
-      color: #f8fafc;
-      font-family: 'Outfit', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Animated background particles */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-      pointer-events: none;
-      z-index: 0;
-    }
-
-    /* ─── HEADER ─── */
-    .dash-header {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(5,7,20,0.85);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(124,58,237,0.3);
-      padding: 16px 32px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: 0 4px 30px rgba(0,0,0,0.5);
-    }
-
-    .dash-header .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 1.4rem;
-      font-weight: 800;
-    }
-
-    .logo-icon {
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--pres-primary), var(--pres-secondary));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem;
-      box-shadow: 0 0 20px var(--pres-glow);
-      animation: pulseGlow 3s ease-in-out infinite;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 20px var(--pres-glow); }
-      50% { box-shadow: 0 0 40px var(--pres-glow), 0 0 60px rgba(6,182,212,0.2); }
-    }
-
-    .logo-text span { color: var(--pres-secondary); }
-
-    .header-actions { display: flex; gap: 12px; align-items: center; }
-
-    .status-pill {
-      padding: 6px 16px;
-      border-radius: 50px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      background: rgba(16,185,129,0.15);
-      border: 1px solid rgba(16,185,129,0.4);
-      color: var(--pres-success);
-      display: flex; align-items: center; gap: 6px;
-    }
-
-    .status-dot {
-      width: 7px; height: 7px;
-      border-radius: 50%;
-      background: var(--pres-success);
-      animation: blink 1.5s ease-in-out infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
-
-    .btn-back {
-      padding: 8px 20px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.15);
-      color: #94a3b8;
-      text-decoration: none;
-      font-size: 0.85rem;
-      font-weight: 600;
-      transition: all 0.2s;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .btn-back:hover { background: rgba(255,255,255,0.12); color: #fff; }
-
-    /* ─── LAYOUT ─── */
-    .main-layout {
-      display: grid;
-      grid-template-columns: 380px 1fr;
-      gap: 24px;
-      padding: 28px 32px;
-      position: relative;
-      z-index: 1;
-      max-width: 1600px;
-      margin: 0 auto;
-    }
-
-    @media (max-width: 1100px) {
-      .main-layout { grid-template-columns: 1fr; }
-    }
-
-    /* ─── PANEL ─── */
-    .panel {
-      background: rgba(15,20,50,0.7);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 24px;
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 20px 24px;
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .panel-header-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-    }
-
-    .panel-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #e2e8f0;
-    }
-
-    .panel-subtitle {
-      font-size: 0.78rem;
-      color: #64748b;
-      margin-top: 2px;
-    }
-
-    /* ─── UPLOAD ZONE ─── */
-    .upload-zone {
-      margin: 20px;
-      border: 2px dashed rgba(124,58,237,0.35);
-      border-radius: 18px;
-      padding: 30px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      background: rgba(124,58,237,0.04);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .upload-zone::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(135deg, rgba(124,58,237,0.05) 0%, transparent 100%);
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-
-    .upload-zone:hover, .upload-zone.drag-over {
-      border-color: var(--pres-primary);
-      background: rgba(124,58,237,0.08);
-      box-shadow: 0 0 30px rgba(124,58,237,0.15);
-    }
-    .upload-zone:hover::before, .upload-zone.drag-over::before { opacity: 1; }
-
-    .upload-icon {
-      font-size: 2.8rem;
-      margin-bottom: 12px;
-      display: block;
-      animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-
-    .upload-title {
-      font-size: 1rem;
-      font-weight: 700;
-      color: #e2e8f0;
-      margin-bottom: 6px;
-    }
-
-    .upload-hint {
-      font-size: 0.8rem;
-      color: #64748b;
-      margin-bottom: 16px;
-    }
-
-    .upload-form { display: flex; flex-direction: column; gap: 12px; padding: 0 20px 20px; }
-
-    .form-row { display: flex; flex-direction: column; gap: 6px; }
-
-    .form-label {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-input {
-      padding: 11px 14px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      color: #f8fafc;
-      font-size: 0.9rem;
-      font-family: 'Outfit', sans-serif;
-      outline: none;
-      transition: all 0.2s;
-    }
-
-    .form-input:focus {
-      border-color: var(--pres-primary);
-      box-shadow: 0 0 0 3px rgba(124,58,237,0.15);
-    }
-
-    .form-input::placeholder { color: #475569; }
-
-    .file-input-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .file-input-wrapper input[type="file"] {
-      position: absolute;
-      inset: 0;
-      opacity: 0;
-      cursor: pointer;
-      width: 100%;
-    }
-
-    .file-input-label {
-      width: 100%;
-      padding: 11px 14px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      color: #475569;
-      font-size: 0.9rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      text-align: left;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    .file-input-label.has-file { color: #a78bfa; border-color: rgba(124,58,237,0.4); }
-
-    .btn-upload {
-      padding: 13px;
-      border: none;
-      border-radius: 12px;
-      background: linear-gradient(135deg, var(--pres-primary), #4f46e5);
-      color: white;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-      letter-spacing: 0.5px;
-      box-shadow: 0 4px 20px rgba(124,58,237,0.35);
-      font-family: 'Outfit', sans-serif;
-    }
-
-    .btn-upload:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 30px rgba(124,58,237,0.5);
-    }
-
-    .btn-upload:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* ─── PROGRESS BAR ─── */
-    .progress-container {
-      margin: 0 20px 16px;
-      display: none;
-    }
-    .progress-container.active { display: block; }
-
-    .progress-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.82rem;
-      color: #94a3b8;
-      margin-bottom: 8px;
-      font-weight: 600;
-    }
-
-    .progress-bar-bg {
-      height: 10px;
-      background: rgba(255,255,255,0.06);
-      border-radius: 50px;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .progress-bar-fill {
-      height: 100%;
-      border-radius: 50px;
-      background: linear-gradient(90deg, var(--pres-primary), var(--pres-secondary));
-      transition: width 0.3s ease;
-      width: 0%;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .progress-bar-fill::after {
-      content: '';
-      position: absolute;
-      top: 0; left: -100%;
-      width: 100%; height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-      animation: shimmer 1.5s infinite;
-    }
-    @keyframes shimmer { to { left: 100%; } }
-
-    /* ─── FILE LIST ─── */
-    .file-list { padding: 0 16px 16px; display: flex; flex-direction: column; gap: 10px; }
-
-    .file-item {
-      padding: 14px 16px;
-      border-radius: 14px;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.06);
-      transition: all 0.25s;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .file-item:hover {
-      background: rgba(124,58,237,0.08);
-      border-color: rgba(124,58,237,0.3);
-    }
-
-    .file-item.selected {
-      background: rgba(124,58,237,0.15);
-      border-color: var(--pres-primary);
-      box-shadow: 0 0 20px rgba(124,58,237,0.2);
-    }
-
-    .file-item-icon {
-      width: 42px; height: 42px;
-      border-radius: 10px;
-      background: linear-gradient(135deg, rgba(124,58,237,0.2), rgba(6,182,212,0.2));
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem;
-      flex-shrink: 0;
-    }
-
-    .file-item-info { flex: 1; min-width: 0; }
-
-    .file-item-name {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #e2e8f0;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .file-item-meta {
-      font-size: 0.75rem;
-      color: #64748b;
-      margin-top: 3px;
-      display: flex;
-      gap: 10px;
-    }
-
-    .meta-badge {
-      padding: 2px 8px;
-      border-radius: 4px;
-      background: rgba(255,255,255,0.05);
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: #94a3b8;
-    }
-
-    .file-item-actions { display: flex; gap: 6px; flex-shrink: 0; }
-
-    .icon-btn {
-      width: 32px; height: 32px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.04);
-      color: #94a3b8;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.9rem;
-      transition: all 0.2s;
-    }
-    .icon-btn:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .icon-btn.danger:hover { background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); color: #f87171; }
-
-    .empty-state {
-      text-align: center;
-      padding: 30px 20px;
-      color: #475569;
-    }
-    .empty-state .empty-icon { font-size: 2.5rem; margin-bottom: 10px; display: block; }
-    .empty-state p { font-size: 0.85rem; }
-
-    /* ─── RIGHT PANEL ─── */
-    .right-column { display: flex; flex-direction: column; gap: 24px; }
-
-    /* ─── ACTIVE PRESENTATION CONTROL ─── */
-    .pres-control-panel {
-      background: rgba(15,20,50,0.7);
-      backdrop-filter: blur(16px);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 24px;
-      overflow: hidden;
-    }
-
-    .active-pres-header {
-      padding: 22px 28px;
-      background: linear-gradient(135deg, rgba(124,58,237,0.15), rgba(6,182,212,0.1));
-      border-bottom: 1px solid rgba(255,255,255,0.07);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-    }
-
-    .active-pres-info { flex: 1; }
-
-    .active-pres-label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--pres-secondary);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 4px;
-    }
-
-    .active-pres-name {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #f8fafc;
-    }
-
-    .active-pres-slide {
-      font-size: 0.83rem;
-      color: #94a3b8;
-      margin-top: 4px;
-    }
-
-    .control-bar {
-      padding: 20px 28px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 12px;
-      align-items: center;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-
-    .btn-ctrl {
-      padding: 10px 22px;
-      border-radius: 12px;
-      border: none;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.88rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.25s;
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
-
-    .btn-prev {
-      background: rgba(255,255,255,0.08);
-      color: #e2e8f0;
-      border: 1px solid rgba(255,255,255,0.12);
-    }
-    .btn-prev:hover { background: rgba(255,255,255,0.14); transform: translateX(-2px); }
-
-    .btn-next {
-      background: linear-gradient(135deg, var(--pres-primary), #4f46e5);
-      color: white;
-      box-shadow: 0 4px 15px rgba(124,58,237,0.3);
-    }
-    .btn-next:hover { transform: translateX(2px); box-shadow: 0 6px 25px rgba(124,58,237,0.5); }
-
-    .btn-fullscreen {
-      background: linear-gradient(135deg, var(--pres-secondary), #0891b2);
-      color: white;
-      box-shadow: 0 4px 15px rgba(6,182,212,0.3);
-    }
-    .btn-fullscreen:hover { box-shadow: 0 6px 25px rgba(6,182,212,0.5); transform: scale(1.02); }
-
-    .btn-close-pres {
-      background: rgba(239,68,68,0.1);
-      color: #f87171;
-      border: 1px solid rgba(239,68,68,0.25);
-    }
-    .btn-close-pres:hover { background: rgba(239,68,68,0.2); transform: scale(1.02); }
-
-    .btn-close-share {
-      background: rgba(245,158,11,0.1);
-      color: #f59e0b;
-      border: 1px solid rgba(245,158,11,0.25);
-    }
-    .btn-close-share:hover { background: rgba(245,158,11,0.2); transform: scale(1.02); }
-
-    .slide-counter {
-      padding: 8px 18px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.1);
-      font-size: 0.88rem;
-      color: #94a3b8;
-      font-weight: 600;
-      min-width: 90px;
-      text-align: center;
-    }
-
-    /* ─── SHARE TOOLS ─── */
-    .share-section { padding: 20px 28px; }
-
-    .section-title {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-bottom: 16px;
-    }
-
-    .share-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 12px;
-    }
-
-    .share-card {
-      padding: 16px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.03);
-      cursor: pointer;
-      transition: all 0.25s;
-      text-align: center;
-    }
-
-    .share-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.06);
-    }
-
-    .share-card .share-icon { font-size: 1.8rem; margin-bottom: 8px; display: block; }
-    .share-card .share-name { font-size: 0.82rem; font-weight: 700; color: #e2e8f0; }
-    .share-card .share-desc { font-size: 0.72rem; color: #64748b; margin-top: 3px; }
-
-    .share-card.image-share { border-color: rgba(245,158,11,0.25); }
-    .share-card.image-share:hover { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.5); }
-
-    .share-card.tree-share { border-color: rgba(16,185,129,0.25); }
-    .share-card.tree-share:hover { background: rgba(16,185,129,0.08); border-color: rgba(16,185,129,0.5); }
-
-    .share-card.note-share { border-color: rgba(6,182,212,0.25); }
-    .share-card.note-share:hover { background: rgba(6,182,212,0.08); border-color: rgba(6,182,212,0.5); }
-
-    .share-card.draw-share { border-color: rgba(236,72,153,0.25); }
-    .share-card.draw-share:hover { background: rgba(236,72,153,0.08); border-color: rgba(236,72,153,0.5); }
-
-    /* ─── MODALS ─── */
-    .modal-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .modal-overlay.open { display: flex; }
-
-    .modal-box {
-      background: rgba(12,15,40,0.97);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      padding: 30px;
-      width: 100%;
-      max-width: 560px;
-      box-shadow: 0 30px 80px rgba(0,0,0,0.6);
-      animation: modalIn 0.3s ease;
-      position: relative;
-    }
-    @keyframes modalIn { from { opacity:0; transform:scale(0.9) translateY(20px); } to { opacity:1; transform:scale(1) translateY(0); } }
-
-    .modal-box.wide { max-width: 800px; }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 22px;
-    }
-
-    .modal-title {
-      font-size: 1.2rem;
-      font-weight: 800;
-      color: #f8fafc;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .modal-close {
-      width: 34px; height: 34px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.06);
-      color: #94a3b8;
-      cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.1rem;
-      transition: all 0.2s;
-    }
-    .modal-close:hover { color: #fff; background: rgba(239,68,68,0.2); border-color: rgba(239,68,68,0.4); }
-
-    /* Image share */
-    .img-drop-zone {
-      border: 2px dashed rgba(245,158,11,0.35);
-      border-radius: 14px;
-      padding: 30px;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.3s;
-      margin-bottom: 16px;
-      background: rgba(245,158,11,0.03);
-      position: relative;
-    }
-    .img-drop-zone:hover { border-color: var(--pres-accent); background: rgba(245,158,11,0.07); }
-    .img-drop-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
-    .img-drop-zone .drop-icon { font-size: 2.5rem; display: block; margin-bottom: 10px; }
-    .img-drop-zone p { color: #94a3b8; font-size: 0.88rem; }
-
-    #img-preview {
-      width: 100%;
-      max-height: 200px;
-      object-fit: contain;
-      border-radius: 10px;
-      display: none;
-      margin-bottom: 16px;
-      border: 1px solid rgba(255,255,255,0.1);
-    }
-
-    .btn-share {
-      width: 100%;
-      padding: 13px;
-      border: none;
-      border-radius: 12px;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.3s;
-    }
-
-    .btn-share.amber {
-      background: linear-gradient(135deg, #d97706, var(--pres-accent));
-      color: white;
-      box-shadow: 0 4px 20px rgba(245,158,11,0.35);
-    }
-    .btn-share.amber:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(245,158,11,0.5); }
-
-    .btn-share.green {
-      background: linear-gradient(135deg, #059669, var(--pres-success));
-      color: white;
-      box-shadow: 0 4px 20px rgba(16,185,129,0.35);
-    }
-    .btn-share.green:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(16,185,129,0.5); }
-
-    .btn-share.cyan {
-      background: linear-gradient(135deg, #0891b2, var(--pres-secondary));
-      color: white;
-      box-shadow: 0 4px 20px rgba(6,182,212,0.35);
-    }
-    .btn-share.cyan:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(6,182,212,0.5); }
-
-    .btn-share.pink {
-      background: linear-gradient(135deg, #db2777, #ec4899);
-      color: white;
-      box-shadow: 0 4px 20px rgba(236,72,153,0.35);
-    }
-    .btn-share.pink:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(236,72,153,0.5); }
-
-    /* Tree builder */
-    .tree-builder textarea {
-      width: 100%;
-      min-height: 120px;
-      padding: 12px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(16,185,129,0.25);
-      border-radius: 10px;
-      color: #f8fafc;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.9rem;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-    .tree-builder textarea:focus { border-color: var(--pres-success); }
-
-    .tree-hint {
-      font-size: 0.76rem;
-      color: #475569;
-      margin: 8px 0 16px;
-      padding: 10px 12px;
-      background: rgba(16,185,129,0.05);
-      border-radius: 8px;
-      border: 1px solid rgba(16,185,129,0.1);
-      line-height: 1.6;
-    }
-
-    /* Note editor */
-    .note-editor textarea {
-      width: 100%;
-      min-height: 140px;
-      padding: 12px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(6,182,212,0.25);
-      border-radius: 10px;
-      color: #f8fafc;
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.9rem;
-      resize: vertical;
-      outline: none;
-      transition: border-color 0.2s;
-      margin-bottom: 16px;
-    }
-    .note-editor textarea:focus { border-color: var(--pres-secondary); }
-
-    /* Drawing canvas */
-    #drawCanvas {
-      width: 100%;
-      height: 320px;
-      background: rgba(0,0,0,0.4);
-      border-radius: 12px;
-      border: 1px solid rgba(236,72,153,0.25);
-      cursor: crosshair;
-      touch-action: none;
-      display: block;
-      margin-bottom: 12px;
-    }
-
-    .draw-tools {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-
-    .color-btn {
-      width: 28px; height: 28px;
-      border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .color-btn.active { border-color: white; transform: scale(1.2); }
-
-    .draw-btn {
-      padding: 6px 14px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      background: rgba(255,255,255,0.06);
-      color: #94a3b8;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      font-family: 'Outfit', sans-serif;
-      transition: all 0.2s;
-    }
-    .draw-btn:hover { background: rgba(255,255,255,0.12); color: #fff; }
-
-    .brush-slider {
-      display: flex; align-items: center; gap: 8px;
-      font-size: 0.8rem; color: #64748b;
-    }
-    .brush-slider input { flex: 1; accent-color: #ec4899; }
-
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 30px;
-      right: 30px;
-      padding: 14px 22px;
-      border-radius: 14px;
-      font-size: 0.88rem;
-      font-weight: 700;
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      transform: translateX(120%);
-      transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
-      backdrop-filter: blur(12px);
-      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-    }
-    .toast.show { transform: translateX(0); }
-    .toast.success { background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; }
-    .toast.error { background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.4); color: #fca5a5; }
-    .toast.info { background: rgba(6,182,212,0.2); border: 1px solid rgba(6,182,212,0.4); color: #67e8f9; }
-
-    /* Preview thumb strip */
-    .thumb-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      max-height: 250px;
-      overflow-y: auto;
-      padding: 16px 28px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-      scrollbar-width: thin;
-      scrollbar-color: rgba(124,58,237,0.3) transparent;
-    }
-
-    .thumb-item {
-      flex-shrink: 0;
-      width: 100px;
-      height: 65px;
-      border-radius: 8px;
-      background: rgba(255,255,255,0.04);
-      border: 2px solid rgba(255,255,255,0.07);
-      overflow: hidden;
-      cursor: pointer;
-      transition: all 0.2s;
-      position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.4rem;
-    }
-
-    .thumb-item:hover { border-color: var(--pres-primary); transform: scale(1.05); }
-    .thumb-item.active { border-color: var(--pres-secondary); box-shadow: 0 0 15px rgba(6,182,212,0.3); }
-    .thumb-item .thumb-num {
-      position: absolute;
-      bottom: 3px;
-      right: 5px;
-      font-size: 0.6rem;
-      font-weight: 800;
-      color: rgba(255,255,255,0.5);
-    }
-
-    /* No pres selected */
-    .no-pres-state {
-      padding: 40px 28px;
-      text-align: center;
-      color: #475569;
-    }
-    .no-pres-state .np-icon { font-size: 3rem; margin-bottom: 12px; display: block; }
-    .no-pres-state h3 { font-size: 1.1rem; color: #64748b; margin-bottom: 8px; }
-    .no-pres-state p { font-size: 0.85rem; line-height: 1.6; }
-
-    /* Conn indicator */
-    #connIndicator {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 0.78rem; font-weight: 600;
-      padding: 5px 12px;
-      border-radius: 50px;
-      background: rgba(255,255,255,0.05);
-    }
-    #connDot { width: 7px; height: 7px; border-radius: 50%; background: #ef4444; }
-    #connDot.online { background: #10b981; }
-
-    .hint-text {
-      font-size: 0.75rem;
-      color: #475569;
-      margin: 8px 0 16px;
-    }
-
-    .select-input {
-      padding: 11px 14px;
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 10px;
-      color: #f8fafc;
-      font-size: 0.9rem;
-      font-family: 'Outfit', sans-serif;
-      outline: none;
-      width: 100%;
-      transition: all 0.2s;
-    }
-    .select-input:focus { border-color: var(--pres-primary); }
-    .select-input option { background: #0f1432; }
-
-    .divider {
-      height: 1px;
-      background: rgba(255,255,255,0.06);
-      margin: 8px 0;
-    }
-  </style>
-</head>
-<body>
-
-<!-- ═══════════════ HEADER ═══════════════ -->
-<header class="dash-header">
-  <div class="logo">
-    <div class="logo-icon">📽️</div>
-    <div>
-      <div class="logo-text">Presentation <span>Control</span></div>
-      <div style="font-size:0.7rem;color:#64748b;font-weight:500">Teacher Dashboard</div>
-    </div>
-  </div>
-
-  <div class="header-actions">
-    <div id="connIndicator">
-      <div id="connDot"></div>
-      <span id="connLabel">Connecting...</span>
-    </div>
-    <div class="status-pill">
-      <div class="status-dot"></div>
-      LIVE SESSION
-    </div>
-    <a href="dashboard.html" class="btn-back">← Dashboard</a>
-  </div>
-</header>
-
-<!-- ═══════════════ MAIN LAYOUT ═══════════════ -->
-<div class="main-layout">
-
-  <!-- ═══ LEFT COLUMN ═══ -->
-  <div class="left-column">
-
-    <!-- Upload Panel -->
-    <div class="panel" style="margin-bottom:24px">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:linear-gradient(135deg,rgba(124,58,237,0.3),rgba(79,70,229,0.3))">📤</div>
+  <head>
+    <script src="js/auth-check.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Presentation Control — Teacher Dashboard</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --pres-primary: #7c3aed;
+        --pres-secondary: #06b6d4;
+        --pres-accent: #f59e0b;
+        --pres-danger: #ef4444;
+        --pres-success: #10b981;
+        --pres-glow: rgba(124, 58, 237, 0.4);
+        --pres-cyan-glow: rgba(6, 182, 212, 0.4);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #050714;
+        background-image:
+          radial-gradient(
+            ellipse at 10% 10%,
+            rgba(124, 58, 237, 0.3) 0%,
+            transparent 45%
+          ),
+          radial-gradient(
+            ellipse at 90% 90%,
+            rgba(6, 182, 212, 0.25) 0%,
+            transparent 45%
+          ),
+          radial-gradient(
+            ellipse at 50% 50%,
+            rgba(245, 158, 11, 0.08) 0%,
+            transparent 60%
+          );
+        color: #f8fafc;
+        font-family: "Outfit", sans-serif;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Animated background particles */
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%239C92AC' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      /* ─── HEADER ─── */
+      .dash-header {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(5, 7, 20, 0.85);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(124, 58, 237, 0.3);
+        padding: 16px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      }
+      @media (max-width: 768px) {
+        .dash-header {
+          flex-direction: column;
+          gap: 12px;
+        }
+      }
+
+      .dash-header .logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.4rem;
+        font-weight: 800;
+      }
+
+      .logo-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(
+          135deg,
+          var(--pres-primary),
+          var(--pres-secondary)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        box-shadow: 0 0 20px var(--pres-glow);
+        animation: pulseGlow 3s ease-in-out infinite;
+      }
+
+      @keyframes pulseGlow {
+        0%,
+        100% {
+          box-shadow: 0 0 20px var(--pres-glow);
+        }
+        50% {
+          box-shadow:
+            0 0 40px var(--pres-glow),
+            0 0 60px rgba(6, 182, 212, 0.2);
+        }
+      }
+
+      .logo-text span {
+        color: var(--pres-secondary);
+      }
+
+      .header-actions {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+
+      .status-pill {
+        padding: 6px 16px;
+        border-radius: 50px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        background: rgba(16, 185, 129, 0.15);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        color: var(--pres-success);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--pres-success);
+        animation: blink 1.5s ease-in-out infinite;
+      }
+      @keyframes blink {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.3;
+        }
+      }
+
+      .btn-back {
+        padding: 8px 20px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: #94a3b8;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-back:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      /* ─── LAYOUT ─── */
+      .main-layout {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 24px;
+        padding: 28px 32px;
+        position: relative;
+        z-index: 1;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      @media (max-width: 768px) {
+        .main-layout {
+          grid-template-columns: 100%;
+        }
+      }
+
+      /* ─── PANEL ─── */
+      .panel {
+        background: rgba(15, 20, 50, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 24px;
+        overflow: hidden;
+      }
+
+      .panel-header {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .panel-header-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+      }
+
+      .panel-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #e2e8f0;
+      }
+
+      .panel-subtitle {
+        font-size: 0.78rem;
+        color: #64748b;
+        margin-top: 2px;
+      }
+
+      /* ─── UPLOAD ZONE ─── */
+      .upload-zone {
+        margin: 20px;
+        border: 2px dashed rgba(124, 58, 237, 0.35);
+        border-radius: 18px;
+        padding: 30px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: rgba(124, 58, 237, 0.04);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .upload-zone::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.05) 0%,
+          transparent 100%
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .upload-zone:hover,
+      .upload-zone.drag-over {
+        border-color: var(--pres-primary);
+        background: rgba(124, 58, 237, 0.08);
+        box-shadow: 0 0 30px rgba(124, 58, 237, 0.15);
+      }
+      .upload-zone:hover::before,
+      .upload-zone.drag-over::before {
+        opacity: 1;
+      }
+
+      .upload-icon {
+        font-size: 2.8rem;
+        margin-bottom: 12px;
+        display: block;
+        animation: float 3s ease-in-out infinite;
+      }
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-8px);
+        }
+      }
+
+      .upload-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        margin-bottom: 6px;
+      }
+
+      .upload-hint {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 16px;
+      }
+
+      .upload-form {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 0 20px 20px;
+      }
+
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .form-label {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .form-input {
+        padding: 11px 14px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #f8fafc;
+        font-size: 0.9rem;
+        font-family: "Outfit", sans-serif;
+        outline: none;
+        transition: all 0.2s;
+      }
+
+      .form-input:focus {
+        border-color: var(--pres-primary);
+        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.15);
+      }
+
+      .form-input::placeholder {
+        color: #475569;
+      }
+
+      .file-input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .file-input-wrapper input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+      }
+
+      .file-input-label {
+        width: 100%;
+        padding: 11px 14px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #475569;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .file-input-label.has-file {
+        color: #a78bfa;
+        border-color: rgba(124, 58, 237, 0.4);
+      }
+
+      .btn-upload {
+        padding: 13px;
+        border: none;
+        border-radius: 12px;
+        background: linear-gradient(135deg, var(--pres-primary), #4f46e5);
+        color: white;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 20px rgba(124, 58, 237, 0.35);
+        font-family: "Outfit", sans-serif;
+      }
+
+      .btn-upload:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 30px rgba(124, 58, 237, 0.5);
+      }
+
+      .btn-upload:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* ─── PROGRESS BAR ─── */
+      .progress-container {
+        margin: 0 20px 16px;
+        display: none;
+      }
+      .progress-container.active {
+        display: block;
+      }
+
+      .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+
+      .progress-bar-bg {
+        height: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 50px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .progress-bar-fill {
+        height: 100%;
+        border-radius: 50px;
+        background: linear-gradient(
+          90deg,
+          var(--pres-primary),
+          var(--pres-secondary)
+        );
+        transition: width 0.3s ease;
+        width: 0%;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .progress-bar-fill::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 1.5s infinite;
+      }
+      @keyframes shimmer {
+        to {
+          left: 100%;
+        }
+      }
+
+      /* ─── FILE LIST ─── */
+      .file-list {
+        padding: 0 16px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .file-item {
+        padding: 14px 16px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        transition: all 0.25s;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+      @media (max-width: 768px) {
+        .file-item {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+      }
+
+      .file-item:hover {
+        background: rgba(124, 58, 237, 0.08);
+        border-color: rgba(124, 58, 237, 0.3);
+      }
+
+      .file-item.selected {
+        background: rgba(124, 58, 237, 0.15);
+        border-color: var(--pres-primary);
+        box-shadow: 0 0 20px rgba(124, 58, 237, 0.2);
+      }
+
+      .file-item-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.2),
+          rgba(6, 182, 212, 0.2)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        flex-shrink: 0;
+      }
+
+      .file-item-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .file-item-name {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #e2e8f0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .file-item-meta {
+        font-size: 0.75rem;
+        color: #64748b;
+        margin-top: 3px;
+        display: flex;
+        gap: 10px;
+      }
+
+      .meta-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: #94a3b8;
+      }
+
+      .file-item-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+      }
+
+      .icon-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.04);
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+      }
+      .icon-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+      .icon-btn.danger:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.4);
+        color: #f87171;
+      }
+
+      .empty-state {
+        text-align: center;
+        padding: 30px 20px;
+        color: #475569;
+      }
+      .empty-state .empty-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+        display: block;
+      }
+      .empty-state p {
+        font-size: 0.85rem;
+      }
+
+      /* ─── RIGHT PANEL ─── */
+      .right-column {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+      }
+
+      /* ─── ACTIVE PRESENTATION CONTROL ─── */
+      .pres-control-panel {
+        background: rgba(15, 20, 50, 0.7);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 24px;
+        overflow: hidden;
+      }
+
+      .active-pres-header {
+        padding: 22px 28px;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.15),
+          rgba(6, 182, 212, 0.1)
+        );
+        border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+      }
+
+      .active-pres-info {
+        flex: 1;
+      }
+
+      .active-pres-label {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--pres-secondary);
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 4px;
+      }
+
+      .active-pres-name {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #f8fafc;
+      }
+
+      .active-pres-slide {
+        font-size: 0.83rem;
+        color: #94a3b8;
+        margin-top: 4px;
+      }
+
+      .control-bar {
+        padding: 20px 28px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .btn-ctrl {
+        padding: 10px 22px;
+        border-radius: 12px;
+        border: none;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.88rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+
+      .btn-prev {
+        background: rgba(255, 255, 255, 0.08);
+        color: #e2e8f0;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .btn-prev:hover {
+        background: rgba(255, 255, 255, 0.14);
+        transform: translateX(-2px);
+      }
+
+      .btn-next {
+        background: linear-gradient(135deg, var(--pres-primary), #4f46e5);
+        color: white;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+      }
+      .btn-next:hover {
+        transform: translateX(2px);
+        box-shadow: 0 6px 25px rgba(124, 58, 237, 0.5);
+      }
+
+      .btn-fullscreen {
+        background: linear-gradient(135deg, var(--pres-secondary), #0891b2);
+        color: white;
+        box-shadow: 0 4px 15px rgba(6, 182, 212, 0.3);
+      }
+      .btn-fullscreen:hover {
+        box-shadow: 0 6px 25px rgba(6, 182, 212, 0.5);
+        transform: scale(1.02);
+      }
+
+      .btn-close-pres {
+        background: rgba(239, 68, 68, 0.1);
+        color: #f87171;
+        border: 1px solid rgba(239, 68, 68, 0.25);
+      }
+      .btn-close-pres:hover {
+        background: rgba(239, 68, 68, 0.2);
+        transform: scale(1.02);
+      }
+
+      .btn-close-share {
+        background: rgba(245, 158, 11, 0.1);
+        color: #f59e0b;
+        border: 1px solid rgba(245, 158, 11, 0.25);
+      }
+      .btn-close-share:hover {
+        background: rgba(245, 158, 11, 0.2);
+        transform: scale(1.02);
+      }
+
+      .slide-counter {
+        padding: 8px 18px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.88rem;
+        color: #94a3b8;
+        font-weight: 600;
+        min-width: 90px;
+        text-align: center;
+      }
+
+      /* ─── SHARE TOOLS ─── */
+      .share-section {
+        padding: 20px 28px;
+      }
+
+      .section-title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        margin-bottom: 16px;
+      }
+
+      .share-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 12px;
+      }
+
+      .share-card {
+        padding: 16px;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        background: rgba(255, 255, 255, 0.03);
+        cursor: pointer;
+        transition: all 0.25s;
+        text-align: center;
+      }
+
+      .share-card:hover {
+        transform: translateY(-3px);
+        border-color: rgba(255, 255, 255, 0.15);
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .share-card .share-icon {
+        font-size: 1.8rem;
+        margin-bottom: 8px;
+        display: block;
+      }
+      .share-card .share-name {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #e2e8f0;
+      }
+      .share-card .share-desc {
+        font-size: 0.72rem;
+        color: #64748b;
+        margin-top: 3px;
+      }
+
+      .share-card.image-share {
+        border-color: rgba(245, 158, 11, 0.25);
+      }
+      .share-card.image-share:hover {
+        background: rgba(245, 158, 11, 0.08);
+        border-color: rgba(245, 158, 11, 0.5);
+      }
+
+      .share-card.tree-share {
+        border-color: rgba(16, 185, 129, 0.25);
+      }
+      .share-card.tree-share:hover {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.5);
+      }
+
+      .share-card.note-share {
+        border-color: rgba(6, 182, 212, 0.25);
+      }
+      .share-card.note-share:hover {
+        background: rgba(6, 182, 212, 0.08);
+        border-color: rgba(6, 182, 212, 0.5);
+      }
+
+      .share-card.draw-share {
+        border-color: rgba(236, 72, 153, 0.25);
+      }
+      .share-card.draw-share:hover {
+        background: rgba(236, 72, 153, 0.08);
+        border-color: rgba(236, 72, 153, 0.5);
+      }
+
+      /* ─── MODALS ─── */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.75);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+      .modal-overlay.open {
+        display: flex;
+      }
+
+      .modal-box {
+        background: rgba(12, 15, 40, 0.97);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 24px;
+        padding: 30px;
+        width: 100%;
+        max-width: 560px;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+        animation: modalIn 0.3s ease;
+        position: relative;
+      }
+      @keyframes modalIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9) translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .modal-box.wide {
+        max-width: 800px;
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+      }
+
+      .modal-title {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #f8fafc;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .modal-close {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.06);
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        transition: all 0.2s;
+      }
+      .modal-close:hover {
+        color: #fff;
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.4);
+      }
+
+      /* Image share */
+      .img-drop-zone {
+        border: 2px dashed rgba(245, 158, 11, 0.35);
+        border-radius: 14px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 16px;
+        background: rgba(245, 158, 11, 0.03);
+        position: relative;
+      }
+      .img-drop-zone:hover {
+        border-color: var(--pres-accent);
+        background: rgba(245, 158, 11, 0.07);
+      }
+      .img-drop-zone input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
+      .img-drop-zone .drop-icon {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: 10px;
+      }
+      .img-drop-zone p {
+        color: #94a3b8;
+        font-size: 0.88rem;
+      }
+
+      #img-preview {
+        width: 100%;
+        max-height: 200px;
+        object-fit: contain;
+        border-radius: 10px;
+        display: none;
+        margin-bottom: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .btn-share {
+        width: 100%;
+        padding: 13px;
+        border: none;
+        border-radius: 12px;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+
+      .btn-share.amber {
+        background: linear-gradient(135deg, #d97706, var(--pres-accent));
+        color: white;
+        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.35);
+      }
+      .btn-share.amber:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(245, 158, 11, 0.5);
+      }
+
+      .btn-share.green {
+        background: linear-gradient(135deg, #059669, var(--pres-success));
+        color: white;
+        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
+      }
+      .btn-share.green:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+      }
+
+      .btn-share.cyan {
+        background: linear-gradient(135deg, #0891b2, var(--pres-secondary));
+        color: white;
+        box-shadow: 0 4px 20px rgba(6, 182, 212, 0.35);
+      }
+      .btn-share.cyan:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5);
+      }
+
+      .btn-share.pink {
+        background: linear-gradient(135deg, #db2777, #ec4899);
+        color: white;
+        box-shadow: 0 4px 20px rgba(236, 72, 153, 0.35);
+      }
+      .btn-share.pink:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 30px rgba(236, 72, 153, 0.5);
+      }
+
+      /* Tree builder */
+      .tree-builder textarea {
+        width: 100%;
+        min-height: 120px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        border-radius: 10px;
+        color: #f8fafc;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.9rem;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+      }
+      .tree-builder textarea:focus {
+        border-color: var(--pres-success);
+      }
+
+      .tree-hint {
+        font-size: 0.76rem;
+        color: #475569;
+        margin: 8px 0 16px;
+        padding: 10px 12px;
+        background: rgba(16, 185, 129, 0.05);
+        border-radius: 8px;
+        border: 1px solid rgba(16, 185, 129, 0.1);
+        line-height: 1.6;
+      }
+
+      /* Note editor */
+      .note-editor textarea {
+        width: 100%;
+        min-height: 140px;
+        padding: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(6, 182, 212, 0.25);
+        border-radius: 10px;
+        color: #f8fafc;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.9rem;
+        resize: vertical;
+        outline: none;
+        transition: border-color 0.2s;
+        margin-bottom: 16px;
+      }
+      .note-editor textarea:focus {
+        border-color: var(--pres-secondary);
+      }
+
+      /* Drawing canvas */
+      #drawCanvas {
+        width: 100%;
+        height: 320px;
+        background: rgba(0, 0, 0, 0.4);
+        border-radius: 12px;
+        border: 1px solid rgba(236, 72, 153, 0.25);
+        cursor: crosshair;
+        touch-action: none;
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      .draw-tools {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+      }
+
+      .color-btn {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .color-btn.active {
+        border-color: white;
+        transform: scale(1.2);
+      }
+
+      .draw-btn {
+        padding: 6px 14px;
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.06);
+        color: #94a3b8;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: "Outfit", sans-serif;
+        transition: all 0.2s;
+      }
+      .draw-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+      }
+
+      .brush-slider {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.8rem;
+        color: #64748b;
+      }
+      .brush-slider input {
+        flex: 1;
+        accent-color: #ec4899;
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        padding: 14px 22px;
+        border-radius: 14px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      }
+      .toast.show {
+        transform: translateX(0);
+      }
+      .toast.success {
+        background: rgba(16, 185, 129, 0.2);
+        border: 1px solid rgba(16, 185, 129, 0.4);
+        color: #6ee7b7;
+      }
+      .toast.error {
+        background: rgba(239, 68, 68, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.4);
+        color: #fca5a5;
+      }
+      .toast.info {
+        background: rgba(6, 182, 212, 0.2);
+        border: 1px solid rgba(6, 182, 212, 0.4);
+        color: #67e8f9;
+      }
+
+      /* Preview thumb strip */
+      .thumb-strip {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        max-height: 250px;
+        overflow-y: auto;
+        padding: 16px 28px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        scrollbar-width: thin;
+        scrollbar-color: rgba(124, 58, 237, 0.3) transparent;
+      }
+
+      .thumb-item {
+        flex-shrink: 0;
+        width: 100px;
+        height: 65px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 2px solid rgba(255, 255, 255, 0.07);
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+      }
+
+      .thumb-item:hover {
+        border-color: var(--pres-primary);
+        transform: scale(1.05);
+      }
+      .thumb-item.active {
+        border-color: var(--pres-secondary);
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+      }
+      .thumb-item .thumb-num {
+        position: absolute;
+        bottom: 3px;
+        right: 5px;
+        font-size: 0.6rem;
+        font-weight: 800;
+        color: rgba(255, 255, 255, 0.5);
+      }
+
+      /* No pres selected */
+      .no-pres-state {
+        padding: 40px 28px;
+        text-align: center;
+        color: #475569;
+      }
+      .no-pres-state .np-icon {
+        font-size: 3rem;
+        margin-bottom: 12px;
+        display: block;
+      }
+      .no-pres-state h3 {
+        font-size: 1.1rem;
+        color: #64748b;
+        margin-bottom: 8px;
+      }
+      .no-pres-state p {
+        font-size: 0.85rem;
+        line-height: 1.6;
+      }
+
+      /* Conn indicator */
+      #connIndicator {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 5px 12px;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.05);
+      }
+      #connDot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #ef4444;
+      }
+      #connDot.online {
+        background: #10b981;
+      }
+
+      .hint-text {
+        font-size: 0.75rem;
+        color: #475569;
+        margin: 8px 0 16px;
+      }
+
+      .select-input {
+        padding: 11px 14px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        color: #f8fafc;
+        font-size: 0.9rem;
+        font-family: "Outfit", sans-serif;
+        outline: none;
+        width: 100%;
+        transition: all 0.2s;
+      }
+      .select-input:focus {
+        border-color: var(--pres-primary);
+      }
+      .select-input option {
+        background: #0f1432;
+      }
+
+      .divider {
+        height: 1px;
+        background: rgba(255, 255, 255, 0.06);
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="dash-header">
+      <div class="logo">
+        <div class="logo-icon">📽️</div>
         <div>
-          <div class="panel-title">Upload Presentation</div>
-          <div class="panel-subtitle">Supports .pptx and .ppt files</div>
-        </div>
-      </div>
-
-      <div class="upload-zone" id="dropZone">
-        <span class="upload-icon">🗂️</span>
-        <div class="upload-title">Drop your PowerPoint here</div>
-        <div class="upload-hint">or click to browse — .pptx / .ppt</div>
-        <input type="file" id="fileDropInput" accept=".pptx,.ppt" style="position:absolute;inset:0;opacity:0;cursor:pointer;width:100%">
-      </div>
-
-      <div class="upload-form">
-        <div class="form-row">
-          <label class="form-label">Subject</label>
-          <input type="text" id="subjectInput" class="form-input" placeholder="e.g. Agriculture Science">
-        </div>
-        <div class="form-row">
-          <label class="form-label">Chapter / Topic</label>
-          <input type="text" id="chapterInput" class="form-input" placeholder="e.g. Chapter 3 — Soil Types">
-        </div>
-        <div class="form-row">
-          <label class="form-label">Selected File</label>
-          <div class="file-input-wrapper">
-            <div class="file-input-label" id="fileInputLabel">No file chosen...</div>
-            <input type="file" id="fileInput" accept=".pptx,.ppt">
+          <div class="logo-text">Presentation <span>Control</span></div>
+          <div style="font-size: 0.7rem; color: #64748b; font-weight: 500">
+            Teacher Dashboard
           </div>
         </div>
-        <button class="btn-upload" id="uploadBtn" disabled>📤 Upload Presentation</button>
       </div>
 
-      <!-- Progress -->
-      <div class="progress-container" id="progressContainer">
-        <div class="progress-label">
-          <span id="progressText">Uploading...</span>
-          <span id="progressPct">0%</span>
+      <div class="header-actions">
+        <div id="connIndicator">
+          <div id="connDot"></div>
+          <span id="connLabel">Connecting...</span>
         </div>
-        <div class="progress-bar-bg">
-          <div class="progress-bar-fill" id="progressFill"></div>
+        <div class="status-pill">
+          <div class="status-dot"></div>
+          LIVE SESSION
+        </div>
+        <a href="dashboard.html" class="btn-back">← Dashboard</a>
+      </div>
+    </header>
+
+    <!-- ═══════════════ MAIN LAYOUT ═══════════════ -->
+    <div class="main-layout">
+      <!-- ═══ LEFT COLUMN ═══ -->
+      <div class="left-column">
+        <!-- Upload Panel -->
+        <div class="panel" style="margin-bottom: 24px">
+          <div class="panel-header">
+            <div
+              class="panel-header-icon"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(124, 58, 237, 0.3),
+                  rgba(79, 70, 229, 0.3)
+                );
+              "
+            >
+              📤
+            </div>
+            <div>
+              <div class="panel-title">Upload Presentation</div>
+              <div class="panel-subtitle">Supports .pptx and .ppt files</div>
+            </div>
+          </div>
+
+          <div class="upload-zone" id="dropZone">
+            <span class="upload-icon">🗂️</span>
+            <div class="upload-title">Drop your PowerPoint here</div>
+            <div class="upload-hint">or click to browse — .pptx / .ppt</div>
+            <input
+              type="file"
+              id="fileDropInput"
+              accept=".pptx,.ppt"
+              style="
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                cursor: pointer;
+                width: 100%;
+              "
+            />
+          </div>
+
+          <div class="upload-form">
+            <div class="form-row">
+              <label class="form-label">Subject</label>
+              <input
+                type="text"
+                id="subjectInput"
+                class="form-input"
+                placeholder="e.g. Agriculture Science"
+              />
+            </div>
+            <div class="form-row">
+              <label class="form-label">Chapter / Topic</label>
+              <input
+                type="text"
+                id="chapterInput"
+                class="form-input"
+                placeholder="e.g. Chapter 3 — Soil Types"
+              />
+            </div>
+            <div class="form-row">
+              <label class="form-label">Selected File</label>
+              <div class="file-input-wrapper">
+                <div class="file-input-label" id="fileInputLabel">
+                  No file chosen...
+                </div>
+                <input type="file" id="fileInput" accept=".pptx,.ppt" />
+              </div>
+            </div>
+            <button class="btn-upload" id="uploadBtn" disabled>
+              📤 Upload Presentation
+            </button>
+          </div>
+
+          <!-- Progress -->
+          <div class="progress-container" id="progressContainer">
+            <div class="progress-label">
+              <span id="progressText">Uploading...</span>
+              <span id="progressPct">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+              <div class="progress-bar-fill" id="progressFill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Library -->
+        <div class="panel">
+          <div class="panel-header">
+            <div
+              class="panel-header-icon"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(6, 182, 212, 0.3),
+                  rgba(8, 145, 178, 0.3)
+                );
+              "
+            >
+              📚
+            </div>
+            <div>
+              <div class="panel-title">Presentation Library</div>
+              <div class="panel-subtitle" id="fileCountLabel">
+                Loading files...
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 12px 16px 0">
+            <input
+              type="text"
+              class="form-input"
+              id="searchFiles"
+              placeholder="🔍 Search presentations..."
+            />
+          </div>
+
+          <div class="file-list" id="fileList">
+            <div class="empty-state">
+              <span class="empty-icon">📂</span>
+              <p>
+                No presentations uploaded yet.<br />Upload your first file
+                above!
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ═══ RIGHT COLUMN ═══ -->
+      <div class="right-column">
+        <!-- Presentation Control Panel -->
+        <div class="pres-control-panel" id="presControlPanel">
+          <!-- No presentation selected state -->
+          <div class="no-pres-state" id="noPres">
+            <span class="np-icon">🎯</span>
+            <h3>No Presentation Selected</h3>
+            <p>
+              Select a presentation from the library on the left to start
+              controlling it on the game screen.
+            </p>
+          </div>
+
+          <!-- Active presentation state (hidden initially) -->
+          <div id="activePresView" style="display: none">
+            <div class="active-pres-header">
+              <div class="active-pres-info">
+                <div class="active-pres-label">▶ NOW PRESENTING</div>
+                <div class="active-pres-name" id="activeName">—</div>
+                <div class="active-pres-slide" id="activeSlideInfo">
+                  Slide — / —
+                </div>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: center">
+                <div class="slide-counter" id="slideCounter">— / —</div>
+              </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="control-bar">
+              <button class="btn-ctrl btn-prev" id="btnPrev">⬅ Prev</button>
+              <button class="btn-ctrl btn-next" id="btnNext">Next ➡</button>
+              <button class="btn-ctrl btn-fullscreen" id="btnFullscreen">
+                ⛶ Open Fullscreen
+              </button>
+              <button class="btn-ctrl btn-close-pres" id="btnClosePres">
+                ✕ Close
+              </button>
+              <button class="btn-ctrl btn-close-share" id="btnCloseShare">
+                ✕ Close Shared Overlay
+              </button>
+            </div>
+
+            <!-- Thumbnail strip -->
+            <div class="thumb-strip" id="thumbStrip"></div>
+
+            <!-- Share Tools -->
+            <div class="share-section">
+              <div class="section-title">⚡ Share to Game Screen</div>
+              <div class="share-grid">
+                <div class="share-card image-share" id="shareImageBtn">
+                  <span class="share-icon">🖼️</span>
+                  <div class="share-name">Share Image</div>
+                  <div class="share-desc">Send photo to screen</div>
+                </div>
+                <div class="share-card tree-share" id="shareTreeBtn">
+                  <span class="share-icon">🌳</span>
+                  <div class="share-name">Classification Tree</div>
+                  <div class="share-desc">Visual hierarchy</div>
+                </div>
+                <div class="share-card note-share" id="shareNoteBtn">
+                  <span class="share-icon">📝</span>
+                  <div class="share-name">Notes / Text</div>
+                  <div class="share-desc">Plain text or notes</div>
+                </div>
+                <div class="share-card draw-share" id="shareDrawBtn">
+                  <span class="share-icon">✏️</span>
+                  <div class="share-name">Drawing</div>
+                  <div class="share-desc">Touch/pen input</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Game Screen URL -->
+        <div class="panel">
+          <div class="panel-header">
+            <div
+              class="panel-header-icon"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(16, 185, 129, 0.3),
+                  rgba(5, 150, 105, 0.3)
+                );
+              "
+            >
+              🖥️
+            </div>
+            <div>
+              <div class="panel-title">Game Screen URL</div>
+              <div class="panel-subtitle">
+                Open this on your projector/TV browser
+              </div>
+            </div>
+          </div>
+          <div style="padding: 16px 20px 20px">
+            <div style="display: flex; gap: 10px; align-items: center">
+              <input
+                type="text"
+                class="form-input"
+                id="gameUrlInput"
+                readonly
+                style="font-size: 0.82rem; color: #94a3b8"
+              />
+              <button
+                onclick="copyGameUrl()"
+                class="btn-upload"
+                style="min-width: 80px; padding: 10px 14px; font-size: 0.82rem"
+              >
+                Copy
+              </button>
+            </div>
+            <p style="font-size: 0.75rem; color: #475569; margin-top: 10px">
+              💡 Open this URL on your classroom projector. The teacher
+              dashboard controls everything in real time.
+            </p>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- File Library -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:linear-gradient(135deg,rgba(6,182,212,0.3),rgba(8,145,178,0.3))">📚</div>
-        <div>
-          <div class="panel-title">Presentation Library</div>
-          <div class="panel-subtitle" id="fileCountLabel">Loading files...</div>
-        </div>
-      </div>
-
-      <div style="padding:12px 16px 0">
-        <input type="text" class="form-input" id="searchFiles" placeholder="🔍 Search presentations...">
-      </div>
-
-      <div class="file-list" id="fileList">
-        <div class="empty-state">
-          <span class="empty-icon">📂</span>
-          <p>No presentations uploaded yet.<br>Upload your first file above!</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ RIGHT COLUMN ═══ -->
-  <div class="right-column">
-
-    <!-- Presentation Control Panel -->
-    <div class="pres-control-panel" id="presControlPanel">
-
-      <!-- No presentation selected state -->
-      <div class="no-pres-state" id="noPres">
-        <span class="np-icon">🎯</span>
-        <h3>No Presentation Selected</h3>
-        <p>Select a presentation from the library on the left to start controlling it on the game screen.</p>
-      </div>
-
-      <!-- Active presentation state (hidden initially) -->
-      <div id="activePresView" style="display:none">
-        <div class="active-pres-header">
-          <div class="active-pres-info">
-            <div class="active-pres-label">▶ NOW PRESENTING</div>
-            <div class="active-pres-name" id="activeName">—</div>
-            <div class="active-pres-slide" id="activeSlideInfo">Slide — / —</div>
-          </div>
-          <div style="display:flex;gap:10px;align-items:center">
-            <div class="slide-counter" id="slideCounter">— / —</div>
-          </div>
-        </div>
-
-        <!-- Controls -->
-        <div class="control-bar">
-          <button class="btn-ctrl btn-prev" id="btnPrev">⬅ Prev</button>
-          <button class="btn-ctrl btn-next" id="btnNext">Next ➡</button>
-          <button class="btn-ctrl btn-fullscreen" id="btnFullscreen">⛶ Open Fullscreen</button>
-          <button class="btn-ctrl btn-close-pres" id="btnClosePres">✕ Close</button>
-          <button class="btn-ctrl btn-close-share" id="btnCloseShare">✕ Close Shared Overlay</button>
-        </div>
-
-        <!-- Thumbnail strip -->
-        <div class="thumb-strip" id="thumbStrip"></div>
-
-        <!-- Share Tools -->
-        <div class="share-section">
-          <div class="section-title">⚡ Share to Game Screen</div>
-          <div class="share-grid">
-            <div class="share-card image-share" id="shareImageBtn">
-              <span class="share-icon">🖼️</span>
-              <div class="share-name">Share Image</div>
-              <div class="share-desc">Send photo to screen</div>
-            </div>
-            <div class="share-card tree-share" id="shareTreeBtn">
-              <span class="share-icon">🌳</span>
-              <div class="share-name">Classification Tree</div>
-              <div class="share-desc">Visual hierarchy</div>
-            </div>
-            <div class="share-card note-share" id="shareNoteBtn">
-              <span class="share-icon">📝</span>
-              <div class="share-name">Notes / Text</div>
-              <div class="share-desc">Plain text or notes</div>
-            </div>
-            <div class="share-card draw-share" id="shareDrawBtn">
-              <span class="share-icon">✏️</span>
-              <div class="share-name">Drawing</div>
-              <div class="share-desc">Touch/pen input</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Live Game Screen URL -->
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-header-icon" style="background:linear-gradient(135deg,rgba(16,185,129,0.3),rgba(5,150,105,0.3))">🖥️</div>
-        <div>
-          <div class="panel-title">Game Screen URL</div>
-          <div class="panel-subtitle">Open this on your projector/TV browser</div>
-        </div>
-      </div>
-      <div style="padding:16px 20px 20px">
-        <div style="display:flex;gap:10px;align-items:center">
-          <input type="text" class="form-input" id="gameUrlInput" readonly style="font-size:0.82rem;color:#94a3b8">
-          <button onclick="copyGameUrl()" class="btn-upload" style="min-width:80px;padding:10px 14px;font-size:0.82rem">Copy</button>
-        </div>
-        <p style="font-size:0.75rem;color:#475569;margin-top:10px">💡 Open this URL on your classroom projector. The teacher dashboard controls everything in real time.</p>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
      SHARE MODALS
 ══════════════════════════════════════════ -->
 
-<!-- Image Share Modal -->
-<div class="modal-overlay" id="imageModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">🖼️ Share Image to Screen</div>
-      <button class="modal-close" onclick="closeModal('imageModal')">✕</button>
+    <!-- Image Share Modal -->
+    <div class="modal-overlay" id="imageModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">🖼️ Share Image to Screen</div>
+          <button class="modal-close" onclick="closeModal('imageModal')">
+            ✕
+          </button>
+        </div>
+        <div class="img-drop-zone" id="imgDropZone">
+          <input type="file" id="imgShareInput" accept="image/*" />
+          <span class="drop-icon">📸</span>
+          <p>Click or drag an image here</p>
+        </div>
+        <img id="img-preview" alt="preview" />
+        <button class="btn-share amber" id="sendImageBtn" disabled>
+          📡 Send to Game Screen
+        </button>
+      </div>
     </div>
-    <div class="img-drop-zone" id="imgDropZone">
-      <input type="file" id="imgShareInput" accept="image/*">
-      <span class="drop-icon">📸</span>
-      <p>Click or drag an image here</p>
-    </div>
-    <img id="img-preview" alt="preview">
-    <button class="btn-share amber" id="sendImageBtn" disabled>📡 Send to Game Screen</button>
-  </div>
-</div>
 
-<!-- Classification Tree Modal -->
-<div class="modal-overlay" id="treeModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">🌳 Classification Tree</div>
-      <button class="modal-close" onclick="closeModal('treeModal')">✕</button>
-    </div>
-    <div class="tree-builder">
-      <label class="form-label" style="display:block;margin-bottom:8px">Tree Title</label>
-      <input type="text" class="form-input" id="treeTitle" placeholder="e.g. Plant Kingdom Classification" style="margin-bottom:14px">
-      <label class="form-label" style="display:block;margin-bottom:8px">Tree Data (JSON or text)</label>
-      <textarea id="treeData" placeholder='Example:
+    <!-- Classification Tree Modal -->
+    <div class="modal-overlay" id="treeModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">🌳 Classification Tree</div>
+          <button class="modal-close" onclick="closeModal('treeModal')">
+            ✕
+          </button>
+        </div>
+        <div class="tree-builder">
+          <label class="form-label" style="display: block; margin-bottom: 8px"
+            >Tree Title</label
+          >
+          <input
+            type="text"
+            class="form-input"
+            id="treeTitle"
+            placeholder="e.g. Plant Kingdom Classification"
+            style="margin-bottom: 14px"
+          />
+          <label class="form-label" style="display: block; margin-bottom: 8px"
+            >Tree Data (JSON or text)</label
+          >
+          <textarea
+            id="treeData"
+            placeholder="Example:
 Kingdom → Plantae
   ├── Division → Bryophyta (Mosses)
   ├── Division → Pteridophyta (Ferns)
   └── Division → Spermatophyta
         ├── Gymnospermae
-        └── Angiospermae'></textarea>
-      <div class="tree-hint">📌 Use indentation with → and ├── └── to define the tree structure. It will be rendered as a visual hierarchy on the game screen.</div>
-      <button class="btn-share green" onclick="sendTree()">🌿 Send to Game Screen</button>
-    </div>
-  </div>
-</div>
-
-<!-- Note / Text Modal -->
-<div class="modal-overlay" id="noteModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <div class="modal-title">📝 Share Note / Text</div>
-      <button class="modal-close" onclick="closeModal('noteModal')">✕</button>
-    </div>
-    <div class="note-editor">
-      <label class="form-label" style="display:block;margin-bottom:8px">Note Title</label>
-      <input type="text" class="form-input" id="noteTitle" placeholder="e.g. Key Points to Remember" style="margin-bottom:14px">
-      <label class="form-label" style="display:block;margin-bottom:8px">Note Content</label>
-      <textarea id="noteContent" placeholder="Type your notes or key points here...&#10;&#10;• Point one&#10;• Point two&#10;• Point three"></textarea>
-      <button class="btn-share cyan" onclick="sendNote()">📡 Send to Game Screen</button>
-    </div>
-  </div>
-</div>
-
-<!-- Drawing Modal -->
-<div class="modal-overlay" id="drawModal">
-  <div class="modal-box wide">
-    <div class="modal-header">
-      <div class="modal-title">✏️ Drawing Board</div>
-      <button class="modal-close" onclick="closeModal('drawModal')">✕</button>
-    </div>
-
-    <div class="draw-tools">
-      <div class="color-btn active" style="background:#ec4899" data-color="#ec4899" onclick="setDrawColor(this, '#ec4899')"></div>
-      <div class="color-btn" style="background:#60a5fa" data-color="#60a5fa" onclick="setDrawColor(this, '#60a5fa')"></div>
-      <div class="color-btn" style="background:#34d399" data-color="#34d399" onclick="setDrawColor(this, '#34d399')"></div>
-      <div class="color-btn" style="background:#fbbf24" data-color="#fbbf24" onclick="setDrawColor(this, '#fbbf24')"></div>
-      <div class="color-btn" style="background:#f8fafc" data-color="#f8fafc" onclick="setDrawColor(this, '#f8fafc')"></div>
-      <div class="color-btn" style="background:#a78bfa" data-color="#a78bfa" onclick="setDrawColor(this, '#a78bfa')"></div>
-      <div style="width:1px;background:rgba(255,255,255,0.1);margin:0 4px"></div>
-      <div class="brush-slider">
-        <span>Size:</span>
-        <input type="range" id="brushSize" min="2" max="30" value="5">
-        <span id="brushSizeVal">5</span>
+        └── Angiospermae"
+          ></textarea>
+          <div class="tree-hint">
+            📌 Use indentation with → and ├── └── to define the tree structure.
+            It will be rendered as a visual hierarchy on the game screen.
+          </div>
+          <button class="btn-share green" onclick="sendTree()">
+            🌿 Send to Game Screen
+          </button>
+        </div>
       </div>
-      <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
     </div>
 
-    <canvas id="drawCanvas"></canvas>
-    <button class="btn-share pink" onclick="sendDrawing()">🎨 Send Drawing to Screen</button>
-  </div>
-</div>
+    <!-- Note / Text Modal -->
+    <div class="modal-overlay" id="noteModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">📝 Share Note / Text</div>
+          <button class="modal-close" onclick="closeModal('noteModal')">
+            ✕
+          </button>
+        </div>
+        <div class="note-editor">
+          <label class="form-label" style="display: block; margin-bottom: 8px"
+            >Note Title</label
+          >
+          <input
+            type="text"
+            class="form-input"
+            id="noteTitle"
+            placeholder="e.g. Key Points to Remember"
+            style="margin-bottom: 14px"
+          />
+          <label class="form-label" style="display: block; margin-bottom: 8px"
+            >Note Content</label
+          >
+          <textarea
+            id="noteContent"
+            placeholder="Type your notes or key points here...&#10;&#10;• Point one&#10;• Point two&#10;• Point three"
+          ></textarea>
+          <button class="btn-share cyan" onclick="sendNote()">
+            📡 Send to Game Screen
+          </button>
+        </div>
+      </div>
+    </div>
 
-<!-- Toast -->
-<div class="toast" id="toast"></div>
+    <!-- Drawing Modal -->
+    <div class="modal-overlay" id="drawModal">
+      <div class="modal-box wide">
+        <div class="modal-header">
+          <div class="modal-title">✏️ Drawing Board</div>
+          <button class="modal-close" onclick="closeModal('drawModal')">
+            ✕
+          </button>
+        </div>
 
-<script src="/socket.io/socket.io.js"></script>
-<script>
-// ════════════════════════════════════════════
-//  SOCKET
-// ════════════════════════════════════════════
-const socket = io();
-let isConnected = false;
+        <div class="draw-tools">
+          <div
+            class="color-btn active"
+            style="background: #ec4899"
+            data-color="#ec4899"
+            onclick="setDrawColor(this, '#ec4899')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #60a5fa"
+            data-color="#60a5fa"
+            onclick="setDrawColor(this, '#60a5fa')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #34d399"
+            data-color="#34d399"
+            onclick="setDrawColor(this, '#34d399')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #fbbf24"
+            data-color="#fbbf24"
+            onclick="setDrawColor(this, '#fbbf24')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #f8fafc"
+            data-color="#f8fafc"
+            onclick="setDrawColor(this, '#f8fafc')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #a78bfa"
+            data-color="#a78bfa"
+            onclick="setDrawColor(this, '#a78bfa')"
+          ></div>
+          <div
+            style="
+              width: 1px;
+              background: rgba(255, 255, 255, 0.1);
+              margin: 0 4px;
+            "
+          ></div>
+          <div class="brush-slider">
+            <span>Size:</span>
+            <input type="range" id="brushSize" min="2" max="30" value="5" />
+            <span id="brushSizeVal">5</span>
+          </div>
+          <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
+        </div>
 
-socket.on('connect', () => {
-  isConnected = true;
-  document.getElementById('connDot').classList.add('online');
-  document.getElementById('connLabel').textContent = 'Connected';
-  loadFileList();
-});
+        <canvas id="drawCanvas"></canvas>
+        <button class="btn-share pink" onclick="sendDrawing()">
+          🎨 Send Drawing to Screen
+        </button>
+      </div>
+    </div>
 
-socket.on('disconnect', () => {
-  isConnected = false;
-  document.getElementById('connDot').classList.remove('online');
-  document.getElementById('connLabel').textContent = 'Offline';
-});
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
-// ════════════════════════════════════════════
-//  STATE
-// ════════════════════════════════════════════
-let files = [];
-let selectedFile = null;
-let currentSlide = 0;
-let totalSlides = 0;
-const gameUrl = window.location.origin + '/game-presentation.html';
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // ════════════════════════════════════════════
+      //  SOCKET
+      // ════════════════════════════════════════════
+      const socket = io();
+      let isConnected = false;
 
-document.getElementById('gameUrlInput').value = gameUrl;
+      socket.on("connect", () => {
+        isConnected = true;
+        document.getElementById("connDot").classList.add("online");
+        document.getElementById("connLabel").textContent = "Connected";
+        loadFileList();
+      });
 
-function copyGameUrl() {
-  navigator.clipboard.writeText(gameUrl).then(() => showToast('Game URL copied! 📋', 'success'));
-}
+      socket.on("disconnect", () => {
+        isConnected = false;
+        document.getElementById("connDot").classList.remove("online");
+        document.getElementById("connLabel").textContent = "Offline";
+      });
 
-// ════════════════════════════════════════════
-//  FILE INPUT HANDLING
-// ════════════════════════════════════════════
-let selectedFileObj = null;
+      // ════════════════════════════════════════════
+      //  STATE
+      // ════════════════════════════════════════════
+      let files = [];
+      let selectedFile = null;
+      let currentSlide = 0;
+      let totalSlides = 0;
+      const gameUrl = window.location.origin + "/game-presentation.html";
 
-function handleFileSelect(file) {
-  if (!file) return;
-  selectedFileObj = file;
-  const label = document.getElementById('fileInputLabel');
-  label.textContent = file.name;
-  label.classList.add('has-file');
-  validateUploadBtn();
-}
+      document.getElementById("gameUrlInput").value = gameUrl;
 
-document.getElementById('fileInput').addEventListener('change', e => handleFileSelect(e.target.files[0]));
-document.getElementById('fileDropInput').addEventListener('change', e => handleFileSelect(e.target.files[0]));
+      function copyGameUrl() {
+        navigator.clipboard
+          .writeText(gameUrl)
+          .then(() => showToast("Game URL copied! 📋", "success"));
+      }
 
-// Drag and drop
-const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => {
-  e.preventDefault();
-  dropZone.classList.remove('drag-over');
-  const file = e.dataTransfer.files[0];
-  if (file && (file.name.endsWith('.pptx') || file.name.endsWith('.ppt'))) {
-    handleFileSelect(file);
-  } else {
-    showToast('Please drop a .pptx or .ppt file', 'error');
-  }
-});
+      // ════════════════════════════════════════════
+      //  FILE INPUT HANDLING
+      // ════════════════════════════════════════════
+      let selectedFileObj = null;
 
-['subjectInput','chapterInput'].forEach(id =>
-  document.getElementById(id).addEventListener('input', validateUploadBtn)
-);
+      function handleFileSelect(file) {
+        if (!file) return;
+        selectedFileObj = file;
+        const label = document.getElementById("fileInputLabel");
+        label.textContent = file.name;
+        label.classList.add("has-file");
+        validateUploadBtn();
+      }
 
-function validateUploadBtn() {
-  const hasFile = !!selectedFileObj;
-  const hasSubject = document.getElementById('subjectInput').value.trim();
-  const hasChapter = document.getElementById('chapterInput').value.trim();
-  document.getElementById('uploadBtn').disabled = !(hasFile && hasSubject && hasChapter);
-}
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", (e) => handleFileSelect(e.target.files[0]));
+      document
+        .getElementById("fileDropInput")
+        .addEventListener("change", (e) => handleFileSelect(e.target.files[0]));
 
-// ════════════════════════════════════════════
-//  UPLOAD WITH PROGRESS
-// ════════════════════════════════════════════
-document.getElementById('uploadBtn').addEventListener('click', uploadPresentation);
+      // Drag and drop
+      const dropZone = document.getElementById("dropZone");
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
+      });
+      dropZone.addEventListener("dragleave", () =>
+        dropZone.classList.remove("drag-over"),
+      );
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (
+          file &&
+          (file.name.endsWith(".pptx") || file.name.endsWith(".ppt"))
+        ) {
+          handleFileSelect(file);
+        } else {
+          showToast("Please drop a .pptx or .ppt file", "error");
+        }
+      });
 
-function uploadPresentation() {
-  if (!selectedFileObj) return;
-  const subject = document.getElementById('subjectInput').value.trim();
-  const chapter = document.getElementById('chapterInput').value.trim();
+      ["subjectInput", "chapterInput"].forEach((id) =>
+        document
+          .getElementById(id)
+          .addEventListener("input", validateUploadBtn),
+      );
 
-  const formData = new FormData();
-  formData.append('presentation', selectedFileObj);
-  formData.append('subject', subject);
-  formData.append('chapter', chapter);
+      function validateUploadBtn() {
+        const hasFile = !!selectedFileObj;
+        const hasSubject = document.getElementById("subjectInput").value.trim();
+        const hasChapter = document.getElementById("chapterInput").value.trim();
+        document.getElementById("uploadBtn").disabled = !(
+          hasFile &&
+          hasSubject &&
+          hasChapter
+        );
+      }
 
-  const progContainer = document.getElementById('progressContainer');
-  const progFill = document.getElementById('progressFill');
-  const progPct = document.getElementById('progressPct');
-  const progText = document.getElementById('progressText');
-  const uploadBtn = document.getElementById('uploadBtn');
+      // ════════════════════════════════════════════
+      //  UPLOAD WITH PROGRESS
+      // ════════════════════════════════════════════
+      document
+        .getElementById("uploadBtn")
+        .addEventListener("click", uploadPresentation);
 
-  progContainer.classList.add('active');
-  uploadBtn.disabled = true;
+      function uploadPresentation() {
+        if (!selectedFileObj) return;
+        const subject = document.getElementById("subjectInput").value.trim();
+        const chapter = document.getElementById("chapterInput").value.trim();
 
-  const xhr = new XMLHttpRequest();
+        const formData = new FormData();
+        formData.append("presentation", selectedFileObj);
+        formData.append("subject", subject);
+        formData.append("chapter", chapter);
 
-  xhr.upload.addEventListener('progress', e => {
-    if (e.lengthComputable) {
-      const pct = Math.round((e.loaded / e.total) * 100);
-      progFill.style.width = pct + '%';
-      progPct.textContent = pct + '%';
-      progText.textContent = pct < 100 ? 'Uploading...' : 'Processing...';
-    }
-  });
+        const progContainer = document.getElementById("progressContainer");
+        const progFill = document.getElementById("progressFill");
+        const progPct = document.getElementById("progressPct");
+        const progText = document.getElementById("progressText");
+        const uploadBtn = document.getElementById("uploadBtn");
 
-  xhr.addEventListener('load', () => {
-    if (xhr.status === 200) {
-      const res = JSON.parse(xhr.responseText);
-      showToast('✅ ' + res.filename + ' uploaded!', 'success');
-      progContainer.classList.remove('active');
-      progFill.style.width = '0%';
-      document.getElementById('subjectInput').value = '';
-      document.getElementById('chapterInput').value = '';
-      document.getElementById('fileInputLabel').textContent = 'No file chosen...';
-      document.getElementById('fileInputLabel').classList.remove('has-file');
-      selectedFileObj = null;
-      uploadBtn.disabled = true;
-      loadFileList();
-    } else {
-      showToast('Upload failed: ' + xhr.responseText, 'error');
-      progContainer.classList.remove('active');
-      uploadBtn.disabled = false;
-    }
-  });
+        progContainer.classList.add("active");
+        uploadBtn.disabled = true;
 
-  xhr.addEventListener('error', () => {
-    showToast('Network error during upload', 'error');
-    progContainer.classList.remove('active');
-    uploadBtn.disabled = false;
-  });
+        const xhr = new XMLHttpRequest();
 
-  xhr.open('POST', '/api/presentation/upload');
-  xhr.send(formData);
-}
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progFill.style.width = pct + "%";
+            progPct.textContent = pct + "%";
+            progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
+          }
+        });
 
-// ════════════════════════════════════════════
-//  FILE LIST
-// ════════════════════════════════════════════
-async function loadFileList() {
-  try {
-    const res = await fetch('/api/presentations');
-    files = await res.json();
-    renderFileList(files);
-    document.getElementById('fileCountLabel').textContent =
-      files.length === 0 ? 'No files yet' : files.length + ' presentation(s) available';
-  } catch(e) {
-    console.error(e);
-  }
-}
+        xhr.addEventListener("load", () => {
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            showToast("✅ " + res.filename + " uploaded!", "success");
+            progContainer.classList.remove("active");
+            progFill.style.width = "0%";
+            document.getElementById("subjectInput").value = "";
+            document.getElementById("chapterInput").value = "";
+            document.getElementById("fileInputLabel").textContent =
+              "No file chosen...";
+            document
+              .getElementById("fileInputLabel")
+              .classList.remove("has-file");
+            selectedFileObj = null;
+            uploadBtn.disabled = true;
+            loadFileList();
+          } else {
+            showToast("Upload failed: " + xhr.responseText, "error");
+            progContainer.classList.remove("active");
+            uploadBtn.disabled = false;
+          }
+        });
 
-function renderFileList(list) {
-  const container = document.getElementById('fileList');
-  if (list.length === 0) {
-    container.innerHTML = `<div class="empty-state">
+        xhr.addEventListener("error", () => {
+          showToast("Network error during upload", "error");
+          progContainer.classList.remove("active");
+          uploadBtn.disabled = false;
+        });
+
+        xhr.open("POST", "/api/presentation/upload");
+        xhr.send(formData);
+      }
+
+      // ════════════════════════════════════════════
+      //  FILE LIST
+      // ════════════════════════════════════════════
+      async function loadFileList() {
+        try {
+          const res = await fetch("/api/presentations");
+          files = await res.json();
+          renderFileList(files);
+          document.getElementById("fileCountLabel").textContent =
+            files.length === 0
+              ? "No files yet"
+              : files.length + " presentation(s) available";
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      function renderFileList(list) {
+        const container = document.getElementById("fileList");
+        if (list.length === 0) {
+          container.innerHTML = `<div class="empty-state">
       <span class="empty-icon">📂</span>
       <p>No presentations uploaded yet.<br>Upload your first file above!</p>
     </div>`;
-    return;
-  }
+          return;
+        }
 
-  container.innerHTML = list.map(f => `
-    <div class="file-item ${selectedFile && selectedFile.filename === f.filename ? 'selected' : ''}"
-         onclick="selectPresentation(${JSON.stringify(f).replace(/"/g,'&quot;')})">
+        container.innerHTML = list
+          .map(
+            (f) => `
+    <div class="file-item ${selectedFile && selectedFile.filename === f.filename ? "selected" : ""}"
+         onclick="selectPresentation(${JSON.stringify(f).replace(/"/g, "&quot;")})">
       <div class="file-item-icon">📊</div>
       <div class="file-item-info">
         <div class="file-item-name">${f.originalname}</div>
@@ -1410,288 +1934,361 @@ function renderFileList(list) {
         </div>
       </div>
       <div class="file-item-actions">
-        <button class="icon-btn" onclick="event.stopPropagation();openPresentation(${JSON.stringify(f).replace(/"/g,'&quot;')})" title="Open">▶</button>
-        <a class="icon-btn" href="/uploads/${f.filename}" download="${f.originalname.replace(/"/g,'&quot;')}" onclick="event.stopPropagation();" title="Download" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">📥</a>
+        <button class="icon-btn" onclick="event.stopPropagation();openPresentation(${JSON.stringify(f).replace(/"/g, "&quot;")})" title="Open">▶</button>
+        <a class="icon-btn" href="/uploads/${f.filename}" download="${f.originalname.replace(/"/g, "&quot;")}" onclick="event.stopPropagation();" title="Download" style="text-decoration: none; display: flex; align-items: center; justify-content: center;">📥</a>
         <button class="icon-btn danger" onclick="event.stopPropagation();deleteFile('${f.filename}')" title="Delete">🗑️</button>
       </div>
     </div>
-  `).join('');
-}
+  `,
+          )
+          .join("");
+      }
 
-document.getElementById('searchFiles').addEventListener('input', e => {
-  const q = e.target.value.toLowerCase();
-  renderFileList(files.filter(f =>
-    f.originalname.toLowerCase().includes(q) ||
-    f.subject.toLowerCase().includes(q) ||
-    f.chapter.toLowerCase().includes(q)
-  ));
-});
+      document.getElementById("searchFiles").addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase();
+        renderFileList(
+          files.filter(
+            (f) =>
+              f.originalname.toLowerCase().includes(q) ||
+              f.subject.toLowerCase().includes(q) ||
+              f.chapter.toLowerCase().includes(q),
+          ),
+        );
+      });
 
-function formatFileSize(bytes) {
-  if (!bytes) return '—';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1024 / 1024).toFixed(2) + ' MB';
-}
+      function formatFileSize(bytes) {
+        if (!bytes) return "—";
+        if (bytes < 1024) return bytes + " B";
+        if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+        return (bytes / 1024 / 1024).toFixed(2) + " MB";
+      }
 
-async function deleteFile(filename) {
-  if (!confirm('Delete this presentation?')) return;
-  const res = await fetch('/api/presentation/' + filename, { method: 'DELETE' });
-  if (res.ok) {
-    showToast('Presentation deleted', 'info');
-    if (selectedFile && selectedFile.filename === filename) {
-      selectedFile = null;
-      document.getElementById('noPres').style.display = '';
-      document.getElementById('activePresView').style.display = 'none';
-      socket.emit('pres-close');
-    }
-    loadFileList();
-  }
-}
+      async function deleteFile(filename) {
+        if (!confirm("Delete this presentation?")) return;
+        const res = await fetch("/api/presentation/" + filename, {
+          method: "DELETE",
+        });
+        if (res.ok) {
+          showToast("Presentation deleted", "info");
+          if (selectedFile && selectedFile.filename === filename) {
+            selectedFile = null;
+            document.getElementById("noPres").style.display = "";
+            document.getElementById("activePresView").style.display = "none";
+            socket.emit("pres-close");
+          }
+          loadFileList();
+        }
+      }
 
-// ════════════════════════════════════════════
-//  SELECT & OPEN PRESENTATION
-// ════════════════════════════════════════════
-function selectPresentation(f) {
-  selectedFile = f;
-  renderFileList(files);
-  showToast('Selected: ' + f.originalname, 'info');
-}
+      // ════════════════════════════════════════════
+      //  SELECT & OPEN PRESENTATION
+      // ════════════════════════════════════════════
+      function selectPresentation(f) {
+        selectedFile = f;
+        renderFileList(files);
+        showToast("Selected: " + f.originalname, "info");
+      }
 
-function openPresentation(f) {
-  selectedFile = f;
-  currentSlide = 0;
-  totalSlides = 0;
-  renderFileList(files);
+      function openPresentation(f) {
+        selectedFile = f;
+        currentSlide = 0;
+        totalSlides = 0;
+        renderFileList(files);
 
-  document.getElementById('noPres').style.display = 'none';
-  document.getElementById('activePresView').style.display = '';
+        document.getElementById("noPres").style.display = "none";
+        document.getElementById("activePresView").style.display = "";
 
-  document.getElementById('activeName').textContent = f.originalname;
-  updateSlideInfo();
+        document.getElementById("activeName").textContent = f.originalname;
+        updateSlideInfo();
 
-  socket.emit('pres-open', { file: f, slide: currentSlide });
-  showToast('▶ Opened: ' + f.originalname, 'success');
-}
+        socket.emit("pres-open", { file: f, slide: currentSlide });
+        showToast("▶ Opened: " + f.originalname, "success");
+      }
 
-socket.on('pres-slide-count', data => {
-  totalSlides = data.total;
-  updateSlideInfo();
-  buildThumbStrip();
-});
+      socket.on("pres-slide-count", (data) => {
+        totalSlides = data.total;
+        updateSlideInfo();
+        buildThumbStrip();
+      });
 
-function updateSlideInfo() {
-  const info = totalSlides > 0 ? `Slide ${currentSlide + 1} / ${totalSlides}` : 'Loading slides...';
-  document.getElementById('slideCounter').textContent = totalSlides > 0 ? `${currentSlide + 1} / ${totalSlides}` : '—';
-  document.getElementById('activeSlideInfo').textContent = info;
+      function updateSlideInfo() {
+        const info =
+          totalSlides > 0
+            ? `Slide ${currentSlide + 1} / ${totalSlides}`
+            : "Loading slides...";
+        document.getElementById("slideCounter").textContent =
+          totalSlides > 0 ? `${currentSlide + 1} / ${totalSlides}` : "—";
+        document.getElementById("activeSlideInfo").textContent = info;
 
-  document.querySelectorAll('.thumb-item').forEach((el, i) => {
-    el.classList.toggle('active', i === currentSlide);
-  });
-}
+        document.querySelectorAll(".thumb-item").forEach((el, i) => {
+          el.classList.toggle("active", i === currentSlide);
+        });
+      }
 
-function buildThumbStrip() {
-  const strip = document.getElementById('thumbStrip');
-  if (!selectedFile) return;
-  const slideDir = `/uploads/slides-${selectedFile.filename.replace(/\.[^.]+$/, "")}`;
-  strip.innerHTML = Array.from({length: totalSlides}, (_, i) => `
-    <div class="thumb-item ${i === currentSlide ? 'active' : ''}" onclick="goToSlide(${i})" title="Slide ${i+1}">
-      <img src="${slideDir}/slide_${i+1}.png" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;">
+      function buildThumbStrip() {
+        const strip = document.getElementById("thumbStrip");
+        if (!selectedFile) return;
+        const slideDir = `/uploads/slides-${selectedFile.filename.replace(/\.[^.]+$/, "")}`;
+        strip.innerHTML = Array.from(
+          { length: totalSlides },
+          (_, i) => `
+    <div class="thumb-item ${i === currentSlide ? "active" : ""}" onclick="goToSlide(${i})" title="Slide ${i + 1}">
+      <img src="${slideDir}/slide_${i + 1}.png" onerror="this.style.display='none'" style="width:100%; height:100%; object-fit:cover; position:absolute; inset:0; z-index:0;">
       <span style="position:relative; z-index:1; text-shadow: 0 2px 4px rgba(0,0,0,0.8)">📄</span>
-      <span class="thumb-num" style="z-index:2; text-shadow: 0 1px 3px rgba(0,0,0,0.8); background: rgba(0,0,0,0.5); padding: 1px 4px; border-radius: 3px;">${i+1}</span>
+      <span class="thumb-num" style="z-index:2; text-shadow: 0 1px 3px rgba(0,0,0,0.8); background: rgba(0,0,0,0.5); padding: 1px 4px; border-radius: 3px;">${i + 1}</span>
     </div>
-  `).join('');
-}
+  `,
+        ).join("");
+      }
 
-function goToSlide(idx) {
-  if (idx < 0 || (totalSlides > 0 && idx >= totalSlides)) return;
-  currentSlide = idx;
-  updateSlideInfo();
-  socket.emit('pres-goto-slide', { slide: currentSlide });
-}
+      function goToSlide(idx) {
+        if (idx < 0 || (totalSlides > 0 && idx >= totalSlides)) return;
+        currentSlide = idx;
+        updateSlideInfo();
+        socket.emit("pres-goto-slide", { slide: currentSlide });
+      }
 
-document.getElementById('btnPrev').addEventListener('click', () => goToSlide(currentSlide - 1));
-document.getElementById('btnNext').addEventListener('click', () => goToSlide(currentSlide + 1));
+      document
+        .getElementById("btnPrev")
+        .addEventListener("click", () => goToSlide(currentSlide - 1));
+      document
+        .getElementById("btnNext")
+        .addEventListener("click", () => goToSlide(currentSlide + 1));
 
-document.addEventListener('keydown', e => {
-  if (document.querySelector('.modal-overlay.open')) return;
-  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToSlide(currentSlide + 1);
-  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToSlide(currentSlide - 1);
-});
+      document.addEventListener("keydown", (e) => {
+        if (document.querySelector(".modal-overlay.open")) return;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown")
+          goToSlide(currentSlide + 1);
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+          goToSlide(currentSlide - 1);
+      });
 
-document.getElementById('btnFullscreen').addEventListener('click', () => {
-  socket.emit('pres-fullscreen', { on: true });
-  showToast('⛶ Fullscreen activated on game screen', 'info');
-});
+      document.getElementById("btnFullscreen").addEventListener("click", () => {
+        socket.emit("pres-fullscreen", { on: true });
+        showToast("⛶ Fullscreen activated on game screen", "info");
+      });
 
-document.getElementById('btnClosePres').addEventListener('click', () => {
-  socket.emit('pres-close');
-  selectedFile = null;
-  document.getElementById('noPres').style.display = '';
-  document.getElementById('activePresView').style.display = 'none';
-  renderFileList(files);
-  showToast('Presentation closed', 'info');
-});
+      document.getElementById("btnClosePres").addEventListener("click", () => {
+        socket.emit("pres-close");
+        selectedFile = null;
+        document.getElementById("noPres").style.display = "";
+        document.getElementById("activePresView").style.display = "none";
+        renderFileList(files);
+        showToast("Presentation closed", "info");
+      });
 
-document.getElementById('btnCloseShare').addEventListener('click', () => {
-  socket.emit('pres-close-share');
-  showToast('✕ Closed shared modals on game screen', 'info');
-});
+      document.getElementById("btnCloseShare").addEventListener("click", () => {
+        socket.emit("pres-close-share");
+        showToast("✕ Closed shared modals on game screen", "info");
+      });
 
-// ════════════════════════════════════════════
-//  SHARE — IMAGE
-// ════════════════════════════════════════════
-document.getElementById('shareImageBtn').addEventListener('click', () => openModal('imageModal'));
+      // ════════════════════════════════════════════
+      //  SHARE — IMAGE
+      // ════════════════════════════════════════════
+      document
+        .getElementById("shareImageBtn")
+        .addEventListener("click", () => openModal("imageModal"));
 
-document.getElementById('imgShareInput').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    const prev = document.getElementById('img-preview');
-    prev.src = ev.target.result;
-    prev.style.display = 'block';
-    document.getElementById('sendImageBtn').disabled = false;
-    document.getElementById('sendImageBtn')._dataUrl = ev.target.result;
-  };
-  reader.readAsDataURL(file);
-});
+      document
+        .getElementById("imgShareInput")
+        .addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            const prev = document.getElementById("img-preview");
+            prev.src = ev.target.result;
+            prev.style.display = "block";
+            document.getElementById("sendImageBtn").disabled = false;
+            document.getElementById("sendImageBtn")._dataUrl = ev.target.result;
+          };
+          reader.readAsDataURL(file);
+        });
 
-let imgShareFile = null;
-document.getElementById('imgShareInput').addEventListener('change', e => {
-  imgShareFile = e.target.files[0];
-});
+      let imgShareFile = null;
+      document
+        .getElementById("imgShareInput")
+        .addEventListener("change", (e) => {
+          imgShareFile = e.target.files[0];
+        });
 
-document.getElementById('sendImageBtn').addEventListener('click', () => {
-  const src = document.getElementById('sendImageBtn')._dataUrl;
-  if (!src) return;
-  socket.emit('pres-share-image', { src });
-  showToast('🖼️ Image sent to game screen!', 'success');
-  closeModal('imageModal');
-});
+      document.getElementById("sendImageBtn").addEventListener("click", () => {
+        const src = document.getElementById("sendImageBtn")._dataUrl;
+        if (!src) return;
+        socket.emit("pres-share-image", { src });
+        showToast("🖼️ Image sent to game screen!", "success");
+        closeModal("imageModal");
+      });
 
-// ════════════════════════════════════════════
-//  SHARE — TREE
-// ════════════════════════════════════════════
-document.getElementById('shareTreeBtn').addEventListener('click', () => openModal('treeModal'));
+      // ════════════════════════════════════════════
+      //  SHARE — TREE
+      // ════════════════════════════════════════════
+      document
+        .getElementById("shareTreeBtn")
+        .addEventListener("click", () => openModal("treeModal"));
 
-function sendTree() {
-  const title = document.getElementById('treeTitle').value.trim();
-  const data = document.getElementById('treeData').value.trim();
-  if (!data) { showToast('Please enter tree data', 'error'); return; }
-  socket.emit('pres-share-tree', { title: title || 'Classification Tree', data });
-  showToast('🌳 Tree sent to game screen!', 'success');
-  closeModal('treeModal');
-}
+      function sendTree() {
+        const title = document.getElementById("treeTitle").value.trim();
+        const data = document.getElementById("treeData").value.trim();
+        if (!data) {
+          showToast("Please enter tree data", "error");
+          return;
+        }
+        socket.emit("pres-share-tree", {
+          title: title || "Classification Tree",
+          data,
+        });
+        showToast("🌳 Tree sent to game screen!", "success");
+        closeModal("treeModal");
+      }
 
-// ════════════════════════════════════════════
-//  SHARE — NOTE
-// ════════════════════════════════════════════
-document.getElementById('shareNoteBtn').addEventListener('click', () => openModal('noteModal'));
+      // ════════════════════════════════════════════
+      //  SHARE — NOTE
+      // ════════════════════════════════════════════
+      document
+        .getElementById("shareNoteBtn")
+        .addEventListener("click", () => openModal("noteModal"));
 
-function sendNote() {
-  const title = document.getElementById('noteTitle').value.trim();
-  const content = document.getElementById('noteContent').value.trim();
-  if (!content) { showToast('Please enter note content', 'error'); return; }
-  socket.emit('pres-share-note', { title: title || 'Note', content });
-  showToast('📝 Note sent to game screen!', 'success');
-  closeModal('noteModal');
-}
+      function sendNote() {
+        const title = document.getElementById("noteTitle").value.trim();
+        const content = document.getElementById("noteContent").value.trim();
+        if (!content) {
+          showToast("Please enter note content", "error");
+          return;
+        }
+        socket.emit("pres-share-note", { title: title || "Note", content });
+        showToast("📝 Note sent to game screen!", "success");
+        closeModal("noteModal");
+      }
 
-// ════════════════════════════════════════════
-//  SHARE — DRAWING
-// ════════════════════════════════════════════
-document.getElementById('shareDrawBtn').addEventListener('click', () => {
-  openModal('drawModal');
-  initCanvas();
-});
+      // ════════════════════════════════════════════
+      //  SHARE — DRAWING
+      // ════════════════════════════════════════════
+      document.getElementById("shareDrawBtn").addEventListener("click", () => {
+        openModal("drawModal");
+        initCanvas();
+      });
 
-let canvas, ctx, drawing = false, drawColor = '#ec4899', brushSize = 5;
+      let canvas,
+        ctx,
+        drawing = false,
+        drawColor = "#ec4899",
+        brushSize = 5;
 
-function initCanvas() {
-  canvas = document.getElementById('drawCanvas');
-  ctx = canvas.getContext('2d');
-  const rect = canvas.getBoundingClientRect();
-  canvas.width = canvas.offsetWidth;
-  canvas.height = 320;
-  ctx.lineCap = 'round';
-  ctx.lineJoin = 'round';
+      function initCanvas() {
+        canvas = document.getElementById("drawCanvas");
+        ctx = canvas.getContext("2d");
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 320;
+        ctx.lineCap = "round";
+        ctx.lineJoin = "round";
 
-  canvas.addEventListener('mousedown', startDraw);
-  canvas.addEventListener('mousemove', draw);
-  canvas.addEventListener('mouseup', stopDraw);
-  canvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0]); }, {passive:false});
-  canvas.addEventListener('touchmove', e => { e.preventDefault(); draw(e.touches[0]); }, {passive:false});
-  canvas.addEventListener('touchend', stopDraw);
-}
+        canvas.addEventListener("mousedown", startDraw);
+        canvas.addEventListener("mousemove", draw);
+        canvas.addEventListener("mouseup", stopDraw);
+        canvas.addEventListener(
+          "touchstart",
+          (e) => {
+            e.preventDefault();
+            startDraw(e.touches[0]);
+          },
+          { passive: false },
+        );
+        canvas.addEventListener(
+          "touchmove",
+          (e) => {
+            e.preventDefault();
+            draw(e.touches[0]);
+          },
+          { passive: false },
+        );
+        canvas.addEventListener("touchend", stopDraw);
+      }
 
-function getPos(e) {
-  const r = canvas.getBoundingClientRect();
-  return { x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) };
-}
+      function getPos(e) {
+        const r = canvas.getBoundingClientRect();
+        return {
+          x: (e.clientX - r.left) * (canvas.width / r.width),
+          y: (e.clientY - r.top) * (canvas.height / r.height),
+        };
+      }
 
-function startDraw(e) {
-  drawing = true;
-  const p = getPos(e);
-  ctx.beginPath();
-  ctx.moveTo(p.x, p.y);
-}
+      function startDraw(e) {
+        drawing = true;
+        const p = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(p.x, p.y);
+      }
 
-function draw(e) {
-  if (!drawing) return;
-  const p = getPos(e);
-  ctx.lineWidth = brushSize;
-  ctx.strokeStyle = drawColor;
-  ctx.lineTo(p.x, p.y);
-  ctx.stroke();
-}
+      function draw(e) {
+        if (!drawing) return;
+        const p = getPos(e);
+        ctx.lineWidth = brushSize;
+        ctx.strokeStyle = drawColor;
+        ctx.lineTo(p.x, p.y);
+        ctx.stroke();
+      }
 
-function stopDraw() { drawing = false; ctx.beginPath(); }
-function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+      function stopDraw() {
+        drawing = false;
+        ctx.beginPath();
+      }
+      function clearCanvas() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
 
-function setDrawColor(el, color) {
-  drawColor = color;
-  document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
+      function setDrawColor(el, color) {
+        drawColor = color;
+        document
+          .querySelectorAll(".color-btn")
+          .forEach((b) => b.classList.remove("active"));
+        el.classList.add("active");
+      }
 
-document.getElementById('brushSize').addEventListener('input', e => {
-  brushSize = e.target.value;
-  document.getElementById('brushSizeVal').textContent = brushSize;
-});
+      document.getElementById("brushSize").addEventListener("input", (e) => {
+        brushSize = e.target.value;
+        document.getElementById("brushSizeVal").textContent = brushSize;
+      });
 
-function sendDrawing() {
-  if (!canvas) return;
-  const dataUrl = canvas.toDataURL('image/png');
-  socket.emit('pres-share-image', { src: dataUrl, isDrawing: true });
-  showToast('🎨 Drawing sent to game screen!', 'success');
-  closeModal('drawModal');
-}
+      function sendDrawing() {
+        if (!canvas) return;
+        const dataUrl = canvas.toDataURL("image/png");
+        socket.emit("pres-share-image", { src: dataUrl, isDrawing: true });
+        showToast("🎨 Drawing sent to game screen!", "success");
+        closeModal("drawModal");
+      }
 
-// ════════════════════════════════════════════
-//  MODAL HELPERS
-// ════════════════════════════════════════════
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+      // ════════════════════════════════════════════
+      //  MODAL HELPERS
+      // ════════════════════════════════════════════
+      function openModal(id) {
+        document.getElementById(id).classList.add("open");
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
 
-document.querySelectorAll('.modal-overlay').forEach(el => {
-  el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
-});
+      document.querySelectorAll(".modal-overlay").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          if (e.target === el) el.classList.remove("open");
+        });
+      });
 
-// ════════════════════════════════════════════
-//  TOAST
-// ════════════════════════════════════════════
-function showToast(msg, type = 'info') {
-  const toast = document.getElementById('toast');
-  const icons = { success: '✅', error: '❌', info: '💡' };
-  toast.innerHTML = (icons[type] || '💡') + ' ' + msg;
-  toast.className = 'toast ' + type + ' show';
-  clearTimeout(toast._t);
-  toast._t = setTimeout(() => toast.classList.remove('show'), 3200);
-}
+      // ════════════════════════════════════════════
+      //  TOAST
+      // ════════════════════════════════════════════
+      function showToast(msg, type = "info") {
+        const toast = document.getElementById("toast");
+        const icons = { success: "✅", error: "❌", info: "💡" };
+        toast.innerHTML = (icons[type] || "💡") + " " + msg;
+        toast.className = "toast " + type + " show";
+        clearTimeout(toast._t);
+        toast._t = setTimeout(() => toast.classList.remove("show"), 3200);
+      }
 
-// Load files on init (will be triggered by connect)
-setTimeout(loadFileList, 500);
-</script>
-</body>
+      // Load files on init (will be triggered by connect)
+      setTimeout(loadFileList, 500);
+    </script>
+  </body>
 </html>

@@ -72,7 +72,7 @@ body.game-maze {
 .hud-team.girls { flex-direction: row-reverse; }
 
 .hud-avatar {
-    width: 52px; height: 52px;
+    width: 80px; height: 80px;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
@@ -94,7 +94,7 @@ body.game-maze {
 .hud-avatar-placeholder {
     width: 100%; height: 100%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
+    font-size: 2.5rem;
 }
 
 .hud-info { flex: 1; }
@@ -103,7 +103,7 @@ body.game-maze {
 
 .hud-team-name {
     font-family: 'Orbitron', sans-serif;
-    font-size: 0.7rem;
+    font-size: 1.5rem;
     font-weight: 700;
     letter-spacing: 2px;
     color: var(--boys-color);
@@ -114,7 +114,7 @@ body.game-maze {
 .hud-team.girls .hud-team-name { color: var(--girls-color); }
 
 .hud-credit {
-    font-size: 1rem;
+    font-size: 2rem;
     font-weight: 800;
     color: #10b981;
     margin-bottom: 5px;
