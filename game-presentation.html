@@ -1,0 +1,1364 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Presentation Studio — Classroom Game Screen</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --p: #7c3aed;
+        --s: #06b6d4;
+        --a: #f59e0b;
+        --g: #10b981;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        background: #030712;
+        color: #f8fafc;
+        font-family: "Outfit", sans-serif;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+      }
+
+      /* ─── ANIMATED BG ─── */
+      .bg-orbs {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+      .orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.25;
+        animation: driftOrb 18s ease-in-out infinite;
+      }
+      .orb1 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #7c3aed, transparent);
+        top: -200px;
+        left: -100px;
+        animation-delay: 0s;
+      }
+      .orb2 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(circle, #06b6d4, transparent);
+        bottom: -150px;
+        right: -100px;
+        animation-delay: -6s;
+      }
+      .orb3 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(circle, #f59e0b, transparent);
+        top: 40%;
+        left: 40%;
+        animation-delay: -12s;
+        opacity: 0.12;
+      }
+      @keyframes driftOrb {
+        0%,
+        100% {
+          transform: translate(0, 0) scale(1);
+        }
+        33% {
+          transform: translate(40px, -30px) scale(1.08);
+        }
+        66% {
+          transform: translate(-20px, 50px) scale(0.95);
+        }
+      }
+
+      /* ─── SCREENS ─── */
+      .screen {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        transition:
+          opacity 0.6s,
+          transform 0.6s;
+      }
+      .screen.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: scale(1.02);
+      }
+
+      /* ─── GALLERY SCREEN ─── */
+      #galleryScreen {
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-bottom: 60px;
+      }
+      #galleryScreen::-webkit-scrollbar {
+        width: 6px;
+      }
+      #galleryScreen::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      #galleryScreen::-webkit-scrollbar-thumb {
+        background: rgba(124, 58, 237, 0.4);
+        border-radius: 3px;
+      }
+
+      .gallery-header {
+        text-align: center;
+        padding: 60px 20px 30px;
+        position: relative;
+      }
+
+      .gallery-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        border-radius: 50px;
+        background: rgba(124, 58, 237, 0.15);
+        border: 1px solid rgba(124, 58, 237, 0.3);
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #a78bfa;
+        margin-bottom: 24px;
+      }
+
+      .badge-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #7c3aed;
+        animation: pulse 1.5s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.5;
+          transform: scale(0.8);
+        }
+      }
+
+      .gallery-title {
+        font-size: clamp(2rem, 6vw, 4rem);
+        font-weight: 900;
+        line-height: 1.1;
+        background: linear-gradient(
+          135deg,
+          #f8fafc 0%,
+          #a78bfa 40%,
+          #67e8f9 100%
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 12px;
+      }
+
+      .gallery-subtitle {
+        font-size: 1rem;
+        color: #64748b;
+        font-weight: 400;
+      }
+
+      /* Grid */
+      .pres-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 24px;
+        padding: 20px 40px;
+        max-width: 1600px;
+        margin: 0 auto;
+      }
+
+      @media (max-width: 640px) {
+        .pres-grid {
+          padding: 16px;
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Card */
+      .pres-card {
+        position: relative;
+        border-radius: 24px;
+        background: rgba(15, 20, 50, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        backdrop-filter: blur(16px);
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        group: true;
+      }
+
+      .pres-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.08) 0%,
+          rgba(6, 182, 212, 0.05) 100%
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .pres-card:hover {
+        transform: translateY(-8px) scale(1.01);
+        border-color: rgba(124, 58, 237, 0.4);
+        box-shadow:
+          0 30px 60px rgba(0, 0, 0, 0.5),
+          0 0 0 1px rgba(124, 58, 237, 0.15),
+          0 0 60px rgba(124, 58, 237, 0.1);
+      }
+      .pres-card:hover::before {
+        opacity: 1;
+      }
+
+      .card-thumb {
+        width: 100%;
+        height: 180px;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 58, 237, 0.2),
+          rgba(6, 182, 212, 0.15)
+        );
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        position: relative;
+        overflow: hidden;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      }
+
+      .card-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        position: absolute;
+        inset: 0;
+      }
+
+      .card-thumb-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          to bottom,
+          transparent 50%,
+          rgba(5, 7, 20, 0.8) 100%
+        );
+      }
+
+      .card-slide-count {
+        position: absolute;
+        bottom: 10px;
+        right: 12px;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: #94a3b8;
+      }
+
+      .card-status-dot {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #10b981;
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      .card-subject {
+        font-size: 0.73rem;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #7c3aed;
+        margin-bottom: 6px;
+      }
+
+      .card-name {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #e2e8f0;
+        margin-bottom: 8px;
+        line-height: 1.3;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+      }
+
+      .card-chapter {
+        font-size: 0.82rem;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .card-footer {
+        padding: 14px 20px;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .card-date {
+        font-size: 0.72rem;
+        color: #475569;
+      }
+
+      .card-open-btn {
+        padding: 7px 16px;
+        border-radius: 8px;
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        border: none;
+        color: white;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: "Outfit", sans-serif;
+      }
+      .card-open-btn:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+      }
+
+      .empty-gallery {
+        text-align: center;
+        padding: 80px 40px;
+        color: #475569;
+      }
+      .empty-gallery .eg-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        display: block;
+        opacity: 0.5;
+      }
+      .empty-gallery h2 {
+        font-size: 1.5rem;
+        color: #64748b;
+        margin-bottom: 10px;
+      }
+      .empty-gallery p {
+        font-size: 0.9rem;
+        line-height: 1.6;
+      }
+
+      /* Conn status corner */
+      .conn-status {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 50;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 50px;
+        background: rgba(5, 7, 20, 0.8);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.78rem;
+        font-weight: 600;
+      }
+      .conn-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ef4444;
+        transition: background 0.3s;
+      }
+      .conn-dot.on {
+        background: #10b981;
+        box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+      }
+
+      /* Waiting banner */
+      .waiting-banner {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 50;
+        padding: 14px;
+        text-align: center;
+        background: rgba(124, 58, 237, 0.12);
+        border-top: 1px solid rgba(124, 58, 237, 0.25);
+        backdrop-filter: blur(12px);
+        font-size: 0.85rem;
+        color: #a78bfa;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+      .waiting-dots {
+        display: flex;
+        gap: 5px;
+      }
+      .waiting-dots span {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #7c3aed;
+        animation: dotBounce 1.2s ease-in-out infinite;
+      }
+      .waiting-dots span:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .waiting-dots span:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      @keyframes dotBounce {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
+      }
+
+      /* ─── FULLSCREEN VIEWER ─── */
+      #viewerScreen {
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #slideContainer {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #slideImg {
+        max-width: 100%;
+        max-height: 100%;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        transition:
+          opacity 0.35s ease,
+          transform 0.35s ease;
+      }
+
+      #slideIframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: none;
+      }
+
+      .slide-fallback {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        padding: 40px;
+        text-align: center;
+        color: #94a3b8;
+      }
+      .slide-fallback.active {
+        display: flex;
+      }
+
+      /* Nav overlay */
+      .nav-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 20px;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      #viewerScreen:hover .nav-overlay {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .nav-btn {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+        font-size: 1.4rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+      }
+      .nav-btn:hover {
+        background: rgba(124, 58, 237, 0.5);
+        border-color: rgba(124, 58, 237, 0.6);
+        transform: scale(1.1);
+      }
+
+      /* Top HUD */
+      .viewer-hud {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        padding: 16px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background: linear-gradient(
+          to bottom,
+          rgba(0, 0, 0, 0.7) 0%,
+          transparent 100%
+        );
+        opacity: 0;
+        transition: opacity 0.3s;
+        z-index: 10;
+      }
+      #viewerScreen:hover .viewer-hud {
+        opacity: 1;
+      }
+
+      .hud-title {
+        font-size: 0.9rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.85);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .hud-badge {
+        padding: 3px 10px;
+        border-radius: 4px;
+        background: rgba(124, 58, 237, 0.4);
+        font-size: 0.7rem;
+        letter-spacing: 1px;
+      }
+
+      .hud-counter {
+        padding: 6px 16px;
+        border-radius: 50px;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      /* Slide transition animation */
+      .slide-out-left {
+        animation: slideOutLeft 0.35s ease forwards;
+      }
+      .slide-in-right {
+        animation: slideInRight 0.35s ease forwards;
+      }
+      .slide-out-right {
+        animation: slideOutRight 0.35s ease forwards;
+      }
+      .slide-in-left {
+        animation: slideInLeft 0.35s ease forwards;
+      }
+
+      @keyframes slideOutLeft {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(-80px);
+        }
+      }
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(80px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      @keyframes slideOutRight {
+        from {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        to {
+          opacity: 0;
+          transform: translateX(80px);
+        }
+      }
+      @keyframes slideInLeft {
+        from {
+          opacity: 0;
+          transform: translateX(-80px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+
+      /* ─── MODAL OVERLAY ─── */
+      .share-modal {
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .share-modal.open {
+        display: flex;
+      }
+
+      .share-backdrop {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(12px);
+        cursor: pointer;
+      }
+
+      .share-box {
+        position: relative;
+        z-index: 1;
+        background: rgba(10, 12, 35, 0.97);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 28px;
+        padding: 36px;
+        max-width: 700px;
+        width: 100%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+        animation: modalPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes modalPop {
+        from {
+          opacity: 0;
+          transform: scale(0.85) translateY(30px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      .share-box::-webkit-scrollbar {
+        width: 4px;
+      }
+      .share-box::-webkit-scrollbar-thumb {
+        background: rgba(124, 58, 237, 0.3);
+        border-radius: 2px;
+      }
+
+      .share-modal-title {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #f8fafc;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .share-modal-sub {
+        font-size: 0.83rem;
+        color: #64748b;
+        margin-bottom: 28px;
+      }
+
+      .modal-close-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.06);
+        color: #94a3b8;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        transition: all 0.2s;
+      }
+      .modal-close-btn:hover {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+        border-color: rgba(239, 68, 68, 0.3);
+      }
+
+      /* IMAGE modal */
+      .shared-img {
+        width: 100%;
+        max-height: 60vh;
+        object-fit: contain;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+
+      /* TREE modal */
+      .tree-display {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 16px;
+        padding: 28px;
+        font-family: "Courier New", monospace;
+        font-size: 0.88rem;
+        line-height: 1.8;
+        color: #e2e8f0;
+        border: 1px solid rgba(16, 185, 129, 0.2);
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .tree-line {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+      }
+      .tree-connector {
+        color: #10b981;
+      }
+      .tree-label {
+        color: #f8fafc;
+      }
+      .tree-arrow {
+        color: #06b6d4;
+        font-style: normal;
+      }
+
+      /* NOTE modal */
+      .note-display {
+        background: rgba(6, 182, 212, 0.04);
+        border-radius: 16px;
+        padding: 28px;
+        border: 1px solid rgba(6, 182, 212, 0.15);
+        white-space: pre-wrap;
+        line-height: 1.8;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+      }
+
+      /* DRAWING modal */
+      .drawing-display {
+        width: 100%;
+        border-radius: 16px;
+        border: 1px solid rgba(236, 72, 153, 0.2);
+      }
+
+      /* Loading slide indicator */
+      .slide-loader {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 5;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s;
+      }
+      .slide-loader.active {
+        opacity: 1;
+      }
+
+      .loader-ring {
+        width: 50px;
+        height: 50px;
+        border: 3px solid rgba(124, 58, 237, 0.2);
+        border-top-color: #7c3aed;
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Swipe hint */
+      .swipe-hint {
+        position: absolute;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 18px;
+        border-radius: 50px;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.4);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+      #viewerScreen:hover .swipe-hint {
+        opacity: 1;
+      }
+
+      /* PPTX client-side renderer */
+      #pptxCanvas {
+        max-width: 100%;
+        max-height: 100%;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: none;
+      }
+
+      /* Selection highlight on gallery */
+      .pres-card.active-card {
+        border-color: #10b981;
+        box-shadow:
+          0 0 0 2px rgba(16, 185, 129, 0.3),
+          0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+      .pres-card.active-card .card-status-dot {
+        background: #10b981;
+        animation: pulse 1s ease-in-out infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background orbs -->
+    <div class="bg-orbs">
+      <div class="orb orb1"></div>
+      <div class="orb orb2"></div>
+      <div class="orb orb3"></div>
+    </div>
+
+    <!-- Connection status -->
+    <div class="conn-status">
+      <div class="conn-dot" id="connDot"></div>
+      <span id="connLabel">Connecting...</span>
+    </div>
+
+    <!-- ════════════════════════════════
+     GALLERY SCREEN
+════════════════════════════════ -->
+    <div class="screen" id="galleryScreen">
+      <div class="gallery-header">
+        <div class="gallery-badge">
+          <div class="badge-dot"></div>
+          Live Classroom · Presentation Studio
+        </div>
+        <h1 class="gallery-title">Presentation<br />Library</h1>
+        <p class="gallery-subtitle">
+          Select a presentation to display, or wait for teacher to open one
+        </p>
+      </div>
+
+      <div class="pres-grid" id="presGrid">
+        <div class="empty-gallery" style="grid-column: 1/-1">
+          <span class="eg-icon">📂</span>
+          <h2>No Presentations Yet</h2>
+          <p>
+            The teacher hasn't uploaded any presentations.<br />Files will
+            appear here once uploaded.
+          </p>
+        </div>
+      </div>
+
+      <div class="waiting-banner">
+        <div class="waiting-dots"><span></span><span></span><span></span></div>
+        Waiting for teacher to start a presentation...
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+     FULLSCREEN VIEWER
+════════════════════════════════ -->
+    <div class="screen hidden" id="viewerScreen">
+      <div id="slideContainer">
+        <!-- Slide image (for converted slides) -->
+        <img id="slideImg" alt="Slide" style="display: none" />
+
+        <!-- Canvas for PPTX rendering -->
+        <canvas id="pptxCanvas"></canvas>
+
+        <!-- Fallback -->
+        <div class="slide-fallback" id="slideFallback">
+          <div style="font-size: 3rem; margin-bottom: 16px">📊</div>
+          <h2 style="color: #94a3b8; margin-bottom: 8px" id="fallbackTitle">
+            Loading presentation...
+          </h2>
+          <p style="color: #475569; font-size: 0.9rem" id="fallbackSub">
+            Please wait
+          </p>
+        </div>
+
+        <!-- Loader -->
+        <div class="slide-loader" id="slideLoader">
+          <div class="loader-ring"></div>
+        </div>
+
+        <!-- Navigation overlay -->
+        <div class="nav-overlay">
+          <button class="nav-btn" id="gamePrev">←</button>
+          <button class="nav-btn" id="gameNext">→</button>
+        </div>
+
+        <!-- Top HUD -->
+        <div class="viewer-hud">
+          <div class="hud-title">
+            <span class="hud-badge">▶ LIVE</span>
+            <span id="hudTitle">Presentation</span>
+          </div>
+          <div class="hud-counter" id="hudCounter">— / —</div>
+        </div>
+
+        <!-- Swipe hint -->
+        <div class="swipe-hint">← Swipe to navigate · Arrow keys →</div>
+      </div>
+    </div>
+
+    <!-- ════════════════════════════════
+     SHARE MODALS
+════════════════════════════════ -->
+
+    <!-- Image / Drawing Modal -->
+    <div class="share-modal" id="imgModal">
+      <div class="share-backdrop" onclick="closeShareModal('imgModal')"></div>
+      <div class="share-box">
+        <button class="modal-close-btn" onclick="closeShareModal('imgModal')">
+          ✕
+        </button>
+        <div class="share-modal-title" id="imgModalTitle">🖼️ Shared Image</div>
+        <div class="share-modal-sub" id="imgModalSub">From your teacher</div>
+        <img id="sharedImg" class="shared-img" src="" alt="Shared" />
+      </div>
+    </div>
+
+    <!-- Tree Modal -->
+    <div class="share-modal" id="treeModal">
+      <div class="share-backdrop" onclick="closeShareModal('treeModal')"></div>
+      <div class="share-box">
+        <button class="modal-close-btn" onclick="closeShareModal('treeModal')">
+          ✕
+        </button>
+        <div class="share-modal-title">🌳 Classification Tree</div>
+        <div class="share-modal-sub" id="treeModalSub">
+          Visual hierarchy from teacher
+        </div>
+        <div class="tree-display" id="treeDisplay"></div>
+      </div>
+    </div>
+
+    <!-- Note Modal -->
+    <div class="share-modal" id="noteModal">
+      <div class="share-backdrop" onclick="closeShareModal('noteModal')"></div>
+      <div class="share-box">
+        <button class="modal-close-btn" onclick="closeShareModal('noteModal')">
+          ✕
+        </button>
+        <div class="share-modal-title">
+          📝 <span id="noteTitleDisplay">Notes</span>
+        </div>
+        <div class="share-modal-sub">Key points from your teacher</div>
+        <div class="note-display" id="noteDisplay"></div>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      // ════════════════════════════════════════════
+      //  STATE
+      // ════════════════════════════════════════════
+      const socket = io();
+      let currentSlide = 0;
+      let totalSlides = 0;
+      let currentFile = null;
+      let slides = []; // array of image URLs
+
+      // ════════════════════════════════════════════
+      //  CONNECTION
+      // ════════════════════════════════════════════
+      socket.on("connect", () => {
+        document.getElementById("connDot").classList.add("on");
+        document.getElementById("connLabel").textContent = "Live";
+        loadPresentations();
+      });
+
+      socket.on("disconnect", () => {
+        document.getElementById("connDot").classList.remove("on");
+        document.getElementById("connLabel").textContent = "Offline";
+      });
+
+      // ════════════════════════════════════════════
+      //  LOAD GALLERY
+      // ════════════════════════════════════════════
+      async function loadPresentations() {
+        try {
+          const res = await fetch("/api/presentations");
+          const files = await res.json();
+          renderGallery(files);
+        } catch (e) {
+          console.error("Failed to load presentations:", e);
+        }
+      }
+
+      function renderGallery(files) {
+        const grid = document.getElementById("presGrid");
+        if (files.length === 0) {
+          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
+      <span class="eg-icon">📂</span>
+      <h2>No Presentations Yet</h2>
+      <p>The teacher hasn't uploaded any presentations.<br>Files will appear here once uploaded.</p>
+    </div>`;
+          return;
+        }
+
+        grid.innerHTML = files
+          .map(
+            (f) => `
+    <div class="pres-card ${currentFile && currentFile.filename === f.filename ? "active-card" : ""}"
+         id="card-${f.filename.replace(/[^a-z0-9]/gi, "_")}"
+         onclick="openPresFromGallery(${JSON.stringify(f).replace(/"/g, "&quot;")})">
+
+      <div class="card-thumb">
+        ${
+          f.slideCount > 0
+            ? `<img src="/uploads/slides-${f.filename.replace(/\.[^.]+$/, "")}/slide_1.png" 
+                  onerror="this.style.display='none'" alt="thumb">`
+            : ""
+        }
+        <span style="position:relative;z-index:1">📊</span>
+        <div class="card-thumb-overlay"></div>
+        <div class="card-status-dot"></div>
+        ${f.slideCount > 0 ? `<div class="card-slide-count">📄 ${f.slideCount} slides</div>` : ""}
+      </div>
+
+      <div class="card-body">
+        <div class="card-subject">📚 ${f.subject}</div>
+        <div class="card-name">${f.originalname.replace(/\.[^.]+$/, "")}</div>
+        <div class="card-chapter">📖 ${f.chapter}</div>
+      </div>
+
+      <div class="card-footer">
+        <div class="card-date">⏱ ${f.uploadedAt}</div>
+        <button class="card-open-btn">Open ▶</button>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
+      }
+
+      function openPresFromGallery(f) {
+        // Students can also navigate — teacher controls override this
+        openPresentation(f, 0);
+      }
+
+      // ════════════════════════════════════════════
+      //  SOCKET EVENTS — TEACHER COMMANDS
+      // ════════════════════════════════════════════
+
+      socket.on("pres-open", async (data) => {
+        await openPresentation(data.file, data.slide || 0);
+      });
+
+      socket.on("pres-goto-slide", (data) => {
+        goToSlide(data.slide, true);
+      });
+
+      socket.on("pres-fullscreen", (data) => {
+        if (data.on && document.fullscreenEnabled) {
+          document.documentElement.requestFullscreen().catch(() => {});
+        } else {
+          document.exitFullscreen().catch(() => {});
+        }
+      });
+
+      socket.on("pres-close", () => {
+        currentFile = null;
+        slides = [];
+        currentSlide = 0;
+        document.getElementById("galleryScreen").classList.remove("hidden");
+        document.getElementById("viewerScreen").classList.add("hidden");
+        if (document.fullscreenElement)
+          document.exitFullscreen().catch(() => {});
+        loadPresentations();
+      });
+
+      socket.on("pres-share-image", (data) => {
+        const modal = document.getElementById("imgModal");
+        const img = document.getElementById("sharedImg");
+        const title = document.getElementById("imgModalTitle");
+        const sub = document.getElementById("imgModalSub");
+
+        img.src = data.src;
+        title.textContent = data.isDrawing
+          ? "🎨 Teacher's Drawing"
+          : "🖼️ Shared Image";
+        sub.textContent = data.isDrawing
+          ? "Hand-drawn by teacher"
+          : "Image shared by teacher";
+        modal.classList.add("open");
+      });
+
+      socket.on("pres-share-tree", (data) => {
+        document.getElementById("treeModalSub").textContent = data.title;
+        document.getElementById("treeDisplay").textContent = data.data;
+        document.getElementById("treeModal").classList.add("open");
+      });
+
+      socket.on("pres-share-note", (data) => {
+        document.getElementById("noteTitleDisplay").textContent = data.title;
+        document.getElementById("noteDisplay").textContent = data.content;
+        document.getElementById("noteModal").classList.add("open");
+      });
+
+      // ════════════════════════════════════════════
+      //  OPEN PRESENTATION
+      // ════════════════════════════════════════════
+      async function openPresentation(f, startSlide = 0) {
+        currentFile = f;
+        currentSlide = startSlide;
+
+        document.getElementById("galleryScreen").classList.add("hidden");
+        document.getElementById("viewerScreen").classList.remove("hidden");
+        document.getElementById("hudTitle").textContent =
+          f.originalname.replace(/\.[^.]+$/, "");
+
+        showLoader(true);
+        showFallback(false);
+
+        // Try to load converted slide images
+        const slideDir = `/uploads/slides-${f.filename.replace(/\.[^.]+$/, "")}`;
+
+        if (f.slideCount && f.slideCount > 0) {
+          // Build slide URLs
+          slides = Array.from(
+            { length: f.slideCount },
+            (_, i) => `${slideDir}/slide_${i + 1}.png`,
+          );
+          totalSlides = f.slideCount;
+          socket.emit("pres-slide-count", { total: totalSlides });
+          showLoader(false);
+          goToSlide(currentSlide, false);
+        } else {
+          // Request server-side conversion
+          try {
+            showFallback(
+              true,
+              "Converting slides...",
+              "This may take a moment for first-time conversion",
+            );
+            const res = await fetch(`/api/presentation/${f.filename}/convert`, {
+              method: "POST",
+            });
+            const result = await res.json();
+
+            if (result.success && result.slideCount > 0) {
+              slides = Array.from(
+                { length: result.slideCount },
+                (_, i) => `${slideDir}/slide_${i + 1}.png`,
+              );
+              totalSlides = result.slideCount;
+              socket.emit("pres-slide-count", { total: totalSlides });
+              showLoader(false);
+              showFallback(false);
+              goToSlide(0, false);
+              // Reload gallery to update slide count
+              loadPresentations();
+            } else {
+              // Fallback: show download link
+              showLoader(false);
+              showFallback(
+                true,
+                f.originalname.replace(/\.[^.]+$/, ""),
+                "Preview not available. PowerPoint may not be installed on server. " +
+                  '<a href="/uploads/' +
+                  f.filename +
+                  '" download style="color:#7c3aed">Download File</a>',
+              );
+            }
+          } catch (e) {
+            showLoader(false);
+            showFallback(
+              true,
+              "Could not load slides",
+              "Server conversion failed",
+            );
+          }
+        }
+      }
+
+      function goToSlide(idx, animate = true) {
+        if (idx < 0 || (totalSlides > 0 && idx >= totalSlides)) return;
+        const direction = idx > currentSlide ? "forward" : "backward";
+        currentSlide = idx;
+        updateHUD();
+
+        const img = document.getElementById("slideImg");
+
+        if (slides.length > 0 && slides[currentSlide]) {
+          const url = slides[currentSlide];
+          showFallback(false);
+
+          if (animate) {
+            img.classList.add(
+              direction === "forward" ? "slide-out-left" : "slide-out-right",
+            );
+            setTimeout(() => {
+              img.src = url;
+              img.style.display = "";
+              img.classList.remove("slide-out-left", "slide-out-right");
+              img.classList.add(
+                direction === "forward" ? "slide-in-right" : "slide-in-left",
+              );
+              setTimeout(
+                () => img.classList.remove("slide-in-right", "slide-in-left"),
+                400,
+              );
+            }, 300);
+          } else {
+            img.src = url;
+            img.style.display = "";
+          }
+
+          img.onerror = () => {
+            img.style.display = "none";
+            showFallback(
+              true,
+              "Slide " + (currentSlide + 1),
+              "Image could not be loaded",
+            );
+          };
+        }
+      }
+
+      function updateHUD() {
+        const c = document.getElementById("hudCounter");
+        c.textContent =
+          totalSlides > 0 ? `${currentSlide + 1} / ${totalSlides}` : "—";
+      }
+
+      function showLoader(on) {
+        document.getElementById("slideLoader").classList.toggle("active", on);
+      }
+
+      function showFallback(on, title = "", sub = "") {
+        const fb = document.getElementById("slideFallback");
+        fb.classList.toggle("active", on);
+        if (on) {
+          document.getElementById("fallbackTitle").textContent = title;
+          document.getElementById("fallbackSub").innerHTML = sub;
+          document.getElementById("slideImg").style.display = "none";
+        }
+      }
+
+      // Navigation buttons
+      document
+        .getElementById("gamePrev")
+        .addEventListener("click", () => goToSlide(currentSlide - 1));
+      document
+        .getElementById("gameNext")
+        .addEventListener("click", () => goToSlide(currentSlide + 1));
+
+      // Keyboard
+      document.addEventListener("keydown", (e) => {
+        if (document.querySelector(".share-modal.open")) return;
+        if (e.key === "ArrowRight" || e.key === "ArrowDown")
+          goToSlide(currentSlide + 1);
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp")
+          goToSlide(currentSlide - 1);
+        if (e.key === "Escape") {
+          const openM = document.querySelector(".share-modal.open");
+          if (openM) openM.classList.remove("open");
+        }
+      });
+
+      // Touch swipe
+      let touchStartX = 0;
+      document.getElementById("viewerScreen").addEventListener(
+        "touchstart",
+        (e) => {
+          touchStartX = e.touches[0].clientX;
+        },
+        { passive: true },
+      );
+      document
+        .getElementById("viewerScreen")
+        .addEventListener("touchend", (e) => {
+          const dx = e.changedTouches[0].clientX - touchStartX;
+          if (Math.abs(dx) > 50) {
+            if (dx < 0) goToSlide(currentSlide + 1);
+            else goToSlide(currentSlide - 1);
+          }
+        });
+
+      // ════════════════════════════════════════════
+      //  MODAL HELPERS
+      // ════════════════════════════════════════════
+      function closeShareModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
+
+      // Also receive pres-updated when files change
+      socket.on("pres-updated", () => loadPresentations());
+
+      // Initial load
+      setTimeout(loadPresentations, 300);
+    </script>
+  </body>
+</html>
