@@ -1324,23 +1324,23 @@
             </div>
           </div>
 
-          <div class="upload-zone" id="dropZone">
-            <span class="upload-icon">🗂️</span>
-            <div class="upload-title">Drop your PowerPoint here</div>
-            <div class="upload-hint">or click to browse — .pptx / .ppt</div>
-            <input
-              type="file"
-              id="fileDropInput"
-              accept=".pptx,.ppt"
-              style="
-                position: absolute;
-                inset: 0;
-                opacity: 0;
-                cursor: pointer;
-                width: 100%;
-              "
-            />
-          </div>
+           <div class="upload-zone" id="dropZone">
+             <span class="upload-icon">🗂️</span>
+             <div class="upload-title">Drop your PowerPoint here</div>
+             <div class="upload-hint">or click to browse — .pptx, .ppt, or .zip</div>
+             <input
+               type="file"
+               id="fileDropInput"
+               accept=".pptx,.ppt,.zip"
+               style="
+                 position: absolute;
+                 inset: 0;
+                 opacity: 0;
+                 cursor: pointer;
+                 width: 100%;
+               "
+             />
+           </div>
 
           <div class="upload-form">
             <div class="form-row">
@@ -1367,7 +1367,7 @@
                 <div class="file-input-label" id="fileInputLabel">
                   No file chosen...
                 </div>
-                <input type="file" id="fileInput" accept=".pptx,.ppt" />
+                <input type="file" id="fileInput" accept=".pptx,.ppt,.zip" />
               </div>
             </div>
             <button class="btn-upload" id="uploadBtn" disabled>
@@ -1872,19 +1872,19 @@ Kingdom → Plantae
       dropZone.addEventListener("dragleave", () =>
         dropZone.classList.remove("drag-over"),
       );
-      dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.classList.remove("drag-over");
-        const file = e.dataTransfer.files[0];
-        if (
-          file &&
-          (file.name.endsWith(".pptx") || file.name.endsWith(".ppt"))
-        ) {
-          handleFileSelect(file);
-        } else {
-          showToast("Please drop a .pptx or .ppt file", "error");
-        }
-      });
+dropZone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropZone.classList.remove("drag-over");
+          const file = e.dataTransfer.files[0];
+          if (
+            file &&
+            (file.name.match(/\.(pptx|ppt|zip)$/i))
+          ) {
+            handleFileSelect(file);
+          } else {
+            showToast("Please drop a .pptx, .ppt, or .zip file", "error");
+          }
+        });
 
       ["subjectInput", "chapterInput"].forEach((id) =>
         document
@@ -1910,68 +1910,72 @@ Kingdom → Plantae
         .getElementById("uploadBtn")
         .addEventListener("click", uploadPresentation);
 
-      function uploadPresentation() {
-        if (!selectedFileObj) return;
-        const subject = document.getElementById("subjectInput").value.trim();
-        const chapter = document.getElementById("chapterInput").value.trim();
+function uploadPresentation() {
+         if (!selectedFileObj) return;
+         const subject = document.getElementById("subjectInput").value.trim();
+         const chapter = document.getElementById("chapterInput").value.trim();
 
-        const formData = new FormData();
-        formData.append("presentation", selectedFileObj);
-        formData.append("subject", subject);
-        formData.append("chapter", chapter);
+         const formData = new FormData();
+         const fieldName = selectedFileObj.name.endsWith('.zip') ? "presentationZip" : "presentation";
+         formData.append(fieldName, selectedFileObj);
+         formData.append("subject", subject);
+         formData.append("chapter", chapter);
 
-        const progContainer = document.getElementById("progressContainer");
-        const progFill = document.getElementById("progressFill");
-        const progPct = document.getElementById("progressPct");
-        const progText = document.getElementById("progressText");
-        const uploadBtn = document.getElementById("uploadBtn");
+         const progContainer = document.getElementById("progressContainer");
+         const progFill = document.getElementById("progressFill");
+         const progPct = document.getElementById("progressPct");
+         const progText = document.getElementById("progressText");
+         const uploadBtn = document.getElementById("uploadBtn");
 
-        progContainer.classList.add("active");
-        uploadBtn.disabled = true;
+         progContainer.classList.add("active");
+         uploadBtn.disabled = true;
 
-        const xhr = new XMLHttpRequest();
+         const xhr = new XMLHttpRequest();
 
-        xhr.upload.addEventListener("progress", (e) => {
-          if (e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 100);
-            progFill.style.width = pct + "%";
-            progPct.textContent = pct + "%";
-            progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
-          }
-        });
+         xhr.upload.addEventListener("progress", (e) => {
+           if (e.lengthComputable) {
+             const pct = Math.round((e.loaded / e.total) * 100);
+             progFill.style.width = pct + "%";
+             progPct.textContent = pct + "%";
+             progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
+           }
+         });
 
-        xhr.addEventListener("load", () => {
-          if (xhr.status === 200) {
-            const res = JSON.parse(xhr.responseText);
-            showToast("✅ " + res.filename + " uploaded!", "success");
-            progContainer.classList.remove("active");
-            progFill.style.width = "0%";
-            document.getElementById("subjectInput").value = "";
-            document.getElementById("chapterInput").value = "";
-            document.getElementById("fileInputLabel").textContent =
-              "No file chosen...";
-            document
-              .getElementById("fileInputLabel")
-              .classList.remove("has-file");
-            selectedFileObj = null;
-            uploadBtn.disabled = true;
-            loadFileList();
-          } else {
-            showToast("Upload failed: " + xhr.responseText, "error");
-            progContainer.classList.remove("active");
-            uploadBtn.disabled = false;
-          }
-        });
+         xhr.addEventListener("load", () => {
+           if (xhr.status === 200) {
+             const res = JSON.parse(xhr.responseText);
+             showToast("✅ " + res.filename + " uploaded!", "success");
+             progContainer.classList.remove("active");
+             progFill.style.width = "0%";
+             document.getElementById("subjectInput").value = "";
+             document.getElementById("chapterInput").value = "";
+             document.getElementById("fileInputLabel").textContent =
+               "No file chosen...";
+             document
+               .getElementById("fileInputLabel")
+               .classList.remove("has-file");
+             selectedFileObj = null;
+             uploadBtn.disabled = true;
+             loadFileList();
+           } else {
+             showToast("Upload failed: " + xhr.responseText, "error");
+             progContainer.classList.remove("active");
+             uploadBtn.disabled = false;
+           }
+         });
 
-        xhr.addEventListener("error", () => {
-          showToast("Network error during upload", "error");
-          progContainer.classList.remove("active");
-          uploadBtn.disabled = false;
-        });
+         xhr.addEventListener("error", () => {
+           showToast("Network error during upload", "error");
+           progContainer.classList.remove("active");
+           uploadBtn.disabled = false;
+         });
 
-        xhr.open("POST", "/api/presentation/upload");
-        xhr.send(formData);
-      }
+         const endpoint = selectedFileObj.name.endsWith('.zip') 
+           ? "/api/presentation/upload-zip" 
+           : "/api/presentation/upload";
+         xhr.open("POST", endpoint);
+         xhr.send(formData);
+       }
 
       // ════════════════════════════════════════════
       //  FILE LIST
