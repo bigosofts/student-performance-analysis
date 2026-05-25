@@ -338,7 +338,7 @@ const videoUpload = multer({
 
 // API to upload video
 app.post("/api/video/upload", (req, res) => {
-  videoUpload.single("video")(req, res, function(err) {
+  videoUpload.single("video")(req, res, function (err) {
     if (err) {
       console.error("Video upload error:", err);
       return res.status(400).json({ error: err.message || "Upload failed" });
@@ -352,15 +352,23 @@ app.post("/api/video/upload", (req, res) => {
 // API to list uploaded videos
 app.get("/api/videos", (req, res) => {
   fs.readdir(uploadsDir, (err, files) => {
-    if (err) return res.status(500).json({ error: "Failed to read uploads directory" });
-    const videos = files.filter(f => f.startsWith("video-"));
-    
+    if (err)
+      return res
+        .status(500)
+        .json({ error: "Failed to read uploads directory" });
+    const videos = files.filter((f) => f.startsWith("video-"));
+
     // Get file stats to sort by newest first (optional but good)
-    const videoStats = videos.map(f => {
+    const videoStats = videos.map((f) => {
       const stats = fs.statSync(path.join(uploadsDir, f));
-      return { filename: f, url: "/uploads/" + f, mtime: stats.mtime.getTime(), size: stats.size };
+      return {
+        filename: f,
+        url: "/uploads/" + f,
+        mtime: stats.mtime.getTime(),
+        size: stats.size,
+      };
     });
-    
+
     videoStats.sort((a, b) => b.mtime - a.mtime);
     res.json(videoStats);
   });
@@ -443,33 +451,41 @@ app.get("/api/quiz/info", (req, res) => {
 // API to clear uploads with game-specific isolation
 app.post("/clear-uploads", (req, res) => {
   const game = req.query.game || req.body.game || null;
-  
+
   fs.readdir(uploadsDir, (err, files) => {
     if (err) return res.status(500).send(err);
-    
+
     for (const file of files) {
-      if (game === 'memory') {
+      if (game === "memory") {
         // Delete files matching /^tile-\d+/ (memory tiles like tile-1-*, tile-2-*, etc.)
         if (/^tile-\d+/.test(file)) {
           fs.unlink(path.join(uploadsDir, file), (err) => {
             if (err) console.error(err);
           });
         }
-      } else if (game === 'monopoly') {
+      } else if (game === "monopoly") {
         // Delete tile-team-* (team photos), quiz-questions.xlsx, and quiz-upload-temp*
-        if (/^tile-team-/.test(file) || file === 'quiz-questions.xlsx' || /^quiz-upload-temp/.test(file)) {
+        if (
+          /^tile-team-/.test(file) ||
+          file === "quiz-questions.xlsx" ||
+          /^quiz-upload-temp/.test(file)
+        ) {
           fs.unlink(path.join(uploadsDir, file), (err) => {
             if (err) console.error(err);
           });
         }
-      } else if (game === 'maze') {
+      } else if (game === "maze") {
         // Delete tile-maze-team-* (team photos), maze-quiz-questions.xlsx, and maze-quiz-upload-temp*
-        if (/^tile-maze-team-/.test(file) || file === 'maze-quiz-questions.xlsx' || /^maze-quiz-upload-temp/.test(file)) {
+        if (
+          /^tile-maze-team-/.test(file) ||
+          file === "maze-quiz-questions.xlsx" ||
+          /^maze-quiz-upload-temp/.test(file)
+        ) {
           fs.unlink(path.join(uploadsDir, file), (err) => {
             if (err) console.error(err);
           });
         }
-      } else if (game === 'wordpuzzle') {
+      } else if (game === "wordpuzzle") {
         // Delete tile-wordpuzzle-team-* (team photos)
         if (/^tile-wordpuzzle-team-/.test(file)) {
           fs.unlink(path.join(uploadsDir, file), (err) => {
@@ -478,25 +494,29 @@ app.post("/clear-uploads", (req, res) => {
         }
       } else {
         // Fallback/Default: only delete tile photos and temp quiz uploads (never touch presentations or active quizzes)
-        if ((/^tile-/.test(file) && !file.includes('quiz-questions') && !file.includes('maze-quiz')) || 
-            /^quiz-upload-temp/.test(file) || 
-            /^maze-quiz-upload-temp/.test(file)) {
+        if (
+          (/^tile-/.test(file) &&
+            !file.includes("quiz-questions") &&
+            !file.includes("maze-quiz")) ||
+          /^quiz-upload-temp/.test(file) ||
+          /^maze-quiz-upload-temp/.test(file)
+        ) {
           fs.unlink(path.join(uploadsDir, file), (err) => {
             if (err) console.error(err);
           });
         }
       }
     }
-    
+
     // Handle game-specific cleanup
-    if (game === 'monopoly') {
+    if (game === "monopoly") {
       initQuizSystem();
     }
-    if (game === 'maze') {
+    if (game === "maze") {
       mazeQuizQuestions = [];
       currentMazeQuizIndex = 0;
     }
-    
+
     // Broadcast wipe to all clients
     io.emit("image-updated", { id: "all" });
     res.send({ status: "ok", game: game || "default" });
@@ -593,19 +613,19 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("pres-share-tree", data);
   });
 
-socket.on("pres-share-note", (data) => {
-         socket.broadcast.emit("pres-share-note", data);
-       });
+  socket.on("pres-share-note", (data) => {
+    socket.broadcast.emit("pres-share-note", data);
+  });
 
-socket.on("pres-share-video", (data) => {
-           io.emit("pres-share-video", data);
-       });
+  socket.on("pres-share-video", (data) => {
+    io.emit("pres-share-video", data);
+  });
 
-       socket.on("pres-share-webpage", (data) => {
-           io.emit("pres-share-webpage", data);
-       });
+  socket.on("pres-share-webpage", (data) => {
+    io.emit("pres-share-webpage", data);
+  });
 
-       socket.on("pres-close-share", () => {
+  socket.on("pres-close-share", () => {
     socket.broadcast.emit("pres-close-share");
   });
 
@@ -706,8 +726,8 @@ app.post("/api/presentation/upload", (req, res) => {
       });
 
     res.json({ status: "ok", filename, originalname: req.file.originalname });
-   });
- });
+  });
+});
 
 // ========== ZIP UPLOAD FOR PRESENTATIONS (ALTERNATIVE METHOD) ==========
 
@@ -729,164 +749,171 @@ const zipUpload = multer({
 });
 
 // API to upload ZIP containing PPTX and slide images
-app.post("/api/presentation/upload-zip", zipUpload.single("presentationZip"), async (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No file uploaded" });
+app.post(
+  "/api/presentation/upload-zip",
+  zipUpload.single("presentationZip"),
+  async (req, res) => {
+    if (!req.file) return res.status(400).json({ error: "No file uploaded" });
 
-  const zipPath = path.join(uploadsDir, req.file.filename);
-  const subject = (req.body.subject || "General").trim();
-  const chapter = (req.body.chapter || "Chapter 1").trim();
+    const zipPath = path.join(uploadsDir, req.file.filename);
+    const subject = (req.body.subject || "General").trim();
+    const chapter = (req.body.chapter || "Chapter 1").trim();
 
-  // Extract ZIP
-  const extractDir = path.join(uploadsDir, `extract-${Date.now()}`);
+    // Extract ZIP
+    const extractDir = path.join(uploadsDir, `extract-${Date.now()}`);
 
-  try {
-    await new Promise((resolve, reject) => {
-      fs.createReadStream(zipPath)
-        .pipe(unzipper.Extract({ path: extractDir }))
-        .on('close', resolve)
-        .on('error', reject);
-    });
+    try {
+      await new Promise((resolve, reject) => {
+        fs.createReadStream(zipPath)
+          .pipe(unzipper.Extract({ path: extractDir }))
+          .on("close", resolve)
+          .on("error", reject);
+      });
 
-    // Find PPTX file in extracted content
-    let pptxFile = null;
-    const files = fs.readdirSync(extractDir);
+      // Find PPTX file in extracted content
+      let pptxFile = null;
+      const files = fs.readdirSync(extractDir);
 
-    for (const file of files) {
-      if (/\.(pptx|ppt)$/i.test(file)) {
-        pptxFile = file;
-        break;
+      for (const file of files) {
+        if (/\.(pptx|ppt)$/i.test(file)) {
+          pptxFile = file;
+          break;
+        }
       }
-    }
 
-    if (!pptxFile) {
-      // Clean up
+      if (!pptxFile) {
+        // Clean up
+        fs.rmSync(zipPath, { force: true });
+        fs.rmSync(extractDir, { recursive: true, force: true });
+        return res.status(400).json({ error: "No PPTX/PPT file found in ZIP" });
+      }
+
+      // Move PPTX to uploads directory with standard naming
+      const pptxSourcePath = path.join(extractDir, pptxFile);
+      const pptxFilename = `pres-${Date.now()}-${pptxFile.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
+      const pptxDestPath = path.join(uploadsDir, pptxFilename);
+
+      fs.renameSync(pptxSourcePath, pptxDestPath);
+
+      // Find and process slide images (Slide1.PNG, Slide2.PNG, etc.)
+      const slideDirName = "slides-" + pptxFilename.replace(/\.[^.]+$/, "");
+      const slideDir = path.join(uploadsDir, slideDirName);
+
+      if (!fs.existsSync(slideDir)) {
+        fs.mkdirSync(slideDir, { recursive: true });
+      }
+
+      let slideCount = 0;
+      const slidePattern = /^Slide\d+\.(png|jpe?g|gif|bmp|tiff?)$/i;
+
+      for (const file of files) {
+        if (slidePattern.test(file)) {
+          const sourcePath = path.join(extractDir, file);
+          // Standardize filename to slide_1.png, slide_2.png, etc.
+          const match = file.match(/^Slide(\d+)\.(.*)$/i);
+          if (match) {
+            const slideNum = parseInt(match[1]);
+            const ext = match[2].toLowerCase();
+            const destFilename = `slide_${slideNum}.${ext}`;
+            const destPath = path.join(slideDir, destFilename);
+
+            fs.copyFileSync(sourcePath, destPath);
+            slideCount++;
+          }
+        }
+      }
+
+      // Create presentation metadata entry
+      const meta = loadPresMeta();
+
+      // Check if same original name already exists → update it
+      const existingIdx = meta.findIndex(
+        (m) => m.originalname === req.file.originalname,
+      );
+      const entry = {
+        filename: pptxFilename,
+        originalname: req.file.originalname, // Keep original ZIP name for reference
+        subject,
+        chapter,
+        size: req.file.size,
+        uploadedAt: new Date().toLocaleDateString("en-GB"),
+        slideCount: slideCount,
+        slideDirName,
+        converted: slideCount > 0, // Mark as converted if we have slides
+      };
+
+      if (existingIdx >= 0) {
+        // Remove old file and slides
+        try {
+          const old = meta[existingIdx];
+          fs.unlinkSync(path.join(uploadsDir, old.filename));
+          const oldSlideDir = path.join(uploadsDir, old.slideDirName);
+          if (fs.existsSync(oldSlideDir)) {
+            fs.rmSync(oldSlideDir, { recursive: true, force: true });
+          }
+        } catch (e) {
+          /* ignore */
+        }
+        meta[existingIdx] = entry;
+      } else {
+        meta.push(entry);
+      }
+
+      savePresMeta(meta);
+      io.emit("pres-updated");
+
+      // Clean up extracted files
       fs.rmSync(zipPath, { force: true });
       fs.rmSync(extractDir, { recursive: true, force: true });
-      return res.status(400).json({ error: "No PPTX/PPT file found in ZIP" });
-    }
 
-    // Move PPTX to uploads directory with standard naming
-    const pptxSourcePath = path.join(extractDir, pptxFile);
-    const pptxFilename = `pres-${Date.now()}-${pptxFile.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const pptxDestPath = path.join(uploadsDir, pptxFilename);
-
-    fs.renameSync(pptxSourcePath, pptxDestPath);
-
-    // Find and process slide images (Slide1.PNG, Slide2.PNG, etc.)
-    const slideDirName = "slides-" + pptxFilename.replace(/\.[^.]+$/, "");
-    const slideDir = path.join(uploadsDir, slideDirName);
-
-    if (!fs.existsSync(slideDir)) {
-      fs.mkdirSync(slideDir, { recursive: true });
-    }
-
-    let slideCount = 0;
-    const slidePattern = /^Slide\d+\.(png|jpe?g|gif|bmp|tiff?)$/i;
-
-    for (const file of files) {
-      if (slidePattern.test(file)) {
-        const sourcePath = path.join(extractDir, file);
-        // Standardize filename to slide_1.png, slide_2.png, etc.
-        const match = file.match(/^Slide(\d+)\.(.*)$/i);
-        if (match) {
-          const slideNum = parseInt(match[1]);
-          const ext = match[2].toLowerCase();
-          const destFilename = `slide_${slideNum}.${ext}`;
-          const destPath = path.join(slideDir, destFilename);
-
-          fs.copyFileSync(sourcePath, destPath);
-          slideCount++;
-        }
+      // If we didn't find slide images, try to convert PPTX
+      if (slideCount === 0) {
+        convertPptxToImages(pptxDestPath, slideDir)
+          .then((count) => {
+            const updated = loadPresMeta();
+            const idx = updated.findIndex((m) => m.filename === pptxFilename);
+            if (idx >= 0) {
+              updated[idx].slideCount = count;
+              updated[idx].converted = true;
+              savePresMeta(updated);
+              io.emit("pres-updated");
+              console.log(
+                `[PRES-ZIP] Converted ${pptxFilename}: ${count} slides`,
+              );
+            }
+          })
+          .catch((e) => {
+            console.warn(
+              "[PRES-ZIP] Conversion failed (PowerPoint may not be installed):",
+              e.message,
+            );
+          });
+      } else {
+        console.log(`[PRES-ZIP] Extracted ${slideCount} slides from ZIP`);
       }
-    }
 
-    // Create presentation metadata entry
-    const meta = loadPresMeta();
+      res.json({
+        status: "ok",
+        filename: pptxFilename,
+        originalname: req.file.originalname,
+        slideCount: slideCount,
+      });
+    } catch (e) {
+      console.error("[PRES-ZIP] Error processing ZIP:", e);
 
-    // Check if same original name already exists → update it
-    const existingIdx = meta.findIndex(
-      (m) => m.originalname === req.file.originalname,
-    );
-    const entry = {
-      filename: pptxFilename,
-      originalname: req.file.originalname, // Keep original ZIP name for reference
-      subject,
-      chapter,
-      size: req.file.size,
-      uploadedAt: new Date().toLocaleDateString("en-GB"),
-      slideCount: slideCount,
-      slideDirName,
-      converted: slideCount > 0, // Mark as converted if we have slides
-    };
-
-    if (existingIdx >= 0) {
-      // Remove old file and slides
+      // Clean up on error
       try {
-        const old = meta[existingIdx];
-        fs.unlinkSync(path.join(uploadsDir, old.filename));
-        const oldSlideDir = path.join(uploadsDir, old.slideDirName);
-        if (fs.existsSync(oldSlideDir)) {
-          fs.rmSync(oldSlideDir, { recursive: true, force: true });
-        }
-      } catch (e) {
-        /* ignore */
+        if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
+        if (fs.existsSync(extractDir))
+          fs.rmSync(extractDir, { recursive: true, force: true });
+      } catch (cleanupError) {
+        console.error("[PRES-ZIP] Error during cleanup:", cleanupError);
       }
-      meta[existingIdx] = entry;
-    } else {
-      meta.push(entry);
+
+      res.status(500).json({ error: `Failed to process ZIP: ${e.message}` });
     }
-
-    savePresMeta(meta);
-    io.emit("pres-updated");
-
-    // Clean up extracted files
-    fs.rmSync(zipPath, { force: true });
-    fs.rmSync(extractDir, { recursive: true, force: true });
-
-    // If we didn't find slide images, try to convert PPTX
-    if (slideCount === 0) {
-      convertPptxToImages(pptxDestPath, slideDir)
-        .then((count) => {
-          const updated = loadPresMeta();
-          const idx = updated.findIndex((m) => m.filename === pptxFilename);
-          if (idx >= 0) {
-            updated[idx].slideCount = count;
-            updated[idx].converted = true;
-            savePresMeta(updated);
-            io.emit("pres-updated");
-            console.log(`[PRES-ZIP] Converted ${pptxFilename}: ${count} slides`);
-          }
-        })
-        .catch((e) => {
-          console.warn(
-            "[PRES-ZIP] Conversion failed (PowerPoint may not be installed):",
-            e.message,
-          );
-        });
-    } else {
-      console.log(`[PRES-ZIP] Extracted ${slideCount} slides from ZIP`);
-    }
-
-    res.json({ 
-      status: "ok", 
-      filename: pptxFilename, 
-      originalname: req.file.originalname,
-      slideCount: slideCount 
-    });
-  } catch (e) {
-    console.error("[PRES-ZIP] Error processing ZIP:", e);
-    
-    // Clean up on error
-    try {
-      if (fs.existsSync(zipPath)) fs.unlinkSync(zipPath);
-      if (fs.existsSync(extractDir)) fs.rmSync(extractDir, { recursive: true, force: true });
-    } catch (cleanupError) {
-      console.error("[PRES-ZIP] Error during cleanup:", cleanupError);
-    }
-
-    res.status(500).json({ error: `Failed to process ZIP: ${e.message}` });
-  }
-});
+  },
+);
 
 // Convert on demand
 app.post("/api/presentation/:filename/convert", async (req, res) => {
@@ -986,18 +1013,19 @@ app.post("/api/gallery/image", galleryUpload.single("image"), (req, res) => {
     chapterName,
     itemName,
     url,
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
   gallery.push(newItem);
   saveGallery(gallery);
-  
+
   res.json({ status: "ok", item: newItem });
 });
 
 // Add a new gallery video (YouTube URL)
 app.post("/api/gallery/video", (req, res) => {
   const { chapterName, itemName, videoUrl, previewUrl } = req.body;
-  if (!videoUrl) return res.status(400).json({ error: "No video URL provided" });
+  if (!videoUrl)
+    return res.status(400).json({ error: "No video URL provided" });
 
   const gallery = loadGallery();
   const newItem = {
@@ -1007,11 +1035,11 @@ app.post("/api/gallery/video", (req, res) => {
     itemName: (itemName || "Unnamed Video").trim(),
     url: videoUrl,
     previewUrl: previewUrl || "",
-    createdAt: new Date().toISOString()
+    createdAt: new Date().toISOString(),
   };
   gallery.push(newItem);
   saveGallery(gallery);
-  
+
   res.json({ status: "ok", item: newItem });
 });
 
@@ -1019,23 +1047,25 @@ app.post("/api/gallery/video", (req, res) => {
 app.put("/api/gallery/:id", galleryUpload.single("image"), (req, res) => {
   const { id } = req.params;
   const gallery = loadGallery();
-  const index = gallery.findIndex(g => g.id === id);
-  if (index === -1) return res.status(404).json({ error: "Gallery item not found" });
+  const index = gallery.findIndex((g) => g.id === id);
+  if (index === -1)
+    return res.status(404).json({ error: "Gallery item not found" });
 
   const item = gallery[index];
-  
+
   if (req.body.chapterName) item.chapterName = req.body.chapterName.trim();
   if (req.body.itemName) item.itemName = req.body.itemName.trim();
-  
+
   if (item.type === "video") {
     if (req.body.videoUrl) item.url = req.body.videoUrl;
-    if (req.body.previewUrl !== undefined) item.previewUrl = req.body.previewUrl;
+    if (req.body.previewUrl !== undefined)
+      item.previewUrl = req.body.previewUrl;
   } else if (item.type === "image" && req.file) {
     // Delete old image
     try {
       const oldPath = path.join(__dirname, item.url);
       if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    } catch(e) {}
+    } catch (e) {}
     item.url = "/uploads/gallery/" + req.file.filename;
   }
 
@@ -1047,22 +1077,23 @@ app.put("/api/gallery/:id", galleryUpload.single("image"), (req, res) => {
 app.delete("/api/gallery/:id", (req, res) => {
   const { id } = req.params;
   const gallery = loadGallery();
-  const index = gallery.findIndex(g => g.id === id);
-  if (index === -1) return res.status(404).json({ error: "Gallery item not found" });
+  const index = gallery.findIndex((g) => g.id === id);
+  if (index === -1)
+    return res.status(404).json({ error: "Gallery item not found" });
 
   const item = gallery[index];
-  
+
   // If it's an image, delete the file
   if (item.type === "image" && item.url) {
     try {
       const filePath = path.join(__dirname, item.url);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch(e) {}
+    } catch (e) {}
   }
 
   gallery.splice(index, 1);
   saveGallery(gallery);
-  
+
   res.json({ status: "ok" });
 });
 
@@ -1079,7 +1110,7 @@ if (fs.existsSync(mazeQuizPath)) {
 }
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
+server.listen(PORT, "0.0.0.0", () => {
   console.log(`
     🚀 Server is running!
     --------------------------------------
