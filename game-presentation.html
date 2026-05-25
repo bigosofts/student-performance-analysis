@@ -1157,11 +1157,19 @@
            <video id="uploadedVideo" controls style="width: 100%; max-height: 60vh; border-radius: 12px; display: none;">
              <source src="" type="video/mp4" />
            </video>
-           <div id="videoControls" style="display: flex; gap: 10px; justify-content: center; padding: 10px 0;">
-             <button onclick="toggleVideoPlay()" class="btn-ctrl" style="background: rgba(124, 58, 237, 0.2); color: #a78bfa; border: 1px solid rgba(124, 58, 237, 0.3);">
-               <span id="playPauseIcon">⏯️</span> <span id="playPauseText">Pause</span>
-             </button>
-           </div>
+         </div>
+       </div>
+     </div>
+
+     <!-- Webpage Modal -->
+     <div class="share-modal" id="webpageModal">
+       <div class="share-backdrop" onclick="closeShareModal('webpageModal')"></div>
+       <div class="share-box" style="width: calc((95vh - 140px) * 16 / 9); max-width: 95vw; height: auto; max-height: 95vh; overflow: hidden; display: flex; flex-direction: column;">
+         <button class="modal-close-btn" onclick="closeShareModal('webpageModal')">✕</button>
+         <div class="share-modal-title">🌐 Shared Webpage</div>
+         <div class="share-modal-sub" id="webpageModalSub">From your teacher</div>
+         <div id="webpageWrapper" style="position: relative; width: 100%; background: #fff; border-radius: 8px; margin-top: 10px;">
+           <iframe id="webpageIframe" style="position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; border: none; transform-origin: top left;" src=""></iframe>
          </div>
        </div>
      </div>
@@ -1349,7 +1357,35 @@ socket.on("pres-close-share", () => {
          closeShareModal("treeModal");
          closeShareModal("noteModal");
          closeShareModal("videoModal");
+         closeShareModal("webpageModal");
        });
+
+       socket.on("pres-share-webpage", (data) => {
+         const iframe = document.getElementById("webpageIframe");
+         iframe.src = data.url;
+         document.getElementById("webpageModal").classList.add("open");
+         // Wait for modal to render before resize calculation
+         setTimeout(resizeWebpageIframe, 50);
+       });
+
+       function resizeWebpageIframe() {
+         const wrapper = document.getElementById("webpageWrapper");
+         const iframe = document.getElementById("webpageIframe");
+         if (!wrapper || !iframe) return;
+         
+         const wrapperWidth = wrapper.clientWidth;
+         
+         // Make it exactly 100% width of the modal
+         const scale = wrapperWidth / 1920;
+         
+         iframe.style.transform = `scale(${scale})`;
+         iframe.style.left = `0px`;
+         iframe.style.top = `0px`;
+         
+         // Maintain the wrapper height to strictly match the scaled iframe
+         wrapper.style.height = `${1080 * scale}px`;
+       }
+       window.addEventListener("resize", resizeWebpageIframe);
 
       // ════════════════════════════════════════════
       //  OPEN PRESENTATION
@@ -1660,41 +1696,18 @@ socket.on("pres-close-share", () => {
       // ════════════════════════════════════════════
       //  MODAL HELPERS
       // ════════════════════════════════════════════
-function closeShareModal(id) {
+       function closeShareModal(id) {
          document.getElementById(id).classList.remove("open");
          if (id === "videoModal") {
            document.getElementById("youtubeIframe").src = "";
            document.getElementById("uploadedVideo").pause();
            document.getElementById("uploadedVideo").src = "";
+         } else if (id === "webpageModal") {
+           document.getElementById("webpageIframe").src = "";
          }
        }
 
-       function toggleVideoPlay() {
-         const youTubeIframe = document.getElementById("youtubeIframe");
-         const uploadedVideo = document.getElementById("uploadedVideo");
-         const playPauseText = document.getElementById("playPauseText");
-         
-         if (youTubeIframe.style.display !== "none") {
-           // YouTube player - we can't directly control it, but we can send commands
-           // For simplicity, just pause by reloading without autoplay
-           const currentSrc = youTubeIframe.src;
-           if (currentSrc.includes("autoplay=1")) {
-             youTubeIframe.src = currentSrc.replace("autoplay=1", "autoplay=0");
-             playPauseText.textContent = "Play";
-           } else {
-             youTubeIframe.src = currentSrc + (currentSrc.includes("?") ? "&autoplay=1" : "?autoplay=1");
-             playPauseText.textContent = "Pause";
-           }
-         } else if (uploadedVideo.style.display !== "none") {
-           if (uploadedVideo.paused) {
-             uploadedVideo.play();
-             playPauseText.textContent = "Pause";
-           } else {
-             uploadedVideo.pause();
-             playPauseText.textContent = "Play";
-           }
-         }
-       }
+
 
       // Also receive pres-updated when files change
       socket.on("pres-updated", () => loadPresentations());

@@ -1429,6 +1429,81 @@
             </div>
           </div>
         </div>
+
+        <!-- Gallery Management -->
+        <div class="panel" style="margin-top: 24px">
+          <div class="panel-header">
+            <div
+              class="panel-header-icon"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(245, 158, 11, 0.3),
+                  rgba(217, 119, 6, 0.3)
+                );
+              "
+            >
+              🖼️
+            </div>
+            <div>
+              <div class="panel-title">Gallery Management</div>
+              <div class="panel-subtitle" id="galleryCountLabel">
+                Loading gallery...
+              </div>
+            </div>
+          </div>
+
+          <div style="padding: 16px 20px 0">
+            <button class="btn-upload" style="width:100%; margin-bottom: 12px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="openGalleryUploadModal()">
+              ➕ Add to Gallery
+            </button>
+            <input
+              type="text"
+              class="form-input"
+              id="searchGallery"
+              placeholder="🔍 Search gallery items..."
+              style="width: 100%;"
+            />
+          </div>
+
+          <div class="file-list" id="galleryList" style="margin-top: 12px; max-height: 450px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(124, 58, 237, 0.3) transparent; padding-right: 10px;">
+            <div class="empty-state">
+              <span class="empty-icon">🖼️</span>
+              <p>No gallery items yet.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Uploaded Videos Panel -->
+        <div class="panel" style="margin-top: 24px">
+          <div class="panel-header">
+            <div
+              class="panel-header-icon"
+              style="
+                background: linear-gradient(
+                  135deg,
+                  rgba(239, 68, 68, 0.3),
+                  rgba(185, 28, 28, 0.3)
+                );
+              "
+            >
+              🎞️
+            </div>
+            <div>
+              <div class="panel-title">Uploaded MP4 Videos</div>
+              <div class="panel-subtitle" id="uploadedVideosCountLabel">
+                Loading...
+              </div>
+            </div>
+          </div>
+          
+          <div class="file-list" id="uploadedVideosList" style="margin-top: 12px; max-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.3) transparent; padding-right: 10px;">
+            <div class="empty-state">
+              <span class="empty-icon">🎞️</span>
+              <p>No uploaded videos yet.</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- ═══ RIGHT COLUMN ═══ -->
@@ -1507,6 +1582,11 @@
                    <div class="share-name">Share Video</div>
                    <div class="share-desc">YouTube or upload MP4</div>
                  </div>
+                 <div class="share-card webpage-share" id="shareWebpageBtn" style="background: rgba(14, 165, 233, 0.05); border-color: rgba(14, 165, 233, 0.2);">
+                   <span class="share-icon">🌐</span>
+                   <div class="share-name">Share Webpage</div>
+                   <div class="share-desc">Live site in iframe</div>
+                 </div>
                </div>
              </div>
            </div>
@@ -1573,6 +1653,19 @@
             ✕
           </button>
         </div>
+
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Select from Gallery</label>
+          <select id="galleryImageSelect" class="select-input">
+            <option value="">-- Choose an Image --</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+        <div style="margin: 12px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+          OR UPLOAD NEW
+        </div>
+
         <div class="img-drop-zone" id="imgDropZone">
           <input type="file" id="imgShareInput" accept="image/*" />
           <span class="drop-icon">📸</span>
@@ -1735,74 +1828,165 @@ Kingdom → Plantae
        </div>
      </div>
 
-     <!-- Video Share Modal -->
-     <div class="modal-overlay" id="videoModal">
-       <div class="modal-box">
-         <div class="modal-header">
-           <div class="modal-title">🎬 Share Video to Screen</div>
-           <button class="modal-close" onclick="closeModal('videoModal')">
-             ✕
-           </button>
-         </div>
-         <div class="hint-text">
-           Enter a YouTube URL for instant playback, or upload an MP4 file.
-         </div>
-         <div class="form-row" style="margin-bottom: 16px">
-           <label class="form-label">YouTube URL</label>
-           <input
-             type="text"
-             id="youtubeUrlInput"
-             class="form-input"
-             placeholder="https://www.youtube.com/watch?v=..."
-           />
-         </div>
-         <div class="divider"></div>
-         <div style="margin: 16px 0; text-align: center; color: #64748b; font-size: 0.85rem">
-           OR
-         </div>
-         <div class="upload-zone" id="videoDropZone" style="margin: 0 0 16px 0">
-           <span class="upload-icon">🎞️</span>
-           <div class="upload-title">Upload MP4 Video</div>
-           <div class="upload-hint">or click to browse — .mp4 files</div>
-           <input
-             type="file"
-             id="videoUploadInput"
-             accept="video/mp4,video/webm,video/*"
-             style="
-               position: absolute;
-               inset: 0;
-               opacity: 0;
-               cursor: pointer;
-               width: 100%;
-             "
-           />
-         </div>
-         <div class="progress-container" id="videoProgressContainer">
-           <div class="progress-label">
-             <span id="videoProgressText">Uploading...</span>
-             <span id="videoProgressPct">0%</span>
-           </div>
-           <div class="progress-bar-bg">
-             <div class="progress-bar-fill" id="videoProgressFill"></div>
-           </div>
-         </div>
-         <div id="videoPreview" style="display: none; margin-bottom: 16px">
-           <video
-             id="videoPreviewPlayer"
-             controls
-             style="width: 100%; max-height: 200px; border-radius: 10px"
-           >
-             <source id="videoPreviewSource" src="" type="video/mp4" />
-           </video>
-         </div>
-         <button class="btn-share amber" id="sendVideoBtn" disabled>
-           📡 Send to Game Screen
-         </button>
-       </div>
-     </div>
+    <!-- Video Share Modal -->
+    <div class="modal-overlay" id="videoModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">🎬 Share Video to Screen</div>
+          <button class="modal-close" onclick="closeModal('videoModal')">
+            ✕
+          </button>
+        </div>
+        <div class="hint-text">
+          Select a video from the gallery, or enter a new YouTube URL, or upload an MP4 file.
+        </div>
+
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Select from Gallery</label>
+          <select id="galleryVideoSelect" class="select-input">
+            <option value="">-- Choose a Video --</option>
+          </select>
+        </div>
+
+        <div class="divider"></div>
+        <div style="margin: 12px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+          OR ADD NEW
+        </div>
+
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">YouTube URL</label>
+          <input
+            type="text"
+            id="youtubeUrlInput"
+            class="form-input"
+            placeholder="https://www.youtube.com/watch?v=..."
+          />
+        </div>
+        <div class="divider"></div>
+        <div style="margin: 16px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+          OR
+        </div>
+        <div class="upload-zone" id="videoDropZone" style="margin: 0 0 16px 0">
+          <span class="upload-icon">🎞️</span>
+          <div class="upload-title">Upload MP4 Video</div>
+          <div class="upload-hint">or click to browse — .mp4 files</div>
+          <input
+            type="file"
+            id="videoUploadInput"
+            accept="video/mp4,video/webm,video/*"
+            style="
+              position: absolute;
+              inset: 0;
+              opacity: 0;
+              cursor: pointer;
+              width: 100%;
+            "
+          />
+        </div>
+        <div class="progress-container" id="videoProgressContainer">
+          <div class="progress-label">
+            <span id="videoProgressText">Uploading...</span>
+            <span id="videoProgressPct">0%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" id="videoProgressFill"></div>
+          </div>
+          <button class="btn-ctrl btn-close-pres" onclick="cancelVideoUpload()" style="margin-top: 10px; width: 100%; justify-content: center; background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25);">
+            ✕ Cancel Upload
+          </button>
+        </div>
+        <div id="videoPreview" style="display: none; margin-bottom: 16px">
+          <video
+            id="videoPreviewPlayer"
+            controls
+            style="width: 100%; max-height: 200px; border-radius: 10px"
+          >
+            <source id="videoPreviewSource" src="" type="video/mp4" />
+          </video>
+        </div>
+        <button class="btn-share amber" id="sendVideoBtn" disabled>
+          📡 Send to Game Screen
+        </button>
+      </div>
+    </div>
+
+    <!-- Webpage Share Modal -->
+    <div class="modal-overlay" id="webpageModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">🌐 Share Webpage</div>
+          <button class="modal-close" onclick="closeModal('webpageModal')">✕</button>
+        </div>
+        <div class="hint-text">
+          Enter a website URL to display it live on the game screen. (Note: Some sites block iframes)
+        </div>
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Website URL</label>
+          <input type="text" id="webpageUrlInput" class="form-input" placeholder="https://example.com" />
+        </div>
+        <button class="btn-share green" id="sendWebpageBtn" onclick="sendWebpage()">
+          📡 Send to Game Screen
+        </button>
+      </div>
+    </div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
+
+    <!-- Gallery Upload Modal -->
+    <div class="modal-overlay" id="galleryUploadModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">➕ Add to Gallery</div>
+          <button class="modal-close" onclick="closeModal('galleryUploadModal')">✕</button>
+        </div>
+        
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Type</label>
+          <select id="galleryTypeSelect" class="select-input" onchange="toggleGalleryUploadType()">
+            <option value="image">Image</option>
+            <option value="video">Video (YouTube)</option>
+          </select>
+        </div>
+
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Chapter Name</label>
+          <input type="text" id="galleryChapterInput" class="form-input" placeholder="e.g. Chapter 1" />
+        </div>
+
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="galleryNameInput" class="form-input" placeholder="e.g. Intro Diagram" />
+        </div>
+
+        <!-- Image Upload Section -->
+        <div id="galleryImageSection">
+          <div class="form-row" style="margin-bottom: 16px">
+            <label class="form-label">Select Image File</label>
+            <div class="file-input-wrapper">
+              <div class="file-input-label" id="galleryFileInputLabel">No file chosen...</div>
+              <input type="file" id="galleryFileInput" accept="image/*" onchange="handleGalleryFileSelect(this.files[0])" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Video Upload Section -->
+        <div id="galleryVideoSection" style="display: none;">
+          <div class="form-row" style="margin-bottom: 16px">
+            <label class="form-label">YouTube Video URL</label>
+            <input type="text" id="galleryVideoUrlInput" class="form-input" placeholder="https://www.youtube.com/watch?v=..." />
+          </div>
+          <div class="form-row" style="margin-bottom: 16px">
+            <label class="form-label">Preview Image URL (Optional)</label>
+            <input type="text" id="galleryPreviewUrlInput" class="form-input" placeholder="https://..." />
+          </div>
+        </div>
+
+        <button class="btn-share green" id="saveGalleryBtn" onclick="submitGalleryItem()">
+          💾 Save to Gallery
+        </button>
+      </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -2356,7 +2540,27 @@ function sendDrawing() {
        document.getElementById("shareVideoBtn").addEventListener("click", () => {
          openModal("videoModal");
          resetVideoModal();
+         fetchUploadedVideos();
        });
+
+       document.getElementById("shareWebpageBtn").addEventListener("click", () => {
+         document.getElementById("webpageUrlInput").value = "";
+         openModal("webpageModal");
+       });
+
+       function sendWebpage() {
+         let url = document.getElementById("webpageUrlInput").value.trim();
+         if (!url) {
+           showToast("Please enter a URL", "error");
+           return;
+         }
+         if (!/^https?:\/\//i.test(url)) {
+           url = "https://" + url;
+         }
+         socket.emit("pres-share-webpage", { url });
+         showToast("🌐 Webpage sent to game screen!", "success");
+         closeModal("webpageModal");
+       }
 
        document.getElementById("youtubeUrlInput").addEventListener("input", (e) => {
          const url = e.target.value.trim();
@@ -2443,6 +2647,19 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
            }
        });
 
+       let currentVideoXhr = null;
+
+       function cancelVideoUpload() {
+         if (currentVideoXhr) {
+           currentVideoXhr.abort();
+           currentVideoXhr = null;
+         }
+         const progContainer = document.getElementById("videoProgressContainer");
+         progContainer.classList.remove("active");
+         document.getElementById("sendVideoBtn").disabled = false;
+         showToast("Upload cancelled", "info");
+       }
+
        function uploadVideoFile() {
          if (!videoFile) return;
 
@@ -2459,6 +2676,7 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
          sendBtn.disabled = true;
 
          const xhr = new XMLHttpRequest();
+         currentVideoXhr = xhr;
 
          xhr.upload.addEventListener("progress", (e) => {
            if (e.lengthComputable) {
@@ -2470,6 +2688,7 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
          });
 
          xhr.addEventListener("load", () => {
+           currentVideoXhr = null;
            if (xhr.status === 200) {
              const res = JSON.parse(xhr.responseText);
              socket.emit("pres-share-video", { type: "upload", url: res.url, filename: res.filename });
@@ -2477,6 +2696,7 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
              progContainer.classList.remove("active");
              progFill.style.width = "0%";
              closeModal("videoModal");
+             fetchUploadedVideos();
            } else {
              showToast("Upload failed: " + xhr.responseText, "error");
              progContainer.classList.remove("active");
@@ -2485,13 +2705,74 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
          });
 
          xhr.addEventListener("error", () => {
+           currentVideoXhr = null;
            showToast("Network error during upload", "error");
            progContainer.classList.remove("active");
            sendBtn.disabled = false;
          });
 
+         xhr.addEventListener("abort", () => {
+           currentVideoXhr = null;
+         });
+
          xhr.open("POST", "/api/video/upload");
          xhr.send(formData);
+       }
+
+       async function fetchUploadedVideos() {
+         try {
+           const res = await fetch("/api/videos");
+           const videos = await res.json();
+           const container = document.getElementById("uploadedVideosList");
+           const countLabel = document.getElementById("uploadedVideosCountLabel");
+           
+           if (countLabel) {
+             countLabel.textContent = videos.length === 0 ? "No videos" : videos.length + " video(s)";
+           }
+
+           if (videos.length === 0) {
+             container.innerHTML = `<div class="empty-state"><span class="empty-icon">🎞️</span><p>No uploaded videos yet.</p></div>`;
+             return;
+           }
+           container.innerHTML = videos.map(v => `
+             <div class="file-item" style="margin-bottom: 8px;">
+               <div class="file-item-icon" style="font-size: 1.1rem; width: 36px; height: 36px;">🎬</div>
+               <div class="file-item-info">
+                 <div class="file-item-name">${v.filename}</div>
+                 <div class="file-item-meta">
+                   <span class="meta-badge" style="background: rgba(255,255,255,0.1);">${formatFileSize(v.size)}</span>
+                 </div>
+               </div>
+               <div class="file-item-actions">
+                 <button class="icon-btn" onclick="shareUploadedVideo('${v.url}', '${v.filename}')" title="Share" style="background: rgba(245, 158, 11, 0.2); color: #fcd34d;">▶</button>
+                 <button class="icon-btn danger" onclick="deleteUploadedVideo('${v.filename}')" title="Delete">🗑️</button>
+               </div>
+             </div>
+           `).join("");
+         } catch (e) {
+           console.error("Failed to fetch uploaded videos", e);
+         }
+       }
+
+       function shareUploadedVideo(url, filename) {
+         socket.emit("pres-share-video", { type: "upload", url, filename });
+         showToast("🎬 Shared uploaded video to screen!", "success");
+         closeModal("videoModal");
+       }
+
+       async function deleteUploadedVideo(filename) {
+         if (!confirm("Delete this uploaded video?")) return;
+         try {
+           const res = await fetch("/api/video/" + filename, { method: "DELETE" });
+           if (res.ok) {
+             showToast("Video deleted", "info");
+             fetchUploadedVideos();
+           } else {
+             showToast("Failed to delete video", "error");
+           }
+         } catch (e) {
+           showToast("Error deleting video", "error");
+         }
        }
 
 // ════════════════════════════════════════════
@@ -2535,7 +2816,251 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
       }
 
       // Load files on init (will be triggered by connect)
-      setTimeout(loadFileList, 500);
+      setTimeout(() => {
+        loadFileList();
+        fetchGallery();
+        fetchUploadedVideos();
+      }, 500);
+
+      // ════════════════════════════════════════════
+      //  GALLERY MANAGEMENT
+      // ════════════════════════════════════════════
+      let galleryItems = [];
+      let galleryUploadFile = null;
+
+      async function fetchGallery() {
+        try {
+          const res = await fetch("/api/gallery");
+          galleryItems = await res.json();
+          renderGallery(galleryItems);
+          updateGalleryDropdowns();
+        } catch (e) {
+          console.error("Error fetching gallery", e);
+        }
+      }
+
+      function renderGallery(list) {
+        const container = document.getElementById("galleryList");
+        const countLabel = document.getElementById("galleryCountLabel");
+        
+        countLabel.textContent = list.length === 0 ? "No items" : list.length + " item(s)";
+
+        if (list.length === 0) {
+          container.innerHTML = `<div class="empty-state">
+            <span class="empty-icon">🖼️</span>
+            <p>No gallery items yet.</p>
+          </div>`;
+          return;
+        }
+
+        // Group by chapter
+        const grouped = list.reduce((acc, item) => {
+          if (!acc[item.chapterName]) acc[item.chapterName] = [];
+          acc[item.chapterName].push(item);
+          return acc;
+        }, {});
+
+        let html = "";
+        for (const [chapter, items] of Object.entries(grouped)) {
+          html += `<div style="font-size: 0.85rem; font-weight: 800; color: #e2e8f0; text-transform: uppercase; margin: 16px 0 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+            <span style="background: rgba(124, 58, 237, 0.2); color: #c4b5fd; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">📂</span> ${chapter}
+          </div>`;
+          
+          html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 16px;">`;
+
+          for (const item of items) {
+            const icon = item.type === "video" ? "🎬" : "🖼️";
+            
+            let bgImg = "none";
+            if (item.type === "image") {
+              bgImg = `url('${item.url}')`;
+            } else if (item.type === "video") {
+              if (item.previewUrl) {
+                bgImg = `url('${item.previewUrl}')`;
+              } else {
+                const ytId = typeof extractYouTubeId === "function" ? extractYouTubeId(item.url) : null;
+                if (ytId) {
+                  bgImg = `url('https://img.youtube.com/vi/${ytId}/hqdefault.jpg')`;
+                }
+              }
+            }
+            
+            const bgStyle = bgImg !== "none" ? `background-image: ${bgImg}; background-size: cover; background-position: center;` : `background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));`;
+            
+            html += `
+              <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 1; display: flex; flex-direction: column; justify-content: flex-end; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onmouseover="this.style.transform='scale(1.05) translateY(-2px)'; this.style.borderColor='rgba(124, 58, 237, 0.5)';" onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.borderColor='rgba(255,255,255,0.1)';">
+                <div style="position: absolute; inset: 0; ${bgStyle} z-index: 0; transition: transform 0.3s;" class="gallery-bg-hover"></div>
+                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(15, 20, 50, 0.95) 0%, rgba(15, 20, 50, 0.4) 40%, transparent 100%); z-index: 1;"></div>
+                
+                <div style="position: absolute; top: 6px; left: 6px; z-index: 2; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); padding: 4px; border-radius: 6px; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(255,255,255,0.05);">
+                  ${icon}
+                </div>
+                
+                <button onclick="event.stopPropagation(); deleteGalleryItem('${item.id}')" style="position: absolute; top: 6px; right: 6px; z-index: 2; background: rgba(239, 68, 68, 0.8); backdrop-filter: blur(4px); border: 1px solid rgba(255,255,255,0.1); width: 26px; height: 26px; border-radius: 6px; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; transition: background 0.2s;" onmouseover="this.style.background='rgba(239, 68, 68, 1)'" onmouseout="this.style.background='rgba(239, 68, 68, 0.8)'" title="Delete">🗑️</button>
+
+                <div style="position: relative; z-index: 2; padding: 12px 10px; text-align: center;">
+                  <div style="font-size: 0.78rem; font-weight: 700; color: #f8fafc; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">${item.itemName}</div>
+                </div>
+              </div>
+            `;
+          }
+          html += `</div>`;
+        }
+        container.innerHTML = html;
+      }
+
+      document.getElementById("searchGallery").addEventListener("input", (e) => {
+        const q = e.target.value.toLowerCase();
+        renderGallery(galleryItems.filter(i => 
+          i.itemName.toLowerCase().includes(q) || 
+          i.chapterName.toLowerCase().includes(q)
+        ));
+      });
+
+      function openGalleryUploadModal() {
+        document.getElementById("galleryChapterInput").value = "";
+        document.getElementById("galleryNameInput").value = "";
+        document.getElementById("galleryTypeSelect").value = "image";
+        document.getElementById("galleryFileInput").value = "";
+        document.getElementById("galleryFileInputLabel").textContent = "No file chosen...";
+        galleryUploadFile = null;
+        document.getElementById("galleryVideoUrlInput").value = "";
+        document.getElementById("galleryPreviewUrlInput").value = "";
+        toggleGalleryUploadType();
+        openModal("galleryUploadModal");
+      }
+
+      function toggleGalleryUploadType() {
+        const type = document.getElementById("galleryTypeSelect").value;
+        if (type === "video") {
+          document.getElementById("galleryImageSection").style.display = "none";
+          document.getElementById("galleryVideoSection").style.display = "block";
+        } else {
+          document.getElementById("galleryImageSection").style.display = "block";
+          document.getElementById("galleryVideoSection").style.display = "none";
+        }
+      }
+
+      function handleGalleryFileSelect(file) {
+        if (!file) return;
+        galleryUploadFile = file;
+        const label = document.getElementById("galleryFileInputLabel");
+        label.textContent = file.name;
+        label.classList.add("has-file");
+      }
+
+      function submitGalleryItem() {
+        const type = document.getElementById("galleryTypeSelect").value;
+        const chapter = document.getElementById("galleryChapterInput").value.trim();
+        const name = document.getElementById("galleryNameInput").value.trim();
+
+        if (!chapter || !name) {
+          showToast("Please enter chapter and item name", "error");
+          return;
+        }
+
+        if (type === "image") {
+          if (!galleryUploadFile) {
+            showToast("Please select an image file", "error");
+            return;
+          }
+          const formData = new FormData();
+          formData.append("image", galleryUploadFile);
+          formData.append("chapterName", chapter);
+          formData.append("itemName", name);
+
+          fetch("/api/gallery/image", {
+            method: "POST",
+            body: formData
+          })
+          .then(res => res.json())
+          .then(data => {
+            if(data.status === "ok") {
+              showToast("Image added to gallery", "success");
+              closeModal("galleryUploadModal");
+              fetchGallery();
+            } else showToast(data.error || "Error adding image", "error");
+          })
+          .catch(e => showToast("Network error", "error"));
+
+        } else if (type === "video") {
+          const videoUrl = document.getElementById("galleryVideoUrlInput").value.trim();
+          const previewUrl = document.getElementById("galleryPreviewUrlInput").value.trim();
+          if (!videoUrl) {
+            showToast("Please enter YouTube URL", "error");
+            return;
+          }
+
+          fetch("/api/gallery/video", {
+            method: "POST",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ chapterName: chapter, itemName: name, videoUrl, previewUrl })
+          })
+          .then(res => res.json())
+          .then(data => {
+            if(data.status === "ok") {
+              showToast("Video added to gallery", "success");
+              closeModal("galleryUploadModal");
+              fetchGallery();
+            } else showToast(data.error || "Error adding video", "error");
+          })
+          .catch(e => showToast("Network error", "error"));
+        }
+      }
+
+      async function deleteGalleryItem(id) {
+        if (!confirm("Delete this gallery item?")) return;
+        const res = await fetch("/api/gallery/" + id, { method: "DELETE" });
+        if (res.ok) {
+          showToast("Item deleted", "info");
+          fetchGallery();
+        }
+      }
+
+      function updateGalleryDropdowns() {
+        const imgSelect = document.getElementById("galleryImageSelect");
+        const vidSelect = document.getElementById("galleryVideoSelect");
+
+        let imgHtml = '<option value="">-- Choose an Image --</option>';
+        let vidHtml = '<option value="">-- Choose a Video --</option>';
+
+        galleryItems.forEach(item => {
+          const text = `${item.chapterName} - ${item.itemName}`;
+          if (item.type === "image") {
+            imgHtml += `<option value="${item.url}">${text}</option>`;
+          } else if (item.type === "video") {
+            vidHtml += `<option value="${item.url}">${text}</option>`;
+          }
+        });
+
+        imgSelect.innerHTML = imgHtml;
+        vidSelect.innerHTML = vidHtml;
+      }
+
+      document.getElementById("galleryImageSelect").addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val) {
+          const prev = document.getElementById("img-preview");
+          prev.src = val;
+          prev.style.display = "block";
+          document.getElementById("sendImageBtn").disabled = false;
+          document.getElementById("sendImageBtn")._dataUrl = val; 
+        } else {
+          if (!document.getElementById("imgShareInput").files[0]) {
+             document.getElementById("sendImageBtn").disabled = true;
+             document.getElementById("img-preview").style.display = "none";
+          }
+        }
+      });
+
+      document.getElementById("galleryVideoSelect").addEventListener("change", (e) => {
+        const val = e.target.value;
+        if (val) {
+          document.getElementById("youtubeUrlInput").value = val;
+          document.getElementById("youtubeUrlInput").dispatchEvent(new Event('input'));
+        }
+      });
+
     </script>
   </body>
 </html>

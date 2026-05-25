@@ -23,6 +23,12 @@ if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
 }
 
+// Ensure gallery uploads directory exists
+const galleryDir = path.join(uploadsDir, "gallery");
+if (!fs.existsSync(galleryDir)) {
+  fs.mkdirSync(galleryDir);
+}
+
 // ========== PRESENTATION SYSTEM ==========
 const PRES_META_FILE = path.join(uploadsDir, "presentations.json");
 
@@ -343,6 +349,42 @@ app.post("/api/video/upload", (req, res) => {
   });
 });
 
+// API to list uploaded videos
+app.get("/api/videos", (req, res) => {
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) return res.status(500).json({ error: "Failed to read uploads directory" });
+    const videos = files.filter(f => f.startsWith("video-"));
+    
+    // Get file stats to sort by newest first (optional but good)
+    const videoStats = videos.map(f => {
+      const stats = fs.statSync(path.join(uploadsDir, f));
+      return { filename: f, url: "/uploads/" + f, mtime: stats.mtime.getTime(), size: stats.size };
+    });
+    
+    videoStats.sort((a, b) => b.mtime - a.mtime);
+    res.json(videoStats);
+  });
+});
+
+// API to delete uploaded video
+app.delete("/api/video/:filename", (req, res) => {
+  const { filename } = req.params;
+  if (!filename.startsWith("video-")) {
+    return res.status(400).json({ error: "Invalid video filename" });
+  }
+  const filePath = path.join(uploadsDir, filename);
+  if (fs.existsSync(filePath)) {
+    try {
+      fs.unlinkSync(filePath);
+      res.json({ status: "ok" });
+    } catch (e) {
+      res.status(500).json({ error: "Failed to delete file" });
+    }
+  } else {
+    res.status(404).json({ error: "File not found" });
+  }
+});
+
 // API to upload maze quiz Excel
 app.post("/upload-maze-quiz", mazeQuizUpload.single("quizFile"), (req, res) => {
   if (!req.file) return res.status(400).json({ error: "No file uploaded" });
@@ -557,6 +599,10 @@ socket.on("pres-share-note", (data) => {
 
 socket.on("pres-share-video", (data) => {
            io.emit("pres-share-video", data);
+       });
+
+       socket.on("pres-share-webpage", (data) => {
+           io.emit("pres-share-webpage", data);
        });
 
        socket.on("pres-close-share", () => {
@@ -886,6 +932,137 @@ app.delete("/api/presentation/:filename", (req, res) => {
   meta.splice(idx, 1);
   savePresMeta(meta);
   io.emit("pres-updated");
+  res.json({ status: "ok" });
+});
+
+// ========== GALLERY SYSTEM ==========
+const GALLERY_FILE = path.join(uploadsDir, "gallery.json");
+
+function loadGallery() {
+  try {
+    if (fs.existsSync(GALLERY_FILE)) {
+      return JSON.parse(fs.readFileSync(GALLERY_FILE, "utf8"));
+    }
+  } catch (e) {
+    console.error("Error loading gallery meta:", e);
+  }
+  return [];
+}
+
+function saveGallery(data) {
+  try {
+    fs.writeFileSync(GALLERY_FILE, JSON.stringify(data, null, 2), "utf8");
+  } catch (e) {
+    console.error("Error saving gallery meta:", e);
+  }
+}
+
+const galleryStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, galleryDir),
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `gallery-${Date.now()}${ext}`);
+  },
+});
+const galleryUpload = multer({ storage: galleryStorage });
+
+// Get all gallery items
+app.get("/api/gallery", (req, res) => {
+  res.json(loadGallery());
+});
+
+// Upload a new gallery image
+app.post("/api/gallery/image", galleryUpload.single("image"), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: "No image uploaded" });
+
+  const chapterName = (req.body.chapterName || "Uncategorized").trim();
+  const itemName = (req.body.itemName || "Unnamed Image").trim();
+  const url = "/uploads/gallery/" + req.file.filename;
+
+  const gallery = loadGallery();
+  const newItem = {
+    id: "img_" + Date.now(),
+    type: "image",
+    chapterName,
+    itemName,
+    url,
+    createdAt: new Date().toISOString()
+  };
+  gallery.push(newItem);
+  saveGallery(gallery);
+  
+  res.json({ status: "ok", item: newItem });
+});
+
+// Add a new gallery video (YouTube URL)
+app.post("/api/gallery/video", (req, res) => {
+  const { chapterName, itemName, videoUrl, previewUrl } = req.body;
+  if (!videoUrl) return res.status(400).json({ error: "No video URL provided" });
+
+  const gallery = loadGallery();
+  const newItem = {
+    id: "vid_" + Date.now(),
+    type: "video",
+    chapterName: (chapterName || "Uncategorized").trim(),
+    itemName: (itemName || "Unnamed Video").trim(),
+    url: videoUrl,
+    previewUrl: previewUrl || "",
+    createdAt: new Date().toISOString()
+  };
+  gallery.push(newItem);
+  saveGallery(gallery);
+  
+  res.json({ status: "ok", item: newItem });
+});
+
+// Update a gallery item
+app.put("/api/gallery/:id", galleryUpload.single("image"), (req, res) => {
+  const { id } = req.params;
+  const gallery = loadGallery();
+  const index = gallery.findIndex(g => g.id === id);
+  if (index === -1) return res.status(404).json({ error: "Gallery item not found" });
+
+  const item = gallery[index];
+  
+  if (req.body.chapterName) item.chapterName = req.body.chapterName.trim();
+  if (req.body.itemName) item.itemName = req.body.itemName.trim();
+  
+  if (item.type === "video") {
+    if (req.body.videoUrl) item.url = req.body.videoUrl;
+    if (req.body.previewUrl !== undefined) item.previewUrl = req.body.previewUrl;
+  } else if (item.type === "image" && req.file) {
+    // Delete old image
+    try {
+      const oldPath = path.join(__dirname, item.url);
+      if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+    } catch(e) {}
+    item.url = "/uploads/gallery/" + req.file.filename;
+  }
+
+  saveGallery(gallery);
+  res.json({ status: "ok", item });
+});
+
+// Delete a gallery item
+app.delete("/api/gallery/:id", (req, res) => {
+  const { id } = req.params;
+  const gallery = loadGallery();
+  const index = gallery.findIndex(g => g.id === id);
+  if (index === -1) return res.status(404).json({ error: "Gallery item not found" });
+
+  const item = gallery[index];
+  
+  // If it's an image, delete the file
+  if (item.type === "image" && item.url) {
+    try {
+      const filePath = path.join(__dirname, item.url);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    } catch(e) {}
+  }
+
+  gallery.splice(index, 1);
+  saveGallery(gallery);
+  
   res.json({ status: "ok" });
 });
 

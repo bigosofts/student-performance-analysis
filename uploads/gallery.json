@@ -1,0 +1,36 @@
+[
+  {
+    "id": "img_1779672822823",
+    "type": "image",
+    "chapterName": "Chapter01",
+    "itemName": "Nature",
+    "url": "/uploads/gallery/gallery-1779672822802.jpeg",
+    "createdAt": "2026-05-25T01:33:42.823Z"
+  },
+  {
+    "id": "img_1779672847564",
+    "type": "image",
+    "chapterName": "Chapter01",
+    "itemName": "River",
+    "url": "/uploads/gallery/gallery-1779672847562.jpg",
+    "createdAt": "2026-05-25T01:34:07.564Z"
+  },
+  {
+    "id": "vid_1779672905312",
+    "type": "video",
+    "chapterName": "Chapter01",
+    "itemName": "silkworm",
+    "url": "https://www.youtube.com/watch?v=GN8yEmkVLGs",
+    "previewUrl": "",
+    "createdAt": "2026-05-25T01:35:05.312Z"
+  },
+  {
+    "id": "vid_1779672947796",
+    "type": "video",
+    "chapterName": "Chapter01",
+    "itemName": "Mashroom",
+    "url": "https://www.youtube.com/watch?v=dFhvP7hbn6Y",
+    "previewUrl": "",
+    "createdAt": "2026-05-25T01:35:47.796Z"
+  }
+]
