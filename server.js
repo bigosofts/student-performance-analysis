@@ -277,6 +277,20 @@ app.use(express.static(path.join(__dirname)));
 app.use("/uploads", express.static(uploadsDir));
 app.use(express.json());
 
+app.post("/api/reload-quiz", (req, res) => {
+  const game = req.body.game;
+  if (game === 'monopoly') {
+    initQuizSystem();
+    res.json({ status: 'ok' });
+  } else if (game === 'maze') {
+    const mazeQuizPath = path.join(uploadsDir, "maze-quiz-questions.xlsx");
+    loadMazeQuizFromExcel(mazeQuizPath);
+    res.json({ status: 'ok' });
+  } else {
+    res.status(400).json({ error: 'Invalid game parameter' });
+  }
+});
+
 // API to upload image
 app.post("/upload/:tileId", upload.single("image"), (req, res) => {
   if (!req.file) return res.status(400).send("No file uploaded.");

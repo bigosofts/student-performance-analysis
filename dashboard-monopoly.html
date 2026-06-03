@@ -431,6 +431,35 @@
             <!-- Quiz System -->
             <div class="quiz-section">
                 <div class="stat-label" style="margin-bottom: 10px;">🎓 Quiz System</div>
+                
+                <!-- Q-Bank Import Section -->
+                <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                    <div style="font-size: 0.75rem; color: #10b981; font-weight: 800; margin-bottom: 8px;">📚 IMPORT FROM QUESTION BANK (TYPE 1 ONLY)</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                        <select id="qbPaper" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
+                            <option value="All">All Papers</option>
+                            <option value="1st">1st Paper</option>
+                            <option value="2nd">2nd Paper</option>
+                        </select>
+                        <select id="qbAmount" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
+                            <option value="All">All Qs</option>
+                            <option value="10">10 Qs</option>
+                            <option value="20">20 Qs</option>
+                            <option value="30">30 Qs</option>
+                        </select>
+                        <input type="text" id="qbChapter" list="qbChapterList" placeholder="Chapter..." style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
+                        <datalist id="qbChapterList"></datalist>
+                        <input type="text" id="qbTopics" list="qbTopicList" placeholder="Topic..." style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
+                        <datalist id="qbTopicList"></datalist>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-bottom: 8px; font-size: 0.75rem;">
+                        <label><input type="checkbox" id="qbBoard"> Board Only</label>
+                        <label><input type="checkbox" id="qbImportant"> Important Only</label>
+                    </div>
+                    <button class="btn-primary btn-small" style="background: linear-gradient(135deg, #10b981, #059669); width: 100%; font-size: 0.8rem; font-weight: 800;" onclick="importFromQBank('monopoly')">📥 FILTER & LOAD INTO GAME</button>
+                </div>
+                
+                <div class="stat-label" style="margin-bottom: 5px;">📤 OR MANUAL EXCEL UPLOAD</div>
                 <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
                     <input type="file" id="quizFileInput" accept=".xlsx,.xls"
                         style="font-size:0.7rem; flex:1; min-width:150px;">
@@ -776,8 +805,76 @@
             });
         }, 500);
 
-        updateUI();
-        refreshSessionDropdown();
+        async function fetchQBankFilters() {
+            try {
+                const [topicsRes, chaptersRes] = await Promise.all([
+                    fetch('/api/mcq/topics'),
+                    fetch('/api/mcq/chapters')
+                ]);
+                const topics = await topicsRes.json();
+                const chapters = await chaptersRes.json();
+                const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
+                document.getElementById('qbTopicList').innerHTML = toOptions(topics);
+                document.getElementById('qbChapterList').innerHTML = toOptions(chapters);
+            } catch (e) {
+                console.error("Error fetching QBank filters:", e);
+            }
+        }
+        
+        async function importFromQBank(game) {
+            const btn = event.target;
+            const origText = btn.innerText;
+            btn.innerText = "⏳ IMPORTING...";
+            btn.disabled = true;
+            
+            try {
+                const data = {
+                    game: game,
+                    paper: document.getElementById('qbPaper').value,
+                    amount: document.getElementById('qbAmount').value,
+                    chapter: document.getElementById('qbChapter').value,
+                    topics: document.getElementById('qbTopics').value,
+                    boardOnly: document.getElementById('qbBoard').checked,
+                    importantOnly: document.getElementById('qbImportant').checked
+                };
+                
+                const exportRes = await fetch('/api/mcq/export-to-game', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                if (!exportRes.ok) {
+                    const err = await exportRes.json();
+                    alert("Error exporting: " + (err.error || 'Failed.'));
+                    return;
+                }
+                
+                const json = await exportRes.json();
+                
+                // Trigger reload in server memory
+                await fetch('/api/reload-quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ game: game })
+                });
+                
+                alert(`Successfully imported ${json.count} Type 1 questions into Monopoly!`);
+                document.getElementById('quizStatus').innerText = `${json.count} questions loaded from Q-Bank`;
+            } catch (e) {
+                console.error(e);
+                alert("Failed to import from QBank.");
+            } finally {
+                btn.innerText = origText;
+                btn.disabled = false;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUI();
+            refreshSessionDropdown();
+            fetchQBankFilters();
+        });
     </script>
 </body>
 

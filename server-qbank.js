@@ -196,6 +196,69 @@ module.exports = function(app, io, uploadsDir) {
         else res.status(500).json({ error: 'Failed to write to Excel.' });
     });
 
+    app.post('/api/mcq/export-to-game', (req, res) => {
+        const { paper, chapter, boardOnly, importantOnly, amount, topics, game } = req.body;
+        
+        if (!game || (game !== 'monopoly' && game !== 'maze')) {
+            return res.status(400).json({ error: 'Valid game (monopoly or maze) is required.' });
+        }
+
+        let data = readExcel(mcqFile);
+        
+        // Ensure ONLY Type 1 MCQ is included
+        data = data.filter(d => String(d.type) === '1');
+        
+        if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
+        if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
+        if (boardOnly === true || boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
+        if (importantOnly === true || importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(String(topics).toLowerCase()));
+        
+        data.sort(() => 0.5 - Math.random());
+        
+        if (amount && amount !== 'All') {
+            const limit = parseInt(amount);
+            if (!isNaN(limit)) {
+                data = data.slice(0, limit);
+            }
+        }
+        
+        if (data.length === 0) {
+            return res.status(404).json({ error: 'No Type 1 MCQs matched the filter criteria.' });
+        }
+
+        // Map to game format: ["Question", "Option A", "Option B", "Option C", "Option D", "Answer"]
+        const exportData = [
+            ["Question", "Option A", "Option B", "Option C", "Option D", "Answer"]
+        ];
+        
+        data.forEach(d => {
+            exportData.push([
+                d.question || '',
+                d.option_a || '',
+                d.option_b || '',
+                d.option_c || '',
+                d.option_d || '',
+                (d.answer || 'A').toString().toUpperCase()
+            ]);
+        });
+        
+        // Write to respective game file
+        const targetFileName = game === 'monopoly' ? 'quiz-questions.xlsx' : 'maze-quiz-questions.xlsx';
+        const targetFilePath = path.join(uploadsDir, targetFileName);
+        
+        try {
+            const ws = XLSX.utils.aoa_to_sheet(exportData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Quiz Questions");
+            XLSX.writeFile(wb, targetFilePath);
+            res.json({ status: 'ok', count: data.length });
+        } catch (e) {
+            console.error("Error writing game export excel:", e);
+            res.status(500).json({ error: 'Failed to write exported game file.' });
+        }
+    });
+
     // ==== Creative API ====
     app.get('/api/creative', (req, res) => {
         let data = readExcel(creativeFile);
