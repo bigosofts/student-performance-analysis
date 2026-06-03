@@ -13,9 +13,11 @@ window.QuestionBank = {
     // Timer utility
     createTimer: function(seconds, onTick, onComplete) {
         let remaining = seconds;
+        let isPaused = false;
         onTick(remaining);
         
         const interval = setInterval(() => {
+            if (isPaused) return;
             remaining--;
             if (remaining >= 0) {
                 onTick(remaining);
@@ -27,7 +29,10 @@ window.QuestionBank = {
         }, 1000);
         
         return {
-            stop: () => clearInterval(interval)
+            stop: () => clearInterval(interval),
+            pause: () => { isPaused = true; },
+            resume: () => { isPaused = false; },
+            isPaused: () => isPaused
         };
     },
 
@@ -108,7 +113,7 @@ window.QuestionBank = {
         
         // Render Question 1
         html += `<div class="mcq-sub-question" data-sub="1">`;
-        html += this.formatMcqType1(q, index);
+        html += this.formatMcqType2(q, index);
         html += `</div>`;
         
         // Render Question 2

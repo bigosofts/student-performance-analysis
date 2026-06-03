@@ -79,11 +79,19 @@
 
     <script>
       const socket = io();
+      
+      socket.on('classroom-navigate', (data) => {
+          if (data.url) window.location.href = data.url;
+      });
+
       let questions = [];
       let currentIdx = 0;
       let timerObj = null;
       let maxTime = 0;
       let revealState = 0; // 0=none, 1=ans1 revealed, 2=ans2 revealed
+      let autoAdvanceTimeoutId = null;
+      let autoAdvanceTimeRemaining = 0;
+      let autoAdvanceStartTime = 0;
 
       const waitingScreen = document.getElementById('waitingScreen');
       const mcqView = document.getElementById('mcqView');
@@ -125,6 +133,36 @@
 
       socket.on('qbank-show-answer', showCurrentAnswer);
 
+      socket.on('qbank-pause-timer', () => {
+          if (timerObj && !timerObj.isPaused()) {
+              timerObj.pause();
+          }
+          if (autoAdvanceTimeoutId) {
+              clearTimeout(autoAdvanceTimeoutId);
+              autoAdvanceTimeoutId = null;
+              autoAdvanceTimeRemaining -= (Date.now() - autoAdvanceStartTime);
+          }
+      });
+
+      socket.on('qbank-resume-timer', () => {
+          if (timerObj && timerObj.isPaused()) {
+              timerObj.resume();
+          } else if (!timerObj && autoAdvanceTimeRemaining > 0 && !autoAdvanceTimeoutId) {
+              autoAdvanceStartTime = Date.now();
+              autoAdvanceTimeoutId = setTimeout(advanceQuiz, autoAdvanceTimeRemaining);
+          }
+      });
+
+      function advanceQuiz() {
+          if (currentIdx < questions.length - 1) {
+              currentIdx++;
+              renderMcq();
+          } else {
+              document.getElementById('mcqTitle').innerHTML = `📝 MCQ QUIZ • সমাপ্ত`;
+              document.getElementById('mcqContent').innerHTML = `<h2 style="text-align:center; margin-top:50px;">কুইজ শেষ হয়েছে!</h2>`;
+          }
+      }
+
       socket.on('qbank-end-quiz', () => {
           waitingScreen.style.display = 'flex';
           mcqView.style.display = 'none';
@@ -152,6 +190,9 @@
 
       function renderMcq() {
           if (timerObj) timerObj.stop();
+          if (autoAdvanceTimeoutId) clearTimeout(autoAdvanceTimeoutId);
+          autoAdvanceTimeoutId = null;
+          timerObj = null;
           revealState = 0;
           const q = questions[currentIdx];
           document.getElementById('mcqTitle').innerHTML = `📝 MCQ QUIZ • প্রশ্ন ${QuestionBank.toBengaliNumber(currentIdx + 1)}/${QuestionBank.toBengaliNumber(questions.length)}`;
@@ -166,6 +207,7 @@
               timerBar.style.width = `${(rem / maxTime) * 100}%`;
           }, () => {
               // Timer complete auto advance logic
+              timerObj = null;
               timerText.innerText = `00:00`;
               timerBar.style.width = `0%`;
               
@@ -173,16 +215,9 @@
               showCurrentAnswer();
               
               // Wait 3 seconds then auto-advance
-              setTimeout(() => {
-                  if (currentIdx < questions.length - 1) {
-                      currentIdx++;
-                      renderMcq();
-                  } else {
-                      // End of quiz
-                      document.getElementById('mcqTitle').innerHTML = `📝 MCQ QUIZ • সমাপ্ত`;
-                      document.getElementById('mcqContent').innerHTML = `<h2 style="text-align:center; margin-top:50px;">কুইজ শেষ হয়েছে!</h2>`;
-                  }
-              }, 3000);
+              autoAdvanceTimeRemaining = 3000;
+              autoAdvanceStartTime = Date.now();
+              autoAdvanceTimeoutId = setTimeout(advanceQuiz, autoAdvanceTimeRemaining);
           });
       }
 

@@ -94,12 +94,13 @@ module.exports = function(app, io, uploadsDir) {
     // ==== MCQ API ====
     app.get('/api/mcq', (req, res) => {
         let data = readExcel(mcqFile);
-        const { paper, chapter, boardOnly, importantOnly, amount } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
         
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
         if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
         
         data.sort(() => 0.5 - Math.random());
         
@@ -110,6 +111,18 @@ module.exports = function(app, io, uploadsDir) {
             }
         }
         res.json(data);
+    });
+
+    app.get('/api/mcq/chapters', (req, res) => {
+        let data = readExcel(mcqFile);
+        let chapters = new Set();
+        data.forEach(d => { if (d.chapter) chapters.add(String(d.chapter)); });
+        res.json(Array.from(chapters).sort());
+    });
+
+    app.get('/api/mcq/download-xlsx', (req, res) => {
+        if (!fs.existsSync(mcqFile)) return res.status(404).json({ error: 'No file found' });
+        res.download(mcqFile, 'mcq-questions.xlsx');
     });
 
     app.post('/api/mcq/upload-image', imageUpload.single('image'), (req, res) => {
@@ -121,41 +134,78 @@ module.exports = function(app, io, uploadsDir) {
         const data = readExcel(mcqFile);
         const newRecord = { ...req.body, id: `mcq_${Date.now()}` };
         data.push(newRecord);
-        writeExcel(mcqFile, data);
-        res.json({ status: 'ok', record: newRecord });
+        const success = writeExcel(mcqFile, data);
+        if (success) res.json({ status: 'ok', record: newRecord });
+        else res.status(500).json({ error: 'Failed to write to Excel. Ensure the file is not open in another program.' });
+    });
+
+    app.put('/api/mcq/:id', (req, res) => {
+        let data = readExcel(mcqFile);
+        const index = data.findIndex(r => r.id === req.params.id);
+        if (index !== -1) {
+            data[index] = { ...data[index], ...req.body, id: req.params.id };
+            const success = writeExcel(mcqFile, data);
+            if (success) res.json({ status: 'ok', record: data[index] });
+            else res.status(500).json({ error: 'Failed to write to Excel. Ensure the file is not open in another program.' });
+        } else {
+            res.status(404).json({ error: 'Record not found' });
+        }
+    });
+
+    app.get('/api/mcq/topics', (req, res) => {
+        let data = readExcel(mcqFile);
+        let topics = new Set();
+        data.forEach(d => {
+            if (d.topics) {
+                String(d.topics).split(',').forEach(t => {
+                    const trimmed = t.trim();
+                    if (trimmed) topics.add(trimmed);
+                });
+            }
+        });
+        res.json(Array.from(topics).sort());
     });
 
     app.delete('/api/mcq/:id', (req, res) => {
         let data = readExcel(mcqFile);
+        const record = data.find(r => r.id === req.params.id);
+        if (record) {
+            // Delete associated images
+            ['question_image', 'passage_image', 'question2_image'].forEach(field => {
+                if (record[field]) {
+                    const imgPath = path.join(qbankImagesDir, record[field]);
+                    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+                }
+            });
+        }
         data = data.filter(r => r.id !== req.params.id);
-        writeExcel(mcqFile, data);
-        res.json({ status: 'ok' });
+        const success = writeExcel(mcqFile, data);
+        if (success) res.json({ status: 'ok' });
+        else res.status(500).json({ error: 'Failed to write to Excel.' });
     });
 
     app.post('/api/mcq/bulk-upload', excelUpload.single('file'), (req, res) => {
         if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-        const newRows = readExcel(req.file.path);
-        const data = readExcel(mcqFile);
-        
-        newRows.forEach(r => {
-            if (!r.id) r.id = `mcq_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-            data.push(r);
-        });
-        
-        writeExcel(mcqFile, data);
+        let newRows = readExcel(req.file.path);
+        // Ensure each row has a unique id
+        newRows = newRows.map(r => ({ ...r, id: r.id || `mcq_${Date.now()}_${Math.floor(Math.random()*10000)}` }));
+        // REPLACE existing xlsx entirely
+        const success = writeExcel(mcqFile, newRows);
         fs.unlinkSync(req.file.path);
-        res.json({ status: 'ok', count: newRows.length });
+        if (success) res.json({ status: 'ok', count: newRows.length });
+        else res.status(500).json({ error: 'Failed to write to Excel.' });
     });
 
     // ==== Creative API ====
     app.get('/api/creative', (req, res) => {
         let data = readExcel(creativeFile);
-        const { paper, chapter, boardOnly, importantOnly, amount } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
         
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
         if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
         
         data.sort(() => 0.5 - Math.random());
         
@@ -168,34 +218,82 @@ module.exports = function(app, io, uploadsDir) {
         res.json(data);
     });
 
+    app.get('/api/creative/chapters', (req, res) => {
+        let data = readExcel(creativeFile);
+        let chapters = new Set();
+        data.forEach(d => { if (d.chapter) chapters.add(String(d.chapter)); });
+        res.json(Array.from(chapters).sort());
+    });
+
+    app.get('/api/creative/download-xlsx', (req, res) => {
+        if (!fs.existsSync(creativeFile)) return res.status(404).json({ error: 'No file found' });
+        res.download(creativeFile, 'creative-questions.xlsx');
+    });
+
     app.post('/api/creative', (req, res) => {
         const data = readExcel(creativeFile);
         const newRecord = { ...req.body, id: `cq_${Date.now()}` };
         data.push(newRecord);
-        writeExcel(creativeFile, data);
-        res.json({ status: 'ok', record: newRecord });
+        const success = writeExcel(creativeFile, data);
+        if (success) res.json({ status: 'ok', record: newRecord });
+        else res.status(500).json({ error: 'Failed to write to Excel. Ensure the file is not open in another program.' });
+    });
+
+    app.put('/api/creative/:id', (req, res) => {
+        let data = readExcel(creativeFile);
+        const index = data.findIndex(r => r.id === req.params.id);
+        if (index !== -1) {
+            data[index] = { ...data[index], ...req.body, id: req.params.id };
+            const success = writeExcel(creativeFile, data);
+            if (success) res.json({ status: 'ok', record: data[index] });
+            else res.status(500).json({ error: 'Failed to write to Excel. Ensure the file is not open in another program.' });
+        } else {
+            res.status(404).json({ error: 'Record not found' });
+        }
+    });
+
+    app.get('/api/creative/topics', (req, res) => {
+        let data = readExcel(creativeFile);
+        let topics = new Set();
+        data.forEach(d => {
+            if (d.topics) {
+                String(d.topics).split(',').forEach(t => {
+                    const trimmed = t.trim();
+                    if (trimmed) topics.add(trimmed);
+                });
+            }
+        });
+        res.json(Array.from(topics).sort());
     });
 
     app.delete('/api/creative/:id', (req, res) => {
         let data = readExcel(creativeFile);
+        const record = data.find(r => r.id === req.params.id);
+        if (record) {
+            // Delete associated images
+            ['passage_image'].forEach(field => {
+                if (record[field]) {
+                    const imgPath = path.join(qbankImagesDir, record[field]);
+                    if (fs.existsSync(imgPath)) fs.unlinkSync(imgPath);
+                }
+            });
+        }
         data = data.filter(r => r.id !== req.params.id);
-        writeExcel(creativeFile, data);
-        res.json({ status: 'ok' });
+        const success = writeExcel(creativeFile, data);
+        if (success) res.json({ status: 'ok' });
+        else res.status(500).json({ error: 'Failed to write to Excel.' });
     });
 
     app.post('/api/creative/bulk-upload', excelUpload.single('file'), (req, res) => {
         if (!req.file) return res.status(400).json({ error: "No file uploaded" });
-        const newRows = readExcel(req.file.path);
-        const data = readExcel(creativeFile);
-        
-        newRows.forEach(r => {
-            if (!r.id) r.id = `cq_${Date.now()}_${Math.floor(Math.random()*1000)}`;
-            data.push(r);
-        });
-        
-        writeExcel(creativeFile, data);
+        let newRows = readExcel(req.file.path);
+        // Ensure each row has a unique id
+        newRows = newRows.map(r => ({ ...r, id: r.id || `cq_${Date.now()}_${Math.floor(Math.random()*10000)}` }));
+        // REPLACE existing xlsx entirely
+        const success = writeExcel(creativeFile, newRows);
         fs.unlinkSync(req.file.path);
-        res.json({ status: 'ok', count: newRows.length });
+        if (success) res.json({ status: 'ok', count: newRows.length });
+        else res.status(500).json({ error: 'Failed to write to Excel.' });
     });
 
     // ==== PDF Export API ====
@@ -296,6 +394,33 @@ module.exports = function(app, io, uploadsDir) {
             doc.moveDown();
             doc.fontSize(12);
 
+            const addImageToPdf = (imgName) => {
+                if (imgName) {
+                    const imgPath = path.join(qbankImagesDir, imgName);
+                    if (fs.existsSync(imgPath)) {
+                        try {
+                            const img = doc.openImage(imgPath);
+                            const targetWidth = 200; // smaller image
+                            const scale = targetWidth / img.width;
+                            const targetHeight = img.height * scale;
+                            
+                            // Check for page overflow
+                            if (doc.y + targetHeight > doc.page.height - doc.page.margins.bottom) {
+                                doc.addPage();
+                            }
+                            
+                            // Center horizontally
+                            const x = (doc.page.width - doc.page.margins.left - doc.page.margins.right - targetWidth) / 2 + doc.page.margins.left;
+                            
+                            doc.image(img, x, doc.y, { width: targetWidth });
+                            doc.y += targetHeight + 15; // manually advance cursor
+                        } catch(e) {
+                            console.error('Error adding image to pdf:', e);
+                        }
+                    }
+                }
+            };
+
         let qNum = 1;
         data.forEach((q) => {
             if (isMcq) {
@@ -308,10 +433,12 @@ module.exports = function(app, io, uploadsDir) {
                         doc.text(`নিচের উদ্দীপকটি পড়ো এবং ${hint} নং প্রশ্নের উত্তর দাও:`);
                         doc.text(`${q.passage}`);
                         doc.moveDown(0.5);
+                        addImageToPdf(q.passage_image);
                     }
                 }
                 
                 doc.text(`${bnIndex1}। ${q.question || ''}`);
+                addImageToPdf(q.question_image);
                 
                 const renderOptions = (a, b, c, d) => {
                     const row1 = (a ? `ক) ${a}` : '').padEnd(30, ' ') + (b ? `    খ) ${b}` : '');
@@ -320,9 +447,9 @@ module.exports = function(app, io, uploadsDir) {
                     if (row2.trim()) doc.text(row2);
                 };
 
-                if (type === 1 || type === 3 || type === 4) {
+                if (type === 1 || type === 3) {
                     renderOptions(q.option_a, q.option_b, q.option_c, q.option_d);
-                } else if (type === 2) {
+                } else if (type === 2 || type === 4) {
                     if (q.option_a) doc.text(`i) ${q.option_a}`);
                     if (q.option_b) doc.text(`ii) ${q.option_b}`);
                     if (q.option_c) doc.text(`iii) ${q.option_c}`);
@@ -335,6 +462,7 @@ module.exports = function(app, io, uploadsDir) {
                     qNum++;
                     const bnIndex2 = toBengaliNumber(qNum);
                     doc.text(`${bnIndex2}। ${q.question2}`);
+                    addImageToPdf(q.question2_image);
                     
                     if (q.q2_type === 'point') {
                         if (q.q2_option_a) doc.text(`i) ${q.q2_option_a}`);
@@ -352,6 +480,7 @@ module.exports = function(app, io, uploadsDir) {
                 const bnIndex = toBengaliNumber(qNum);
                 doc.text(`প্রশ্ন ${bnIndex}। ${q.passage || ''}`);
                 doc.moveDown(0.5);
+                addImageToPdf(q.passage_image);
                 if (q.knowledge) doc.text(`ক) ${q.knowledge}`);
                 if (q.understanding) doc.text(`খ) ${q.understanding}`);
                 if (q.application) doc.text(`গ) ${q.application}`);
@@ -400,9 +529,9 @@ module.exports = function(app, io, uploadsDir) {
                     if (row2.trim()) output += row2 + '\n';
                 };
 
-                if (type === 1 || type === 3 || type === 4) {
+                if (type === 1 || type === 3) {
                     appendOptions(q.option_a, q.option_b, q.option_c, q.option_d);
-                } else if (type === 2) {
+                } else if (type === 2 || type === 4) {
                     if (q.option_a) output += `i) ${q.option_a}\n`;
                     if (q.option_b) output += `ii) ${q.option_b}\n`;
                     if (q.option_c) output += `iii) ${q.option_c}\n`;
@@ -666,6 +795,12 @@ module.exports = function(app, io, uploadsDir) {
         });
         socket.on('qbank-close-creative', () => {
             socket.broadcast.emit('qbank-close-creative');
+        });
+        socket.on('qbank-pause-timer', () => {
+            socket.broadcast.emit('qbank-pause-timer');
+        });
+        socket.on('qbank-resume-timer', () => {
+            socket.broadcast.emit('qbank-resume-timer');
         });
         socket.on('leaderboard-show', (data) => {
             socket.broadcast.emit('leaderboard-show', data);

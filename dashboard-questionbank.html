@@ -1,263 +1,544 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <script src="js/auth-check.js"></script>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Question Bank Manager</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <link rel="stylesheet" href="css/questionbank.css" />
-    <script src="/socket.io/socket.io.js"></script>
-    <script src="js/questionbank.js"></script>
-    <style>
-      .dashboard-container {
-        padding: 20px;
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      .card { margin-bottom: 20px; }
-      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-      .back-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; }
-      .back-btn:hover { background: rgba(255,255,255,0.2); }
-      .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; color: white; }
-      .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
-      .btn-danger { background: #ef4444; }
-      .btn-success { background: #10b981; }
-      .hidden { display: none !important; }
-    </style>
-  </head>
-  <body>
-    <div class="dashboard-container qb-font-bn">
-      <div class="header">
-        <h1>📝 Question Bank Manager</h1>
-        <a href="dashboard.html" class="back-btn">⬅ Back to Hub</a>
-      </div>
 
-      <div class="tabs-container">
-        <button class="tab-btn active" onclick="switchTab('mcq')">MCQ Bank</button>
-        <button class="tab-btn" onclick="switchTab('cq')">Creative Question Bank</button>
-      </div>
+<head>
+  <script src="js/auth-check.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Question Bank Manager</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/questionbank.css" />
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/questionbank.js"></script>
+  <style>
+    .dashboard-container {
+      padding: 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
 
-      <!-- MCQ TAB -->
-      <div id="tab-mcq" class="tab-content active">
-        <div class="glass-panel card">
-          <h2>Upload MCQ</h2>
-          <div class="form-grid" style="margin-bottom: 20px;">
-            <div class="form-group">
-              <label>Question Type</label>
-              <select id="mcqType" class="form-control" onchange="updateMcqForm()">
-                <option value="1">Type 1: Simple MCQ</option>
-                <option value="2">Type 2: Point-based (i, ii, iii)</option>
-                <option value="3">Type 3: Passage + Simple</option>
-                <option value="4">Type 4: Passage + Compound</option>
-              </select>
-            </div>
-          </div>
-          
-          <form id="mcqForm" onsubmit="saveMcq(event)">
-            <div id="mcqFields">
-              <!-- Dynamically populated -->
-            </div>
-            
-            <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 20px 0;" />
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Paper</label>
-                <select id="mcqPaper" class="form-control" required>
-                  <option value="1st">1st Paper</option>
-                  <option value="2nd">2nd Paper</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Chapter</label>
-                <input type="text" id="mcqChapter" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>Topics</label>
-                <input type="text" id="mcqTopics" class="form-control" />
-              </div>
-              <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 25px;">
-                <input type="checkbox" id="mcqBoard" /> <label style="margin:0">Board Question</label>
-              </div>
-              <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 25px;">
-                <input type="checkbox" id="mcqImportant" /> <label style="margin:0">Important</label>
-              </div>
-            </div>
-            
-            <button type="submit" class="btn btn-primary">Save MCQ</button>
-            <button type="button" class="btn" style="background: rgba(255,255,255,0.1);" onclick="document.getElementById('mcqForm').reset()">Clear</button>
-          </form>
+    .card {
+      margin-bottom: 20px;
+    }
 
-          <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
-          
-          <h3>Or Bulk Upload</h3>
-          <div style="display:flex; gap: 10px; align-items:center;">
-            <input type="file" id="mcqBulkFile" accept=".xlsx" class="form-control" />
-            <button class="btn btn-success" onclick="uploadBulk('mcq')">Upload Excel</button>
-          </div>
-        </div>
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
 
-        <div class="glass-panel card">
-          <h2>Quiz Launcher & Export</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Amount</label>
-              <select id="quizAmount" class="form-control">
-                <option value="All">All Questions</option>
-                <option value="10">10 Questions</option>
-                <option value="20">20 Questions</option>
-                <option value="30">30 Questions</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Paper</label>
-              <select id="quizPaper" class="form-control">
-                <option value="All">All</option>
-                <option value="1st">1st Paper</option>
-                <option value="2nd">2nd Paper</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Chapter</label>
-              <input type="text" id="quizChapter" class="form-control" placeholder="Type chapter or leave empty for All" />
-            </div>
-            <div class="form-group">
-              <label>Timer per Q (sec)</label>
-              <input type="number" id="quizTimer" class="form-control" value="30" />
-            </div>
-          </div>
-          <div class="form-grid" style="margin-top: 15px;">
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-              <input type="checkbox" id="quizBoard" /> <label style="margin:0">Board Question Only</label>
-            </div>
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-              <input type="checkbox" id="quizImportant" /> <label style="margin:0">Important Only</label>
-            </div>
-          </div>
-          <div style="margin-top: 15px;">
-            <button class="btn btn-primary" onclick="launchMcqQuiz()">🎮 Launch Quiz on Projector</button>
-            <button class="btn btn-danger" onclick="closeMcqQuiz()">🛑 Close Screen</button>
-            <button class="btn btn-success" onclick="exportPdf('mcq')">📥 Download PDF</button>
-            <button class="btn btn-info" onclick="exportTxt('mcq')">📄 Download TXT</button>
-          </div>
-        </div>
-      </div>
+    .back-btn {
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      color: white;
+      text-decoration: none;
+    }
 
-      <!-- CREATIVE TAB -->
-      <div id="tab-cq" class="tab-content">
-        <div class="glass-panel card">
-          <h2>Upload Creative Question</h2>
-          <form id="cqForm" onsubmit="saveCq(event)">
-            <div class="form-group">
-              <label>Passage</label>
-              <textarea id="cqPassage" class="form-control" rows="4" required></textarea>
-            </div>
-            <div class="form-group">
-              <label>Passage Image (Optional)</label>
-              <input type="file" id="cqPassageImg" class="form-control" accept="image/*" />
-            </div>
-            
-            <div class="form-grid">
-              <div class="form-group">
-                <label>ক) জ্ঞানমূলক</label>
-                <input type="text" id="cqK" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>খ) অনুধাবনমূলক</label>
-                <input type="text" id="cqU" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>গ) প্রয়োগমূলক</label>
-                <input type="text" id="cqA" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>ঘ) উচ্চতর দক্ষতামূলক</label>
-                <input type="text" id="cqH" class="form-control" required />
-              </div>
-            </div>
+    .back-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
 
-            <div class="form-grid">
-              <div class="form-group">
-                <label>Paper</label>
-                <select id="cqPaper" class="form-control" required>
-                  <option value="1st">1st Paper</option>
-                  <option value="2nd">2nd Paper</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Chapter</label>
-                <input type="text" id="cqChapter" class="form-control" required />
-              </div>
-              <div class="form-group">
-                <label>Topics</label>
-                <input type="text" id="cqTopics" class="form-control" />
-              </div>
-            </div>
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      color: white;
+    }
 
-            <button type="submit" class="btn btn-primary">Save CQ</button>
-          </form>
-          
-          <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
-          
-          <h3>Or Bulk Upload</h3>
-          <div style="display:flex; gap: 10px; align-items:center;">
-            <input type="file" id="cqBulkFile" accept=".xlsx" class="form-control" />
-            <button class="btn btn-success" onclick="uploadBulk('cq')">Upload Excel</button>
-          </div>
-        </div>
-        
-        <div class="glass-panel card">
-          <h2>Display & Export</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label>Paper</label>
-              <select id="cqFilterPaper" class="form-control">
-                <option value="All">All</option>
-                <option value="1st">1st Paper</option>
-                <option value="2nd">2nd Paper</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Chapter</label>
-              <input type="text" id="cqFilterChapter" class="form-control" placeholder="All" />
-            </div>
-          </div>
-          <div class="form-grid" style="margin-top: 15px;">
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-              <input type="checkbox" id="cqFilterBoard" /> <label style="margin:0">Board Question Only</label>
-            </div>
-            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
-              <input type="checkbox" id="cqFilterImportant" /> <label style="margin:0">Important Only</label>
-            </div>
-          </div>
-          <div style="margin-top: 15px;">
-            <button class="btn btn-primary" onclick="showCqOnProjector()">📽️ Show on Projector</button>
-            <button class="btn btn-danger" onclick="closeCqOnProjector()">❌ Close Display</button>
-            <button class="btn btn-success" onclick="exportPdf('creative')">📥 Download PDF</button>
-            <button class="btn btn-info" onclick="exportTxt('creative')">📄 Download TXT</button>
-          </div>
-        </div>
-      </div>
-      
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+    }
+
+    .btn-danger {
+      background: #ef4444;
+    }
+
+    .btn-success {
+      background: #10b981;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .btn-info {
+      background: #0ea5e9;
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 1000;
+      display: none;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .modal-content {
+      background: #0f172a;
+      padding: 24px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 98vw;
+      min-height: 90vh;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .modal-search-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 14px 0 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 16px;
+    }
+
+    .modal-search-bar input,
+    .modal-search-bar select {
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      color: white;
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+      min-width: 130px;
+    }
+
+    .modal-search-bar input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .modal-search-bar label {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    #tableContainer {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    table.data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 0;
+      color: white;
+      font-size: 13px;
+    }
+
+    table.data-table th,
+    table.data-table td {
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 9px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    table.data-table th {
+      background: rgba(255, 255, 255, 0.08);
+      font-weight: 700;
+      position: sticky;
+      top: 0;
+    }
+
+    table.data-table tr:hover td {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 7px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .badge-board {
+      background: #2563eb;
+    }
+
+    .badge-imp {
+      background: #d97706;
+    }
+
+    #mcqPauseBtn {
+      background-color: #3a3a3a;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-container qb-font-bn">
+    <div class="header">
+      <h1>📝 Question Bank Manager</h1>
+      <a href="dashboard.html" class="back-btn">⬅ Back to Hub</a>
     </div>
 
-    <script>
-      const socket = io();
-      
-      function switchTab(tabId) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-        event.target.classList.add('active');
-        document.getElementById(`tab-${tabId}`).classList.add('active');
-      }
+    <div class="tabs-container">
+      <button class="tab-btn active" onclick="switchTab('mcq')">MCQ Bank</button>
+      <button class="tab-btn" onclick="switchTab('cq')">Creative Question Bank</button>
+    </div>
 
-      function updateMcqForm() {
-        const type = document.getElementById('mcqType').value;
-        const container = document.getElementById('mcqFields');
-        let html = '';
-        
-        if (type === '3' || type === '4') {
-            html += `<div class="form-group">
+    <!-- MCQ TAB -->
+    <div id="tab-mcq" class="tab-content active">
+      <div class="glass-panel card">
+        <h2>Upload MCQ</h2>
+        <div class="form-grid" style="margin-bottom: 20px;">
+          <div class="form-group">
+            <label>Question Type</label>
+            <select id="mcqType" class="form-control" onchange="updateMcqForm()">
+              <option value="1">Type 1: Simple MCQ</option>
+              <option value="2">Type 2: Point-based (i, ii, iii)</option>
+              <option value="3">Type 3: Passage + Simple</option>
+              <option value="4">Type 4: Passage + Compound</option>
+            </select>
+          </div>
+        </div>
+
+        <form id="mcqForm" onsubmit="saveMcq(event)">
+          <div id="mcqFields">
+            <!-- Dynamically populated -->
+          </div>
+
+          <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 20px 0;" />
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Paper</label>
+              <select id="mcqPaper" class="form-control" required>
+                <option value="1st">1st Paper</option>
+                <option value="2nd">2nd Paper</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Chapter</label>
+              <select id="mcqChapter" class="form-control" required>
+                <option value="Chapter 1">Chapter 1</option>
+                <option value="Chapter 2">Chapter 2</option>
+                <option value="Chapter 3">Chapter 3</option>
+                <option value="Chapter 4">Chapter 4</option>
+                <option value="Chapter 5">Chapter 5</option>
+                <option value="Chapter 6">Chapter 6</option>
+                <option value="Chapter 7">Chapter 7</option>
+                <option value="Chapter 8">Chapter 8</option>
+                <option value="Chapter 9">Chapter 9</option>
+                <option value="Chapter 10">Chapter 10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Topics</label>
+              <input type="text" id="mcqTopics" list="mcqTopicList" class="form-control" autocomplete="off" />
+              <datalist id="mcqTopicList"></datalist>
+            </div>
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 25px;">
+              <input type="checkbox" id="mcqBoard"
+                onchange="document.getElementById('mcqBoardYearGroup').style.display = this.checked ? 'block' : 'none';" />
+              <label style="margin:0">Board Question</label>
+            </div>
+            <div class="form-group" id="mcqBoardYearGroup" style="display: none;">
+              <label>Board Year</label>
+              <input type="text" id="mcqBoardYear" class="form-control" placeholder="e.g. 2023" />
+            </div>
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 25px;">
+              <input type="checkbox" id="mcqImportant" /> <label style="margin:0">Important</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="mcqSaveBtn">Save MCQ</button>
+          <button type="button" class="btn" style="background: rgba(255,255,255,0.1);"
+            onclick="document.getElementById('mcqForm').reset(); document.getElementById('mcqBoardYearGroup').style.display='none'; document.getElementById('mcqSaveBtn').innerText='Save MCQ'; document.getElementById('mcqForm').removeAttribute('data-edit-id');">Clear</button>
+          <button type="button" class="btn btn-info" onclick="openTableModal('mcq')">Manage MCQs</button>
+        </form>
+
+        <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
+
+        <h3>Or Bulk Upload</h3>
+        <div style="display:flex; gap: 10px; align-items:center;">
+          <input type="file" id="mcqBulkFile" accept=".xlsx" class="form-control" />
+          <button class="btn btn-success" onclick="uploadBulk('mcq')">Upload Excel</button>
+        </div>
+      </div>
+
+      <div class="glass-panel card">
+        <h2>Quiz Launcher & Export</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Amount</label>
+            <select id="quizAmount" class="form-control">
+              <option value="All">All Questions</option>
+              <option value="10">10 Questions</option>
+              <option value="20">20 Questions</option>
+              <option value="30">30 Questions</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Paper</label>
+            <select id="quizPaper" class="form-control">
+              <option value="All">All</option>
+              <option value="1st">1st Paper</option>
+              <option value="2nd">2nd Paper</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Chapter</label>
+            <input type="text" id="quizChapter" list="quizChapterList" class="form-control" placeholder="All Chapters"
+              autocomplete="off" />
+            <datalist id="quizChapterList"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Topics</label>
+            <input type="text" id="quizTopics" list="quizTopicsList" class="form-control" placeholder="All Topics"
+              autocomplete="off" />
+            <datalist id="quizTopicsList"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Timer per Q (sec)</label>
+            <input type="number" id="quizTimer" class="form-control" value="30" />
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top: 15px;">
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="quizBoard" /> <label style="margin:0">Board Question Only</label>
+          </div>
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="quizImportant" /> <label style="margin:0">Important Only</label>
+          </div>
+        </div>
+        <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
+          <button class="btn btn-primary" onclick="launchMcqQuiz()">🎮 Launch Quiz on Projector</button>
+          <button class="btn btn-warning" id="mcqPauseBtn" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause
+            Timer</button>
+          <button class="btn btn-danger" onclick="closeMcqQuiz()">🛑 Close Screen</button>
+          <button class="btn btn-success" onclick="exportPdf('mcq')">📥 Download PDF</button>
+          <button class="btn btn-info" onclick="exportTxt('mcq')">📄 Download TXT</button>
+          <a href="/api/mcq/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download
+            XLSX</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- CREATIVE TAB -->
+    <div id="tab-cq" class="tab-content">
+      <div class="glass-panel card">
+        <h2>Upload Creative Question</h2>
+        <form id="cqForm" onsubmit="saveCq(event)">
+          <div class="form-group">
+            <label>Passage</label>
+            <textarea id="cqPassage" class="form-control" rows="4" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Passage Image (Optional)</label>
+            <input type="file" id="cqPassageImg" class="form-control" accept="image/*" />
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>ক) জ্ঞানমূলক</label>
+              <input type="text" id="cqK" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>খ) অনুধাবনমূলক</label>
+              <input type="text" id="cqU" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>গ) প্রয়োগমূলক</label>
+              <input type="text" id="cqA" class="form-control" required />
+            </div>
+            <div class="form-group">
+              <label>ঘ) উচ্চতর দক্ষতামূলক</label>
+              <input type="text" id="cqH" class="form-control" required />
+            </div>
+          </div>
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Paper</label>
+              <select id="cqPaper" class="form-control" required>
+                <option value="1st">1st Paper</option>
+                <option value="2nd">2nd Paper</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Chapter</label>
+              <select id="cqChapter" class="form-control" required>
+                <option value="Chapter 1">Chapter 1</option>
+                <option value="Chapter 2">Chapter 2</option>
+                <option value="Chapter 3">Chapter 3</option>
+                <option value="Chapter 4">Chapter 4</option>
+                <option value="Chapter 5">Chapter 5</option>
+                <option value="Chapter 6">Chapter 6</option>
+                <option value="Chapter 7">Chapter 7</option>
+                <option value="Chapter 8">Chapter 8</option>
+                <option value="Chapter 9">Chapter 9</option>
+                <option value="Chapter 10">Chapter 10</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Topics</label>
+              <input type="text" id="cqTopics" list="cqTopicList" class="form-control" autocomplete="off" />
+              <datalist id="cqTopicList"></datalist>
+            </div>
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 25px;">
+              <input type="checkbox" id="cqBoard"
+                onchange="document.getElementById('cqBoardYearGroup').style.display = this.checked ? 'block' : 'none';" />
+              <label style="margin:0">Board Question</label>
+            </div>
+            <div class="form-group" id="cqBoardYearGroup" style="display: none;">
+              <label>Board Year</label>
+              <input type="text" id="cqBoardYear" class="form-control" placeholder="e.g. 2023" />
+            </div>
+            <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px; margin-top: 25px;">
+              <input type="checkbox" id="cqImportant" /> <label style="margin:0">Important</label>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary" id="cqSaveBtn">Save CQ</button>
+          <button type="button" class="btn" style="background: rgba(255,255,255,0.1);"
+            onclick="document.getElementById('cqForm').reset(); document.getElementById('cqBoardYearGroup').style.display='none'; document.getElementById('cqSaveBtn').innerText='Save CQ'; document.getElementById('cqForm').removeAttribute('data-edit-id');">Clear</button>
+          <button type="button" class="btn btn-info" onclick="openTableModal('creative')">Manage CQs</button>
+        </form>
+
+        <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
+
+        <h3>Or Bulk Upload</h3>
+        <div style="display:flex; gap: 10px; align-items:center;">
+          <input type="file" id="cqBulkFile" accept=".xlsx" class="form-control" />
+          <button class="btn btn-success" onclick="uploadBulk('cq')">Upload Excel</button>
+        </div>
+      </div>
+
+      <div class="glass-panel card">
+        <h2>Display & Export</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Paper</label>
+            <select id="cqFilterPaper" class="form-control">
+              <option value="All">All</option>
+              <option value="1st">1st Paper</option>
+              <option value="2nd">2nd Paper</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Chapter</label>
+            <input type="text" id="cqFilterChapter" list="cqFilterChapterList" class="form-control"
+              placeholder="All Chapters" autocomplete="off" />
+            <datalist id="cqFilterChapterList"></datalist>
+          </div>
+          <div class="form-group">
+            <label>Topics</label>
+            <input type="text" id="cqFilterTopics" list="cqFilterTopicsList" class="form-control"
+              placeholder="All Topics" autocomplete="off" />
+            <datalist id="cqFilterTopicsList"></datalist>
+          </div>
+        </div>
+        <div class="form-grid" style="margin-top: 15px;">
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="cqFilterBoard" /> <label style="margin:0">Board Question Only</label>
+          </div>
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="cqFilterImportant" /> <label style="margin:0">Important Only</label>
+          </div>
+        </div>
+        <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
+          <button class="btn btn-primary" onclick="showCqOnProjector()">📽️ Show on Projector</button>
+          <button class="btn btn-warning" id="cqPauseBtn" onclick="toggleQuizTimer('cqPauseBtn')">⏸ Pause Timer</button>
+          <button class="btn btn-danger" onclick="closeCqOnProjector()">❌ Close Display</button>
+          <button class="btn btn-success" onclick="exportPdf('creative')">📥 Download PDF</button>
+          <button class="btn btn-info" onclick="exportTxt('creative')">📄 Download TXT</button>
+          <a href="/api/creative/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download
+            XLSX</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Manage Questions Modal -->
+  <div id="tableModal" class="modal-overlay">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <h2 id="tableModalTitle" style="margin:0;">Manage Questions</h2>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <span id="tableRecordCount" style="color:rgba(255,255,255,0.5);font-size:13px;"></span>
+          <button class="btn btn-danger" style="padding:8px 18px;" onclick="closeTableModal()">✕ Close</button>
+        </div>
+      </div>
+      <!-- Search Filters -->
+      <div class="modal-search-bar" id="modalSearchBar">
+        <input type="text" id="srchText" placeholder="🔍 Search question / passage..." style="flex:1;min-width:200px;"
+          oninput="renderTable()">
+        <select id="srchPaper" onchange="renderTable()">
+          <option value="">All Papers</option>
+          <option value="1st">1st Paper</option>
+          <option value="2nd">2nd Paper</option>
+        </select>
+        <select id="srchChapter" onchange="renderTable()">
+          <option value="">All Chapters</option>
+          <option>Chapter 1</option>
+          <option>Chapter 2</option>
+          <option>Chapter 3</option>
+          <option>Chapter 4</option>
+          <option>Chapter 5</option>
+          <option>Chapter 6</option>
+          <option>Chapter 7</option>
+          <option>Chapter 8</option>
+          <option>Chapter 9</option>
+          <option>Chapter 10</option>
+        </select>
+        <input type="text" id="srchTopic" placeholder="Topic..." oninput="renderTable()" style="min-width:120px;">
+        <input type="text" id="srchBoardYear" placeholder="Board Year..." oninput="renderTable()"
+          style="min-width:110px;">
+        <label><input type="checkbox" id="srchBoardOnly" onchange="renderTable()"> Board Only</label>
+        <label><input type="checkbox" id="srchImportant" onchange="renderTable()"> Important Only</label>
+        <select id="srchMcqType" onchange="renderTable()" style="display:none;">
+          <option value="">All Types</option>
+          <option value="1">Type 1</option>
+          <option value="2">Type 2</option>
+          <option value="3">Type 3</option>
+          <option value="4">Type 4</option>
+        </select>
+        <button class="btn" style="background:rgba(255,255,255,0.1);padding:8px 14px;"
+          onclick="clearSearch()">Clear</button>
+      </div>
+      <div id="tableContainer"></div>
+    </div>
+  </div>
+
+  <script>
+    const socket = io();
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+    }
+
+    function updateMcqForm() {
+      const type = document.getElementById('mcqType').value;
+      const container = document.getElementById('mcqFields');
+      let html = '';
+
+      if (type === '3' || type === '4') {
+        html += `<div class="form-group">
                 <label>Passage</label>
                 <textarea id="f_passage" class="form-control" rows="3"></textarea>
             </div>
@@ -265,9 +546,9 @@
                 <label>Passage Image</label>
                 <input type="file" id="f_passage_image" class="form-control" />
             </div>`;
-        }
+      }
 
-        html += `<div class="form-group">
+      html += `<div class="form-group">
             <label>Question</label>
             <input type="text" id="f_question" class="form-control" required />
         </div>
@@ -276,8 +557,8 @@
             <input type="file" id="f_question_image" class="form-control" />
         </div>`;
 
-        if (type === '1' || type === '3') {
-            html += `<div class="form-grid">
+      if (type === '1' || type === '3') {
+        html += `<div class="form-grid">
                 <div class="form-group"><label>Option A</label><input type="text" id="f_opta" class="form-control" required/></div>
                 <div class="form-group"><label>Option B</label><input type="text" id="f_optb" class="form-control" required/></div>
                 <div class="form-group"><label>Option C</label><input type="text" id="f_optc" class="form-control" required/></div>
@@ -286,8 +567,8 @@
                     <select id="f_ans" class="form-control"><option>A</option><option>B</option><option>C</option><option>D</option></select>
                 </div>
             </div>`;
-        } else {
-            html += `<div class="form-grid">
+      } else {
+        html += `<div class="form-grid">
                 <div class="form-group"><label>Point i</label><input type="text" id="f_opta" class="form-control" required/></div>
                 <div class="form-group"><label>Point ii</label><input type="text" id="f_optb" class="form-control" required/></div>
                 <div class="form-group"><label>Point iii</label><input type="text" id="f_optc" class="form-control" required/></div>
@@ -301,10 +582,10 @@
                     <select id="f_ans" class="form-control"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option></select>
                 </div>
             </div>`;
-        }
+      }
 
-        if (type === '4') {
-            html += `<hr style="border:1px solid #444"/><h3>Question 2</h3>
+      if (type === '4') {
+        html += `<hr style="border:1px solid #444"/><h3>Question 2</h3>
             <div class="form-group"><label>Question 2</label><input type="text" id="f_q2" class="form-control" /></div>
             <div class="form-grid">
                 <div class="form-group"><label>Option A</label><input type="text" id="f_q2a" class="form-control" /></div>
@@ -315,165 +596,447 @@
                     <select id="f_q2ans" class="form-control"><option>A</option><option>B</option><option>C</option><option>D</option></select>
                 </div>
             </div>`;
+      }
+
+      container.innerHTML = html;
+    }
+
+    updateMcqForm(); // init
+
+    async function uploadImage(fileInputId) {
+      const file = document.getElementById(fileInputId)?.files[0];
+      if (!file) return "";
+      const fd = new FormData();
+      fd.append('image', file);
+      const res = await fetch('/api/mcq/upload-image', { method: 'POST', body: fd });
+      const json = await res.json();
+      return json.url;
+    }
+
+    async function saveMcq(e) {
+      e.preventDefault();
+      const form = document.getElementById('mcqForm');
+      const editId = form.getAttribute('data-edit-id');
+      const type = document.getElementById('mcqType').value;
+
+      let data = {
+        type,
+        paper: document.getElementById('mcqPaper').value,
+        chapter: document.getElementById('mcqChapter').value,
+        topics: document.getElementById('mcqTopics').value,
+        board_question: document.getElementById('mcqBoard').checked ? 'TRUE' : 'FALSE',
+        board_year: document.getElementById('mcqBoard').checked ? document.getElementById('mcqBoardYear').value : '',
+        marked_important: document.getElementById('mcqImportant').checked ? 'TRUE' : 'FALSE',
+        question: document.getElementById('f_question')?.value,
+        option_a: document.getElementById('f_opta')?.value,
+        option_b: document.getElementById('f_optb')?.value,
+        option_c: document.getElementById('f_optc')?.value,
+        option_d: document.getElementById('f_optd')?.value,
+        answer: document.getElementById('f_ans')?.value,
+      };
+
+      if (type === '2' || type === '4') {
+        data.combo_option_1 = document.getElementById('f_c1')?.value;
+        data.combo_option_2 = document.getElementById('f_c2')?.value;
+        data.combo_option_3 = document.getElementById('f_c3')?.value;
+        data.combo_option_4 = document.getElementById('f_c4')?.value;
+      }
+
+      if (type === '3' || type === '4') {
+        data.passage = document.getElementById('f_passage')?.value;
+        const newPassageImg = await uploadImage('f_passage_image');
+        if (newPassageImg) data.passage_image = newPassageImg;
+      }
+
+      const newQImg = await uploadImage('f_question_image');
+      if (newQImg) data.question_image = newQImg;
+
+      if (type === '4') {
+        data.question2 = document.getElementById('f_q2')?.value;
+        data.q2_option_a = document.getElementById('f_q2a')?.value;
+        data.q2_option_b = document.getElementById('f_q2b')?.value;
+        data.q2_option_c = document.getElementById('f_q2c')?.value;
+        data.q2_option_d = document.getElementById('f_q2d')?.value;
+        data.q2_answer = document.getElementById('f_q2ans')?.value;
+      }
+
+      const url = editId ? `/api/mcq/${editId}` : '/api/mcq';
+      const method = editId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return alert('Error: ' + (err.error || 'Failed to write to Excel'));
+      }
+
+      alert('MCQ Saved Successfully!');
+      form.reset();
+      document.getElementById('mcqBoardYearGroup').style.display = 'none';
+      document.getElementById('mcqSaveBtn').innerText = 'Save MCQ';
+      form.removeAttribute('data-edit-id');
+      fetchTopics();
+    }
+
+    async function saveCq(e) {
+      e.preventDefault();
+      const form = document.getElementById('cqForm');
+      const editId = form.getAttribute('data-edit-id');
+      let data = {
+        passage: document.getElementById('cqPassage').value,
+        knowledge: document.getElementById('cqK').value,
+        understanding: document.getElementById('cqU').value,
+        application: document.getElementById('cqA').value,
+        higher_thinking: document.getElementById('cqH').value,
+        paper: document.getElementById('cqPaper').value,
+        chapter: document.getElementById('cqChapter').value,
+        topics: document.getElementById('cqTopics').value,
+        board_question: document.getElementById('cqBoard').checked ? 'TRUE' : 'FALSE',
+        board_year: document.getElementById('cqBoard').checked ? document.getElementById('cqBoardYear').value : '',
+        marked_important: document.getElementById('cqImportant').checked ? 'TRUE' : 'FALSE'
+      };
+
+      const newImg = await uploadImage('cqPassageImg');
+      if (newImg) data.passage_image = newImg;
+
+      const url = editId ? `/api/creative/${editId}` : '/api/creative';
+      const method = editId ? 'PUT' : 'POST';
+
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        return alert('Error: ' + (err.error || 'Failed to write to Excel'));
+      }
+
+      alert('Creative Question Saved!');
+      form.reset();
+      document.getElementById('cqBoardYearGroup').style.display = 'none';
+      document.getElementById('cqSaveBtn').innerText = 'Save CQ';
+      form.removeAttribute('data-edit-id');
+      fetchTopics();
+    }
+
+    async function uploadBulk(type) {
+      const file = document.getElementById(type + 'BulkFile').files[0];
+      if (!file) return alert('Select file first');
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch(`/api/${type === 'mcq' ? 'mcq' : 'creative'}/bulk-upload`, { method: 'POST', body: fd });
+      const json = await res.json();
+      alert(`Uploaded ${json.count} rows successfully!`);
+    }
+
+    function buildQueryString(prefix) {
+      let qs = `?amount=${document.getElementById(prefix + 'Amount')?.value || 'All'}`;
+      qs += `&paper=${document.getElementById(prefix + 'Paper')?.value || 'All'}`;
+      const chap = document.getElementById(prefix + 'Chapter')?.value;
+      if (chap) qs += `&chapter=${encodeURIComponent(chap)}`;
+      const topics = document.getElementById(prefix + 'Topics')?.value;
+      if (topics) qs += `&topics=${encodeURIComponent(topics)}`;
+
+      if (document.getElementById(prefix + 'Board')?.checked) qs += `&boardOnly=true`;
+      if (document.getElementById(prefix + 'Important')?.checked) qs += `&importantOnly=true`;
+
+      return qs;
+    }
+
+    function exportPdf(type) {
+      let prefix = type === 'mcq' ? 'quiz' : 'cqFilter';
+      const qs = buildQueryString(prefix);
+      window.open(`/api/${type}/export-pdf${qs}`, '_blank');
+    }
+
+    function exportTxt(type) {
+      let prefix = type === 'mcq' ? 'quiz' : 'cqFilter';
+      const qs = buildQueryString(prefix);
+      window.open(`/api/${type}/export-txt${qs}`, '_blank');
+    }
+
+    function launchMcqQuiz() {
+      const qs = buildQueryString('quiz');
+      fetch(`/api/mcq${qs}`)
+        .then(r => r.json())
+        .then(data => {
+          if (data.length === 0) return alert("No questions match the filter.");
+          const timer = parseInt(document.getElementById('quizTimer').value) || 30;
+          socket.emit('qbank-start-mcq-quiz', { questions: data, timer });
+          alert(`Quiz launched with ${data.length} questions!`);
+        });
+    }
+
+    let isTimerPaused = false;
+    function toggleQuizTimer(btnId) {
+      isTimerPaused = !isTimerPaused;
+      const btn = document.getElementById(btnId);
+      if (isTimerPaused) {
+        btn.innerText = '▶ Resume Timer';
+        btn.classList.replace('btn-warning', 'btn-success');
+        socket.emit('qbank-pause-timer');
+      } else {
+        btn.innerText = '⏸ Pause Timer';
+        btn.classList.replace('btn-success', 'btn-warning');
+        socket.emit('qbank-resume-timer');
+      }
+    }
+
+    function closeMcqQuiz() {
+      isTimerPaused = false;
+      const btn = document.getElementById('mcqPauseBtn');
+      if (btn) { btn.innerText = '⏸ Pause Timer'; btn.classList.replace('btn-success', 'btn-warning'); }
+      socket.emit('qbank-end-quiz');
+    }
+
+    function launchCreative() {
+      console.warn("Function not implemented properly");
+    }
+
+    async function showCqOnProjector() {
+      isTimerPaused = false;
+      const btn = document.getElementById('cqPauseBtn');
+      if (btn) { btn.innerText = '⏸ Pause Timer'; btn.classList.replace('btn-success', 'btn-warning'); }
+      const qs = buildQueryString('cqFilter');
+      const res = await fetch(`/api/creative${qs}`);
+      const questions = await res.json();
+      if (questions.length === 0) return alert('No questions match the filter');
+
+      socket.emit('qbank-show-creative', { questions });
+    }
+
+    function closeCqOnProjector() {
+      isTimerPaused = false;
+      const btn = document.getElementById('cqPauseBtn');
+      if (btn) { btn.innerText = '⏸ Pause Timer'; btn.classList.replace('btn-success', 'btn-warning'); }
+      socket.emit('qbank-close-creative');
+    }
+
+    // Fetch Topics and Chapters for all datalists
+    async function fetchTopics() {
+      try {
+        const [mcqTopicsRes, cqTopicsRes, mcqChaptersRes, cqChaptersRes] = await Promise.all([
+          fetch('/api/mcq/topics'),
+          fetch('/api/creative/topics'),
+          fetch('/api/mcq/chapters'),
+          fetch('/api/creative/chapters')
+        ]);
+        const mcqTopics = await mcqTopicsRes.json();
+        const cqTopics = await cqTopicsRes.json();
+        const mcqChapters = await mcqChaptersRes.json();
+        const cqChapters = await cqChaptersRes.json();
+
+        const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
+
+        // Form input datalists
+        document.getElementById('mcqTopicList').innerHTML = toOptions(mcqTopics);
+        document.getElementById('cqTopicList').innerHTML = toOptions(cqTopics);
+        // Display filter datalists – topics
+        document.getElementById('quizTopicsList').innerHTML = toOptions(mcqTopics);
+        document.getElementById('cqFilterTopicsList').innerHTML = toOptions(cqTopics);
+        // Display filter datalists – chapters
+        document.getElementById('quizChapterList').innerHTML = toOptions(mcqChapters);
+        document.getElementById('cqFilterChapterList').innerHTML = toOptions(cqChapters);
+      } catch (e) { console.error("Error fetching topics/chapters", e); }
+    }
+    fetchTopics();
+
+    // Table Management Logic
+    let currentTableType = '';
+    let currentTableData = [];
+
+    async function openTableModal(type) {
+      currentTableType = type;
+      document.getElementById('tableModal').style.display = 'flex';
+      document.getElementById('tableModalTitle').innerText = type === 'mcq' ? 'Manage MCQs' : 'Manage Creative Questions';
+      // Show/hide MCQ type filter
+      document.getElementById('srchMcqType').style.display = type === 'mcq' ? '' : 'none';
+      clearSearch();
+      await loadTableData();
+    }
+
+    function closeTableModal() {
+      document.getElementById('tableModal').style.display = 'none';
+    }
+
+    async function loadTableData() {
+      const res = await fetch(`/api/${currentTableType}?amount=All`);
+      currentTableData = await res.json();
+      renderTable();
+    }
+
+    function clearSearch() {
+      ['srchText', 'srchBoardYear', 'srchTopic'].forEach(id => document.getElementById(id).value = '');
+      ['srchPaper', 'srchChapter', 'srchMcqType'].forEach(id => document.getElementById(id).value = '');
+      ['srchBoardOnly', 'srchImportant'].forEach(id => document.getElementById(id).checked = false);
+      renderTable();
+    }
+
+    function renderTable() {
+      const container = document.getElementById('tableContainer');
+
+      const txt = (document.getElementById('srchText')?.value || '').toLowerCase();
+      const paper = document.getElementById('srchPaper')?.value || '';
+      const chap = document.getElementById('srchChapter')?.value || '';
+      const topic = (document.getElementById('srchTopic')?.value || '').toLowerCase();
+      const byear = (document.getElementById('srchBoardYear')?.value || '').toLowerCase();
+      const board = document.getElementById('srchBoardOnly')?.checked;
+      const imp = document.getElementById('srchImportant')?.checked;
+      const mtype = document.getElementById('srchMcqType')?.value || '';
+
+      let filtered = currentTableData.filter(row => {
+        const haystack = ((row.question || '') + ' ' + (row.passage || '') + ' ' + (row.question2 || '')).toLowerCase();
+        if (txt && !haystack.includes(txt)) return false;
+        if (paper && row.paper !== paper) return false;
+        let ch = (row.chapter || '').toString();
+        if (!ch.toLowerCase().includes('chapter')) ch = 'Chapter ' + ch;
+        if (chap && ch !== chap) return false;
+        if (topic && !(row.topics || '').toLowerCase().includes(topic)) return false;
+        if (byear && !(row.board_year || '').toLowerCase().includes(byear)) return false;
+        if (board && String(row.board_question).toUpperCase() !== 'TRUE') return false;
+        if (imp && String(row.marked_important).toUpperCase() !== 'TRUE') return false;
+        if (mtype && String(row.type) !== mtype) return false;
+        return true;
+      });
+
+      document.getElementById('tableRecordCount').innerText =
+        `Showing ${filtered.length} / ${currentTableData.length} records`;
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="color:rgba(255,255,255,0.5);padding:20px;">No records match the search.</p>';
+        return;
+      }
+
+      // Map filtered rows back to their original index for edit
+      const indexMap = filtered.map(row => currentTableData.indexOf(row));
+
+      let html = `<table class="data-table"><thead><tr>`;
+      if (currentTableType === 'mcq') {
+        html += `<th>#</th><th>Type</th><th>Chapter</th><th>Question / Passage</th><th>Topics</th><th>Board Year</th><th>Flags</th><th>Actions</th>`;
+      } else {
+        html += `<th>#</th><th>Chapter</th><th>Passage</th><th>Topics</th><th>Board Year</th><th>Flags</th><th>Actions</th>`;
+      }
+      html += `</tr></thead><tbody>`;
+
+      filtered.forEach((row, fi) => {
+        const origIdx = indexMap[fi];
+        const isBoard = String(row.board_question).toUpperCase() === 'TRUE';
+        const isImp = String(row.marked_important).toUpperCase() === 'TRUE';
+        const flags = (isBoard ? `<span class="badge badge-board">Board</span> ` : '') +
+          (isImp ? `<span class="badge badge-imp">⭐ Imp</span>` : '');
+        html += `<tr>`;
+        if (currentTableType === 'mcq') {
+          html += `<td>${fi + 1}</td><td>T${row.type}</td><td>${row.chapter || ''}</td>`
+            + `<td>${(row.question || row.passage || '').substring(0, 60)}…</td>`
+            + `<td>${row.topics || ''}</td><td>${row.board_year || ''}</td><td>${flags}</td>`;
+        } else {
+          html += `<td>${fi + 1}</td><td>${row.chapter || ''}</td>`
+            + `<td>${(row.passage || '').substring(0, 60)}…</td>`
+            + `<td>${row.topics || ''}</td><td>${row.board_year || ''}</td><td>${flags}</td>`;
         }
-        
-        container.innerHTML = html;
+        html += `<td style="white-space:nowrap;">
+                  <button class="btn btn-primary" style="padding:4px 10px;margin-right:4px;font-size:12px;" onclick="editRecord(${origIdx})">✏ Edit</button>
+                  <button class="btn btn-danger" style="padding:4px 10px;font-size:12px;" onclick="deleteRecord('${row.id}')">🗑 Delete</button>
+              </td>`;
+        html += `</tr>`;
+      });
+      html += `</tbody></table>`;
+      container.innerHTML = html;
+    }
+
+    async function deleteRecord(id) {
+      if (!confirm("Are you sure you want to delete this record and its image(s)?")) return;
+      const res = await fetch(`/api/${currentTableType}/${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        return alert('Error: ' + (err.error || 'Delete failed'));
       }
-      
-      updateMcqForm(); // init
+      await loadTableData();
+    }
 
-      async function uploadImage(fileInputId) {
-          const file = document.getElementById(fileInputId)?.files[0];
-          if (!file) return "";
-          const fd = new FormData();
-          fd.append('image', file);
-          const res = await fetch('/api/mcq/upload-image', { method: 'POST', body: fd });
-          const json = await res.json();
-          return json.url;
-      }
+    function editRecord(index) {
+      const record = currentTableData[index];
+      closeTableModal();
 
-      async function saveMcq(e) {
-          e.preventDefault();
-          const type = document.getElementById('mcqType').value;
-          
-          let data = {
-              type,
-              paper: document.getElementById('mcqPaper').value,
-              chapter: document.getElementById('mcqChapter').value,
-              topics: document.getElementById('mcqTopics').value,
-              board_question: document.getElementById('mcqBoard').checked ? 'TRUE' : 'FALSE',
-              marked_important: document.getElementById('mcqImportant').checked ? 'TRUE' : 'FALSE',
-              question: document.getElementById('f_question')?.value,
-              option_a: document.getElementById('f_opta')?.value,
-              option_b: document.getElementById('f_optb')?.value,
-              option_c: document.getElementById('f_optc')?.value,
-              option_d: document.getElementById('f_optd')?.value,
-              answer: document.getElementById('f_ans')?.value,
-          };
+      if (currentTableType === 'mcq') {
+        switchTab('mcq');
+        document.getElementById('mcqType').value = record.type || '1';
+        updateMcqForm(); // Redraw dynamic fields
 
-          if (type === '2' || type === '4') {
-              data.combo_option_1 = document.getElementById('f_c1')?.value;
-              data.combo_option_2 = document.getElementById('f_c2')?.value;
-              data.combo_option_3 = document.getElementById('f_c3')?.value;
-              data.combo_option_4 = document.getElementById('f_c4')?.value;
+        setTimeout(() => {
+          document.getElementById('mcqForm').setAttribute('data-edit-id', record.id);
+          document.getElementById('mcqSaveBtn').innerText = 'Update MCQ';
+
+          document.getElementById('mcqPaper').value = record.paper || '1st';
+          let ch = record.chapter || 'Chapter 1';
+          if (!ch.toString().toLowerCase().includes('chapter')) ch = 'Chapter ' + ch;
+          document.getElementById('mcqChapter').value = ch;
+          document.getElementById('mcqTopics').value = record.topics || '';
+
+          const isBoard = String(record.board_question).toUpperCase() === 'TRUE';
+          document.getElementById('mcqBoard').checked = isBoard;
+          document.getElementById('mcqBoardYearGroup').style.display = isBoard ? 'block' : 'none';
+          document.getElementById('mcqBoardYear').value = record.board_year || '';
+          document.getElementById('mcqImportant').checked = String(record.marked_important).toUpperCase() === 'TRUE';
+
+          if (document.getElementById('f_question')) document.getElementById('f_question').value = record.question || '';
+          if (document.getElementById('f_opta')) document.getElementById('f_opta').value = record.option_a || '';
+          if (document.getElementById('f_optb')) document.getElementById('f_optb').value = record.option_b || '';
+          if (document.getElementById('f_optc')) document.getElementById('f_optc').value = record.option_c || '';
+          if (document.getElementById('f_optd')) document.getElementById('f_optd').value = record.option_d || '';
+          if (document.getElementById('f_ans')) document.getElementById('f_ans').value = record.answer || 'A';
+
+          if (document.getElementById('f_c1')) document.getElementById('f_c1').value = record.combo_option_1 || '';
+          if (document.getElementById('f_c2')) document.getElementById('f_c2').value = record.combo_option_2 || '';
+          if (document.getElementById('f_c3')) document.getElementById('f_c3').value = record.combo_option_3 || '';
+          if (document.getElementById('f_c4')) document.getElementById('f_c4').value = record.combo_option_4 || '';
+
+          if (document.getElementById('f_passage')) document.getElementById('f_passage').value = record.passage || '';
+
+          if (document.getElementById('f_q2')) {
+            document.getElementById('f_q2').value = record.question2 || '';
+            document.getElementById('f_q2a').value = record.q2_option_a || '';
+            document.getElementById('f_q2b').value = record.q2_option_b || '';
+            document.getElementById('f_q2c').value = record.q2_option_c || '';
+            document.getElementById('f_q2d').value = record.q2_option_d || '';
+            document.getElementById('f_q2ans').value = record.q2_answer || 'A';
           }
 
-          if (type === '3' || type === '4') {
-              data.passage = document.getElementById('f_passage')?.value;
-              data.passage_image = await uploadImage('f_passage_image');
-          }
+          window.scrollTo(0, 0);
+        }, 100);
+      } else {
+        switchTab('cq');
+        document.getElementById('cqForm').setAttribute('data-edit-id', record.id);
+        document.getElementById('cqSaveBtn').innerText = 'Update CQ';
 
-          data.question_image = await uploadImage('f_question_image');
+        document.getElementById('cqPassage').value = record.passage || '';
+        document.getElementById('cqK').value = record.knowledge || '';
+        document.getElementById('cqU').value = record.understanding || '';
+        document.getElementById('cqA').value = record.application || '';
+        document.getElementById('cqH').value = record.higher_thinking || '';
 
-          if (type === '4') {
-              data.question2 = document.getElementById('f_q2')?.value;
-              data.q2_option_a = document.getElementById('f_q2a')?.value;
-              data.q2_option_b = document.getElementById('f_q2b')?.value;
-              data.q2_option_c = document.getElementById('f_q2c')?.value;
-              data.q2_option_d = document.getElementById('f_q2d')?.value;
-              data.q2_answer = document.getElementById('f_q2ans')?.value;
-          }
+        document.getElementById('cqPaper').value = record.paper || '1st';
+        let ch = record.chapter || 'Chapter 1';
+        if (!ch.toString().toLowerCase().includes('chapter')) ch = 'Chapter ' + ch;
+        document.getElementById('cqChapter').value = ch;
+        document.getElementById('cqTopics').value = record.topics || '';
 
-          await fetch('/api/mcq', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data)
-          });
-          
-          alert('MCQ Saved Successfully!');
-          document.getElementById('mcqForm').reset();
+        const isBoard = String(record.board_question).toUpperCase() === 'TRUE';
+        document.getElementById('cqBoard').checked = isBoard;
+        document.getElementById('cqBoardYearGroup').style.display = isBoard ? 'block' : 'none';
+        document.getElementById('cqBoardYear').value = record.board_year || '';
+        document.getElementById('cqImportant').checked = String(record.marked_important).toUpperCase() === 'TRUE';
+
+        window.scrollTo(0, 0);
       }
+    }
+  </script>
+</body>
 
-      async function saveCq(e) {
-          e.preventDefault();
-          let data = {
-              passage: document.getElementById('cqPassage').value,
-              knowledge: document.getElementById('cqK').value,
-              understanding: document.getElementById('cqU').value,
-              application: document.getElementById('cqA').value,
-              higher_thinking: document.getElementById('cqH').value,
-              paper: document.getElementById('cqPaper').value,
-              chapter: document.getElementById('cqChapter').value,
-              topics: document.getElementById('cqTopics').value
-          };
-          data.passage_image = await uploadImage('cqPassageImg');
-
-          await fetch('/api/creative', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(data)
-          });
-          
-          alert('Creative Question Saved!');
-          document.getElementById('cqForm').reset();
-      }
-
-      async function uploadBulk(type) {
-          const file = document.getElementById(type + 'BulkFile').files[0];
-          if (!file) return alert('Select file first');
-          const fd = new FormData();
-          fd.append('file', file);
-          const res = await fetch(`/api/${type === 'mcq' ? 'mcq' : 'creative'}/bulk-upload`, { method: 'POST', body: fd });
-          const json = await res.json();
-          alert(`Uploaded ${json.count} rows successfully!`);
-      }
-
-      function buildQueryString(prefix) {
-          let qs = `?amount=${document.getElementById(prefix+'Amount')?.value || 'All'}`;
-          qs += `&paper=${document.getElementById(prefix+'Paper')?.value || 'All'}`;
-          const chap = document.getElementById(prefix+'Chapter')?.value;
-          if (chap) qs += `&chapter=${chap}`;
-          
-          if (document.getElementById(prefix+'Board')?.checked) qs += `&boardOnly=true`;
-          if (document.getElementById(prefix+'Important')?.checked) qs += `&importantOnly=true`;
-          
-          return qs;
-      }
-
-      function exportPdf(type) {
-          let prefix = type === 'mcq' ? 'quiz' : 'cqFilter';
-          const qs = buildQueryString(prefix);
-          window.open(`/api/${type}/export-pdf${qs}`, '_blank');
-      }
-
-      function exportTxt(type) {
-          let prefix = type === 'mcq' ? 'quiz' : 'cqFilter';
-          const qs = buildQueryString(prefix);
-          window.open(`/api/${type}/export-txt${qs}`, '_blank');
-      }
-
-      function launchMcqQuiz() {
-          const qs = buildQueryString('quiz');
-          fetch(`/api/mcq${qs}`)
-              .then(r => r.json())
-              .then(data => {
-                  if(data.length === 0) return alert("No questions match the filter.");
-                  const timer = parseInt(document.getElementById('quizTimer').value) || 30;
-                  socket.emit('qbank-start-mcq-quiz', { questions: data, timer });
-                  alert(`Quiz launched with ${data.length} questions!`);
-              });
-      }
-
-      function closeMcqQuiz() {
-          socket.emit('qbank-end-quiz');
-      }
-
-      function launchCreative() {
-          console.warn("Function not implemented properly");
-      }
-
-      async function showCqOnProjector() {
-          const qs = buildQueryString('cqFilter');
-          const res = await fetch(`/api/creative${qs}`);
-          const questions = await res.json();
-          if (questions.length === 0) return alert('No questions match the filter');
-          
-          socket.emit('qbank-show-creative', { questions });
-      }
-
-      function closeCqOnProjector() {
-          socket.emit('qbank-close-creative');
-      }
-    </script>
-  </body>
 </html>
