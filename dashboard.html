@@ -202,10 +202,64 @@
         >
           Presentation Studio
         </button>
+        <button
+          onclick="navigateProjector('game-questionbank.html')"
+          class="btn-primary"
+          style="
+            background: #10b981;
+            font-size: 0.82rem;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+          "
+        >
+          Question Bank
+        </button>
+        <button
+          onclick="navigateProjector('game-leaderboard.html')"
+          class="btn-primary"
+          style="
+            background: #f59e0b;
+            font-size: 0.82rem;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-weight: 700;
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+          "
+        >
+          Leaderboard
+        </button>
       </div>
     </div>
 
     <div class="selection-grid">
+      <!-- Question Bank Manager -->
+      <a href="dashboard-questionbank.html" class="glass-card game-selector" style="border-top: 4px solid #10b981">
+        <span class="icon-large">📝</span>
+        <h2 style="font-size: 1.8rem">Question Bank</h2>
+        <p style="color: var(--text-dim); margin-top: 10px">
+          Manage MCQs, Creative Questions, and start quizzes.
+        </p>
+        <span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669)">ONLINE / ACTIVE</span>
+      </a>
+
+      <!-- Student Performance Manager -->
+      <a href="dashboard-studentperf.html" class="glass-card game-selector" style="border-top: 4px solid #f59e0b">
+        <span class="icon-large">📊</span>
+        <h2 style="font-size: 1.8rem">Student Performance</h2>
+        <p style="color: var(--text-dim); margin-top: 10px">
+          Manage students, attendance, marks, and leaderboard.
+        </p>
+        <span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706)">ONLINE / ACTIVE</span>
+      </a>
+
       <!-- Memory Flip Game -->
       <a href="dashboard-memory.html" class="glass-card game-selector">
         <span class="icon-large">🎴</span>

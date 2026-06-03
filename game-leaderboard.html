@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard Projector</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/questionbank.css" />
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      body {
+        background-color: #0f172a;
+        color: white;
+        overflow: hidden;
+      }
+      .projector-view {
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        padding: 40px;
+        box-sizing: border-box;
+      }
+      .header-bar {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+      .header-bar h1 {
+        font-size: 3rem;
+        color: #f59e0b;
+        margin-bottom: 10px;
+        text-shadow: 0 0 20px rgba(245, 158, 11, 0.5);
+      }
+      .header-bar h3 {
+        color: var(--text-dim);
+        font-weight: 400;
+      }
+      .content-area {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+      }
+      .waiting-screen {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        font-size: 3rem;
+        color: rgba(255,255,255,0.3);
+        text-align: center;
+        flex-direction: column;
+      }
+      .waiting-screen span { font-size: 1.5rem; margin-top: 20px; }
+      
+      .rank-tooltip {
+          position: absolute;
+          background: rgba(0,0,0,0.9);
+          padding: 10px;
+          border-radius: 8px;
+          border: 1px solid rgba(255,255,255,0.2);
+          display: none;
+          z-index: 100;
+          pointer-events: none;
+      }
+    </style>
+  </head>
+  <body class="qb-font-bn">
+    <div class="rank-tooltip" id="tooltip"></div>
+    <div id="app" class="projector-view">
+        <div class="waiting-screen" id="waitingScreen">
+            <div>Interactive ClassRoom</div>
+            <span>Waiting for leaderboard data...</span>
+        </div>
+        
+        <div id="lbView" style="display:none; height:100%; display:flex; flex-direction:column;">
+            <div class="header-bar">
+                <h1>🏆 STUDENT LEADERBOARD 🏆</h1>
+                <h3 id="lbSubtitle"></h3>
+            </div>
+            <div class="content-area" id="lbContent"></div>
+        </div>
+    </div>
+
+    <script>
+      const socket = io();
+      const waitingScreen = document.getElementById('waitingScreen');
+      const lbView = document.getElementById('lbView');
+      const tooltip = document.getElementById('tooltip');
+
+      socket.on('leaderboard-show', (payload) => {
+          waitingScreen.style.display = 'none';
+          lbView.style.display = 'flex';
+          
+          const { data, filters } = payload;
+          const subtitle = [];
+          if (filters.className) subtitle.push(`Class: ${filters.className}`);
+          if (filters.section) subtitle.push(`Section: ${filters.section}`);
+          if (filters.session) subtitle.push(`Session: ${filters.session}`);
+          document.getElementById('lbSubtitle').innerText = subtitle.join('  |  ');
+          
+          const container = document.getElementById('lbContent');
+          container.innerHTML = '';
+          
+          if (data.length === 0) {
+              container.innerHTML = '<h2 style="text-align:center; color:#666">No records found</h2>';
+              return;
+          }
+          
+          const maxScore = Math.max(...data.map(d => d.totalScore));
+          
+          data.forEach((student, index) => {
+              const rank = index + 1;
+              let rankText = `#${rank}`;
+              if (rank === 1) rankText = '🥇 ' + rankText;
+              else if (rank === 2) rankText = '🥈 ' + rankText;
+              else if (rank === 3) rankText = '🥉 ' + rankText;
+              
+              const pct = maxScore > 0 ? (student.totalScore / maxScore) * 100 : 0;
+              
+              const row = document.createElement('div');
+              row.className = 'lb-row';
+              row.innerHTML = `
+                  <div class="lb-rank">${rankText}</div>
+                  <div class="lb-name">${student.name} <span style="font-size:0.8rem;color:#888">(${student.roll})</span></div>
+                  <div class="lb-bar-container">
+                      <div class="lb-bar" style="width: 0%" data-width="${pct}%"></div>
+                  </div>
+                  <div class="lb-score">${student.totalScore} pts</div>
+              `;
+              
+              row.addEventListener('mouseenter', (e) => {
+                  tooltip.innerHTML = `Attendance: ${student.attendanceScore} | Exams: ${student.examScore}`;
+                  tooltip.style.display = 'block';
+                  tooltip.style.left = (e.pageX + 10) + 'px';
+                  tooltip.style.top = (e.pageY + 10) + 'px';
+              });
+              row.addEventListener('mousemove', (e) => {
+                  tooltip.style.left = (e.pageX + 10) + 'px';
+                  tooltip.style.top = (e.pageY + 10) + 'px';
+              });
+              row.addEventListener('mouseleave', () => {
+                  tooltip.style.display = 'none';
+              });
+              
+              container.appendChild(row);
+          });
+          
+          // Animate bars
+          setTimeout(() => {
+              document.querySelectorAll('.lb-bar').forEach(bar => {
+                  bar.style.width = bar.dataset.width;
+              });
+          }, 100);
+      });
+      
+      socket.on('classroom-navigate', (data) => {
+          if (data.url) window.location.href = data.url;
+      });
+    </script>
+  </body>
+</html>

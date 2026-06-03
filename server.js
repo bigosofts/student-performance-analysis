@@ -1100,6 +1100,9 @@ app.delete("/api/gallery/:id", (req, res) => {
 // Serve slide images
 app.use("/uploads", express.static(uploadsDir));
 
+// Question Bank and Student Performance API
+require('./server-qbank')(app, io, uploadsDir);
+
 // Initialize quiz systems
 initQuizSystem();
 

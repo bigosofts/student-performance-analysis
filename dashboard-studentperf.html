@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="js/auth-check.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Performance Manager</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/questionbank.css" />
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      .dashboard-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+      .card { margin-bottom: 20px; }
+      .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+      .back-btn { padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; text-decoration: none; }
+      .back-btn:hover { background: rgba(255,255,255,0.2); }
+      .btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; color: white; }
+      .btn-primary { background: linear-gradient(135deg, var(--primary), var(--secondary)); }
+      .btn-danger { background: #ef4444; }
+      .btn-success { background: #10b981; }
+    </style>
+  </head>
+  <body>
+    <div class="dashboard-container qb-font-bn">
+      <div class="header">
+        <h1>📊 Student Performance Manager</h1>
+        <a href="dashboard.html" class="back-btn">⬅ Back to Hub</a>
+      </div>
+
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('student')">Student Bank</button>
+        <button class="tab-btn" onclick="switchTab('perf')">Performance & Marks</button>
+      </div>
+
+      <!-- STUDENT BANK TAB -->
+      <div id="tab-student" class="tab-content active">
+        <div class="glass-panel card">
+          <h2>Add Student</h2>
+          <form id="studentForm" onsubmit="saveStudent(event)">
+            <div class="form-grid">
+              <div class="form-group"><label>Name</label><input type="text" id="sName" class="form-control" required /></div>
+              <div class="form-group"><label>Roll</label><input type="text" id="sRoll" class="form-control" required /></div>
+              <div class="form-group"><label>ID</label><input type="text" id="sId" class="form-control" required /></div>
+              <div class="form-group"><label>Mobile</label><input type="text" id="sMobile" class="form-control" /></div>
+              <div class="form-group"><label>Session</label><input type="text" id="sSession" class="form-control" placeholder="e.g. 2024-25" required /></div>
+              <div class="form-group"><label>Class</label><input type="text" id="sClass" class="form-control" required /></div>
+              <div class="form-group"><label>Section</label><input type="text" id="sSection" class="form-control" required /></div>
+              <div class="form-group"><label>Group</label><input type="text" id="sGroup" class="form-control" required /></div>
+              <div class="form-group"><label>Gender</label>
+                <select id="sGender" class="form-control">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Add Student</button>
+          </form>
+
+          <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
+          
+          <h3>Or Bulk Upload</h3>
+          <div style="display:flex; gap: 10px; align-items:center;">
+            <input type="file" id="studentBulkFile" accept=".xlsx" class="form-control" />
+            <button class="btn btn-success" onclick="uploadBulkStudent()">Upload Excel</button>
+          </div>
+        </div>
+
+        <div class="glass-panel card">
+          <h2>Student List</h2>
+          <div class="form-grid" style="margin-bottom: 20px;">
+            <div class="form-group"><label>Session</label><input type="text" id="fSession" class="form-control" /></div>
+            <div class="form-group"><label>Class</label><input type="text" id="fClass" class="form-control" /></div>
+            <div class="form-group"><label>Section</label><input type="text" id="fSection" class="form-control" /></div>
+            <div class="form-group"><label>Group</label><input type="text" id="fGroup" class="form-control" /></div>
+          </div>
+          <button class="btn btn-primary" onclick="loadStudents()">🔍 Search</button>
+          <button class="btn btn-success" onclick="initPerformance()">📥 Initialize Performance Records for Filtered Students</button>
+
+          <div class="data-table-wrapper">
+            <table class="data-table">
+              <thead><tr><th>Roll</th><th>Name</th><th>ID</th><th>Session</th><th>Class</th><th>Section</th><th>Group</th><th>Actions</th></tr></thead>
+              <tbody id="studentTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERFORMANCE TAB -->
+      <div id="tab-perf" class="tab-content">
+        <div class="glass-panel card">
+          <h2>Performance Mode</h2>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="btn btn-primary" onclick="setMode('attendance')">📋 Attendance Mode</button>
+            <button class="btn btn-primary" onclick="setMode('marks')">📝 Marks Mode</button>
+          </div>
+          
+          <!-- ATTENDANCE -->
+          <div id="attendanceSection" style="display:none;">
+            <h3>Attendance</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="attDate" class="form-control" />
+              </div>
+            </div>
+            
+            <div style="margin: 20px 0;">
+              <h4>Bulk Upload Attendance</h4>
+              <div style="display:flex; gap: 10px; align-items:center;">
+                <input type="file" id="attBulkFile" accept=".xlsx" class="form-control" />
+                <button class="btn btn-success" onclick="uploadBulkAttendance()">Upload Excel</button>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="loadAttendanceGrid()">Load Grid for Selected Filter</button>
+            
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead><tr><th>Roll</th><th>Name</th><th>✅ Present</th></tr></thead>
+                <tbody id="attTableBody"></tbody>
+              </table>
+            </div>
+            <button class="btn btn-success" style="margin-top: 15px;" onclick="saveAttendance()">💾 Save Attendance</button>
+          </div>
+
+          <!-- MARKS -->
+          <div id="marksSection" style="display:none;">
+            <h3>Marks</h3>
+            <div style="margin: 20px 0;">
+              <h4>Bulk Upload Marks</h4>
+              <div style="display:flex; gap: 10px; align-items:center;">
+                <input type="file" id="marksBulkFile" accept=".xlsx" class="form-control" />
+                <button class="btn btn-success" onclick="uploadBulkMarks()">Upload Excel</button>
+              </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="loadMarksGrid()">Load Grid for Selected Filter</button>
+            
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Roll</th><th>Name</th>
+                    <th>CT1</th><th>CT2</th><th>CT3</th><th>CT4</th><th>CT5</th>
+                    <th>HY</th><th>Y</th><th>PT</th><th>T</th>
+                    <th>MT1</th><th>MT2</th><th>MCQ1</th><th>MCQ2</th><th>MCQ3</th>
+                  </tr>
+                </thead>
+                <tbody id="marksTableBody"></tbody>
+              </table>
+            </div>
+            <button class="btn btn-success" style="margin-top: 15px;" onclick="saveMarks()">💾 Save Marks</button>
+          </div>
+          
+        </div>
+
+        <div class="glass-panel card">
+          <h2>Summary & Leaderboard</h2>
+          <button class="btn btn-primary" onclick="showLeaderboard()">🏆 Launch Leaderboard on Projector</button>
+        </div>
+      </div>
+      
+    </div>
+
+    <script>
+      const socket = io();
+      document.getElementById('attDate').valueAsDate = new Date();
+      
+      function switchTab(tabId) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        event.target.classList.add('active');
+        document.getElementById(`tab-${tabId}`).classList.add('active');
+      }
+
+      function setMode(mode) {
+          document.getElementById('attendanceSection').style.display = mode === 'attendance' ? 'block' : 'none';
+          document.getElementById('marksSection').style.display = mode === 'marks' ? 'block' : 'none';
+      }
+
+      // ==== STUDENT BANK ====
+      async function saveStudent(e) {
+          e.preventDefault();
+          const data = {
+              name: document.getElementById('sName').value,
+              roll: document.getElementById('sRoll').value,
+              id: document.getElementById('sId').value,
+              mobile: document.getElementById('sMobile').value,
+              session: document.getElementById('sSession').value,
+              class: document.getElementById('sClass').value,
+              section: document.getElementById('sSection').value,
+              group: document.getElementById('sGroup').value,
+              gender: document.getElementById('sGender').value,
+          };
+          
+          await fetch('/api/students', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(data)
+          });
+          alert('Student Added!');
+          document.getElementById('studentForm').reset();
+          loadStudents();
+      }
+
+      async function uploadBulkStudent() {
+          const file = document.getElementById('studentBulkFile').files[0];
+          if (!file) return alert('Select file first');
+          const fd = new FormData();
+          fd.append('file', file);
+          const res = await fetch('/api/students/bulk-upload', { method: 'POST', body: fd });
+          const json = await res.json();
+          alert(`Uploaded ${json.count} rows successfully!`);
+          loadStudents();
+      }
+
+      function buildStudentQuery() {
+          let qs = `?session=${document.getElementById('fSession').value}`;
+          qs += `&className=${document.getElementById('fClass').value}`;
+          qs += `&section=${document.getElementById('fSection').value}`;
+          qs += `&group=${document.getElementById('fGroup').value}`;
+          return qs;
+      }
+
+      let currentStudents = [];
+
+      async function loadStudents() {
+          const res = await fetch(`/api/students${buildStudentQuery()}`);
+          currentStudents = await res.json();
+          const tbody = document.getElementById('studentTableBody');
+          tbody.innerHTML = '';
+          currentStudents.forEach(s => {
+              tbody.innerHTML += `<tr>
+                  <td>${s.roll}</td><td>${s.name}</td><td>${s.id}</td>
+                  <td>${s.session}</td><td>${s.class}</td><td>${s.section}</td><td>${s.group}</td>
+                  <td><button class="btn btn-danger" onclick="deleteStudent('${s.roll}')">🗑️</button></td>
+              </tr>`;
+          });
+      }
+
+      async function deleteStudent(roll) {
+          if (!confirm('Are you sure?')) return;
+          await fetch(`/api/students/${roll}`, { method: 'DELETE' });
+          loadStudents();
+      }
+
+      async function initPerformance() {
+          if (currentStudents.length === 0) return alert('No students selected to initialize!');
+          await fetch('/api/performance/init', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ students: currentStudents })
+          });
+          alert('Performance records initialized for these students!');
+      }
+
+      // ==== ATTENDANCE & MARKS ====
+      let perfData = [];
+      
+      async function loadPerfData() {
+          const res = await fetch(`/api/performance${buildStudentQuery()}`);
+          perfData = await res.json();
+      }
+
+      async function loadAttendanceGrid() {
+          await loadPerfData();
+          const date = document.getElementById('attDate').value;
+          const tbody = document.getElementById('attTableBody');
+          tbody.innerHTML = '';
+          perfData.forEach(p => {
+              const att = (p.attendance || []).find(a => a.date === date);
+              const checked = att && att.isPresent ? 'checked' : '';
+              tbody.innerHTML += `<tr>
+                  <td>${p.roll}</td><td>${p.name}</td>
+                  <td><input type="checkbox" data-roll="${p.roll}" class="att-check" style="transform: scale(1.5)" ${checked} /></td>
+              </tr>`;
+          });
+      }
+
+      async function saveAttendance() {
+          const date = document.getElementById('attDate').value;
+          if (!date) return alert('Select date');
+          const records = [];
+          document.querySelectorAll('.att-check').forEach(cb => {
+              records.push({ roll: cb.dataset.roll, isPresent: cb.checked });
+          });
+          
+          await fetch('/api/performance/attendance', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ date, records })
+          });
+          alert('Attendance Saved!');
+      }
+
+      async function loadMarksGrid() {
+          await loadPerfData();
+          const tbody = document.getElementById('marksTableBody');
+          tbody.innerHTML = '';
+          const cols = ['CT1','CT2','CT3','CT4','CT5','HY','Y','PT','T','MT1','MT2','MCQ1','MCQ2','MCQ3'];
+          
+          perfData.forEach(p => {
+              let html = `<tr><td>${p.roll}</td><td>${p.name}</td>`;
+              cols.forEach(c => {
+                  const val = (p.mark && p.mark[c]) ? p.mark[c] : '';
+                  html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-col="${c}" value="${val}" /></td>`;
+              });
+              html += `</tr>`;
+              tbody.innerHTML += html;
+          });
+      }
+
+      async function saveMarks() {
+          const recordsMap = {};
+          document.querySelectorAll('.mark-input').forEach(inp => {
+              const roll = inp.dataset.roll;
+              const col = inp.dataset.col;
+              if (!recordsMap[roll]) recordsMap[roll] = { roll };
+              recordsMap[roll][col] = inp.value;
+          });
+          
+          await fetch('/api/performance/marks', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ records: Object.values(recordsMap) })
+          });
+          alert('Marks Saved!');
+      }
+
+      async function uploadBulkAttendance() {
+          const file = document.getElementById('attBulkFile').files[0];
+          if (!file) return alert('Select file first');
+          const fd = new FormData();
+          fd.append('file', file);
+          await fetch('/api/performance/attendance/bulk', { method: 'POST', body: fd });
+          alert('Attendance bulk uploaded!');
+          loadAttendanceGrid();
+      }
+
+      async function uploadBulkMarks() {
+          const file = document.getElementById('marksBulkFile').files[0];
+          if (!file) return alert('Select file first');
+          const fd = new FormData();
+          fd.append('file', file);
+          await fetch('/api/performance/marks/bulk', { method: 'POST', body: fd });
+          alert('Marks bulk uploaded!');
+          loadMarksGrid();
+      }
+
+      async function showLeaderboard() {
+          const res = await fetch(`/api/performance/leaderboard${buildStudentQuery()}`);
+          const data = await res.json();
+          socket.emit('leaderboard-show', { 
+              data, 
+              filters: {
+                  className: document.getElementById('fClass').value,
+                  section: document.getElementById('fSection').value,
+                  session: document.getElementById('fSession').value
+              }
+          });
+          alert('Leaderboard pushed to projector!');
+      }
+    </script>
+  </body>
+</html>
