@@ -1,192 +1,192 @@
-// Question Bank Shared Utilities
+// Question Bank Shared Utilities – v3
 
 window.QuestionBank = {
     OPTION_LABELS: ['ক', 'খ', 'গ', 'ঘ'],
     POINT_LABELS: ['i', 'ii', 'iii'],
 
-    // Convert English numbers to Bengali numbers
+    /* ── Bengali number conversion ── */
     toBengaliNumber: function(num) {
-        const engToBn = { '0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯' };
-        return String(num).replace(/[0-9]/g, x => engToBn[x]);
+        const map = { '0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯' };
+        return String(num).replace(/[0-9]/g, x => map[x]);
     },
 
-    // Timer utility
+    /* ── Timer utility ── */
     createTimer: function(seconds, onTick, onComplete) {
         let remaining = seconds;
-        let isPaused = false;
+        let isPaused  = false;
         onTick(remaining);
-        
         const interval = setInterval(() => {
             if (isPaused) return;
             remaining--;
-            if (remaining >= 0) {
-                onTick(remaining);
-            }
-            if (remaining <= 0) {
-                clearInterval(interval);
-                if (onComplete) onComplete();
-            }
+            if (remaining >= 0) onTick(remaining);
+            if (remaining <= 0) { clearInterval(interval); if (onComplete) onComplete(); }
         }, 1000);
-        
         return {
-            stop: () => clearInterval(interval),
-            pause: () => { isPaused = true; },
-            resume: () => { isPaused = false; },
+            stop:     () => clearInterval(interval),
+            pause:    () => { isPaused = true; },
+            resume:   () => { isPaused = false; },
             isPaused: () => isPaused
         };
     },
 
-    // Format Type 1: Simple MCQ
+    /* ─────────────────────────────────────────
+       Options builder helpers
+    ───────────────────────────────────────── */
+    _simpleOptions: function(q, keys, dataFn) {
+        let html = `<div class="mcq-options-grid">`;
+        keys.forEach((key, i) => {
+            if (q[key]) {
+                html += `<div class="mcq-option" data-opt="${dataFn(i)}">
+                    <span class="opt-label">${this.OPTION_LABELS[i]}</span>${q[key]}
+                </div>`;
+            }
+        });
+        html += `</div>`;
+        return html;
+    },
+
+    _pointBlock: function(optionKeys, values, comboKeys, comboValues) {
+        let html = `<div class="mcq-points">`;
+        optionKeys.forEach((key, i) => {
+            if (values[key]) html += `<div class="mcq-point">${this.POINT_LABELS[i]}) ${values[key]}</div>`;
+        });
+        html += `</div><div class="mcq-subtext">নিচের কোনটি সঠিক?</div>`;
+        html += `<div class="mcq-options-grid">`;
+        comboKeys.forEach((key, i) => {
+            if (values[key]) {
+                html += `<div class="mcq-option" data-opt="${i+1}">
+                    <span class="opt-label">${this.OPTION_LABELS[i]}</span>${values[key]}
+                </div>`;
+            }
+        });
+        html += `</div>`;
+        return html;
+    },
+
+    /* ─────────────────────────────────────────
+       TYPE 1 – Simple MCQ (vertically centred)
+    ───────────────────────────────────────── */
     formatMcqType1: function(q, index) {
         const bnIndex = this.toBengaliNumber(index);
-        let html = `<div class="mcq-q-text">${bnIndex}। ${q.question}</div>`;
-        if (q.question_image) {
-            html += `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt="Question Image" /></div>`;
-        }
-        
-        html += `<div class="mcq-options-grid">`;
-        ['option_a', 'option_b', 'option_c', 'option_d'].forEach((optKey, i) => {
-            if (q[optKey]) {
-                html += `<div class="mcq-option" data-opt="${String.fromCharCode(65+i)}">
-                    <span class="opt-label">${this.OPTION_LABELS[i]})</span> ${q[optKey]}
-                </div>`;
-            }
-        });
-        html += `</div>`;
-        return html;
+        let inner = `<div class="mcq-q-text">${bnIndex}। ${q.question}</div>`;
+        if (q.question_image) inner += `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt=""/></div>`;
+        inner += this._simpleOptions(q,
+            ['option_a','option_b','option_c','option_d'],
+            i => String.fromCharCode(65+i)
+        );
+        return `<div class="mcq-simple-wrapper">${inner}</div>`;
     },
 
-    // Format Type 2: Point-based MCQ
+    /* ─────────────────────────────────────────
+       TYPE 2 – Point/Combo MCQ (vertically centred)
+    ───────────────────────────────────────── */
     formatMcqType2: function(q, index) {
         const bnIndex = this.toBengaliNumber(index);
-        let html = `<div class="mcq-q-text">${bnIndex}। ${q.question}</div>`;
-        if (q.question_image) {
-            html += `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt="Question Image" /></div>`;
-        }
-        
-        html += `<div class="mcq-points">`;
-        ['option_a', 'option_b', 'option_c'].forEach((optKey, i) => {
-            if (q[optKey]) {
-                html += `<div class="mcq-point">${this.POINT_LABELS[i]}) ${q[optKey]}</div>`;
-            }
-        });
-        html += `</div>`;
-        
-        html += `<div class="mcq-subtext">নিচের কোনটি সঠিক?</div>`;
-        html += `<div class="mcq-options-grid">`;
-        ['combo_option_1', 'combo_option_2', 'combo_option_3', 'combo_option_4'].forEach((optKey, i) => {
-            if (q[optKey]) {
-                html += `<div class="mcq-option" data-opt="${i+1}">
-                    <span class="opt-label">${this.OPTION_LABELS[i]})</span> ${q[optKey]}
-                </div>`;
-            }
-        });
-        html += `</div>`;
-        return html;
+        let inner = `<div class="mcq-q-text">${bnIndex}। ${q.question}</div>`;
+        if (q.question_image) inner += `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt=""/></div>`;
+        inner += this._pointBlock(
+            ['option_a','option_b','option_c'], q,
+            ['combo_option_1','combo_option_2','combo_option_3','combo_option_4'], q
+        );
+        return `<div class="mcq-simple-wrapper">${inner}</div>`;
     },
 
-    // Format Type 3: Passage + Simple MCQ
+    /* ─────────────────────────────────────────
+       TYPE 3 – Passage (left) | Question (right)
+    ───────────────────────────────────────── */
     formatMcqType3: function(q, index) {
         const bnIndex = this.toBengaliNumber(index);
-        let html = `<div class="mcq-passage-container">`;
-        html += `<div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${bnIndex} নং প্রশ্নের উত্তর দাও</div>`;
-        html += `<div class="mcq-passage">${q.passage}</div>`;
-        if (q.passage_image) {
-            html += `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt="Passage Image" /></div>`;
-        }
-        html += `</div>`;
-        html += this.formatMcqType1(q, index);
-        return html;
+
+        const passage = `<div class="mcq-passage-container">
+            <div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${bnIndex} নং প্রশ্নের উত্তর দাও</div>
+            <div class="mcq-passage">${q.passage}</div>
+            ${q.passage_image ? `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
+        </div>`;
+
+        let questionPanel = `<div class="mcq-question-panel">
+            <div class="mcq-q-text">${bnIndex}। ${q.question}</div>
+            ${q.question_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt=""/></div>` : ''}
+            ${this._simpleOptions(q, ['option_a','option_b','option_c','option_d'], i => String.fromCharCode(65+i))}
+        </div>`;
+
+        return `<div class="mcq-type3-layout">${passage}${questionPanel}</div>`;
     },
 
-    // Format Type 4: Passage + Compound (2 questions)
+    /* ─────────────────────────────────────────
+       TYPE 4 – Passage (left) | Q1 + Q2 (right, stacked)
+       Q1 is always point/combo; Q2 may be simple or point
+       Combo options appear BELOW i/ii/iii points
+    ───────────────────────────────────────── */
     formatMcqType4: function(q, index) {
         const bnIndex1 = this.toBengaliNumber(index);
         const bnIndex2 = this.toBengaliNumber(index + 1);
-        let html = `<div class="mcq-passage-container">`;
-        html += `<div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${bnIndex1} ও ${bnIndex2} নং প্রশ্নের উত্তর দাও</div>`;
-        html += `<div class="mcq-passage">${q.passage}</div>`;
-        if (q.passage_image) {
-            html += `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt="Passage Image" /></div>`;
-        }
-        html += `</div>`;
-        
-        // Render Question 1
-        html += `<div class="mcq-sub-question" data-sub="1">`;
-        html += this.formatMcqType2(q, index);
-        html += `</div>`;
-        
-        // Render Question 2
-        html += `<div class="mcq-sub-question" data-sub="2">`;
-        
-        let q2Html = `<div class="mcq-q-text">${bnIndex2}। ${q.question2}</div>`;
-        if (q.question2_image) {
-            q2Html += `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question2_image}" alt="Question Image" /></div>`;
-        }
-        
+
+        /* Passage */
+        const passage = `<div class="mcq-passage-container">
+            <div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${bnIndex1} ও ${bnIndex2} নং প্রশ্নের উত্তর দাও</div>
+            <div class="mcq-passage">${q.passage}</div>
+            ${q.passage_image ? `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
+        </div>`;
+
+        /* Q1 – always point/combo type */
+        let q1 = `<div class="mcq-sub-question" data-sub="1">
+            <div class="mcq-q-text">${bnIndex1}। ${q.question}</div>
+            ${q.question_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt=""/></div>` : ''}
+            ${this._pointBlock(
+                ['option_a','option_b','option_c'], q,
+                ['combo_option_1','combo_option_2','combo_option_3','combo_option_4'], q
+            )}
+        </div>`;
+
+        /* Q2 – may be simple or point */
+        let q2Inner = `<div class="mcq-q-text">${bnIndex2}। ${q.question2}</div>
+            ${q.question2_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question2_image}" alt=""/></div>` : ''}`;
+
         if (q.q2_type === 'point') {
-            q2Html += `<div class="mcq-points">`;
-            ['q2_option_a', 'q2_option_b', 'q2_option_c'].forEach((optKey, i) => {
-                if (q[optKey]) {
-                    q2Html += `<div class="mcq-point">${this.POINT_LABELS[i]}) ${q[optKey]}</div>`;
-                }
-            });
-            q2Html += `</div>`;
-            
-            q2Html += `<div class="mcq-subtext">নিচের কোনটি সঠিক?</div>`;
-            q2Html += `<div class="mcq-options-grid">`;
-            ['q2_combo_option_1', 'q2_combo_option_2', 'q2_combo_option_3', 'q2_combo_option_4'].forEach((optKey, i) => {
-                if (q[optKey]) {
-                    q2Html += `<div class="mcq-option" data-opt="${i+1}">
-                        <span class="opt-label">${this.OPTION_LABELS[i]})</span> ${q[optKey]}
-                    </div>`;
-                }
-            });
-            q2Html += `</div>`;
+            q2Inner += this._pointBlock(
+                ['q2_option_a','q2_option_b','q2_option_c'], q,
+                ['q2_combo_option_1','q2_combo_option_2','q2_combo_option_3','q2_combo_option_4'], q
+            );
         } else {
-            q2Html += `<div class="mcq-options-grid">`;
-            ['q2_option_a', 'q2_option_b', 'q2_option_c', 'q2_option_d'].forEach((optKey, i) => {
-                if (q[optKey]) {
-                    q2Html += `<div class="mcq-option" data-opt="${String.fromCharCode(65+i)}">
-                        <span class="opt-label">${this.OPTION_LABELS[i]})</span> ${q[optKey]}
-                    </div>`;
-                }
-            });
-            q2Html += `</div>`;
+            q2Inner += this._simpleOptions(q,
+                ['q2_option_a','q2_option_b','q2_option_c','q2_option_d'],
+                i => String.fromCharCode(65+i)
+            );
         }
-        html += q2Html;
-        html += `</div>`;
-        
-        return html;
+
+        const q2 = `<div class="mcq-sub-question" data-sub="2">${q2Inner}</div>`;
+
+        return `<div class="mcq-type4-layout">${passage}<div class="mcq-type4-questions">${q1}${q2}</div></div>`;
     },
 
-    // Auto-detect type and format
+    /* ─────────────────────────────────────────
+       Auto-detect type and format
+    ───────────────────────────────────────── */
     formatMcq: function(q, index) {
-        if (!q || !q.type) return "<div>Invalid Question</div>";
+        if (!q || !q.type) return '<div>Invalid Question</div>';
         const type = parseInt(q.type);
         if (type === 1) return this.formatMcqType1(q, index);
         if (type === 2) return this.formatMcqType2(q, index);
         if (type === 3) return this.formatMcqType3(q, index);
         if (type === 4) return this.formatMcqType4(q, index);
-        return "<div>Unknown Question Type</div>";
+        return '<div>Unknown Question Type</div>';
     },
 
-    // Format Creative Question
+    /* ─────────────────────────────────────────
+       Format Creative Question
+    ───────────────────────────────────────── */
     formatCreative: function(q, index) {
         const bnIndex = this.toBengaliNumber(index);
-        let html = `<div class="cq-container">`;
-        html += `<div class="cq-passage">প্রশ্ন ${bnIndex}। ${q.passage}</div>`;
-        if (q.passage_image) {
-            html += `<div class="cq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt="Passage Image" /></div>`;
-        }
-        
-        html += `<div class="cq-questions">`;
-        if (q.knowledge) html += `<div class="cq-item"><span class="cq-label">ক)</span> ${q.knowledge}</div>`;
-        if (q.understanding) html += `<div class="cq-item"><span class="cq-label">খ)</span> ${q.understanding}</div>`;
-        if (q.application) html += `<div class="cq-item"><span class="cq-label">গ)</span> ${q.application}</div>`;
-        if (q.higher_thinking) html += `<div class="cq-item"><span class="cq-label">ঘ)</span> ${q.higher_thinking}</div>`;
+        let html = `<div class="cq-container">
+            <div class="cq-number-badge">${bnIndex}</div>
+            <div class="cq-passage">${q.passage}</div>
+            ${q.passage_image ? `<div class="cq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
+            <div class="cq-questions">`;
+        if (q.knowledge)       html += `<div class="cq-item"><span class="cq-label">ক)</span>${q.knowledge}</div>`;
+        if (q.understanding)   html += `<div class="cq-item"><span class="cq-label">খ)</span>${q.understanding}</div>`;
+        if (q.application)     html += `<div class="cq-item"><span class="cq-label">গ)</span>${q.application}</div>`;
+        if (q.higher_thinking) html += `<div class="cq-item"><span class="cq-label">ঘ)</span>${q.higher_thinking}</div>`;
         html += `</div></div>`;
-        
         return html;
     }
 };
