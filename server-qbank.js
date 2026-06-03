@@ -79,6 +79,67 @@ module.exports = function(app, io, uploadsDir) {
         }
     }
 
+    // Normalize any date value from xlsx (serial number, JS Date, or string) to YYYY-MM-DD
+    function normalizeDate(val) {
+        if (!val && val !== 0) return null;
+        // Excel serial number (e.g. 46175)
+        if (typeof val === 'number') {
+            const d = new Date(Math.round((val - 25569) * 86400 * 1000));
+            return d.toISOString().split('T')[0];
+        }
+        // JS Date object
+        if (val instanceof Date) {
+            return val.toISOString().split('T')[0];
+        }
+        const str = String(val).trim();
+        // M/D/YYYY or MM/DD/YYYY or M/D/YY or MM/DD/YY
+        const mdyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
+        if (mdyMatch) {
+            let [, m, d, y] = mdyMatch;
+            if (y.length === 2) {
+                y = '20' + y;
+            }
+            return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        }
+        // If it's already YYYY-MM-DD or close to it, try to ensure YYYY-MM-DD format
+        const ymdMatch = str.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+        if (ymdMatch) {
+            const [, y, m, d] = ymdMatch;
+            return `${y}-${m.padStart(2, '0')}-${d.padStart(2, '0')}`;
+        }
+        return str;
+    }
+
+    // Compute ranked leaderboard from performance data
+    function computeLeaderboard(perfData) {
+        return perfData.map(p => {
+            const attCount = (p.attendance || []).filter(a => a.isPresent).length;
+            const attScore = attCount * 5;
+            let examScore = 0;
+            if (p.mark) {
+                Object.values(p.mark).forEach(v => { examScore += (parseFloat(v) || 0); });
+            }
+            return {
+                name: p.name,
+                roll: String(p.roll),
+                id: p.id,
+                session: p.session,
+                class: p.class,
+                section: p.section,
+                group: p.group,
+                attendanceScore: attScore,
+                examScore: examScore,
+                totalScore: attScore + examScore
+            };
+        }).sort((a, b) => b.totalScore - a.totalScore);
+    }
+
+    // Emit live leaderboard update to all connected clients
+    function emitLeaderboardUpdate(perfData) {
+        const leaderboard = computeLeaderboard(perfData);
+        io.emit('leaderboard-live-update', { data: leaderboard });
+    }
+
     // Initialize files if they don't exist
     if (!fs.existsSync(mcqFile)) writeExcel(mcqFile, []);
     if (!fs.existsSync(creativeFile)) writeExcel(creativeFile, []);
@@ -653,6 +714,18 @@ module.exports = function(app, io, uploadsDir) {
         res.json({ status: 'ok' });
     });
 
+    app.put('/api/students/:roll', (req, res) => {
+        let data = readExcel(studentFile);
+        const index = data.findIndex(r => String(r.roll) === req.params.roll);
+        if (index !== -1) {
+            data[index] = { ...data[index], ...req.body };
+            writeExcel(studentFile, data);
+            res.json({ status: 'ok', record: data[index] });
+        } else {
+            res.status(404).json({ error: 'Student not found' });
+        }
+    });
+
     app.delete('/api/students/:roll', (req, res) => {
         let data = readExcel(studentFile);
         data = data.filter(r => String(r.roll) !== req.params.roll);
@@ -663,20 +736,50 @@ module.exports = function(app, io, uploadsDir) {
     app.post('/api/students/bulk-upload', excelUpload.single('file'), (req, res) => {
         if (!req.file) return res.status(400).json({ error: "No file uploaded" });
         const newRows = readExcel(req.file.path);
-        const data = readExcel(studentFile);
         
-        newRows.forEach(newRow => {
-            const exists = data.findIndex(d => String(d.roll) === String(newRow.roll) && String(d.id) === String(newRow.id));
-            if (exists >= 0) {
-                data[exists] = { ...data[exists], ...newRow };
-            } else {
-                data.push(newRow);
-            }
-        });
-        
-        writeExcel(studentFile, data);
+        // Replace existing xlsx entirely
+        writeExcel(studentFile, newRows);
         fs.unlinkSync(req.file.path);
         res.json({ status: 'ok', count: newRows.length });
+    });
+
+    app.get('/api/students/filters', (req, res) => {
+        const data = readExcel(studentFile);
+        const sessions = new Set(), classes = new Set(), sections = new Set(), groups = new Set();
+        data.forEach(d => {
+            if (d.session) sessions.add(String(d.session));
+            if (d.class) classes.add(String(d.class));
+            if (d.section) sections.add(String(d.section));
+            if (d.group) groups.add(String(d.group));
+        });
+        res.json({
+            sessions: Array.from(sessions).sort(),
+            classes: Array.from(classes).sort(),
+            sections: Array.from(sections).sort(),
+            groups: Array.from(groups).sort()
+        });
+    });
+
+    // ==== Student Demo XLSX ====
+    app.get('/api/students/demo-xlsx', (req, res) => {
+        const demoData = [{
+            id: 'STU2024001',
+            roll: '101',
+            name: 'Demo Student Name',
+            session: '2024-25',
+            class: 'Eleven',
+            section: 'Teesta',
+            group: 'A',
+            gender: 'Male',
+            mobile: '01700000000'
+        }];
+        const ws = XLSX.utils.json_to_sheet(demoData);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Students');
+        const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        res.setHeader('Content-Disposition', 'attachment; filename="student-bank-demo.xlsx"');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buf);
     });
 
     // ==== Student Performance API ====
@@ -714,27 +817,61 @@ module.exports = function(app, io, uploadsDir) {
         });
         
         writeJson(perfFile, perfData);
+        
+        // Trigger leaderboard update immediately with calculated scores
+        const initPayload = students.map(s => {
+            const pData = perfData.find(p => String(p.roll) === String(s.roll)) || s;
+            const attCount = (pData.attendance || []).filter(a => a.isPresent).length;
+            const attScore = attCount * 5;
+            
+            let examScore = 0;
+            if (pData.mark) {
+                Object.keys(pData.mark).forEach(k => {
+                    examScore += (parseFloat(pData.mark[k]) || 0);
+                });
+            }
+            
+            return {
+                name: pData.name,
+                roll: pData.roll,
+                attendanceScore: attScore,
+                examScore: examScore,
+                totalScore: attScore + examScore
+            };
+        });
+        
+        // Sort before emitting
+        initPayload.sort((a, b) => b.totalScore - a.totalScore);
+        
+        io.emit('leaderboard-show', {
+            data: initPayload,
+            filters: { session: 'Initializing', className: '', section: '' }
+        });
+        
         res.json({ status: 'ok' });
     });
 
     app.post('/api/performance/attendance', (req, res) => {
         const { date, records } = req.body; // records: [{roll, isPresent}]
         const perfData = readJson(perfFile);
+        const normTargetDate = normalizeDate(date) || date;
+        console.log(`[ATTENDANCE GRID SAVE] Date: ${normTargetDate}, records count: ${records ? records.length : 0}`);
         
         records.forEach(r => {
             const student = perfData.find(p => String(p.roll) === String(r.roll));
             if (student) {
                 if (!student.attendance) student.attendance = [];
-                const existingDate = student.attendance.find(a => a.date === date);
+                const existingDate = student.attendance.find(a => normalizeDate(a.date) === normTargetDate);
                 if (existingDate) {
                     existingDate.isPresent = r.isPresent;
                 } else {
-                    student.attendance.push({ date, isPresent: r.isPresent });
+                    student.attendance.push({ date: normTargetDate, isPresent: r.isPresent });
                 }
             }
         });
         
         writeJson(perfFile, perfData);
+        emitLeaderboardUpdate(perfData);
         res.json({ status: 'ok' });
     });
 
@@ -755,30 +892,49 @@ module.exports = function(app, io, uploadsDir) {
         });
         
         writeJson(perfFile, perfData);
+        emitLeaderboardUpdate(perfData);
         res.json({ status: 'ok' });
     });
     
     app.post('/api/performance/attendance/bulk', excelUpload.single('file'), (req, res) => {
         if (!req.file) return res.status(400).json({ error: "No file uploaded" });
         const newRows = readExcel(req.file.path);
-        const perfData = readJson(perfFile);
+        let perfData = readJson(perfFile);
         const today = new Date().toISOString().split('T')[0];
         
         newRows.forEach(r => {
-            const student = perfData.find(p => String(p.roll) === String(r.Roll || r.roll));
+            console.log(`[ATTENDANCE BULK ROW] Keys: ${Object.keys(r).join(', ')} | name: ${r.name} | isPresent: ${r.isPresent} | id: ${r.id} | roll: ${r.roll}`);
+            
+            const student = perfData.find(p => {
+                const searchId = r.id || r.ID || r.Id;
+                if (searchId) return String(p.id) === String(searchId);
+                return String(p.roll) === String(r.roll || r.Roll);
+            });
+            
             if (student) {
+                // Normalize date from xlsx (handles serial numbers, M/D/YYYY, YYYY-MM-DD)
+                const rawDate = r.date !== undefined ? r.date : (r.Date !== undefined ? r.Date : null);
+                const recordDate = normalizeDate(rawDate) || today;
+                // Read isPresent (supports isPresent, Present, present columns)
+                const rawPresent = r.isPresent !== undefined ? r.isPresent : (r.Present !== undefined ? r.Present : r.present);
+                const isPresent = String(rawPresent).trim().toUpperCase() === 'TRUE' || 
+                                  String(rawPresent).trim().toUpperCase() === 'PRESENT' || 
+                                  String(rawPresent).trim().toUpperCase() === 'P' || 
+                                  rawPresent === 1 || 
+                                  rawPresent === true;
+                console.log(`[ATTENDANCE BULK] Roll: ${student.roll}, Name: ${student.name}, rawDate: ${rawDate}, recordDate: ${recordDate}, rawPresent: ${rawPresent}, isPresent: ${isPresent}`);
                 if (!student.attendance) student.attendance = [];
-                const isPresent = String(r.Present || r.present).toUpperCase() === 'TRUE' || r.Present === 1 || r.Present === true;
-                const existingDate = student.attendance.find(a => a.date === today);
-                if (existingDate) {
-                    existingDate.isPresent = isPresent;
+                const existingIdx = student.attendance.findIndex(a => normalizeDate(a.date) === recordDate);
+                if (existingIdx >= 0) {
+                    student.attendance[existingIdx].isPresent = isPresent;
                 } else {
-                    student.attendance.push({ date: today, isPresent });
+                    student.attendance.push({ date: recordDate, isPresent });
                 }
             }
         });
         
         writeJson(perfFile, perfData);
+        emitLeaderboardUpdate(perfData);
         fs.unlinkSync(req.file.path);
         res.json({ status: 'ok', count: newRows.length });
     });
@@ -786,13 +942,13 @@ module.exports = function(app, io, uploadsDir) {
     app.post('/api/performance/marks/bulk', excelUpload.single('file'), (req, res) => {
         if (!req.file) return res.status(400).json({ error: "No file uploaded" });
         const newRows = readExcel(req.file.path);
-        const perfData = readJson(perfFile);
+        let perfData = readJson(perfFile);
         
         newRows.forEach(r => {
             const student = perfData.find(p => String(p.roll) === String(r.Roll || r.roll));
             if (student) {
-                if (!student.mark) student.mark = {};
-                ['CT1','CT2','CT3','CT4','CT5','HY','Y','PT','T','MT1','MT2','MCQ1','MCQ2','MCQ3'].forEach(k => {
+                student.mark = {}; // Completely replace marks object
+                ['CT1','CT2','CT3','CT4','CT5','HY','Y','PT','T','MT1','MT2','MCQ1','MCQ2','MCQ3', 'Rewards'].forEach(k => {
                     if (r[k] !== undefined) {
                         student.mark[k] = parseFloat(r[k]) || 0;
                     }
@@ -801,8 +957,85 @@ module.exports = function(app, io, uploadsDir) {
         });
         
         writeJson(perfFile, perfData);
+        emitLeaderboardUpdate(perfData);
         fs.unlinkSync(req.file.path);
         res.json({ status: 'ok', count: newRows.length });
+    });
+
+    // ==== Marks Demo XLSX (pre-filled with filtered students + current marks) ====
+    app.get('/api/performance/marks/demo-xlsx', (req, res) => {
+        const { session, className, section, group } = req.query;
+        let students = readExcel(studentFile);
+        if (session) students = students.filter(d => d.session === session);
+        if (className) students = students.filter(d => d.class === className);
+        if (section) students = students.filter(d => d.section === section);
+        if (group) students = students.filter(d => d.group === group);
+
+        const perfData = readJson(perfFile);
+        const markCols = ['CT1','CT2','CT3','CT4','CT5','HY','Y','PT','T','MT1','MT2','MCQ1','MCQ2','MCQ3','Rewards'];
+
+        let rows = students.map(s => {
+            const perf = perfData.find(p => String(p.roll) === String(s.roll));
+            const marks = (perf && perf.mark) ? perf.mark : {};
+            const row = { roll: s.roll, name: s.name, id: s.id, session: s.session, class: s.class, section: s.section, group: s.group };
+            markCols.forEach(c => { row[c] = marks[c] !== undefined ? marks[c] : 0; });
+            return row;
+        });
+
+        if (rows.length === 0) {
+            const demo = { roll: '101', name: 'Demo Student', id: 'STU2024001', session: '2024-25', class: 'Eleven', section: 'Teesta', group: 'A' };
+            markCols.forEach(c => { demo[c] = 0; });
+            rows = [demo];
+        }
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Marks');
+        const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        res.setHeader('Content-Disposition', 'attachment; filename="marks-bulk-template.xlsx"');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buf);
+    });
+
+    // ==== Attendance Demo XLSX (pre-filled with filtered students + current date attendance) ====
+    app.get('/api/performance/attendance/demo-xlsx', (req, res) => {
+        const { session, className, section, group, date } = req.query;
+        let students = readExcel(studentFile);
+        if (session) students = students.filter(d => d.session === session);
+        if (className) students = students.filter(d => d.class === className);
+        if (section) students = students.filter(d => d.section === section);
+        if (group) students = students.filter(d => d.group === group);
+
+        const perfData = readJson(perfFile);
+        const targetDate = date || new Date().toISOString().split('T')[0];
+
+        let rows = students.map(s => {
+            const perf = perfData.find(p => String(p.roll) === String(s.roll));
+            const attEntry = (perf && perf.attendance) ? perf.attendance.find(a => a.date === targetDate) : null;
+            return {
+                roll: s.roll,
+                name: s.name,
+                id: s.id,
+                session: s.session,
+                class: s.class,
+                section: s.section,
+                group: s.group,
+                date: targetDate,
+                isPresent: attEntry ? (attEntry.isPresent ? 'TRUE' : 'FALSE') : 'FALSE'
+            };
+        });
+
+        if (rows.length === 0) {
+            rows = [{ roll: '101', name: 'Demo Student', id: 'STU2024001', session: '2024-25', class: 'Eleven', section: 'Teesta', group: 'A', date: targetDate, isPresent: 'TRUE' }];
+        }
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+        const buf = XLSX.write(wb, { type: 'buffer', bookType: 'xlsx' });
+        res.setHeader('Content-Disposition', 'attachment; filename="attendance-bulk-template.xlsx"');
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.send(buf);
     });
 
     // Leaderboard calculation
