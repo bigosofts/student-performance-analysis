@@ -11,10 +11,4 @@ test*.pdf
 uploads/~$*.xlsx
 ~$*.xlsx
 
-# Uploaded data files (user-specific, regenerated on deploy)
-uploads/*.xlsx
-uploads/*.json
-uploads/qbank-images/
-uploads/gallery/
-uploads/slides-*/
-uploads/*.pptx
+
