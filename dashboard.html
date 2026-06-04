@@ -1,496 +1,651 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <script src="js/auth-check.js"></script>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Teacher Central - Control Dashboard</title>
-    <link rel="stylesheet" href="css/style.css" />
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700;800;900&display=swap');
 
-      * { box-sizing: border-box; margin: 0; padding: 0; }
+<head>
+  <script src="js/auth-check.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Teacher Central - Control Dashboard</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700;800;900&display=swap');
 
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: radial-gradient(ellipse at top, #0f172a 0%, #020617 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      /* Projector ready - NO scroll on desktop */
+      display: flex;
+      flex-direction: column;
+      position: relative;
+    }
+
+    /* ─── Animated Background Particles ─── */
+    .bg-animation {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+      opacity: 0.5;
+    }
+
+    .bg-circle {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(90px);
+      animation: float 20s infinite alternate ease-in-out;
+    }
+
+    .c1 {
+      width: 500px;
+      height: 500px;
+      background: rgba(99, 102, 241, 0.15);
+      top: -150px;
+      left: -100px;
+    }
+
+    .c2 {
+      width: 600px;
+      height: 600px;
+      background: rgba(236, 72, 153, 0.15);
+      bottom: -200px;
+      right: -150px;
+      animation-delay: -5s;
+    }
+
+    .c3 {
+      width: 400px;
+      height: 400px;
+      background: rgba(16, 185, 129, 0.15);
+      top: 30%;
+      left: 45%;
+      animation-delay: -10s;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translate(0, 0) rotate(0deg) scale(1);
+      }
+
+      100% {
+        transform: translate(80px, 80px) rotate(10deg) scale(1.1);
+      }
+    }
+
+    /* ─── Header ─── */
+    .header-area {
+      text-align: center;
+      padding: clamp(10px, 3vh, 30px) 20px clamp(5px, 1.5vh, 15px);
+      animation: slideDown 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      opacity: 0;
+      transform: translateY(-30px);
+      z-index: 5;
+      flex-shrink: 0;
+    }
+
+    .title-glitch {
+      font-family: 'Orbitron', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      text-transform: uppercase;
+      background: linear-gradient(to right, #6366f1, #ec4899, #f59e0b);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: clamp(2px, 0.5vh, 5px);
+      filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.3));
+      letter-spacing: 2px;
+      line-height: 1.1;
+    }
+
+    .subtitle {
+      font-size: clamp(0.8rem, 1.2vw, 1.2rem);
+      color: #9ca3af;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    /* ─── Projector Remote Control ─── */
+    .remote-control-panel {
+      width: 100%;
+      max-width: 1700px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-top: 4px solid #7c3aed;
+      border-radius: clamp(12px, 2vw, 24px);
+      padding: clamp(10px, 2vh, 25px) clamp(15px, 2vw, 40px);
+      margin-bottom: clamp(10px, 2vh, 24px);
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      animation: fadeIn 1s ease forwards;
+      animation-delay: 0.3s;
+      opacity: 0;
+      flex-shrink: 1;
+      /* Allows shrinking on short screens */
+    }
+
+    .remote-title {
+      font-size: clamp(0.9rem, 1.5vw, 1.2rem);
+      color: #fff;
+      margin-bottom: clamp(6px, 1.5vh, 15px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .remote-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: clamp(6px, 1vw, 16px);
+      justify-content: center;
+    }
+
+    .remote-btn {
+      font-size: clamp(0.65rem, 1vw, 0.9rem);
+      padding: clamp(6px, 1vh, 12px) clamp(10px, 1.5vw, 20px);
+      border-radius: 12px;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .remote-btn:hover {
+      transform: translateY(-4px) scale(1.05);
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+      filter: brightness(1.2);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ─── Main Content Grid ─── */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 0 clamp(15px, 4vw, 50px);
+      z-index: 5;
+      min-height: 0;
+      /* Allows flex items to shrink */
+    }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: clamp(20px, 1.5vh, 24px);
+      width: 100%;
+
+      perspective: 1200px;
+      flex-shrink: 1;
+      min-height: 0;
+    }
+
+    /* ─── Card Design ─── */
+    .game-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      border-radius: clamp(12px, 1.5vw, 24px);
+      padding: clamp(10px, 2vh, 28px) clamp(10px, 1.5vw, 24px);
+      text-decoration: none;
+      color: white;
+      transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+      opacity: 0;
+      transform: translateY(40px) rotateX(10deg);
+      animation: cardEntrance 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      border-top: 4px solid var(--theme-color, #fff);
+      min-height: 0;
+    }
+
+    /* Animation Stagger & Colors */
+    .game-card:nth-child(1) {
+      animation-delay: 0.2s;
+      --theme-color: #10b981;
+      --glow: rgba(16, 185, 129, 0.3);
+    }
+
+    .game-card:nth-child(2) {
+      animation-delay: 0.3s;
+      --theme-color: #f59e0b;
+      --glow: rgba(245, 158, 11, 0.3);
+    }
+
+    .game-card:nth-child(3) {
+      animation-delay: 0.4s;
+      --theme-color: #3b82f6;
+      --glow: rgba(59, 130, 246, 0.3);
+    }
+
+    .game-card:nth-child(4) {
+      animation-delay: 0.5s;
+      --theme-color: #a855f7;
+      --glow: rgba(168, 85, 247, 0.3);
+    }
+
+    /* Wide card for Presentation */
+    .game-card:nth-child(5) {
+      animation-delay: 0.6s;
+      grid-column: 1 / 3;
+      flex-direction: row;
+      text-align: left;
+      padding: clamp(8px, 1.5vh, 26px) clamp(16px, 2.5vw, 40px);
+      --theme-color: #7c3aed;
+      --glow: rgba(124, 58, 237, 0.3);
+    }
+
+    .game-card:nth-child(6) {
+      animation-delay: 0.7s;
+      --theme-color: #00e5ff;
+      --glow: rgba(0, 229, 255, 0.3);
+    }
+
+    .game-card:nth-child(7) {
+      animation-delay: 0.8s;
+      --theme-color: #f97316;
+      --glow: rgba(249, 115, 22, 0.3);
+    }
+
+    /* Hover Effects */
+    .game-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      background: rgba(255, 255, 255, 0.07);
+      border-color: rgba(255, 255, 255, 0.2);
+      border-top-color: var(--theme-color);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px var(--glow);
+    }
+
+    .game-icon {
+      width: clamp(40px, 7vh, 100px);
+      height: clamp(40px, 7vh, 100px);
+      border-radius: clamp(10px, 1.5vw, 24px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: clamp(2rem, 4vh, 4rem);
+      margin-bottom: clamp(6px, 1.5vh, 20px);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      flex-shrink: 0;
+    }
+
+    .game-card:hover .game-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+
+    /* Layout specific for the wide card */
+    .game-card:nth-child(5) .game-icon {
+      margin-bottom: 0;
+      margin-right: clamp(15px, 2vw, 30px);
+      width: clamp(65px, 10vh, 100px);
+      height: clamp(65px, 10vh, 100px);
+      font-size: clamp(2.5rem, 4vh, 3.8rem);
+    }
+
+    .game-card:nth-child(5) .card-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding-right: clamp(10px, 1vw, 20px);
+    }
+
+    .card-text {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      width: 100%;
+      align-items: center;
+    }
+
+    .game-card:nth-child(5) .card-text {
+      align-items: flex-start;
+    }
+
+    .game-card h2 {
+      font-size: clamp(1rem, 1.5vw, 1.4rem);
+      font-weight: 800;
+      margin-bottom: clamp(4px, 1vh, 8px);
+      letter-spacing: 0.5px;
+      line-height: 1.2;
+    }
+
+    .game-card p {
+      color: #a1a1aa;
+      font-size: clamp(0.7rem, 1vw, 0.9rem);
+      line-height: 1.4;
+      flex-grow: 1;
+      margin-bottom: clamp(10px, 1.5vh, 18px);
+      font-weight: 400;
+    }
+
+    .status-badge {
+      padding: clamp(4px, 1vh, 6px) clamp(10px, 1.5vw, 16px);
+      border-radius: 20px;
+      background: var(--theme-color);
+      font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+      text-transform: uppercase;
+      font-weight: 800;
+      color: white;
+      margin-top: auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    /* Ensure contrast for bright badges */
+    .game-card:nth-child(6) .status-badge {
+      color: #000;
+    }
+
+    .game-card:nth-child(7) .status-badge {
+      color: #000;
+    }
+
+    /* ─── Back to Main Button (Static Footer) ─── */
+    .footer-wrap {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: clamp(10px, 2vh, 20px) 0 clamp(15px, 3vh, 35px);
+      animation: slideInUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      animation-delay: 1s;
+      opacity: 0;
+      transform: translateY(30px);
+      z-index: 10;
+      flex-shrink: 0;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: clamp(10px, 2vh, 14px) clamp(24px, 3vw, 36px);
+      border-radius: 50px;
+      color: white;
+      font-weight: 800;
+      font-size: clamp(0.8rem, 1vw, 0.9rem);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      backdrop-filter: blur(10px);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-secondary::before {
+      content: "🔙";
+      font-size: clamp(1rem, 1.5vw, 1.1rem);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      transform: translateY(-5px) scale(1.05);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    /* ─── Keyframe Animations ─── */
+    @keyframes slideDown {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes cardEntrance {
+      to {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+      }
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    /* ─── Responsive Design (Fallbacks / Reshaping) ─── */
+
+    /* Tablet & Small Desktop (Max 1200px) */
+    @media (max-width: 1200px) {
       body {
-        background: radial-gradient(ellipse at top, #0f172a 0%, #020617 100%);
-        color: white;
-        font-family: 'Inter', sans-serif;
-        width: 100vw;
-        height: 100vh;
-        overflow: hidden; /* Projector ready - NO scroll on desktop */
-        display: flex;
-        flex-direction: column;
-        position: relative;
+        overflow-y: auto;
+        /* Allow scrolling on smaller screens */
+        height: auto;
+        min-height: 100vh;
       }
 
-      /* ─── Animated Background Particles ─── */
-      .bg-animation {
-        position: absolute;
-        top: 0; left: 0; width: 100%; height: 100%;
-        z-index: -1;
-        overflow: hidden;
-        opacity: 0.5;
-      }
-      .bg-circle {
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(90px);
-        animation: float 20s infinite alternate ease-in-out;
-      }
-      .c1 { width: 500px; height: 500px; background: rgba(99, 102, 241, 0.15); top: -150px; left: -100px; }
-      .c2 { width: 600px; height: 600px; background: rgba(236, 72, 153, 0.15); bottom: -200px; right: -150px; animation-delay: -5s; }
-      .c3 { width: 400px; height: 400px; background: rgba(16, 185, 129, 0.15); top: 30%; left: 45%; animation-delay: -10s; }
-
-      @keyframes float {
-        0%   { transform: translate(0, 0) rotate(0deg) scale(1); }
-        100% { transform: translate(80px, 80px) rotate(10deg) scale(1.1); }
-      }
-
-      /* ─── Header ─── */
-      .header-area {
-        text-align: center;
-        padding: clamp(10px, 3vh, 30px) 20px clamp(5px, 1.5vh, 15px);
-        animation: slideDown 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        opacity: 0; transform: translateY(-30px);
-        z-index: 5;
-        flex-shrink: 0;
-      }
-      .title-glitch {
-        font-family: 'Orbitron', sans-serif;
-        font-size: clamp(2rem, 5vw, 3.5rem);
-        font-weight: 900;
-        text-transform: uppercase;
-        background: linear-gradient(to right, #6366f1, #ec4899, #f59e0b);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: clamp(2px, 0.5vh, 5px);
-        filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.3));
-        letter-spacing: 2px;
-        line-height: 1.1;
-      }
-      .subtitle {
-        font-size: clamp(0.8rem, 1.2vw, 1.2rem);
-        color: #9ca3af;
-        letter-spacing: 3px;
-        text-transform: uppercase;
-        font-weight: 700;
-      }
-
-      /* ─── Projector Remote Control ─── */
-      .remote-control-panel {
-        width: 100%;
-        max-width: 1700px;
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-top: 4px solid #7c3aed;
-        border-radius: clamp(12px, 2vw, 24px);
-        padding: clamp(10px, 2vh, 25px) clamp(15px, 2vw, 40px);
-        margin-bottom: clamp(10px, 2vh, 24px);
-        text-align: center;
-        backdrop-filter: blur(12px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
-        animation: fadeIn 1s ease forwards;
-        animation-delay: 0.3s;
-        opacity: 0;
-        flex-shrink: 1; /* Allows shrinking on short screens */
-      }
-      
-      .remote-title {
-        font-size: clamp(0.9rem, 1.5vw, 1.2rem);
-        color: #fff;
-        margin-bottom: clamp(6px, 1.5vh, 15px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        font-weight: 800;
-        letter-spacing: 1px;
-      }
-
-      .remote-buttons {
-        display: flex;
-        flex-wrap: wrap;
-        gap: clamp(6px, 1vw, 16px);
-        justify-content: center;
-      }
-      
-      .remote-btn {
-        font-size: clamp(0.65rem, 1vw, 0.9rem);
-        padding: clamp(6px, 1vh, 12px) clamp(10px, 1.5vw, 20px);
-        border-radius: 12px;
-        font-weight: 800;
-        border: 1px solid rgba(255,255,255,0.1);
-        color: white;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      }
-      .remote-btn:hover {
-        transform: translateY(-4px) scale(1.05);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
-        filter: brightness(1.2);
-        border-color: rgba(255,255,255,0.4);
-      }
-
-      /* ─── Main Content Grid ─── */
       .main-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: flex-start;
-        padding: 0 clamp(15px, 4vw, 50px);
-        z-index: 5;
-        min-height: 0; /* Allows flex items to shrink */
+        padding: 10px 20px;
       }
 
       .game-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: clamp(8px, 1.5vh, 24px);
-        width: 100%;
-        max-width: 1700px;
-        perspective: 1200px;
-        flex-shrink: 1;
-        min-height: 0;
+        grid-template-columns: repeat(2, 1fr);
       }
 
-      /* ─── Card Design ─── */
-      .game-card {
-        background: rgba(255, 255, 255, 0.03);
-        border: 1px solid rgba(255, 255, 255, 0.07);
-        border-radius: clamp(12px, 1.5vw, 24px);
-        padding: clamp(10px, 2vh, 28px) clamp(10px, 1.5vw, 24px);
-        text-decoration: none;
-        color: white;
-        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        display: flex;
+      .game-card:nth-child(5) {
+        grid-column: 1 / -1;
+      }
+
+      .remote-control-panel {
+        max-width: 95%;
+      }
+    }
+
+    /* Mobile (Max 768px) */
+    @media (max-width: 768px) {
+      .header-area {
+        padding: 20px 15px 10px;
+        margin-top: 0;
+      }
+
+      .game-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .game-card:nth-child(5) {
         flex-direction: column;
-        align-items: center;
         text-align: center;
-        backdrop-filter: blur(12px);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.05);
-        opacity: 0;
-        transform: translateY(40px) rotateX(10deg);
-        animation: cardEntrance 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        border-top: 4px solid var(--theme-color, #fff);
-        min-height: 0;
-      }
-      
-      /* Animation Stagger & Colors */
-      .game-card:nth-child(1) { animation-delay: 0.2s; --theme-color: #10b981; --glow: rgba(16,185,129,0.3); }
-      .game-card:nth-child(2) { animation-delay: 0.3s; --theme-color: #f59e0b; --glow: rgba(245,158,11,0.3); }
-      .game-card:nth-child(3) { animation-delay: 0.4s; --theme-color: #3b82f6; --glow: rgba(59,130,246,0.3); }
-      .game-card:nth-child(4) { animation-delay: 0.5s; --theme-color: #a855f7; --glow: rgba(168,85,247,0.3); }
-      
-      /* Wide card for Presentation */
-      .game-card:nth-child(5) { 
-        animation-delay: 0.6s; 
-        grid-column: 1 / 3; 
-        flex-direction: row; 
-        text-align: left; 
-        padding: clamp(8px, 1.5vh, 26px) clamp(16px, 2.5vw, 40px);
-        --theme-color: #7c3aed; 
-        --glow: rgba(124,58,237,0.3);
-      }
-      .game-card:nth-child(6) { animation-delay: 0.7s; --theme-color: #00e5ff; --glow: rgba(0,229,255,0.3); }
-      .game-card:nth-child(7) { animation-delay: 0.8s; --theme-color: #f97316; --glow: rgba(249,115,22,0.3); }
-
-      /* Hover Effects */
-      .game-card:hover {
-        transform: translateY(-4px) scale(1.02);
-        background: rgba(255, 255, 255, 0.07);
-        border-color: rgba(255, 255, 255, 0.2);
-        border-top-color: var(--theme-color);
-        box-shadow: 0 25px 50px rgba(0,0,0,0.5), 0 0 30px var(--glow);
       }
 
-      .game-icon {
-        width: clamp(40px, 7vh, 100px); height: clamp(40px, 7vh, 100px);
-        border-radius: clamp(10px, 1.5vw, 24px);
-        display: flex; align-items: center; justify-content: center;
-        font-size: clamp(2rem, 4vh, 4rem);
-        margin-bottom: clamp(6px, 1.5vh, 20px);
-        transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        flex-shrink: 0;
-      }
-      .game-card:hover .game-icon { transform: scale(1.15) rotate(5deg); }
-      
-      /* Layout specific for the wide card */
-      .game-card:nth-child(5) .game-icon { 
-        margin-bottom: 0; 
-        margin-right: clamp(15px, 2vw, 30px); 
-        width: clamp(65px, 10vh, 100px); 
-        height: clamp(65px, 10vh, 100px); 
-        font-size: clamp(2.5rem, 4vh, 3.8rem); 
-      }
-      .game-card:nth-child(5) .card-text { flex: 1; display: flex; flex-direction: column; justify-content: center; padding-right: clamp(10px, 1vw, 20px);}
-
-      .card-text { display: flex; flex-direction: column; flex: 1; width: 100%; align-items: center;}
-      .game-card:nth-child(5) .card-text { align-items: flex-start; }
-
-      .game-card h2 {
-        font-size: clamp(1rem, 1.5vw, 1.4rem);
-        font-weight: 800;
-        margin-bottom: clamp(4px, 1vh, 8px);
-        letter-spacing: 0.5px;
-        line-height: 1.2;
-      }
-      .game-card p {
-        color: #a1a1aa;
-        font-size: clamp(0.7rem, 1vw, 0.9rem);
-        line-height: 1.4;
-        flex-grow: 1;
-        margin-bottom: clamp(10px, 1.5vh, 18px);
-        font-weight: 400;
+      .game-card:nth-child(5) .card-text {
+        align-items: center;
       }
 
-      .status-badge {
-        padding: clamp(4px, 1vh, 6px) clamp(10px, 1.5vw, 16px);
-        border-radius: 20px;
-        background: var(--theme-color);
-        font-size: clamp(0.6rem, 0.8vw, 0.75rem);
-        text-transform: uppercase;
-        font-weight: 800;
-        color: white;
-        margin-top: auto;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      .game-card:nth-child(5) .game-icon {
+        margin-right: 0;
+        margin-bottom: 22px;
       }
 
-      /* Ensure contrast for bright badges */
-      .game-card:nth-child(6) .status-badge { color: #000; }
-      .game-card:nth-child(7) .status-badge { color: #000; }
+      .game-card:nth-child(5) .card-text {
+        padding-right: 0;
+      }
 
-      /* ─── Back to Main Button (Static Footer) ─── */
-      .footer-wrap {
+      .remote-buttons {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .remote-btn {
         width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: clamp(10px, 2vh, 20px) 0 clamp(15px, 3vh, 35px);
-        animation: slideInUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        animation-delay: 1s;
-        opacity: 0;
-        transform: translateY(30px);
-        z-index: 10;
-        flex-shrink: 0;
       }
+
       .btn-secondary {
-        background: rgba(255,255,255,0.08);
-        border: 1px solid rgba(255,255,255,0.2);
-        padding: clamp(10px, 2vh, 14px) clamp(24px, 3vw, 36px);
-        border-radius: 50px;
-        color: white;
-        font-weight: 800;
-        font-size: clamp(0.8rem, 1vw, 0.9rem);
-        letter-spacing: 2px;
-        text-transform: uppercase;
-        transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
-        backdrop-filter: blur(10px);
-        text-decoration: none;
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        width: 90%;
+        justify-content: center;
       }
-      .btn-secondary::before {
-        content: "🔙";
-        font-size: clamp(1rem, 1.5vw, 1.1rem);
-      }
-      .btn-secondary:hover {
-        background: rgba(255,255,255,0.15);
-        transform: translateY(-5px) scale(1.05);
-        box-shadow: 0 15px 35px rgba(0,0,0,0.5), 0 0 20px rgba(255,255,255,0.1);
-        border-color: rgba(255,255,255,0.4);
-      }
+    }
+  </style>
+</head>
 
-      /* ─── Keyframe Animations ─── */
-      @keyframes slideDown { to { opacity: 1; transform: translateY(0); } }
-      @keyframes slideInUp { to { opacity: 1; transform: translateY(0); } }
-      @keyframes cardEntrance { to { opacity: 1; transform: translateY(0) rotateX(0); } }
-      @keyframes fadeIn { to { opacity: 1; } }
+<body>
+  <!-- Background Particles -->
+  <div class="bg-animation">
+    <div class="bg-circle c1"></div>
+    <div class="bg-circle c2"></div>
+    <div class="bg-circle c3"></div>
+  </div>
 
-      /* ─── Responsive Design (Fallbacks / Reshaping) ─── */
-      
-      /* Tablet & Small Desktop (Max 1200px) */
-      @media (max-width: 1200px) {
-        body {
-          overflow-y: auto; /* Allow scrolling on smaller screens */
-          height: auto;
-          min-height: 100vh;
-        }
-        .main-content {
-          padding: 10px 20px;
-        }
-        .game-grid {
-          grid-template-columns: repeat(2, 1fr);
-        }
-        .game-card:nth-child(5) {
-          grid-column: 1 / -1; 
-        }
-        .remote-control-panel {
-          max-width: 95%;
-        }
-      }
+  <!-- Header Section -->
+  <div class="header-area">
+    <h1 class="title-glitch">Teacher Central</h1>
+    <div class="subtitle">Select a game module to manage the classroom flow</div>
+  </div>
 
-      /* Mobile (Max 768px) */
-      @media (max-width: 768px) {
-        .header-area {
-          padding: 20px 15px 10px;
-          margin-top: 0;
-        }
-        .game-grid {
-          grid-template-columns: 1fr;
-        }
-        .game-card:nth-child(5) {
-          flex-direction: column;
-          text-align: center;
-        }
-        .game-card:nth-child(5) .card-text {
-          align-items: center;
-        }
-        .game-card:nth-child(5) .game-icon {
-          margin-right: 0;
-          margin-bottom: 22px;
-        }
-        .game-card:nth-child(5) .card-text {
-          padding-right: 0;
-        }
-        .remote-buttons {
-          flex-direction: column;
-          align-items: stretch;
-        }
-        .remote-btn {
-          width: 100%;
-        }
-        .btn-secondary {
-          width: 90%;
-          justify-content: center;
-        }
-      }
+  <!-- Main Content Grid -->
+  <div class="main-content">
 
-    </style>
-  </head>
-  <body>
-    <!-- Background Particles -->
-    <div class="bg-animation">
-      <div class="bg-circle c1"></div>
-      <div class="bg-circle c2"></div>
-      <div class="bg-circle c3"></div>
+    <!-- Classroom Remote Navigation Control -->
+    <div class="remote-control-panel">
+      <h2 class="remote-title">📱 Projector Remote Control</h2>
+      <div class="remote-buttons">
+        <button onclick="navigateProjector('index.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #475569, #334155);">Lobby (Home)</button>
+        <button onclick="navigateProjector('game.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #3b82f6, #2563eb);">Memory Flip</button>
+        <button onclick="navigateProjector('game-monopoly.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #a855f7, #9333ea);">Monopoly Quiz</button>
+        <button onclick="navigateProjector('game-maze.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #0e7490, #0891b2);">Maze Runner</button>
+        <button onclick="navigateProjector('game-wordpuzzle.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #ea580c, #c2410c);">Word Puzzle</button>
+        <button onclick="navigateProjector('game-presentation.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">Presentation Studio</button>
+        <button onclick="navigateProjector('game-questionbank.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #10b981, #059669);">Question Bank</button>
+        <button onclick="navigateProjector('game-leaderboard.html')" class="remote-btn"
+          style="background: linear-gradient(135deg, #f59e0b, #d97706);">Leaderboard</button>
+      </div>
     </div>
 
-    <!-- Header Section -->
-    <div class="header-area">
-      <h1 class="title-glitch">Teacher Central</h1>
-      <div class="subtitle">Select a game module to manage the classroom flow</div>
-    </div>
+    <div class="game-grid">
 
-    <!-- Main Content Grid -->
-    <div class="main-content">
-      
-      <!-- Classroom Remote Navigation Control -->
-      <div class="remote-control-panel">
-        <h2 class="remote-title">📱 Projector Remote Control</h2>
-        <div class="remote-buttons">
-          <button onclick="navigateProjector('index.html')" class="remote-btn" style="background: linear-gradient(135deg, #475569, #334155);">Lobby (Home)</button>
-          <button onclick="navigateProjector('game.html')" class="remote-btn" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">Memory Flip</button>
-          <button onclick="navigateProjector('game-monopoly.html')" class="remote-btn" style="background: linear-gradient(135deg, #a855f7, #9333ea);">Monopoly Quiz</button>
-          <button onclick="navigateProjector('game-maze.html')" class="remote-btn" style="background: linear-gradient(135deg, #0e7490, #0891b2);">Maze Runner</button>
-          <button onclick="navigateProjector('game-wordpuzzle.html')" class="remote-btn" style="background: linear-gradient(135deg, #ea580c, #c2410c);">Word Puzzle</button>
-          <button onclick="navigateProjector('game-presentation.html')" class="remote-btn" style="background: linear-gradient(135deg, #7c3aed, #6d28d9);">Presentation Studio</button>
-          <button onclick="navigateProjector('game-questionbank.html')" class="remote-btn" style="background: linear-gradient(135deg, #10b981, #059669);">Question Bank</button>
-          <button onclick="navigateProjector('game-leaderboard.html')" class="remote-btn" style="background: linear-gradient(135deg, #f59e0b, #d97706);">Leaderboard</button>
+      <!-- Game 1: Question Bank -->
+      <a href="dashboard-questionbank.html" class="game-card">
+        <div class="game-icon">📝</div>
+        <div class="card-text">
+          <h2>Question Bank</h2>
+          <p>Manage MCQs, Creative Questions, and start quizzes.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669)">ONLINE /
+            ACTIVE</span>
         </div>
-      </div>
+      </a>
 
-      <div class="game-grid">
-        
-        <!-- Game 1: Question Bank -->
-        <a href="dashboard-questionbank.html" class="game-card">
-          <div class="game-icon">📝</div>
-          <div class="card-text">
-            <h2>Question Bank</h2>
-            <p>Manage MCQs, Creative Questions, and start quizzes.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #10b981, #059669)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
+      <!-- Game 2: Student Performance -->
+      <a href="dashboard-studentperf.html" class="game-card">
+        <div class="game-icon">📊</div>
+        <div class="card-text">
+          <h2>Student Performance</h2>
+          <p>Manage students, attendance, marks, and leaderboard.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706)">ONLINE /
+            ACTIVE</span>
+        </div>
+      </a>
 
-        <!-- Game 2: Student Performance -->
-        <a href="dashboard-studentperf.html" class="game-card">
-          <div class="game-icon">📊</div>
-          <div class="card-text">
-            <h2>Student Performance</h2>
-            <p>Manage students, attendance, marks, and leaderboard.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #f59e0b, #d97706)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
+      <!-- Game 3: Memory Flip Game -->
+      <a href="dashboard-memory.html" class="game-card">
+        <div class="game-icon">🎴</div>
+        <div class="card-text">
+          <h2>Memory Flip</h2>
+          <p>Boys vs Girls memory challenge dashboard.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">ONLINE /
+            ACTIVE</span>
+        </div>
+      </a>
 
-        <!-- Game 3: Memory Flip Game -->
-        <a href="dashboard-memory.html" class="game-card">
-          <div class="game-icon">🎴</div>
-          <div class="card-text">
-            <h2>Memory Flip</h2>
-            <p>Boys vs Girls memory challenge dashboard.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
+      <!-- Game 4: Monopoly Quiz Game -->
+      <a href="dashboard-monopoly.html" class="game-card">
+        <div class="game-icon">🎲</div>
+        <div class="card-text">
+          <h2>Monopoly Quiz</h2>
+          <p>Control team movement, money, and photos.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #a855f7, #9333ea)">ONLINE /
+            ACTIVE</span>
+        </div>
+      </a>
 
-        <!-- Game 4: Monopoly Quiz Game -->
-        <a href="dashboard-monopoly.html" class="game-card">
-          <div class="game-icon">🎲</div>
-          <div class="card-text">
-            <h2>Monopoly Quiz</h2>
-            <p>Control team movement, money, and photos.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #a855f7, #9333ea)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
+      <!-- Game 5 (Wide): Presentation Studio -->
+      <a href="dashboard-presentation.html" class="game-card">
+        <div class="game-icon">📽️</div>
+        <div class="card-text">
+          <h2>Presentation Studio</h2>
+          <p>Upload &amp; display PowerPoint slides. Share images, trees, notes &amp; drawings live.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #7c3aed, #6d28d9)">ONLINE /
+            ACTIVE</span>
+        </div>
+      </a>
 
-        <!-- Game 5 (Wide): Presentation Studio -->
-        <a href="dashboard-presentation.html" class="game-card">
-          <div class="game-icon">📽️</div>
-          <div class="card-text">
-            <h2>Presentation Studio</h2>
-            <p>Upload &amp; display PowerPoint slides. Share images, trees, notes &amp; drawings live.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #7c3aed, #6d28d9)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
+      <!-- Game 6: Maze Runner Quiz -->
+      <a href="dashboard-maze.html" class="game-card">
+        <div class="game-icon">🗺️</div>
+        <div class="card-text">
+          <h2>Maze Runner Quiz</h2>
+          <p>Control maze generation, runner movement, and quiz rewards.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #00e5ff, #06b6d4)">ONLINE /
+            ACTIVE</span>
+        </div>
+      </a>
 
-        <!-- Game 6: Maze Runner Quiz -->
-        <a href="dashboard-maze.html" class="game-card">
-          <div class="game-icon">🗺️</div>
-          <div class="card-text">
-            <h2>Maze Runner Quiz</h2>
-            <p>Control maze generation, runner movement, and quiz rewards.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #00e5ff, #06b6d4)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
+      <!-- Game 7: Word Puzzle Game -->
+      <a href="dashboard-wordpuzzle.html" class="game-card">
+        <div class="game-icon">🔤</div>
+        <div class="card-text">
+          <h2>Word Puzzle</h2>
+          <p>Control word selection, timer, and hints.</p>
+          <span class="status-badge" style="background: linear-gradient(135deg, #f97316, #ea580c)">ONLINE /
+            ACTIVE</span>
+        </div>
+      </a>
 
-        <!-- Game 7: Word Puzzle Game -->
-        <a href="dashboard-wordpuzzle.html" class="game-card">
-          <div class="game-icon">🔤</div>
-          <div class="card-text">
-            <h2>Word Puzzle</h2>
-            <p>Control word selection, timer, and hints.</p>
-            <span class="status-badge" style="background: linear-gradient(135deg, #f97316, #ea580c)">ONLINE / ACTIVE</span>
-          </div>
-        </a>
-
-      </div>
     </div>
+  </div>
 
-    <!-- Footer Back Button -->
-    <div class="footer-wrap">
-      <a href="index.html" class="btn-secondary">Back to Main Portal</a>
-    </div>
+  <!-- Footer Back Button -->
+  <div class="footer-wrap">
+    <a href="index.html" class="btn-secondary">Back to Main Portal</a>
+  </div>
 
-    <script src="/socket.io/socket.io.js"></script>
-    <script>
-      const socket = io();
-      function navigateProjector(url) {
-        socket.emit("classroom-navigate", { url: url });
-      }
-    </script>
-  </body>
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    function navigateProjector(url) {
+      socket.emit("classroom-navigate", { url: url });
+    }
+  </script>
+</body>
+
 </html>
