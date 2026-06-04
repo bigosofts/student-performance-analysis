@@ -16,6 +16,48 @@
       href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Outfit:wght@400;600;800;900&display=swap"
       rel="stylesheet"
     />
+    <style>
+      /* --- MOBILE TAB NAVIGATION --- */
+      .mobile-tab-bar {
+          display: none;
+          position: fixed;
+          bottom: 0; left: 0; right: 0;
+          background: #1e293b;
+          border-top: 1px solid #334155;
+          padding: 8px;
+          z-index: 100;
+          justify-content: space-around;
+          box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+      }
+      .mobile-tab-btn {
+          background: transparent;
+          border: none;
+          color: #94a3b8;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 4px;
+          font-size: 0.7rem;
+          font-weight: 600;
+          cursor: pointer;
+          padding: 4px 8px;
+          transition: all 0.2s;
+      }
+      .mobile-tab-btn.active {
+          color: #3b82f6;
+      }
+      .mobile-tab-btn .tab-icon {
+          font-size: 1.2rem;
+      }
+
+      @media (max-width: 768px) {
+          body { padding-bottom: 80px; }
+          .mobile-tab-bar { display: flex; }
+          .maze-control-grid { display: flex; flex-direction: column; }
+          [data-mobile-tab] { display: none !important; }
+          [data-mobile-tab].mob-active { display: block !important; }
+      }
+    </style>
   </head>
   <body class="dashboard-maze">
     <!-- Header -->
@@ -59,7 +101,7 @@
 
     <div class="maze-control-grid">
       <!-- ══ TEAM BOYS ══════════════════════════════════════ -->
-      <div class="maze-team-card boys">
+      <div class="maze-team-card boys" data-mobile-tab="boys">
         <h2
           style="
             color: var(--boys-color);
@@ -246,7 +288,7 @@
       </div>
 
       <!-- ══ TEAM GIRLS ═════════════════════════════════════ -->
-      <div class="maze-team-card girls">
+      <div class="maze-team-card girls" data-mobile-tab="girls">
         <h2
           style="
             color: var(--girls-color);
@@ -433,7 +475,7 @@
       </div>
 
       <!-- ══ GAME COMMANDS ══════════════════════════════════ -->
-      <div class="maze-team-card control">
+      <div class="maze-team-card control" data-mobile-tab="control">
         <h2
           style="
             color: #7c3aed;
@@ -819,10 +861,49 @@
     <!-- Toast -->
     <div id="mazeToast" class="maze-toast" style="opacity: 0"></div>
 
+    <!-- Mobile Tab Bar -->
+    <nav class="mobile-tab-bar" id="mobileTabBar">
+        <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
+            <span class="tab-icon">🎮</span>
+            Global
+        </button>
+        <button class="mobile-tab-btn" data-tab="boys" onclick="switchMobileTab('boys')">
+            <span class="tab-icon">👦</span>
+            Boys
+        </button>
+        <button class="mobile-tab-btn" data-tab="girls" onclick="switchMobileTab('girls')">
+            <span class="tab-icon">👧</span>
+            Girls
+        </button>
+    </nav>
+
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/maze.js"></script>
     <script>
       const { MazeGame } = window;
+
+      function switchMobileTab(tabName) {
+        document.querySelectorAll('[data-mobile-tab]').forEach(el => {
+            el.classList.remove('mob-active');
+        });
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
+            el.classList.add('mob-active');
+        });
+        const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      (function() {
+          if (window.innerWidth <= 768) {
+              switchMobileTab('control');
+          } else {
+              document.querySelectorAll('[data-mobile-tab]').forEach(el => el.classList.add('mob-active'));
+          }
+      })();
 
       let dashSocket = null;
       let currentQuizTeam = null;

@@ -187,6 +187,49 @@
     #cqPauseBtn {
       background-color: #3a3a3a;
     }
+
+    /* --- MOBILE TAB NAVIGATION --- */
+    .mobile-tab-bar {
+      display: none;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      padding: 8px 4px;
+      z-index: 200;
+      justify-content: space-around;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+    }
+    .mobile-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 10px;
+      transition: all 0.2s;
+      border-radius: 8px;
+    }
+    .mobile-tab-btn.active {
+      color: #3b82f6;
+      background: rgba(59,130,246,0.1);
+    }
+    .mobile-tab-btn .tab-icon { font-size: 1.2rem; }
+
+    @media (max-width: 768px) {
+      body { padding-bottom: 80px; }
+      .dashboard-container { padding: 12px; }
+      .mobile-tab-bar { display: flex; }
+      .tabs-container { display: none !important; }
+      .tab-content { display: none !important; }
+      .tab-content.mob-active { display: block !important; }
+      .header h1 { font-size: 1.3rem; }
+    }
   </style>
 </head>
 
@@ -474,6 +517,18 @@
     </div>
 
   </div>
+
+  <!-- Mobile Tab Bar -->
+  <nav class="mobile-tab-bar" id="mobileTabBarQB">
+    <button class="mobile-tab-btn active" data-tab="mcq" onclick="switchMobileTabQB('mcq')">
+      <span class="tab-icon">📝</span>
+      MCQ Bank
+    </button>
+    <button class="mobile-tab-btn" data-tab="cq" onclick="switchMobileTabQB('cq')">
+      <span class="tab-icon">✍️</span>
+      CQ Bank
+    </button>
+  </nav>
 
   <!-- Manage Questions Modal -->
   <div id="tableModal" class="modal-overlay">
@@ -1040,6 +1095,25 @@
         window.scrollTo(0, 0);
       }
     }
+
+    // ════════════════════════════════════════════
+    //  MOBILE TAB SWITCHING (Question Bank)
+    // ════════════════════════════════════════════
+    function switchMobileTabQB(tabName) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('mob-active'));
+      document.querySelectorAll('.mobile-tab-btn').forEach(btn => btn.classList.remove('active'));
+      const targetTab = document.getElementById(`tab-${tabName}`);
+      if (targetTab) targetTab.classList.add('mob-active');
+      const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    (function() {
+      if (window.innerWidth <= 768) {
+        switchMobileTabQB('mcq');
+      }
+    })();
   </script>
 </body>
 

@@ -157,7 +157,7 @@
     }
 
     .remote-btn {
-      font-size: clamp(0.65rem, 1vw, 0.9rem);
+
       padding: clamp(6px, 1vh, 12px) clamp(10px, 1.5vw, 20px);
       border-radius: 12px;
       font-weight: 800;
@@ -327,7 +327,7 @@
     }
 
     .game-card h2 {
-      font-size: clamp(1rem, 1.5vw, 1.4rem);
+
       font-weight: 800;
       margin-bottom: clamp(4px, 1vh, 8px);
       letter-spacing: 0.5px;
@@ -336,7 +336,7 @@
 
     .game-card p {
       color: #a1a1aa;
-      font-size: clamp(0.7rem, 1vw, 0.9rem);
+
       line-height: 1.4;
       flex-grow: 1;
       margin-bottom: clamp(10px, 1.5vh, 18px);
@@ -347,7 +347,7 @@
       padding: clamp(4px, 1vh, 6px) clamp(10px, 1.5vw, 16px);
       border-radius: 20px;
       background: var(--theme-color);
-      font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+
       text-transform: uppercase;
       font-weight: 800;
       color: white;
@@ -466,8 +466,72 @@
       }
     }
 
+    @media (max-width:768px) {
+      .main-content {
+        padding: 0px;
+      }
+    }
+
+    /* --- MOBILE TAB NAVIGATION --- */
+    .mobile-tab-bar {
+      display: none;
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: #1e293b;
+      border-top: 1px solid #334155;
+      padding: 8px;
+      z-index: 100;
+      justify-content: space-around;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .mobile-tab-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 4px 8px;
+      transition: all 0.2s;
+    }
+
+    .mobile-tab-btn.active {
+      color: #3b82f6;
+    }
+
+    .mobile-tab-btn .tab-icon {
+      font-size: 1.2rem;
+    }
+
     /* Mobile (Max 768px) */
     @media (max-width: 768px) {
+      .mobile-tab-bar {
+        display: flex;
+      }
+
+      [data-mobile-tab] {
+        display: none !important;
+      }
+
+      [data-mobile-tab].mob-active {
+        display: block !important;
+      }
+
+      [data-mobile-tab="games"].mob-active {
+        display: grid !important;
+      }
+
+      .main-content {
+        padding-bottom: 80px;
+      }
+
       .header-area {
         padding: 20px 15px 10px;
         margin-top: 0;
@@ -475,6 +539,7 @@
 
       .game-grid {
         grid-template-columns: 1fr;
+        margin-bottom: 50px;
       }
 
       .game-card:nth-child(5) {
@@ -507,6 +572,7 @@
       .btn-secondary {
         width: 90%;
         justify-content: center;
+        margin-top: -200px;
       }
     }
   </style>
@@ -530,7 +596,7 @@
   <div class="main-content">
 
     <!-- Classroom Remote Navigation Control -->
-    <div class="remote-control-panel">
+    <div class="remote-control-panel" data-mobile-tab="remote">
       <h2 class="remote-title">📱 Projector Remote Control</h2>
       <div class="remote-buttons">
         <button onclick="navigateProjector('index.html')" class="remote-btn"
@@ -552,7 +618,7 @@
       </div>
     </div>
 
-    <div class="game-grid">
+    <div class="game-grid" data-mobile-tab="games">
 
       <!-- Game 1: Question Bank -->
       <a href="dashboard-questionbank.html" class="game-card">
@@ -636,15 +702,55 @@
 
   <!-- Footer Back Button -->
   <div class="footer-wrap">
-    <a href="index.html" class="btn-secondary">Back to Main Portal</a>
+    <a href="index.html" class="btn-secondary">Logout</a>
   </div>
+
+  <!-- Mobile Tab Bar -->
+  <nav class="mobile-tab-bar" id="mobileTabBar">
+    <button class="mobile-tab-btn active" data-tab="remote" onclick="switchMobileTab('remote')">
+      <span class="tab-icon">🎮</span>
+      Remote
+    </button>
+    <button class="mobile-tab-btn" data-tab="games" onclick="switchMobileTab('games')">
+      <span class="tab-icon">🕹️</span>
+      Games
+    </button>
+  </nav>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+
     function navigateProjector(url) {
       socket.emit("classroom-navigate", { url: url });
     }
+
+    // ════════════════════════════════════════════
+    //  MOBILE TAB SWITCHING
+    // ════════════════════════════════════════════
+    function switchMobileTab(tabName) {
+      document.querySelectorAll('[data-mobile-tab]').forEach(el => {
+        el.classList.remove('mob-active');
+      });
+      document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
+        el.classList.add('mob-active');
+      });
+      const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+      if (activeBtn) activeBtn.classList.add('active');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    (function () {
+      if (window.innerWidth <= 768) {
+        switchMobileTab('remote');
+      } else {
+        // Ensure both are visible on desktop if resized
+        document.querySelectorAll('[data-mobile-tab]').forEach(el => el.classList.add('mob-active'));
+      }
+    })();
   </script>
 </body>
 

@@ -41,30 +41,70 @@
             margin-top: 5px;
             display: none;
         }
+
+        /* --- MOBILE TAB NAVIGATION --- */
+        .mobile-tab-bar {
+            display: none;
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            background: #1e293b;
+            border-top: 1px solid #334155;
+            padding: 8px;
+            z-index: 100;
+            justify-content: space-around;
+            box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+        }
+        .mobile-tab-btn {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 8px;
+            transition: all 0.2s;
+        }
+        .mobile-tab-btn.active {
+            color: #3b82f6;
+        }
+        .mobile-tab-btn .tab-icon {
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            body { padding-bottom: 80px; }
+            .mobile-tab-bar { display: flex; }
+            [data-mobile-tab] { display: none !important; }
+            [data-mobile-tab].mob-active { display: block !important; }
+        }
     </style>
 </head>
 <body>
-    <div class="glass-card dashboard-header">
-        <h1 style="color: var(--secondary);">Memory Flip Control</h1>
-        <p>Teacher Dashboard • <a href="dashboard.html" style="color: var(--primary); text-decoration: none;">Back to Central</a></p>
-    </div>
+    <div data-mobile-tab="control">
+        <div class="glass-card dashboard-header">
+            <h1 style="color: var(--secondary);">Memory Flip Control</h1>
+            <p>Teacher Dashboard • <a href="dashboard.html" style="color: var(--primary); text-decoration: none;">Back to Central</a></p>
+        </div>
 
-    <div class="controls-grid">
-        <button class="btn-primary" onclick="handleInit()">RESET / CREATE 30 TILES</button>
-        <button class="btn-primary" onclick="handleShuffle()" style="background: #8b5cf6;">SHUFFLE TILES</button>
-        <button class="btn-primary" onclick="handlePreview()" style="background: #10b981;">START 10S PREVIEW</button>
-        <button class="btn-primary" onclick="handleSwitch()" style="background: #f59e0b;">SWITCH TURN</button>
-        <button class="btn-secondary" onclick="handleReset()">FULL WIPE DATA</button>
-    </div>
+        <div class="controls-grid">
+            <button class="btn-primary" onclick="handleInit()">RESET / CREATE 30 TILES</button>
+            <button class="btn-primary" onclick="handleShuffle()" style="background: #8b5cf6;">SHUFFLE TILES</button>
+            <button class="btn-primary" onclick="handlePreview()" style="background: #10b981;">START 10S PREVIEW</button>
+            <button class="btn-primary" onclick="handleSwitch()" style="background: #f59e0b;">SWITCH TURN</button>
+            <button class="btn-secondary" onclick="handleReset()">FULL WIPE DATA</button>
+        </div>
 
-    <div class="status-strip glass-card">
-        <div>Turn: <strong id="currentTurn">Boys</strong></div>
-        <div>Boys Score: <strong id="boysScore">0</strong></div>
-        <div>Girls Score: <strong id="girlsScore">0</strong></div>
-    </div>
+        <div class="status-strip glass-card">
+            <div>Turn: <strong id="currentTurn">Boys</strong></div>
+            <div>Boys Score: <strong id="boysScore">0</strong></div>
+            <div>Girls Score: <strong id="girlsScore">0</strong></div>
+        </div>
 
-    <div class="glass-card" style="padding: 20px; margin-bottom: 30px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
-        <div>
+        <div class="glass-card" style="padding: 20px; margin-bottom: 30px;">
             <h2 style="margin-bottom: 10px;">Announce Winner</h2>
             <input type="text" id="className" placeholder="Class (e.g. 12)" style="margin:5px 0;">
             <input type="text" id="sectionName" placeholder="Section (e.g. Shitolokkha)" style="margin:5px 0;">
@@ -74,20 +114,35 @@
             </div>
             <button class="btn-primary" onclick="handleClearWinner()" style="background:#64748b; margin-top:10px; width:100%;">CLOSE WINNER SCREEN</button>
         </div>
-        <div>
+    </div>
+
+    <div data-mobile-tab="tiles">
+        <div class="glass-card" style="padding: 20px; margin-bottom: 30px;">
             <h2 style="margin-bottom: 10px;">Bulk Image Upload</h2>
             <p style="font-size: 0.8rem; color: var(--text-dim);">Select up to 30 images.</p>
             <input type="file" id="bulkUpload" multiple accept="image/*" class="btn-primary" style="width: auto;">
             <div id="bulkStatus" style="margin-top: 10px; color: #10b981; font-weight: 600;"></div>
         </div>
-    </div>
 
-    <div class="editor-container">
-        <h2 style="margin-bottom: 20px;">Tile Management</h2>
-        <div id="tileEditorList" class="tile-editor-list">
-            <!-- Tiles injected here -->
+        <div class="editor-container">
+            <h2 style="margin-bottom: 20px;">Tile Management</h2>
+            <div id="tileEditorList" class="tile-editor-list">
+                <!-- Tiles injected here -->
+            </div>
         </div>
     </div>
+
+    <!-- Mobile Tab Bar -->
+    <nav class="mobile-tab-bar" id="mobileTabBar">
+        <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
+            <span class="tab-icon">🎮</span>
+            Control
+        </button>
+        <button class="mobile-tab-btn" data-tab="tiles" onclick="switchMobileTab('tiles')">
+            <span class="tab-icon">🧩</span>
+            Tiles
+        </button>
+    </nav>
 
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/game.js"></script>
@@ -289,6 +344,32 @@
                 renderAll();
             });
         }
+
+        // ════════════════════════════════════════════
+        //  MOBILE TAB SWITCHING
+        // ════════════════════════════════════════════
+        function switchMobileTab(tabName) {
+            document.querySelectorAll('[data-mobile-tab]').forEach(el => {
+                el.classList.remove('mob-active');
+            });
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
+                el.classList.add('mob-active');
+            });
+            const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+            if (activeBtn) activeBtn.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        (function() {
+            if (window.innerWidth <= 768) {
+                switchMobileTab('control');
+            } else {
+                document.querySelectorAll('[data-mobile-tab]').forEach(el => el.classList.add('mob-active'));
+            }
+        })();
     </script>
 </body>
 </html>
