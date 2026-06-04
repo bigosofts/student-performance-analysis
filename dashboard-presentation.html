@@ -1271,6 +1271,93 @@
         background: rgba(255, 255, 255, 0.06);
         margin: 8px 0;
       }
+
+      /* ═══════════════════════════════════════════
+         MOBILE TAB NAVIGATION
+         Only visible on screens ≤768px
+      ═══════════════════════════════════════════ */
+
+      .mobile-tab-bar {
+        display: none;
+      }
+
+      @media (max-width: 768px) {
+        /* ─── Tab Bar ─── */
+        .mobile-tab-bar {
+          display: flex;
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          z-index: 200;
+          background: rgba(5, 7, 20, 0.92);
+          backdrop-filter: blur(20px);
+          border-top: 1px solid rgba(124, 58, 237, 0.25);
+          padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+          gap: 2px;
+          box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .mobile-tab-btn {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+          padding: 6px 2px;
+          border: none;
+          background: transparent;
+          color: #64748b;
+          font-family: 'Outfit', sans-serif;
+          font-size: 0.62rem;
+          font-weight: 700;
+          cursor: pointer;
+          border-radius: 10px;
+          transition: all 0.25s;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          -webkit-tap-highlight-color: transparent;
+        }
+
+        .mobile-tab-btn .tab-icon {
+          font-size: 1.2rem;
+          line-height: 1;
+          transition: transform 0.25s;
+        }
+
+        .mobile-tab-btn.active {
+          color: #c4b5fd;
+          background: rgba(124, 58, 237, 0.15);
+        }
+
+        .mobile-tab-btn.active .tab-icon {
+          transform: scale(1.15);
+        }
+
+        .mobile-tab-btn:active {
+          transform: scale(0.93);
+        }
+
+        /* ─── Layout overrides ─── */
+        .main-layout {
+          padding-bottom: 85px; /* space for tab bar */
+        }
+
+        /* All tab content sections are hidden by default on mobile */
+        [data-mobile-tab] {
+          display: none !important;
+        }
+
+        /* Show only the active one */
+        [data-mobile-tab].mob-active {
+          display: block !important;
+        }
+
+        /* The right column needs flex when active */
+        .right-column[data-mobile-tab].mob-active {
+          display: flex !important;
+        }
+      }
     </style>
   </head>
   <body>
@@ -1304,7 +1391,7 @@
       <!-- ═══ LEFT COLUMN ═══ -->
       <div class="left-column">
         <!-- Upload Panel -->
-        <div class="panel" style="margin-bottom: 24px">
+        <div class="panel" style="margin-bottom: 24px" data-mobile-tab="upload">
           <div class="panel-header">
             <div
               class="panel-header-icon"
@@ -1388,7 +1475,7 @@
         </div>
 
         <!-- File Library -->
-        <div class="panel">
+        <div class="panel" data-mobile-tab="library">
           <div class="panel-header">
             <div
               class="panel-header-icon"
@@ -1431,7 +1518,7 @@
         </div>
 
         <!-- Gallery Management -->
-        <div class="panel" style="margin-top: 24px">
+        <div class="panel" style="margin-top: 24px" data-mobile-tab="gallery">
           <div class="panel-header">
             <div
               class="panel-header-icon"
@@ -1475,7 +1562,7 @@
         </div>
 
         <!-- Uploaded Videos Panel -->
-        <div class="panel" style="margin-top: 24px">
+        <div class="panel" style="margin-top: 24px" data-mobile-tab="videos">
           <div class="panel-header">
             <div
               class="panel-header-icon"
@@ -1507,7 +1594,7 @@
       </div>
 
       <!-- ═══ RIGHT COLUMN ═══ -->
-      <div class="right-column">
+      <div class="right-column" data-mobile-tab="control">
         <!-- Presentation Control Panel -->
         <div class="pres-control-panel" id="presControlPanel">
           <!-- No presentation selected state -->
@@ -1515,7 +1602,7 @@
             <span class="np-icon">🎯</span>
             <h3>No Presentation Selected</h3>
             <p>
-              Select a presentation from the library on the left to start
+              Select a presentation from the <strong>📚 Library</strong> to start
               controlling it on the game screen.
             </p>
           </div>
@@ -1929,6 +2016,30 @@ Kingdom → Plantae
         </button>
       </div>
     </div>
+
+    <!-- Mobile Tab Bar -->
+    <nav class="mobile-tab-bar" id="mobileTabBar">
+      <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
+        <span class="tab-icon">🎮</span>
+        Control
+      </button>
+      <button class="mobile-tab-btn" data-tab="upload" onclick="switchMobileTab('upload')">
+        <span class="tab-icon">📤</span>
+        Upload
+      </button>
+      <button class="mobile-tab-btn" data-tab="library" onclick="switchMobileTab('library')">
+        <span class="tab-icon">📚</span>
+        Library
+      </button>
+      <button class="mobile-tab-btn" data-tab="gallery" onclick="switchMobileTab('gallery')">
+        <span class="tab-icon">🖼️</span>
+        Gallery
+      </button>
+      <button class="mobile-tab-btn" data-tab="videos" onclick="switchMobileTab('videos')">
+        <span class="tab-icon">🎞️</span>
+        Videos
+      </button>
+    </nav>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -3060,6 +3171,35 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
           document.getElementById("youtubeUrlInput").dispatchEvent(new Event('input'));
         }
       });
+      // ════════════════════════════════════════════
+      //  MOBILE TAB SWITCHING (UI ONLY)
+      // ════════════════════════════════════════════
+      function switchMobileTab(tabName) {
+        // Hide all tab content sections
+        document.querySelectorAll('[data-mobile-tab]').forEach(el => {
+          el.classList.remove('mob-active');
+        });
+        // Deactivate all tab buttons
+        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+          btn.classList.remove('active');
+        });
+        // Activate the selected tab content
+        document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
+          el.classList.add('mob-active');
+        });
+        // Activate the selected tab button
+        const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
+        if (activeBtn) activeBtn.classList.add('active');
+        // Scroll to top when switching tabs
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      // Initialize: activate 'control' tab on mobile by default
+      (function() {
+        if (window.innerWidth <= 768) {
+          switchMobileTab('control');
+        }
+      })();
 
     </script>
   </body>
