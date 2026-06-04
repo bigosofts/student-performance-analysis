@@ -1357,6 +1357,48 @@
         .right-column[data-mobile-tab].mob-active {
           display: flex !important;
         }
+
+        /* ─── Control Bar Redesign ─── */
+        .control-bar {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          padding: 16px !important;
+        }
+        .btn-ctrl {
+          justify-content: center;
+          padding: 12px !important;
+        }
+        .btn-ctrl.btn-fullscreen {
+          grid-column: 1 / -1;
+        }
+        .btn-ctrl.btn-close-pres {
+          grid-column: 1 / -1;
+        }
+        .btn-ctrl.btn-close-share {
+          grid-column: 1 / -1;
+        }
+
+        /* ─── Thumb strip horizontal scroll ─── */
+        .thumb-strip {
+          flex-wrap: nowrap !important;
+          overflow-x: auto !important;
+          overflow-y: hidden !important;
+          padding: 16px !important;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+        }
+        .thumb-item {
+          scroll-snap-align: start;
+        }
+
+        /* ─── Share Grid Redesign ─── */
+        .share-section {
+          padding: 16px !important;
+        }
+        .share-grid {
+          grid-template-columns: 1fr 1fr !important;
+        }
       }
     </style>
   </head>
@@ -1649,6 +1691,16 @@
                   <div class="share-name">Share Image</div>
                   <div class="share-desc">Send photo to screen</div>
                 </div>
+                <div class="share-card draw-share" id="shareDrawBtn">
+                  <span class="share-icon">✏️</span>
+                  <div class="share-name">Drawing</div>
+                  <div class="share-desc">Touch/pen input</div>
+                </div>
+                <div class="share-card video-share" id="shareVideoBtn">
+                  <span class="share-icon">🎬</span>
+                  <div class="share-name">Share Video</div>
+                  <div class="share-desc">YouTube or upload MP4</div>
+                </div>
                 <div class="share-card tree-share" id="shareTreeBtn">
                   <span class="share-icon">🌳</span>
                   <div class="share-name">Classification Tree</div>
@@ -1659,21 +1711,16 @@
                   <div class="share-name">Notes / Text</div>
                   <div class="share-desc">Plain text or notes</div>
                 </div>
-<div class="share-card draw-share" id="shareDrawBtn">
-                   <span class="share-icon">✏️</span>
-                   <div class="share-name">Drawing</div>
-                   <div class="share-desc">Touch/pen input</div>
-                 </div>
-                 <div class="share-card video-share" id="shareVideoBtn">
-                   <span class="share-icon">🎬</span>
-                   <div class="share-name">Share Video</div>
-                   <div class="share-desc">YouTube or upload MP4</div>
-                 </div>
-                 <div class="share-card webpage-share" id="shareWebpageBtn" style="background: rgba(14, 165, 233, 0.05); border-color: rgba(14, 165, 233, 0.2);">
-                   <span class="share-icon">🌐</span>
-                   <div class="share-name">Share Webpage</div>
-                   <div class="share-desc">Live site in iframe</div>
-                 </div>
+                <div class="share-card webpage-share" id="shareWebpageBtn" style="background: rgba(14, 165, 233, 0.05); border-color: rgba(14, 165, 233, 0.2);">
+                  <span class="share-icon">🌐</span>
+                  <div class="share-name">Share Webpage</div>
+                  <div class="share-desc">Live site in iframe</div>
+                </div>
+                <div class="share-card pdf-share" id="sharePdfBtn" style="background: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2);">
+                  <span class="share-icon">📄</span>
+                  <div class="share-name">Share PDF</div>
+                  <div class="share-desc">Show PDF from gallery</div>
+                </div>
                </div>
              </div>
            </div>
@@ -2017,6 +2064,27 @@ Kingdom → Plantae
       </div>
     </div>
 
+    <!-- PDF Share Modal -->
+    <div class="modal-overlay" id="pdfModal">
+      <div class="modal-box wide">
+        <div class="modal-header">
+          <div class="modal-title">📄 Share PDF Document</div>
+          <button class="modal-close" onclick="closeModal('pdfModal')">✕</button>
+        </div>
+        
+        <div class="form-row" style="margin-bottom: 16px">
+          <label class="form-label">Select PDF from Gallery</label>
+          <select id="galleryPdfSelect" class="select-input">
+            <option value="">-- Choose a PDF --</option>
+          </select>
+        </div>
+
+        <button class="btn-share green" id="sendPdfBtn" onclick="sendPdf()" disabled>
+          📡 Send PDF to Game Screen
+        </button>
+      </div>
+    </div>
+
     <!-- Mobile Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar">
       <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
@@ -2055,7 +2123,7 @@ Kingdom → Plantae
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Type</label>
           <select id="galleryTypeSelect" class="select-input" onchange="toggleGalleryUploadType()">
-            <option value="image">Image</option>
+            <option value="media">Image / PDF</option>
             <option value="video">Video (YouTube)</option>
           </select>
         </div>
@@ -2070,13 +2138,13 @@ Kingdom → Plantae
           <input type="text" id="galleryNameInput" class="form-input" placeholder="e.g. Intro Diagram" />
         </div>
 
-        <!-- Image Upload Section -->
+        <!-- Image/PDF Upload Section -->
         <div id="galleryImageSection">
           <div class="form-row" style="margin-bottom: 16px">
-            <label class="form-label">Select Image File</label>
+            <label class="form-label">Select File (Image/PDF)</label>
             <div class="file-input-wrapper">
               <div class="file-input-label" id="galleryFileInputLabel">No file chosen...</div>
-              <input type="file" id="galleryFileInput" accept="image/*" onchange="handleGalleryFileSelect(this.files[0])" />
+              <input type="file" id="galleryFileInput" accept="image/*,application/pdf" onchange="handleGalleryFileSelect(this.files[0])" />
             </div>
           </div>
         </div>
@@ -2673,6 +2741,41 @@ function sendDrawing() {
          closeModal("webpageModal");
        }
 
+       document.getElementById("sharePdfBtn").addEventListener("click", () => {
+         // Populate the select with PDF files from the gallery
+         const select = document.getElementById("galleryPdfSelect");
+         select.innerHTML = '<option value="">-- Choose a PDF --</option>';
+         let hasPdf = false;
+         galleryItems.forEach(item => {
+           if (item.type === "pdf" || (item.url && item.url.toLowerCase().endsWith(".pdf"))) {
+             hasPdf = true;
+             const opt = document.createElement("option");
+             opt.value = item.url;
+             opt.textContent = `[${item.chapterName}] ${item.itemName}`;
+             select.appendChild(opt);
+           }
+         });
+         
+         if (!hasPdf) {
+           select.innerHTML = '<option value="">-- No PDFs available in Gallery --</option>';
+         }
+         
+         document.getElementById("sendPdfBtn").disabled = true;
+         openModal("pdfModal");
+       });
+
+       document.getElementById("galleryPdfSelect").addEventListener("change", (e) => {
+         document.getElementById("sendPdfBtn").disabled = !e.target.value;
+       });
+
+       function sendPdf() {
+         const url = document.getElementById("galleryPdfSelect").value;
+         if (!url) return;
+         socket.emit("pres-share-pdf", { url });
+         showToast("📄 PDF sent to game screen!", "success");
+         closeModal("pdfModal");
+       }
+
        document.getElementById("youtubeUrlInput").addEventListener("input", (e) => {
          const url = e.target.value.trim();
          if (isValidYouTubeUrl(url)) {
@@ -3070,15 +3173,22 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
           return;
         }
 
-        if (type === "image") {
+        if (type === "media" || type === "image" || type === "pdf") {
           if (!galleryUploadFile) {
-            showToast("Please select an image file", "error");
+            showToast("Please select a file", "error");
             return;
           }
+          
+          let actualType = "image";
+          if (galleryUploadFile.name.toLowerCase().endsWith(".pdf")) {
+            actualType = "pdf";
+          }
+          
           const formData = new FormData();
-          formData.append("image", galleryUploadFile);
+          formData.append("image", galleryUploadFile); // Keeping 'image' as the field name since the backend uses upload.single('image')
           formData.append("chapterName", chapter);
           formData.append("itemName", name);
+          formData.append("type", actualType);
 
           fetch("/api/gallery/image", {
             method: "POST",
@@ -3087,10 +3197,10 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
           .then(res => res.json())
           .then(data => {
             if(data.status === "ok") {
-              showToast("Image added to gallery", "success");
+              showToast(actualType === "pdf" ? "PDF added to gallery" : "Image added to gallery", "success");
               closeModal("galleryUploadModal");
               fetchGallery();
-            } else showToast(data.error || "Error adding image", "error");
+            } else showToast(data.error || "Error adding file", "error");
           })
           .catch(e => showToast("Network error", "error"));
 
@@ -3137,7 +3247,9 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
 
         galleryItems.forEach(item => {
           const text = `${item.chapterName} - ${item.itemName}`;
-          if (item.type === "image") {
+          const isPdf = item.type === "pdf" || (item.url && item.url.toLowerCase().endsWith(".pdf"));
+          
+          if ((item.type === "image" || item.type === "media") && !isPdf) {
             imgHtml += `<option value="${item.url}">${text}</option>`;
           } else if (item.type === "video") {
             vidHtml += `<option value="${item.url}">${text}</option>`;

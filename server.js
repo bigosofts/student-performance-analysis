@@ -315,7 +315,7 @@ app.post("/upload-quiz", quizUpload.single("quizFile"), (req, res) => {
   if (fs.existsSync(dest)) {
     try {
       fs.unlinkSync(dest);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   // Rename temp to permanent
@@ -417,7 +417,7 @@ app.post("/upload-maze-quiz", mazeQuizUpload.single("quizFile"), (req, res) => {
   if (fs.existsSync(dest)) {
     try {
       fs.unlinkSync(dest);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   fs.renameSync(tempPath, dest);
@@ -637,6 +637,10 @@ io.on("connection", (socket) => {
 
   socket.on("pres-share-webpage", (data) => {
     io.emit("pres-share-webpage", data);
+  });
+
+  socket.on("pres-share-pdf", (data) => {
+    io.emit("pres-share-pdf", data);
   });
 
   socket.on("pres-close-share", () => {
@@ -962,13 +966,13 @@ app.delete("/api/presentation/:filename", (req, res) => {
   // Delete file
   try {
     fs.unlinkSync(path.join(uploadsDir, entry.filename));
-  } catch (e) {}
+  } catch (e) { }
   // Delete slides dir
   try {
     const slideDir = path.join(uploadsDir, entry.slideDirName);
     if (fs.existsSync(slideDir))
       fs.rmSync(slideDir, { recursive: true, force: true });
-  } catch (e) {}
+  } catch (e) { }
 
   meta.splice(idx, 1);
   savePresMeta(meta);
@@ -1021,9 +1025,10 @@ app.post("/api/gallery/image", galleryUpload.single("image"), (req, res) => {
   const url = "/uploads/gallery/" + req.file.filename;
 
   const gallery = loadGallery();
+  const itemType = req.body.type || "image";
   const newItem = {
     id: "img_" + Date.now(),
-    type: "image",
+    type: itemType,
     chapterName,
     itemName,
     url,
@@ -1074,13 +1079,14 @@ app.put("/api/gallery/:id", galleryUpload.single("image"), (req, res) => {
     if (req.body.videoUrl) item.url = req.body.videoUrl;
     if (req.body.previewUrl !== undefined)
       item.previewUrl = req.body.previewUrl;
-  } else if (item.type === "image" && req.file) {
-    // Delete old image
+  } else if ((item.type === "image" || item.type === "pdf") && req.file) {
+    // Delete old file
     try {
       const oldPath = path.join(__dirname, item.url);
       if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    } catch (e) {}
+    } catch (e) { }
     item.url = "/uploads/gallery/" + req.file.filename;
+    if (req.body.type) item.type = req.body.type;
   }
 
   saveGallery(gallery);
@@ -1102,7 +1108,7 @@ app.delete("/api/gallery/:id", (req, res) => {
     try {
       const filePath = path.join(__dirname, item.url);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch (e) {}
+    } catch (e) { }
   }
 
   gallery.splice(index, 1);
@@ -1111,7 +1117,24 @@ app.delete("/api/gallery/:id", (req, res) => {
   res.json({ status: "ok" });
 });
 
-// Serve slide images
+// Force inline display for PDFs to prevent automatic downloading
+app.get("/api/view-pdf", (req, res) => {
+  const fileUrl = req.query.url;
+  if (!fileUrl) return res.status(400).send("No URL");
+
+  // Prevent directory traversal
+  const normalizedPath = path.normalize(fileUrl).replace(/^(\.\.[\/\\])+/, '');
+  const filePath = path.join(__dirname, normalizedPath);
+
+  if (!fs.existsSync(filePath)) return res.status(404).send("File not found");
+
+  res.setHeader("Content-Type", "application/pdf");
+  res.setHeader("Content-Disposition", "inline; filename=\"document.pdf\"");
+  const stream = fs.createReadStream(filePath);
+  stream.pipe(res);
+});
+
+// Serve static files
 app.use("/uploads", express.static(uploadsDir));
 
 // Question Bank and Student Performance API

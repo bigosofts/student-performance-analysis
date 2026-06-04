@@ -1174,6 +1174,19 @@
        </div>
      </div>
 
+     <!-- PDF Modal -->
+     <div class="share-modal" id="pdfModal">
+       <div class="share-backdrop" onclick="closeShareModal('pdfModal')"></div>
+       <div class="share-box" style="width: 95vw; max-width: none; height: 95vh; overflow: hidden; display: flex; flex-direction: column;">
+         <button class="modal-close-btn" onclick="closeShareModal('pdfModal')">✕</button>
+         <div class="share-modal-title">📄 Shared PDF</div>
+         <div class="share-modal-sub" id="pdfModalSub">From your teacher</div>
+         <div style="width: 100%; flex: 1; margin-top: 10px; background: #fff; border-radius: 8px;">
+           <iframe id="pdfIframe" style="width: 100%; height: 100%; border: none; border-radius: 8px;" src=""></iframe>
+         </div>
+       </div>
+     </div>
+
     <script src="/socket.io/socket.io.js"></script>
     <script>
       // ════════════════════════════════════════════
@@ -1358,6 +1371,7 @@ socket.on("pres-close-share", () => {
          closeShareModal("noteModal");
          closeShareModal("videoModal");
          closeShareModal("webpageModal");
+         closeShareModal("pdfModal");
        });
 
        socket.on("pres-share-webpage", (data) => {
@@ -1366,6 +1380,24 @@ socket.on("pres-close-share", () => {
          document.getElementById("webpageModal").classList.add("open");
          // Wait for modal to render before resize calculation
          setTimeout(resizeWebpageIframe, 50);
+       });
+
+       socket.on("pres-share-pdf", async (data) => {
+         const iframe = document.getElementById("pdfIframe");
+         document.getElementById("pdfModal").classList.add("open");
+         iframe.src = ""; // Clear existing
+         
+         try {
+           // Fetching via AJAX prevents IDM from intercepting the download
+           const res = await fetch("/api/view-pdf?url=" + encodeURIComponent(data.url));
+           const blob = await res.blob();
+           
+           // Create a local blob URL and pass it to the iframe
+           const blobUrl = URL.createObjectURL(blob);
+           iframe.src = blobUrl;
+         } catch (e) {
+           console.error("Failed to load PDF:", e);
+         }
        });
 
        function resizeWebpageIframe() {
@@ -1476,34 +1508,54 @@ socket.on("pres-close-share", () => {
           showFallback(false);
 
           if (animate) {
-            img.classList.add(
-              direction === "forward" ? "slide-out-left" : "slide-out-right",
-            );
-            setTimeout(() => {
+            showLoader(true);
+            const nextImg = new Image();
+            
+            nextImg.onload = () => {
+              showLoader(false);
+              img.classList.add(
+                direction === "forward" ? "slide-out-left" : "slide-out-right",
+              );
+              setTimeout(() => {
+                img.src = url;
+                img.style.display = "";
+                img.classList.remove("slide-out-left", "slide-out-right");
+                img.classList.add(
+                  direction === "forward" ? "slide-in-right" : "slide-in-left",
+                );
+                setTimeout(
+                  () => img.classList.remove("slide-in-right", "slide-in-left"),
+                  400,
+                );
+              }, 300);
+            };
+            
+            nextImg.onerror = () => {
+              showLoader(false);
+              img.style.display = "none";
+              showFallback(
+                true,
+                "Slide " + (currentSlide + 1),
+                "Image could not be loaded",
+              );
+            };
+            
+            nextImg.src = url;
+          } else {
+            showLoader(true);
+            const nextImg = new Image();
+            nextImg.onload = () => {
+              showLoader(false);
               img.src = url;
               img.style.display = "";
-              img.classList.remove("slide-out-left", "slide-out-right");
-              img.classList.add(
-                direction === "forward" ? "slide-in-right" : "slide-in-left",
-              );
-              setTimeout(
-                () => img.classList.remove("slide-in-right", "slide-in-left"),
-                400,
-              );
-            }, 300);
-          } else {
-            img.src = url;
-            img.style.display = "";
+            };
+            nextImg.onerror = () => {
+              showLoader(false);
+              img.style.display = "none";
+              showFallback(true, "Slide " + (currentSlide + 1), "Image could not be loaded");
+            };
+            nextImg.src = url;
           }
-
-          img.onerror = () => {
-            img.style.display = "none";
-            showFallback(
-              true,
-              "Slide " + (currentSlide + 1),
-              "Image could not be loaded",
-            );
-          };
         }
       }
 
