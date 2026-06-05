@@ -776,7 +776,7 @@
         white-space: pre-wrap;
         line-height: 1.8;
         color: #e2e8f0;
-        font-size: 2rem;
+        font-size: 2.5rem;
         flex: 1;
         min-height: 0;
         overflow-y: auto;
@@ -898,7 +898,7 @@
       }
       .tree-node-value {
         color: #fff;
-        font-size: 1.5rem;
+        font-size: 2.5rem;
         font-weight: 500;
       }
 
@@ -1126,66 +1126,161 @@
       </div>
     </div>
 
-<!-- Note Modal -->
-     <div class="share-modal" id="noteModal">
-       <div class="share-backdrop" onclick="closeShareModal('noteModal')"></div>
-       <div class="share-box">
-         <button class="modal-close-btn" onclick="closeShareModal('noteModal')">
-           ✕
-         </button>
-         <div class="share-modal-title">
-           📝 <span id="noteTitleDisplay">Notes</span>
-         </div>
-         <div class="share-modal-sub">Key points from your teacher</div>
-         <div class="note-display" id="noteDisplay"></div>
-       </div>
-     </div>
+    <!-- Note Modal -->
+    <div class="share-modal" id="noteModal">
+      <div class="share-backdrop" onclick="closeShareModal('noteModal')"></div>
+      <div class="share-box">
+        <button class="modal-close-btn" onclick="closeShareModal('noteModal')">
+          ✕
+        </button>
+        <div class="share-modal-title">
+          📝 <span id="noteTitleDisplay">Notes</span>
+        </div>
+        <div class="share-modal-sub">Key points from your teacher</div>
+        <div class="note-display" id="noteDisplay"></div>
+      </div>
+    </div>
 
-     <!-- Video Modal -->
-     <div class="share-modal" id="videoModal">
-       <div class="share-backdrop" onclick="closeShareModal('videoModal')"></div>
-       <div class="share-box">
-         <button class="modal-close-btn" onclick="closeShareModal('videoModal')">
-           ✕
-         </button>
-         <div class="share-modal-title">🎬 Shared Video</div>
-         <div class="share-modal-sub" id="videoModalSub">From your teacher</div>
-         <div id="videoContainer" style="width: 100%; flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 12px;">
-           <div id="youtubePlayer" style="width: 100%; aspect-ratio: 16/9; display: none;">
-             <iframe id="youtubeIframe" width="100%" height="100%" src="" frameborder="0" allowfullscreen></iframe>
-           </div>
-           <video id="uploadedVideo" controls style="width: 100%; max-height: 60vh; border-radius: 12px; display: none;">
-             <source src="" type="video/mp4" />
-           </video>
-         </div>
-       </div>
-     </div>
+    <!-- Video Modal -->
+    <div class="share-modal" id="videoModal">
+      <div class="share-backdrop" onclick="closeShareModal('videoModal')"></div>
+      <div class="share-box">
+        <button class="modal-close-btn" onclick="closeShareModal('videoModal')">
+          ✕
+        </button>
+        <div class="share-modal-title">🎬 Shared Video</div>
+        <div class="share-modal-sub" id="videoModalSub">From your teacher</div>
+        <div
+          id="videoContainer"
+          style="
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+          "
+        >
+          <div
+            id="youtubePlayer"
+            style="width: 100%; aspect-ratio: 16/9; display: none"
+          >
+            <iframe
+              id="youtubeIframe"
+              width="100%"
+              height="100%"
+              src=""
+              frameborder="0"
+              allowfullscreen
+            ></iframe>
+          </div>
+          <video
+            id="uploadedVideo"
+            controls
+            style="
+              width: 100%;
+              max-height: 60vh;
+              border-radius: 12px;
+              display: none;
+            "
+          >
+            <source src="" type="video/mp4" />
+          </video>
+        </div>
+      </div>
+    </div>
 
-     <!-- Webpage Modal -->
-     <div class="share-modal" id="webpageModal">
-       <div class="share-backdrop" onclick="closeShareModal('webpageModal')"></div>
-       <div class="share-box" style="width: calc((95vh - 140px) * 16 / 9); max-width: 95vw; height: auto; max-height: 95vh; overflow: hidden; display: flex; flex-direction: column;">
-         <button class="modal-close-btn" onclick="closeShareModal('webpageModal')">✕</button>
-         <div class="share-modal-title">🌐 Shared Webpage</div>
-         <div class="share-modal-sub" id="webpageModalSub">From your teacher</div>
-         <div id="webpageWrapper" style="position: relative; width: 100%; background: #fff; border-radius: 8px; margin-top: 10px;">
-           <iframe id="webpageIframe" style="position: absolute; top: 0; left: 0; width: 1920px; height: 1080px; border: none; transform-origin: top left;" src=""></iframe>
-         </div>
-       </div>
-     </div>
+    <!-- Webpage Modal -->
+    <div class="share-modal" id="webpageModal">
+      <div
+        class="share-backdrop"
+        onclick="closeShareModal('webpageModal')"
+      ></div>
+      <div
+        class="share-box"
+        style="
+          width: calc((95vh - 140px) * 16 / 9);
+          max-width: 95vw;
+          height: auto;
+          max-height: 95vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <button
+          class="modal-close-btn"
+          onclick="closeShareModal('webpageModal')"
+        >
+          ✕
+        </button>
+        <div class="share-modal-title">🌐 Shared Webpage</div>
+        <div class="share-modal-sub" id="webpageModalSub">
+          From your teacher
+        </div>
+        <div
+          id="webpageWrapper"
+          style="
+            position: relative;
+            width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            margin-top: 10px;
+          "
+        >
+          <iframe
+            id="webpageIframe"
+            style="
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 1920px;
+              height: 1080px;
+              border: none;
+              transform-origin: top left;
+            "
+            src=""
+          ></iframe>
+        </div>
+      </div>
+    </div>
 
-     <!-- PDF Modal -->
-     <div class="share-modal" id="pdfModal">
-       <div class="share-backdrop" onclick="closeShareModal('pdfModal')"></div>
-       <div class="share-box" style="width: 95vw; max-width: none; height: 95vh; overflow: hidden; display: flex; flex-direction: column;">
-         <button class="modal-close-btn" onclick="closeShareModal('pdfModal')">✕</button>
-         <div class="share-modal-title">📄 Shared PDF</div>
-         <div class="share-modal-sub" id="pdfModalSub">From your teacher</div>
-         <div style="width: 100%; flex: 1; margin-top: 10px; background: #fff; border-radius: 8px;">
-           <iframe id="pdfIframe" style="width: 100%; height: 100%; border: none; border-radius: 8px;" src=""></iframe>
-         </div>
-       </div>
-     </div>
+    <!-- PDF Modal -->
+    <div class="share-modal" id="pdfModal">
+      <div class="share-backdrop" onclick="closeShareModal('pdfModal')"></div>
+      <div
+        class="share-box"
+        style="
+          width: 95vw;
+          max-width: none;
+          height: 95vh;
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
+        "
+      >
+        <button class="modal-close-btn" onclick="closeShareModal('pdfModal')">
+          ✕
+        </button>
+        <div class="share-modal-title">📄 Shared PDF</div>
+        <div class="share-modal-sub" id="pdfModalSub">From your teacher</div>
+        <div
+          style="
+            width: 100%;
+            flex: 1;
+            margin-top: 10px;
+            background: #fff;
+            border-radius: 8px;
+          "
+        >
+          <iframe
+            id="pdfIframe"
+            style="width: 100%; height: 100%; border: none; border-radius: 8px"
+            src=""
+          ></iframe>
+        </div>
+      </div>
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -1336,88 +1431,93 @@
         document.getElementById("treeModal").classList.add("open");
       });
 
-socket.on("pres-share-note", (data) => {
-         document.getElementById("noteTitleDisplay").textContent = data.title;
-         document.getElementById("noteDisplay").textContent = data.content;
-         document.getElementById("noteModal").classList.add("open");
-       });
+      socket.on("pres-share-note", (data) => {
+        document.getElementById("noteTitleDisplay").textContent = data.title;
+        document.getElementById("noteDisplay").textContent = data.content;
+        document.getElementById("noteModal").classList.add("open");
+      });
 
-socket.on("pres-share-video", (data) => {
-         console.log("Received pres-share-video:", data);
-         const modal = document.getElementById("videoModal");
-         const youTubePlayer = document.getElementById("youtubePlayer");
-         const youTubeIframe = document.getElementById("youtubeIframe");
-         const uploadedVideo = document.getElementById("uploadedVideo");
-         
-         if (data.type === "youtube") {
-           youTubePlayer.style.display = "block";
-           uploadedVideo.style.display = "none";
-           youTubeIframe.src = "https://www.youtube.com/embed/" + data.videoId + "?autoplay=1";
-           document.getElementById("videoModalSub").textContent = "YouTube video shared by teacher";
-           console.log("YouTube iframe src:", youTubeIframe.src);
-         } else if (data.type === "upload") {
-           youTubePlayer.style.display = "none";
-           uploadedVideo.style.display = "block";
-           uploadedVideo.src = data.url;
-           document.getElementById("videoModalSub").textContent = "Uploaded video";
-         }
-         modal.classList.add("open");
-         console.log("Video modal opened");
-       });
+      socket.on("pres-share-video", (data) => {
+        console.log("Received pres-share-video:", data);
+        const modal = document.getElementById("videoModal");
+        const youTubePlayer = document.getElementById("youtubePlayer");
+        const youTubeIframe = document.getElementById("youtubeIframe");
+        const uploadedVideo = document.getElementById("uploadedVideo");
 
-socket.on("pres-close-share", () => {
-         closeShareModal("imgModal");
-         closeShareModal("treeModal");
-         closeShareModal("noteModal");
-         closeShareModal("videoModal");
-         closeShareModal("webpageModal");
-         closeShareModal("pdfModal");
-       });
+        if (data.type === "youtube") {
+          youTubePlayer.style.display = "block";
+          uploadedVideo.style.display = "none";
+          youTubeIframe.src =
+            "https://www.youtube.com/embed/" + data.videoId + "?autoplay=1";
+          document.getElementById("videoModalSub").textContent =
+            "YouTube video shared by teacher";
+          console.log("YouTube iframe src:", youTubeIframe.src);
+        } else if (data.type === "upload") {
+          youTubePlayer.style.display = "none";
+          uploadedVideo.style.display = "block";
+          uploadedVideo.src = data.url;
+          document.getElementById("videoModalSub").textContent =
+            "Uploaded video";
+        }
+        modal.classList.add("open");
+        console.log("Video modal opened");
+      });
 
-       socket.on("pres-share-webpage", (data) => {
-         const iframe = document.getElementById("webpageIframe");
-         iframe.src = data.url;
-         document.getElementById("webpageModal").classList.add("open");
-         // Wait for modal to render before resize calculation
-         setTimeout(resizeWebpageIframe, 50);
-       });
+      socket.on("pres-close-share", () => {
+        closeShareModal("imgModal");
+        closeShareModal("treeModal");
+        closeShareModal("noteModal");
+        closeShareModal("videoModal");
+        closeShareModal("webpageModal");
+        closeShareModal("pdfModal");
+      });
 
-       socket.on("pres-share-pdf", async (data) => {
-         const iframe = document.getElementById("pdfIframe");
-         document.getElementById("pdfModal").classList.add("open");
-         iframe.src = ""; // Clear existing
-         
-         try {
-           // Fetching via AJAX prevents IDM from intercepting the download
-           const res = await fetch("/api/view-pdf?url=" + encodeURIComponent(data.url));
-           const blob = await res.blob();
-           
-           // Create a local blob URL and pass it to the iframe
-           const blobUrl = URL.createObjectURL(blob);
-           iframe.src = blobUrl;
-         } catch (e) {
-           console.error("Failed to load PDF:", e);
-         }
-       });
+      socket.on("pres-share-webpage", (data) => {
+        const iframe = document.getElementById("webpageIframe");
+        iframe.src = data.url;
+        document.getElementById("webpageModal").classList.add("open");
+        // Wait for modal to render before resize calculation
+        setTimeout(resizeWebpageIframe, 50);
+      });
 
-       function resizeWebpageIframe() {
-         const wrapper = document.getElementById("webpageWrapper");
-         const iframe = document.getElementById("webpageIframe");
-         if (!wrapper || !iframe) return;
-         
-         const wrapperWidth = wrapper.clientWidth;
-         
-         // Make it exactly 100% width of the modal
-         const scale = wrapperWidth / 1920;
-         
-         iframe.style.transform = `scale(${scale})`;
-         iframe.style.left = `0px`;
-         iframe.style.top = `0px`;
-         
-         // Maintain the wrapper height to strictly match the scaled iframe
-         wrapper.style.height = `${1080 * scale}px`;
-       }
-       window.addEventListener("resize", resizeWebpageIframe);
+      socket.on("pres-share-pdf", async (data) => {
+        const iframe = document.getElementById("pdfIframe");
+        document.getElementById("pdfModal").classList.add("open");
+        iframe.src = ""; // Clear existing
+
+        try {
+          // Fetching via AJAX prevents IDM from intercepting the download
+          const res = await fetch(
+            "/api/view-pdf?url=" + encodeURIComponent(data.url),
+          );
+          const blob = await res.blob();
+
+          // Create a local blob URL and pass it to the iframe
+          const blobUrl = URL.createObjectURL(blob);
+          iframe.src = blobUrl;
+        } catch (e) {
+          console.error("Failed to load PDF:", e);
+        }
+      });
+
+      function resizeWebpageIframe() {
+        const wrapper = document.getElementById("webpageWrapper");
+        const iframe = document.getElementById("webpageIframe");
+        if (!wrapper || !iframe) return;
+
+        const wrapperWidth = wrapper.clientWidth;
+
+        // Make it exactly 100% width of the modal
+        const scale = wrapperWidth / 1920;
+
+        iframe.style.transform = `scale(${scale})`;
+        iframe.style.left = `0px`;
+        iframe.style.top = `0px`;
+
+        // Maintain the wrapper height to strictly match the scaled iframe
+        wrapper.style.height = `${1080 * scale}px`;
+      }
+      window.addEventListener("resize", resizeWebpageIframe);
 
       // ════════════════════════════════════════════
       //  OPEN PRESENTATION
@@ -1510,7 +1610,7 @@ socket.on("pres-close-share", () => {
           if (animate) {
             showLoader(true);
             const nextImg = new Image();
-            
+
             nextImg.onload = () => {
               showLoader(false);
               img.classList.add(
@@ -1529,7 +1629,7 @@ socket.on("pres-close-share", () => {
                 );
               }, 300);
             };
-            
+
             nextImg.onerror = () => {
               showLoader(false);
               img.style.display = "none";
@@ -1539,7 +1639,7 @@ socket.on("pres-close-share", () => {
                 "Image could not be loaded",
               );
             };
-            
+
             nextImg.src = url;
           } else {
             showLoader(true);
@@ -1552,7 +1652,11 @@ socket.on("pres-close-share", () => {
             nextImg.onerror = () => {
               showLoader(false);
               img.style.display = "none";
-              showFallback(true, "Slide " + (currentSlide + 1), "Image could not be loaded");
+              showFallback(
+                true,
+                "Slide " + (currentSlide + 1),
+                "Image could not be loaded",
+              );
             };
             nextImg.src = url;
           }
@@ -1748,18 +1852,16 @@ socket.on("pres-close-share", () => {
       // ════════════════════════════════════════════
       //  MODAL HELPERS
       // ════════════════════════════════════════════
-       function closeShareModal(id) {
-         document.getElementById(id).classList.remove("open");
-         if (id === "videoModal") {
-           document.getElementById("youtubeIframe").src = "";
-           document.getElementById("uploadedVideo").pause();
-           document.getElementById("uploadedVideo").src = "";
-         } else if (id === "webpageModal") {
-           document.getElementById("webpageIframe").src = "";
-         }
-       }
-
-
+      function closeShareModal(id) {
+        document.getElementById(id).classList.remove("open");
+        if (id === "videoModal") {
+          document.getElementById("youtubeIframe").src = "";
+          document.getElementById("uploadedVideo").pause();
+          document.getElementById("uploadedVideo").src = "";
+        } else if (id === "webpageModal") {
+          document.getElementById("webpageIframe").src = "";
+        }
+      }
 
       // Also receive pres-updated when files change
       socket.on("pres-updated", () => loadPresentations());
@@ -1773,5 +1875,6 @@ socket.on("pres-close-share", () => {
       // Initial load
       setTimeout(loadPresentations, 300);
     </script>
+    <script src="js/wake-lock.js"></script>
   </body>
 </html>
