@@ -147,7 +147,7 @@
         class="glass-card score-card boys neon-border-blue"
         style="padding: 10px"
       >
-        <div style="font-size: 0.7rem; color: #60a5fa">BOYS</div>
+        <div style="font-size: 0.7rem; color: #60a5fa">BLUE TEAM</div>
         <div id="boysScore" class="score-value" style="font-size: 1.5rem">
           0
         </div>
@@ -158,14 +158,14 @@
         class="turn-top turn-boys animate-float"
         style="font-size: 2rem; text-align: center"
       >
-        BOYS TURN
+        BLUE TEAM TURN
       </div>
 
       <div
         class="glass-card score-card girls neon-border-pink"
         style="padding: 10px"
       >
-        <div style="font-size: 0.7rem; color: #f472b6">GIRLS</div>
+        <div style="font-size: 0.7rem; color: #f472b6">RED TEAM</div>
         <div id="girlsScore" class="score-value" style="font-size: 1.5rem">
           0
         </div>
@@ -225,6 +225,8 @@
       const turnDisplay = document.getElementById("turnDisplay");
       const boysScoreElem = document.getElementById("boysScore");
       const girlsScoreElem = document.getElementById("girlsScore");
+      const teamLabel = (team) => (team === "boys" ? "Blue Team" : "Red Team");
+      const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
       function initDOMTiles() {
         board.innerHTML = "";
@@ -302,14 +304,14 @@
         girlsScoreElem.innerText = MemoryGame.game.girlsScore;
 
         const isBoys = MemoryGame.game.currentTurn === "boys";
-        turnDisplay.innerText = isBoys ? "BOYS TURN" : "GIRLS TURN";
+        turnDisplay.innerText =
+          teamLabelUpper(MemoryGame.game.currentTurn) + " TURN";
         turnDisplay.className = `turn-top ${isBoys ? "turn-boys" : "turn-girls"} animate-float`;
 
         const overlay = document.getElementById("winnerOverlay");
         const winnerMsg = document.getElementById("winnerMsg");
         if (MemoryGame.game.winner) {
-          const winnerTeam =
-            MemoryGame.game.winner === "boys" ? "Boys" : "Girls";
+          const winnerTeam = teamLabel(MemoryGame.game.winner);
           winnerMsg.innerHTML = `Congratulations to all <strong>${winnerTeam}</strong> of <br> Class: ${MemoryGame.game.classInfo} | Section: ${MemoryGame.game.sectionInfo}`;
           overlay.classList.add("active");
         } else {

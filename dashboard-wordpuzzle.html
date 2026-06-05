@@ -99,15 +99,15 @@
   <!-- ── Three-column control grid ── -->
   <div class="wp-control-grid">
 
-    <!-- ══ TEAM BOYS ══ -->
+    <!-- ══ BLUE TEAM ══ -->
     <div class="wp-team-card boys" data-mobile-tab="boys">
       <h2 style="color:var(--boys-color); font-family:'Orbitron',sans-serif; letter-spacing:2px; margin-bottom:16px;">
-        TEAM BOYS</h2>
+        BLUE TEAM</h2>
 
       <!-- Photo -->
       <div id="boysImgPreview"
         style="width:110px; height:110px; border-radius:50%; background:#000; margin:0 auto 10px; overflow:hidden; border:4px solid var(--boys-color); box-shadow:0 0 20px var(--boys-glow);">
-        <img id="boysImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Boys" />
+        <img id="boysImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Blue Team" />
         <div id="boysNoImg"
           style="display:flex; align-items:center; justify-content:center; height:100%; font-size:2rem;">🏃‍♂️</div>
       </div>
@@ -166,13 +166,13 @@
       <div class="glass-card" style="padding:16px; margin-top:14px; background:rgba(0,0,0,0.3);">
         <div class="wp-stat-label" style="margin-bottom:10px;">🔄 Turn Control</div>
         <div class="wp-turn-btn-group">
-          <button class="wp-turn-btn boys-turn" id="btnBoysTurn" onclick="setTurn('boys')">🏃‍♂️ BOYS TURN</button>
-          <button class="wp-turn-btn girls-turn" id="btnGirlsTurn" onclick="setTurn('girls')">🏃‍♀️ GIRLS TURN</button>
+          <button class="wp-turn-btn boys-turn" id="btnBoysTurn" onclick="setTurn('boys')">🏃‍♂️ BLUE TEAM TURN</button>
+          <button class="wp-turn-btn girls-turn" id="btnGirlsTurn" onclick="setTurn('girls')">🏃‍♀️ RED TEAM TURN</button>
         </div>
         <button class="btn-primary"
           style="width:100%; background:linear-gradient(135deg,#7c3aed,#6d28d9); font-family:'Orbitron',sans-serif; font-size:0.82rem;"
           onclick="switchTurn()">
-          ⇄ SWITCH TURN: <span id="nextTurnText">GIRLS</span>
+          ⇄ SWITCH TURN: <span id="nextTurnText">RED TEAM</span>
         </button>
       </div>
 
@@ -241,11 +241,11 @@
         <input type="text" id="wpSectionName" placeholder="Section (e.g. Shitolokkha)" />
         <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px;">
           <button class="btn-primary" style="background:#3b82f6; font-weight:800; font-size:0.8rem; padding:10px 6px;"
-            onclick="handleAnnounce('boys')">🎉 BOYS WIN</button>
+            onclick="handleAnnounce('boys')">🎉 BLUE TEAM WIN</button>
           <button class="btn-primary" style="background:#7c3aed; font-weight:800; font-size:0.8rem; padding:10px 6px;"
             onclick="handleAnnounce('draw')">🤝 DRAW</button>
           <button class="btn-primary" style="background:#ec4899; font-weight:800; font-size:0.8rem; padding:10px 6px;"
-            onclick="handleAnnounce('girls')">🎉 GIRLS WIN</button>
+            onclick="handleAnnounce('girls')">🎉 RED TEAM WIN</button>
         </div>
         <button class="btn-primary" style="background:#64748b; width:100%; margin-top:8px; font-size:0.78rem;"
           onclick="handleClearWinner()">CLOSE WINNER SCREEN</button>
@@ -258,15 +258,15 @@
       </div>
     </div>
 
-    <!-- ══ TEAM GIRLS ══ -->
+    <!-- ══ RED TEAM ══ -->
     <div class="wp-team-card girls" data-mobile-tab="girls">
       <h2 style="color:var(--girls-color); font-family:'Orbitron',sans-serif; letter-spacing:2px; margin-bottom:16px;">
-        TEAM GIRLS</h2>
+        RED TEAM</h2>
 
       <!-- Photo -->
       <div id="girlsImgPreview"
         style="width:110px; height:110px; border-radius:50%; background:#000; margin:0 auto 10px; overflow:hidden; border:4px solid var(--girls-color); box-shadow:0 0 20px var(--girls-glow);">
-        <img id="girlsImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Girls" />
+        <img id="girlsImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Red Team" />
         <div id="girlsNoImg"
           style="display:flex; align-items:center; justify-content:center; height:100%; font-size:2rem;">🏃‍♀️</div>
       </div>
@@ -316,11 +316,11 @@
     </button>
     <button class="mobile-tab-btn" data-tab="boys" onclick="switchMobileTab('boys')">
       <span class="tab-icon">👦</span>
-      Boys
+      Blue Team
     </button>
     <button class="mobile-tab-btn" data-tab="girls" onclick="switchMobileTab('girls')">
       <span class="tab-icon">👧</span>
-      Girls
+      Red Team
     </button>
   </nav>
 
@@ -331,6 +331,8 @@
 
     let dashSocket = null;
     let selectedRows = 10, selectedCols = 10;
+    const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
+    const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
     // ── Socket ──────────────────────────────────────────
     if (typeof io !== 'undefined') {
@@ -426,7 +428,7 @@
 
       // Turn
       const turn = g.currentTurn;
-      document.getElementById('nextTurnText').textContent = turn === 'boys' ? 'GIRLS' : 'BOYS';
+      document.getElementById('nextTurnText').textContent = turn === 'boys' ? 'RED TEAM' : 'BLUE TEAM';
       document.getElementById('btnBoysTurn').classList.toggle('active-turn', turn === 'boys');
       document.getElementById('btnGirlsTurn').classList.toggle('active-turn', turn === 'girls');
 
@@ -502,14 +504,14 @@
       const val = document.getElementById(team + 'SetPointsInput').value;
       WordPuzzle.setWPPoints(team, val);
       updateStats();
-      showToast(`✅ ${team.toUpperCase()} points set to ${val}`);
+      showToast(`✅ ${teamLabelUpper(team)} points set to ${val}`);
     }
 
     function handleAddPoints(team) {
       const val = document.getElementById(team + 'SetPointsInput').value;
       WordPuzzle.addWPPoints(team, val);
       updateStats();
-      showToast(`➕ ${val} points added to ${team.toUpperCase()}`);
+      showToast(`➕ ${val} points added to ${teamLabelUpper(team)}`);
     }
 
     function announcePoints(team) {
@@ -540,7 +542,7 @@
       if (!input.files[0]) return;
       await WordPuzzle.saveWPTeamImage(team, input.files[0]);
       updatePhotos();
-      showToast(`✅ ${team.toUpperCase()} photo updated!`);
+      showToast(`✅ ${teamLabelUpper(team)} photo updated!`);
     }
 
     // ── Winner ───────────────────────────────────────────
@@ -548,7 +550,7 @@
       const cls = document.getElementById('wpClassName').value || '12';
       const sec = document.getElementById('wpSectionName').value || 'Shitolokkha';
       WordPuzzle.announceWPWinner(team, cls, sec);
-      showToast(team === 'draw' ? '🤝 DRAW announced!' : `🏆 ${team.toUpperCase()} WIN announced!`);
+      showToast(team === 'draw' ? '🤝 DRAW announced!' : `🏆 ${teamLabelUpper(team)} WIN announced!`);
     }
 
     function handleClearWinner() {

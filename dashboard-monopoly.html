@@ -321,9 +321,9 @@
     </div>
 
     <div class="control-grid">
-        <!-- Team Boys Control -->
+        <!-- Blue Team Control -->
         <div class="glass-card team-card boys" data-mobile-tab="boys">
-            <h2 style="color: var(--primary); letter-spacing: 2px;">TEAM BOYS</h2>
+            <h2 style="color: var(--primary); letter-spacing: 2px;">BLUE TEAM</h2>
             <div id="boysImgPreview"
                 style="width: 120px; height: 120px; border-radius: 50%; background: #000; margin: 20px auto; overflow: hidden; border: 4px solid var(--primary); box-shadow: 0 0 20px var(--primary-glow);">
                 <img id="boysImg" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
@@ -373,9 +373,9 @@
             </div>
         </div>
 
-        <!-- Team Girls Control -->
+        <!-- Red Team Control -->
         <div class="glass-card team-card girls" data-mobile-tab="girls">
-            <h2 style="color: var(--secondary); letter-spacing: 2px;">TEAM GIRLS</h2>
+            <h2 style="color: var(--secondary); letter-spacing: 2px;">RED TEAM</h2>
             <div id="girlsImgPreview"
                 style="width: 120px; height: 120px; border-radius: 50%; background: #000; margin: 20px auto; overflow: hidden; border: 4px solid var(--secondary); box-shadow: 0 0 20px var(--secondary-glow);">
                 <img id="girlsImg" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
@@ -465,7 +465,7 @@
                 <button class="btn-primary"
                     style="width: 100%; margin-bottom: 15px; background: #8b5cf6; height: 60px; font-size: 1.2rem;"
                     onclick="switchTurn()">
-                    NEXT TURN: <span id="turnText" style="font-weight: 900;">BOYS</span>
+                    NEXT TURN: <span id="turnText" style="font-weight: 900;">BLUE TEAM</span>
                 </button>
             </div>
 
@@ -512,9 +512,9 @@
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
                     <button class="btn-primary btn-small" style="background:#3b82f6;" onclick="triggerQuiz('boys')">📝
-                        QUIZ → BOYS</button>
+                        QUIZ → BLUE TEAM</button>
                     <button class="btn-primary btn-small" style="background:#ec4899;" onclick="triggerQuiz('girls')">📝
-                        QUIZ → GIRLS</button>
+                        QUIZ → RED TEAM</button>
                 </div>
 
                 <div id="quizQuestionBox" class="quiz-question-box">
@@ -537,11 +537,11 @@
                 <input type="text" id="mSectionName" placeholder="Section (e.g. Shitolokkha)">
                 <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 12px;">
                     <button class="btn-primary btn-small" style="background: #3b82f6; font-weight: 800;"
-                        onclick="handleAnnounce('boys')">🎉 BOYS WIN</button>
+                        onclick="handleAnnounce('boys')">🎉 BLUE TEAM WIN</button>
                     <button class="btn-primary btn-small" style="background: #8b5cf6; font-weight: 800;"
                         onclick="handleAnnounce('draw')">🤝 DRAW</button>
                     <button class="btn-primary btn-small" style="background: #ec4899; font-weight: 800;"
-                        onclick="handleAnnounce('girls')">🎉 GIRLS WIN</button>
+                        onclick="handleAnnounce('girls')">🎉 RED TEAM WIN</button>
                 </div>
                 <button class="btn-primary btn-small" onclick="handleClearWinner()"
                     style="background: #64748b; margin-top: 10px; width: 100%;">CLOSE WINNER SCREEN</button>
@@ -562,12 +562,12 @@
         </button>
         <button class="mobile-tab-btn" data-tab="boys" onclick="switchMobileTab('boys')">
             <span class="tab-icon">👦</span>
-            Boys
-        </button>
+      Blue Team
+    </button>
         <button class="mobile-tab-btn" data-tab="girls" onclick="switchMobileTab('girls')">
             <span class="tab-icon">👧</span>
-            Girls
-        </button>
+      Red Team
+    </button>
     </nav>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -576,6 +576,8 @@
         const { MonopolyGame } = window;
         let currentQuizTeam = null;
         let dashSocket = null;
+        const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
+        const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
         // Single shared socket connection
         if (typeof io !== 'undefined') {
@@ -600,19 +602,19 @@
             document.getElementById('govMoney').innerText = '৳ ' + game.govScore;
             document.getElementById('boysPosName').innerText = board[game.boysPos].name;
             document.getElementById('girlsPosName').innerText = board[game.girlsPos].name;
-            document.getElementById('turnText').innerText = game.currentTurn.toUpperCase();
+            document.getElementById('turnText').innerText = teamLabelUpper(game.currentTurn);
 
             const boysBookedEl = document.getElementById('boysBookedStatus');
             const bookedCells = game.bookedCells || {};
             if (bookedCells[game.boysPos]) {
                 const owner = bookedCells[game.boysPos];
-                boysBookedEl.innerHTML = `<div class="booked-info booked-${owner}">🔒 Booked by ${owner.toUpperCase()}</div>`;
+                boysBookedEl.innerHTML = `<div class="booked-info booked-${owner}">🔒 Booked by ${teamLabelUpper(owner)}</div>`;
             } else { boysBookedEl.innerHTML = ''; }
 
             const girlsBookedEl = document.getElementById('girlsBookedStatus');
             if (bookedCells[game.girlsPos]) {
                 const owner = bookedCells[game.girlsPos];
-                girlsBookedEl.innerHTML = `<div class="booked-info booked-${owner}">🔒 Booked by ${owner.toUpperCase()}</div>`;
+                girlsBookedEl.innerHTML = `<div class="booked-info booked-${owner}">🔒 Booked by ${teamLabelUpper(owner)}</div>`;
             } else { girlsBookedEl.innerHTML = ''; }
 
             const bImg = document.getElementById('boysImg');
@@ -681,7 +683,7 @@
             const board = MonopolyGame.boardData;
             const pos = team === 'boys' ? game.boysPos : game.girlsPos;
             const placeName = board[pos].name;
-            if (confirm(`Book "${placeName}" for TEAM ${team.toUpperCase()}?`)) {
+            if (confirm(`Book "${placeName}" for ${teamLabelUpper(team)}?`)) {
                 MonopolyGame.bookPlace(team);
                 updateUI();
             }

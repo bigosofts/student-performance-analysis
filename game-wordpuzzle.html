@@ -328,11 +328,11 @@
 
     <!-- ── Top Bar: Team Panels ── -->
     <div class="wp-top-bar">
-      <!-- Girls Team -->
+      <!-- Red Team -->
       <div class="wp-team-panel girls-panel" id="girlsPanel">
         <div class="wp-avatar-ring" id="girlsAvatar">🏃‍♀️</div>
         <div class="wp-team-info">
-          <div class="wp-team-label">Team Girls</div>
+          <div class="wp-team-label">Red Team</div>
           <div class="wp-score-display" id="girlsScoreDisplay">0</div>
           <div class="wp-score-label">POINTS</div>
         </div>
@@ -341,14 +341,14 @@
       <!-- Centre title + turn badge -->
       <div class="wp-game-title-center">
         <div class="wp-game-title-text">🔤 WORD PUZZLE</div>
-        <div class="wp-turn-badge boys" id="turnBadge" style="margin-top:6px;">BOYS TURN</div>
+        <div class="wp-turn-badge boys" id="turnBadge" style="margin-top:6px;">BLUE TEAM TURN</div>
       </div>
 
-      <!-- Boys Team -->
+      <!-- Blue Team -->
       <div class="wp-team-panel boys-panel" id="boysPanel">
         <div class="wp-avatar-ring" id="boysAvatar">🏃‍♂️</div>
         <div class="wp-team-info">
-          <div class="wp-team-label">Team Boys</div>
+          <div class="wp-team-label">Blue Team</div>
           <div class="wp-score-display" id="boysScoreDisplay">0</div>
           <div class="wp-score-label">POINTS</div>
         </div>
@@ -376,7 +376,7 @@
     <div id="pointsModalOverlay" class="wp-points-modal-overlay">
       <div class="wp-points-modal-card">
         <span class="wp-modal-icon" id="modalIcon">🎉</span>
-        <div class="wp-modal-team-badge boys" id="modalTeamBadge">BOYS</div>
+        <div class="wp-modal-team-badge boys" id="modalTeamBadge">BLUE TEAM</div>
         <div class="wp-modal-amount-label">POINTS AWARDED</div>
         <div class="wp-modal-amount-value boys" id="modalAmountValue">+0</div>
         <div class="wp-modal-total-line boys" id="modalTotalLine">Total: <strong id="modalTotal">0</strong></div>
@@ -390,6 +390,8 @@
 
       let gameSocket    = null;
       let autoCloseTimer = null;
+      const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
+      const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
       // ── Grid rendering ──────────────────────────────────
       let lastRenderedRows = 0, lastRenderedCols = 0;
@@ -481,7 +483,7 @@
 
         // Turn badge
         const badge = document.getElementById('turnBadge');
-        badge.textContent  = g.currentTurn.toUpperCase() + ' TURN';
+        badge.textContent  = teamLabelUpper(g.currentTurn) + ' TURN';
         badge.className    = 'wp-turn-badge ' + g.currentTurn;
 
         // Active-team glow
@@ -491,14 +493,14 @@
         // Avatars
         const bAvatar = document.getElementById('boysAvatar');
         if (g.boysImage) {
-          bAvatar.innerHTML = `<img src="${g.boysImage}?v=${g.lastUpdate}" alt="Boys">`;
+          bAvatar.innerHTML = `<img src="${g.boysImage}?v=${g.lastUpdate}" alt="Blue Team">`;
         } else {
           bAvatar.textContent = '🏃‍♂️';
         }
 
         const gAvatar = document.getElementById('girlsAvatar');
         if (g.girlsImage) {
-          gAvatar.innerHTML = `<img src="${g.girlsImage}?v=${g.lastUpdate}" alt="Girls">`;
+          gAvatar.innerHTML = `<img src="${g.girlsImage}?v=${g.lastUpdate}" alt="Red Team">`;
         } else {
           gAvatar.textContent = '🏃‍♀️';
         }
@@ -507,7 +509,7 @@
         const winnerOverlay = document.getElementById('wpWinnerOverlay');
         if (g.winner) {
           const isDraw = g.winner === 'draw';
-          const team   = g.winner === 'boys' ? 'Boys' : 'Girls';
+          const team   = teamLabel(g.winner);
 
           document.getElementById('winnerConfetti').textContent = isDraw ? '🤝' : '🎉';
           document.getElementById('winnerTitle').textContent    = isDraw
@@ -559,7 +561,7 @@
         const total_el   = document.getElementById('modalTotal');
 
         icon.textContent        = team === 'boys' ? '🏃‍♂️' : '🏃‍♀️';
-        badge.textContent       = team.toUpperCase();
+        badge.textContent       = teamLabelUpper(team);
         badge.className         = `wp-modal-team-badge ${team}`;
         amount_el.textContent   = `+${amount}`;
         amount_el.className     = `wp-modal-amount-value ${team}`;

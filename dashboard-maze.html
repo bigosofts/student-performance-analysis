@@ -100,7 +100,7 @@
     </div>
 
     <div class="maze-control-grid">
-      <!-- ══ TEAM BOYS ══════════════════════════════════════ -->
+      <!-- ══ BLUE TEAM ══════════════════════════════════════ -->
       <div class="maze-team-card boys" data-mobile-tab="boys">
         <h2
           style="
@@ -110,7 +110,7 @@
             margin-bottom: 16px;
           "
         >
-          TEAM BOYS
+          BLUE TEAM
         </h2>
 
         <!-- Photo -->
@@ -131,7 +131,7 @@
             id="boysImg"
             src=""
             style="width: 100%; height: 100%; object-fit: cover; display: none"
-            alt="Boys"
+            alt="Blue Team"
           />
           <div
             id="boysNoImg"
@@ -202,7 +202,7 @@
           "
         >
           <div class="maze-stat-label" style="margin-bottom: 10px">
-            🔧 Generate Boys Maze
+            🔧 Generate Blue Team Maze
           </div>
           <div class="maze-size-btns">
             <button
@@ -239,7 +239,7 @@
             "
             onclick="generateMaze('boys')"
           >
-            ⚡ GENERATE BOYS MAZE
+            ⚡ GENERATE BLUE TEAM MAZE
           </button>
           <div
             id="boysMazeStatus"
@@ -263,7 +263,7 @@
           "
         >
           <div class="maze-stat-label" style="margin-bottom: 4px">
-            🕹️ Move Boys Runner
+            🕹️ Move Blue Team Runner
           </div>
           <div class="dpad" id="boysDpad">
             <button class="dpad-btn up" onclick="moveRunner('boys', 'up')">
@@ -287,7 +287,7 @@
         </div>
       </div>
 
-      <!-- ══ TEAM GIRLS ═════════════════════════════════════ -->
+      <!-- ══ RED TEAM ═════════════════════════════════════ -->
       <div class="maze-team-card girls" data-mobile-tab="girls">
         <h2
           style="
@@ -297,7 +297,7 @@
             margin-bottom: 16px;
           "
         >
-          TEAM GIRLS
+          RED TEAM
         </h2>
 
         <!-- Photo -->
@@ -318,7 +318,7 @@
             id="girlsImg"
             src=""
             style="width: 100%; height: 100%; object-fit: cover; display: none"
-            alt="Girls"
+            alt="Red Team"
           />
           <div
             id="girlsNoImg"
@@ -389,7 +389,7 @@
           "
         >
           <div class="maze-stat-label" style="margin-bottom: 10px">
-            🔧 Generate Girls Maze
+            🔧 Generate Red Team Maze
           </div>
           <div class="maze-size-btns">
             <button
@@ -426,7 +426,7 @@
             "
             onclick="generateMaze('girls')"
           >
-            ⚡ GENERATE GIRLS MAZE
+            ⚡ GENERATE RED TEAM MAZE
           </button>
           <div
             id="girlsMazeStatus"
@@ -450,7 +450,7 @@
           "
         >
           <div class="maze-stat-label" style="margin-bottom: 4px">
-            🕹️ Move Girls Runner
+            🕹️ Move Red Team Runner
           </div>
           <div class="dpad dpad-girls" id="girlsDpad">
             <button class="dpad-btn up" onclick="moveRunner('girls', 'up')">
@@ -605,14 +605,14 @@
               id="btnBoysTurn"
               onclick="setTurn('boys')"
             >
-              🏃‍♂️ BOYS TURN
+              🏃‍♂️ BLUE TEAM TURN
             </button>
             <button
               class="turn-btn girls-turn"
               id="btnGirlsTurn"
               onclick="setTurn('girls')"
             >
-              🏃‍♀️ GIRLS TURN
+              🏃‍♀️ RED TEAM TURN
             </button>
           </div>
           <div style="margin-top: 10px">
@@ -626,7 +626,7 @@
               "
               onclick="switchTurn()"
             >
-              ⇄ SWITCH TURN: <span id="nextTurnText">GIRLS</span>
+              ⇄ SWITCH TURN: <span id="nextTurnText">RED TEAM</span>
             </button>
           </div>
         </div>
@@ -718,14 +718,14 @@
               style="background: #3b82f6; font-size: 0.82rem; font-weight: 800"
               onclick="triggerMazeQuiz('boys')"
             >
-              📝 QUIZ → BOYS
+              📝 QUIZ → BLUE TEAM
             </button>
             <button
               class="btn-primary"
               style="background: #ec4899; font-size: 0.82rem; font-weight: 800"
               onclick="triggerMazeQuiz('girls')"
             >
-              📝 QUIZ → GIRLS
+              📝 QUIZ → RED TEAM
             </button>
           </div>
 
@@ -797,7 +797,7 @@
               "
               onclick="handleAnnounce('boys')"
             >
-              🎉 BOYS WIN
+              🎉 BLUE TEAM WIN
             </button>
             <button
               class="btn-primary"
@@ -821,7 +821,7 @@
               "
               onclick="handleAnnounce('girls')"
             >
-              🎉 GIRLS WIN
+              🎉 RED TEAM WIN
             </button>
           </div>
           <button
@@ -869,12 +869,12 @@
         </button>
         <button class="mobile-tab-btn" data-tab="boys" onclick="switchMobileTab('boys')">
             <span class="tab-icon">👦</span>
-            Boys
-        </button>
+      Blue Team
+    </button>
         <button class="mobile-tab-btn" data-tab="girls" onclick="switchMobileTab('girls')">
             <span class="tab-icon">👧</span>
-            Girls
-        </button>
+      Red Team
+    </button>
     </nav>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -909,6 +909,8 @@
       let currentQuizTeam = null;
       let boysSelectedSize = 20;
       let girlsSelectedSize = 20;
+      const teamLabel = (team) => (team === "boys" ? "Blue Team" : "Red Team");
+      const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
       // ── Socket ────────────────────────────────────────────────
       if (typeof io !== "undefined") {
@@ -952,7 +954,7 @@
         // Turn
         const turn = g.currentTurn;
         document.getElementById("nextTurnText").textContent =
-          turn === "boys" ? "GIRLS" : "BOYS";
+          turn === "boys" ? "RED TEAM" : "BLUE TEAM";
         const btnB = document.getElementById("btnBoysTurn");
         const btnG = document.getElementById("btnGirlsTurn");
         btnB.classList.toggle("active-turn", turn === "boys");
@@ -1030,7 +1032,7 @@
         setTimeout(() => {
           MazeGame.generateTeamMaze(team, size);
           updateUI();
-          showToast(`✅ ${team.toUpperCase()} ${size}×${size} maze generated!`);
+          showToast(`✅ ${teamLabelUpper(team)} ${size}×${size} maze generated!`);
         }, 50);
       }
 
@@ -1063,7 +1065,7 @@
         if (!input.files[0]) return;
         await MazeGame.saveMazeTeamImage(team, input.files[0]);
         updateUI();
-        showToast(`✅ ${team.toUpperCase()} photo updated!`);
+        showToast(`✅ ${teamLabelUpper(team)} photo updated!`);
       }
 
       // ── Turn control ──────────────────────────────────────────
@@ -1137,7 +1139,7 @@
         if (!currentQuizTeam) return;
         if (correct) {
           MazeGame.updateMazeScore(currentQuizTeam, 3000);
-          showToast(`+3000 credits → ${currentQuizTeam.toUpperCase()}!`);
+          showToast(`+3000 credits → ${teamLabelUpper(currentQuizTeam)}!`);
         } else {
           showToast(`Wrong answer — no credits awarded.`);
         }

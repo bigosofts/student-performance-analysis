@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "git:push": "git add --all && git commit -m \"make UI polished for quiz showcase\" && git push origin main",
+    "git:push": "git add --all && git commit -m \"team name change\" && git push origin main",
     "git:pull": "git pull origin main",
     "git:reset": "git reset --hard HEAD && git clean -fd"
   },

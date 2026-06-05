@@ -19,13 +19,13 @@
   <body class="game-maze">
     <!-- HUD -->
     <div class="maze-hud" id="mazeHud">
-      <!-- Girls Team (left) -->
+      <!-- Red Team (left) -->
       <div class="hud-team girls" id="hudGirls">
         <div class="hud-avatar" id="hudGirlsAvatar">
           <div class="hud-avatar-placeholder">🏃‍♀️</div>
         </div>
         <div class="hud-info">
-          <div class="hud-team-name">Team Girls</div>
+          <div class="hud-team-name">Red Team</div>
           <div class="hud-credit" id="hudGirlsCredit">0 Credits</div>
           <div class="hud-progress-bar-wrap">
             <div
@@ -41,16 +41,16 @@
       <!-- Centre -->
       <div class="hud-center">
         <div class="hud-title">Maze Runner Quiz</div>
-        <div class="hud-turn-badge boys" id="hudTurnBadge">BOYS TURN</div>
+        <div class="hud-turn-badge boys" id="hudTurnBadge">BLUE TEAM TURN</div>
       </div>
 
-      <!-- Boys Team (right) -->
+      <!-- Blue Team (right) -->
       <div class="hud-team boys" id="hudBoys">
         <div class="hud-avatar" id="hudBoysAvatar">
           <div class="hud-avatar-placeholder">🏃‍♂️</div>
         </div>
         <div class="hud-info">
-          <div class="hud-team-name">Team Boys</div>
+          <div class="hud-team-name">Blue Team</div>
           <div class="hud-credit" id="hudBoysCredit">0 Credits</div>
           <div class="hud-progress-bar-wrap">
             <div
@@ -81,7 +81,7 @@
         <div class="maze-quiz-header">
           <div class="maze-quiz-title">📝 QUIZ TIME!</div>
           <div id="mazeQuizTeamBadge" class="maze-quiz-team-badge boys">
-            BOYS
+            BLUE TEAM
           </div>
         </div>
         <div id="mazeQuizQuestion" class="maze-quiz-question"></div>
@@ -129,6 +129,8 @@
       const PATH_COLOR = "rgba(0,229,255,0.08)"; // solution path tint
       const EXIT_COLOR = "#10b981";
       const START_COLOR = "rgba(99,102,241,0.5)";
+      const teamLabel = (team) => (team === "boys" ? "Blue Team" : "Red Team");
+      const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
       let animFrame = null;
       let runnerAnim = 0; // frame counter for runner animation
@@ -324,24 +326,24 @@
 
         // Turn badge
         const badge = document.getElementById("hudTurnBadge");
-        badge.textContent = g.currentTurn.toUpperCase() + " TURN";
+        badge.textContent = teamLabelUpper(g.currentTurn) + " TURN";
         badge.className = "hud-turn-badge " + g.currentTurn;
 
         // Team avatars
         if (g.boysImage) {
           document.getElementById("hudBoysAvatar").innerHTML =
-            `<img src="${g.boysImage}?v=${g.lastUpdate}" alt="Boys" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            `<img src="${g.boysImage}?v=${g.lastUpdate}" alt="Blue Team" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
         }
         if (g.girlsImage) {
           document.getElementById("hudGirlsAvatar").innerHTML =
-            `<img src="${g.girlsImage}?v=${g.lastUpdate}" alt="Girls" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
+            `<img src="${g.girlsImage}?v=${g.lastUpdate}" alt="Red Team" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">`;
         }
 
         // Winner overlay
         const winnerOverlay = document.getElementById("mazeWinnerOverlay");
         if (g.winner) {
           const isWin = g.winner !== "draw";
-          const team = g.winner === "boys" ? "Boys" : "Girls";
+          const team = teamLabel(g.winner);
           document.getElementById("mazeWinnerConfetti").textContent = isWin
             ? "🎉"
             : "🤝";
@@ -361,7 +363,7 @@
       function showMazeQuiz(data) {
         const overlay = document.getElementById("mazeQuizOverlay");
         const badge = document.getElementById("mazeQuizTeamBadge");
-        badge.textContent = data.team.toUpperCase();
+        badge.textContent = teamLabelUpper(data.team);
         badge.className = "maze-quiz-team-badge " + data.team;
         document.getElementById("mazeQuizQuestion").textContent = data.question;
         const labels = ["A", "B", "C", "D"];

@@ -321,19 +321,19 @@
                     <div class="label">GOVERNMENT FUND</div>
                     <div class="amount" id="govVal">৳ 5000</div>
                 </div>
-                <div id="turnBadge" class="turn-badge boys">BOYS TURN</div>
+                <div id="turnBadge" class="turn-badge boys">BLUE TEAM TURN</div>
                 <div class="vs-section">
                     <div class="team-block">
                         <div class="team-photo boys"><img id="imgBoys"
-                                src="https://via.placeholder.com/150/1e3a8a/ffffff?text=Boys" alt="Boys"></div>
-                        <div class="team-label boys">BOYS</div>
+                                src="https://via.placeholder.com/150/1e3a8a/ffffff?text=Blue+Team" alt="Blue Team"></div>
+                        <div class="team-label boys">BLUE TEAM</div>
                         <div class="team-money" id="moneyBoys">৳ 2500</div>
                     </div>
                     <div class="vs-text">VS</div>
                     <div class="team-block">
                         <div class="team-photo girls"><img id="imgGirls"
-                                src="https://via.placeholder.com/150/831843/ffffff?text=Girls" alt="Girls"></div>
-                        <div class="team-label girls">GIRLS</div>
+                                src="https://via.placeholder.com/150/831843/ffffff?text=Red+Team" alt="Red Team"></div>
+                        <div class="team-label girls">RED TEAM</div>
                         <div class="team-money" id="moneyGirls">৳ 2500</div>
                     </div>
                 </div>
@@ -361,7 +361,7 @@
     <div id="quizOverlay" class="quiz-overlay">
         <div class="quiz-card">
             <div class="quiz-title">📝 QUIZ TIME!</div>
-            <div id="quizTeamBadge" class="quiz-team-badge boys">BOYS</div>
+            <div id="quizTeamBadge" class="quiz-team-badge boys">BLUE TEAM</div>
             <div id="quizQuestionText" class="quiz-question"></div>
             <div id="quizOptions" class="quiz-options"></div>
             <div id="quizResultBadge" class="quiz-result-badge"></div>
@@ -382,6 +382,8 @@
     <script>
         const { MonopolyGame } = window;
         const boardElem = document.getElementById('monopolyBoard');
+        const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
+        const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
         function getSide(index) {
             if (index < 11) return 'bottom';
@@ -433,7 +435,7 @@
                     cell.classList.add(`booked-${team}`);
                     const tag = document.createElement('div');
                     tag.className = `owner-tag ${team}-tag`;
-                    tag.textContent = team.toUpperCase();
+                    tag.textContent = teamLabelUpper(team);
                     cell.appendChild(tag);
                 }
             }
@@ -445,7 +447,7 @@
             document.getElementById('moneyBoys').innerText = '৳ ' + g.boysScore;
             document.getElementById('moneyGirls').innerText = '৳ ' + g.girlsScore;
             const badge = document.getElementById('turnBadge');
-            badge.innerText = g.currentTurn.toUpperCase() + ' TURN';
+            badge.innerText = teamLabelUpper(g.currentTurn) + ' TURN';
             badge.className = 'turn-badge ' + g.currentTurn;
             if (g.boysImage) document.getElementById('imgBoys').src = g.boysImage + '?v=' + g.lastUpdate;
             if (g.girlsImage) document.getElementById('imgGirls').src = g.girlsImage + '?v=' + g.lastUpdate;
@@ -460,7 +462,7 @@
                     winnerTitle.innerHTML = 'ড্র! 🤝';
                     winnerMsg.innerHTML = `উভয় দলই সমান!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`;
                 } else {
-                    const winnerTeam = g.winner === 'boys' ? 'Boys' : 'Girls';
+                    const winnerTeam = teamLabel(g.winner);
                     winnerTitle.innerHTML = 'অভিনন্দন! 🎉';
                     winnerMsg.innerHTML = `Congratulations to all <strong>${winnerTeam}</strong>!<br>Class: ${g.classInfo} | Section: ${g.sectionInfo}`;
                 }
@@ -487,7 +489,7 @@
         function showQuiz(data) {
             const overlay = document.getElementById('quizOverlay');
             const badge = document.getElementById('quizTeamBadge');
-            badge.textContent = data.team.toUpperCase();
+            badge.textContent = teamLabelUpper(data.team);
             badge.className = 'quiz-team-badge ' + data.team;
             document.getElementById('quizQuestionText').textContent = data.question;
             const labels = ['A', 'B', 'C', 'D'];

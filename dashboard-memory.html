@@ -99,9 +99,9 @@
         </div>
 
         <div class="status-strip glass-card">
-            <div>Turn: <strong id="currentTurn">Boys</strong></div>
-            <div>Boys Score: <strong id="boysScore">0</strong></div>
-            <div>Girls Score: <strong id="girlsScore">0</strong></div>
+            <div>Turn: <strong id="currentTurn">Blue Team</strong></div>
+            <div>Blue Team Score: <strong id="boysScore">0</strong></div>
+            <div>Red Team Score: <strong id="girlsScore">0</strong></div>
         </div>
 
         <div class="glass-card" style="padding: 20px; margin-bottom: 30px;">
@@ -109,8 +109,8 @@
             <input type="text" id="className" placeholder="Class (e.g. 12)" style="margin:5px 0;">
             <input type="text" id="sectionName" placeholder="Section (e.g. Shitolokkha)" style="margin:5px 0;">
             <div style="display:flex; gap:10px; margin-top:10px;">
-                <button class="btn-primary btn-correct" onclick="handleAnnounce('boys')">BOYS WIN</button>
-                <button class="btn-secondary" onclick="handleAnnounce('girls')">GIRLS WIN</button>
+                <button class="btn-primary btn-correct" onclick="handleAnnounce('boys')">BLUE TEAM WIN</button>
+                <button class="btn-secondary" onclick="handleAnnounce('girls')">RED TEAM WIN</button>
             </div>
             <button class="btn-primary" onclick="handleClearWinner()" style="background:#64748b; margin-top:10px; width:100%;">CLOSE WINNER SCREEN</button>
         </div>
@@ -149,10 +149,11 @@
     <script>
         const { MemoryGame } = window;
         const list = document.getElementById('tileEditorList');
+        const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
 
         function updateStatus() {
             MemoryGame.loadGame();
-            document.getElementById('currentTurn').innerText = MemoryGame.game.currentTurn.toUpperCase();
+            document.getElementById('currentTurn').innerText = teamLabel(MemoryGame.game.currentTurn);
             document.getElementById('boysScore').innerText = MemoryGame.game.boysScore;
             document.getElementById('girlsScore').innerText = MemoryGame.game.girlsScore;
         }
