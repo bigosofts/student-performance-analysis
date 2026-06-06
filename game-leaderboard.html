@@ -86,17 +86,63 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        height: 100%;
-        font-size: 3rem;
-        color: rgba(255,255,255,.15);
+        flex: 1;
         text-align: center;
         flex-direction: column;
-        gap: 20px;
+        gap: 16px;
+        position: relative;
+        z-index: 1;
       }
       .waiting-screen span {
         font-size: 1.3rem;
         color: rgba(255,255,255,.1);
         letter-spacing: 2px;
+      }
+      .waiting-screen .ws-icon {
+        font-size: clamp(4rem, 10vw, 7rem);
+        animation: float 3s ease-in-out infinite;
+        filter: drop-shadow(0 0 30px rgba(99, 102, 241, 0.8));
+      }
+      .waiting-screen .ws-title {
+        font-family: 'Orbitron', sans-serif;
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 900;
+        background: linear-gradient(135deg, #6366f1, #ec4899, #06b6d4);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: gradientShift 4s ease-in-out infinite;
+      }
+      .waiting-screen .ws-subtitle {
+        font-size: clamp(1rem, 2vw, 1.4rem);
+        color: rgba(255,255,255,.4);
+        letter-spacing: 2px;
+        text-transform: uppercase;
+      }
+      .ws-dots {
+        display: flex;
+        gap: 9px;
+        justify-content: center;
+        margin-top: 8px;
+      }
+      .ws-dot {
+        width: 11px;
+        height: 11px;
+        border-radius: 50%;
+        background: #6366f1;
+        animation: bounce 1.2s infinite ease-in-out;
+      }
+      .ws-dot:nth-child(2) {
+        animation-delay: 0.2s;
+        background: #ec4899;
+      }
+      .ws-dot:nth-child(3) {
+        animation-delay: 0.4s;
+        background: #06b6d4;
+      }
+      .waiting-screen > div:not(.ws-icon):not(.ws-title):not(.ws-subtitle):not(.ws-dots),
+      .waiting-screen > span:not(.ws-dot) {
+        display: none;
       }
 
       /* ─── Leaderboard ─── */
@@ -279,6 +325,14 @@
     <div id="app" class="projector-view">
 
       <div class="waiting-screen" id="waitingScreen">
+        <div class="ws-icon">📡</div>
+        <div class="ws-title">Interactive ClassRoom</div>
+        <div class="ws-subtitle">Waiting for teacher...</div>
+        <div class="ws-dots">
+          <span class="ws-dot"></span>
+          <span class="ws-dot"></span>
+          <span class="ws-dot"></span>
+        </div>
         <div>🏫 Interactive ClassRoom</div>
         <span>Waiting for data…</span>
       </div>

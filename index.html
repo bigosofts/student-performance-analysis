@@ -1039,6 +1039,12 @@
         grid-column: span 6;
       }
 
+      body[data-theme="aurora"] .game-card::before,
+      body[data-theme="mono"] .game-card::before {
+        display: none;
+        animation: none;
+      }
+
       @media (min-width: 1201px) {
         body[data-theme="aurora"] .game-grid,
         body[data-theme="sunrise"] .game-grid,
@@ -1288,6 +1294,147 @@
         .btn-dashboard {
           width: 100%;
           justify-content: center;
+        }
+      }
+
+      @media (max-width: 1200px) {
+        body[data-theme="aurora"] .game-grid,
+        body[data-theme="sunrise"] .game-grid,
+        body[data-theme="ocean"] .game-grid,
+        body[data-theme="orchard"] .game-grid,
+        body[data-theme="mono"] .game-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+          grid-auto-rows: auto;
+          align-items: stretch;
+          gap: clamp(14px, 2vw, 22px);
+          width: min(100%, 920px);
+          max-width: 920px;
+        }
+
+        body[data-theme="aurora"] .game-card,
+        body[data-theme="sunrise"] .game-card,
+        body[data-theme="ocean"] .game-card,
+        body[data-theme="orchard"] .game-card,
+        body[data-theme="mono"] .game-card,
+        body[data-theme="aurora"] .game-card:nth-child(n),
+        body[data-theme="sunrise"] .game-card:nth-child(n),
+        body[data-theme="ocean"] .game-card:nth-child(n),
+        body[data-theme="orchard"] .game-card:nth-child(n),
+        body[data-theme="mono"] .game-card:nth-child(n) {
+          grid-column: auto;
+          grid-row: auto;
+          min-height: 220px;
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(5),
+        body[data-theme="sunrise"] .game-card:nth-child(5),
+        body[data-theme="ocean"] .game-card:nth-child(5),
+        body[data-theme="orchard"] .game-card:nth-child(5),
+        body[data-theme="mono"] .game-card:nth-child(5),
+        body[data-theme="aurora"] .game-card:nth-child(7),
+        body[data-theme="sunrise"] .game-card:nth-child(7),
+        body[data-theme="ocean"] .game-card:nth-child(7),
+        body[data-theme="orchard"] .game-card:nth-child(7),
+        body[data-theme="mono"] .game-card:nth-child(7) {
+          grid-column: 1 / -1;
+          flex-direction: row;
+          align-items: center;
+          text-align: left;
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="sunrise"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="ocean"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="orchard"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="mono"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="aurora"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="sunrise"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="ocean"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="orchard"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="mono"] .game-card:nth-child(7) .game-icon {
+          margin: 0 clamp(16px, 3vw, 28px) 0 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        body[data-theme="aurora"] .game-grid,
+        body[data-theme="sunrise"] .game-grid,
+        body[data-theme="ocean"] .game-grid,
+        body[data-theme="orchard"] .game-grid,
+        body[data-theme="mono"] .game-grid {
+          grid-template-columns: minmax(0, 1fr);
+          width: 100%;
+          max-width: 520px;
+          gap: 16px;
+        }
+
+        body[data-theme="aurora"] .game-card,
+        body[data-theme="sunrise"] .game-card,
+        body[data-theme="ocean"] .game-card,
+        body[data-theme="orchard"] .game-card,
+        body[data-theme="mono"] .game-card,
+        body[data-theme="aurora"] .game-card:nth-child(n),
+        body[data-theme="sunrise"] .game-card:nth-child(n),
+        body[data-theme="ocean"] .game-card:nth-child(n),
+        body[data-theme="orchard"] .game-card:nth-child(n),
+        body[data-theme="mono"] .game-card:nth-child(n) {
+          grid-column: auto;
+          grid-row: auto;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+          min-height: auto;
+          padding: 18px;
+        }
+
+        body[data-theme="aurora"] .game-card .game-icon,
+        body[data-theme="sunrise"] .game-card .game-icon,
+        body[data-theme="ocean"] .game-card .game-icon,
+        body[data-theme="orchard"] .game-card .game-icon,
+        body[data-theme="mono"] .game-card .game-icon,
+        body[data-theme="aurora"] .game-card:nth-child(n) .game-icon,
+        body[data-theme="sunrise"] .game-card:nth-child(n) .game-icon,
+        body[data-theme="ocean"] .game-card:nth-child(n) .game-icon,
+        body[data-theme="orchard"] .game-card:nth-child(n) .game-icon,
+        body[data-theme="mono"] .game-card:nth-child(n) .game-icon {
+          margin: 0 0 18px;
+        }
+
+        body[data-theme="aurora"] .game-card .card-text,
+        body[data-theme="sunrise"] .game-card .card-text,
+        body[data-theme="ocean"] .game-card .card-text,
+        body[data-theme="orchard"] .game-card .card-text,
+        body[data-theme="mono"] .game-card .card-text {
+          width: 100%;
+          padding-right: 0;
+        }
+
+        body[data-theme="aurora"] .game-card .btn-launch,
+        body[data-theme="sunrise"] .game-card .btn-launch,
+        body[data-theme="ocean"] .game-card .btn-launch,
+        body[data-theme="orchard"] .game-card .btn-launch,
+        body[data-theme="mono"] .game-card .btn-launch {
+          width: 100%;
+          align-self: stretch;
+        }
+      }
+
+      @media (max-width: 420px) {
+        body[data-theme="aurora"] .main-content,
+        body[data-theme="sunrise"] .main-content,
+        body[data-theme="ocean"] .main-content,
+        body[data-theme="orchard"] .main-content,
+        body[data-theme="mono"] .main-content {
+          padding-left: 12px;
+          padding-right: 12px;
+        }
+
+        body[data-theme="aurora"] .game-card,
+        body[data-theme="sunrise"] .game-card,
+        body[data-theme="ocean"] .game-card,
+        body[data-theme="orchard"] .game-card,
+        body[data-theme="mono"] .game-card {
+          padding: 16px 14px;
         }
       }
     </style>
