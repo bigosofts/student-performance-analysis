@@ -415,6 +415,10 @@
         border-color: rgba(255, 255, 255, 0.4);
       }
 
+      .mobile-panel-back {
+        display: none;
+      }
+
       /* ─── Keyframe Animations ─── */
       @keyframes slideDown {
         to {
@@ -574,13 +578,41 @@
           width: 100%;
         }
 
+        .mobile-panel-back {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 100%;
+          min-height: 56px;
+          margin-top: 18px;
+          border-radius: 18px;
+          background: rgba(255, 255, 255, 0.08);
+          border: 1px solid rgba(255, 255, 255, 0.22);
+          color: white;
+          font-weight: 900;
+          font-size: 0.95rem;
+          letter-spacing: 2px;
+          text-decoration: none;
+          text-transform: uppercase;
+          box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+        }
+
+        .mobile-panel-back::before {
+          content: "🔙";
+          margin-right: 10px;
+        }
+
+        .footer-wrap {
+          display: none;
+        }
+
         .btn-secondary {
           width: 90%;
           justify-content: center;
         }
 
         .footer-wrap .btn-secondary {
-          margin-top: -200px;
+          margin-top: 0;
         }
       }
     </style>
@@ -665,9 +697,10 @@
             Leaderboard
           </button>
         </div>
+        <a href="index.html" class="mobile-panel-back">Back</a>
       </div>
 
-      <div class="game-grid" data-mobile-tab="games">
+      <div class="game-grid mob-active" data-mobile-tab="games">
         <!-- Game 1: Question Bank -->
         <a href="dashboard-questionbank.html" class="game-card">
           <div class="game-icon">📝</div>
@@ -772,14 +805,14 @@
     </div>
 
     <!-- Footer Back Button -->
-    <div class="footer-wrap">
+    <div class="footer-wrap" data-mobile-tab="remote">
       <a href="index.html" class="btn-secondary">Back</a>
     </div>
 
     <!-- Mobile Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar">
       <button
-        class="mobile-tab-btn active"
+        class="mobile-tab-btn"
         data-tab="remote"
         onclick="switchMobileTab('remote')"
       >
@@ -787,7 +820,7 @@
         Remote
       </button>
       <button
-        class="mobile-tab-btn"
+        class="mobile-tab-btn active"
         data-tab="games"
         onclick="switchMobileTab('games')"
       >
@@ -828,7 +861,7 @@
 
       (function () {
         if (window.innerWidth <= 768) {
-          switchMobileTab("remote");
+          switchMobileTab("games");
         } else {
           // Ensure both are visible on desktop if resized
           document

@@ -1517,7 +1517,7 @@
         </div>
 
         <!-- File Library -->
-        <div class="panel" data-mobile-tab="library">
+        <div class="panel mob-active" data-mobile-tab="library">
           <div class="panel-header">
             <div
               class="panel-header-icon"
@@ -2087,7 +2087,7 @@ Kingdom → Plantae
 
     <!-- Mobile Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar">
-      <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
+      <button class="mobile-tab-btn" data-tab="control" onclick="switchMobileTab('control')">
         <span class="tab-icon">🎮</span>
         Control
       </button>
@@ -2095,7 +2095,7 @@ Kingdom → Plantae
         <span class="tab-icon">📤</span>
         Upload
       </button>
-      <button class="mobile-tab-btn" data-tab="library" onclick="switchMobileTab('library')">
+      <button class="mobile-tab-btn active" data-tab="library" onclick="switchMobileTab('library')">
         <span class="tab-icon">📚</span>
         Library
       </button>
@@ -3306,10 +3306,10 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      // Initialize: activate 'control' tab on mobile by default
+      // Initialize: activate the library tab on mobile by default
       (function() {
         if (window.innerWidth <= 768) {
-          switchMobileTab('control');
+          switchMobileTab('library');
         }
       })();
 

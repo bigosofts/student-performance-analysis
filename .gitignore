@@ -11,4 +11,10 @@ test*.pdf
 uploads/~$*.xlsx
 ~$*.xlsx
 
+# Local/server generated files
+.well-known/
+.git/
+tmp/
+uploads/
+.htaccess
 
