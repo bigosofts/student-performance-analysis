@@ -1433,23 +1433,233 @@
         color: #e0f2fe;
       }
 
+      /* Vibrant game-room refinement */
+      body {
+        background:
+          linear-gradient(135deg, rgba(6, 8, 32, 0.96), rgba(35, 12, 58, 0.9) 35%, rgba(4, 30, 45, 0.94) 68%, rgba(3, 7, 18, 0.98)),
+          repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0 1px, transparent 1px 26px),
+          repeating-linear-gradient(45deg, rgba(34, 211, 238, 0.06) 0 1px, transparent 1px 34px);
+      }
+
+      body::before {
+        background:
+          linear-gradient(110deg, transparent 0 8%, rgba(34, 211, 238, 0.12) 8% 12%, transparent 12% 52%, rgba(251, 191, 36, 0.11) 52% 56%, transparent 56%),
+          linear-gradient(70deg, transparent 0 20%, rgba(236, 72, 153, 0.14) 20% 24%, transparent 24% 76%, rgba(16, 185, 129, 0.12) 76% 80%, transparent 80%),
+          radial-gradient(ellipse at top left, rgba(34, 211, 238, 0.18), transparent 34%),
+          radial-gradient(ellipse at bottom right, rgba(245, 158, 11, 0.16), transparent 34%);
+        opacity: 1;
+      }
+
+      #galleryScreen {
+        padding: clamp(18px, 2.2vw, 30px) clamp(28px, 5vw, 72px) 82px;
+      }
+
+      .gallery-header {
+        max-width: 1380px;
+        min-height: 0;
+        margin: 0 auto 28px;
+        padding: clamp(18px, 2.2vw, 28px);
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        gap: 22px;
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.82), rgba(47, 21, 80, 0.64)),
+          linear-gradient(90deg, rgba(34, 211, 238, 0.1), rgba(236, 72, 153, 0.08), rgba(245, 158, 11, 0.1));
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        box-shadow:
+          0 22px 70px rgba(0, 0, 0, 0.38),
+          0 0 34px rgba(236, 72, 153, 0.14),
+          inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        overflow: hidden;
+      }
+
+      .gallery-header::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background:
+          linear-gradient(90deg, #22d3ee 0 24%, #ec4899 24% 52%, #f59e0b 52% 76%, #10b981 76% 100%);
+        height: 4px;
+        opacity: 0.9;
+      }
+
+      .gallery-header::after {
+        content: "READY";
+        align-self: center;
+        padding: 10px 14px;
+        color: #06111f;
+        background: linear-gradient(135deg, #facc15, #22d3ee);
+        border: none;
+        font-size: 0.72rem;
+        box-shadow:
+          0 0 22px rgba(250, 204, 21, 0.22),
+          0 0 24px rgba(34, 211, 238, 0.2);
+      }
+
+      .gallery-badge {
+        margin-bottom: 10px;
+        width: fit-content;
+        color: #fef3c7;
+        background: rgba(245, 158, 11, 0.14);
+        border-color: rgba(251, 191, 36, 0.38);
+      }
+
+      .badge-dot {
+        background: #facc15;
+        box-shadow: 0 0 16px rgba(250, 204, 21, 0.9);
+      }
+
+      .gallery-title {
+        font-size: clamp(2.1rem, 4vw, 3.55rem);
+        line-height: 1;
+        margin: 0 0 8px;
+        background: linear-gradient(100deg, #fef08a 0%, #67e8f9 34%, #f0abfc 68%, #86efac 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 18px rgba(236, 72, 153, 0.18));
+      }
+
+      .gallery-subtitle {
+        max-width: 780px;
+        color: #dbeafe;
+        font-size: clamp(0.88rem, 1vw, 1rem);
+      }
+
+      .pres-grid {
+        max-width: 1380px;
+        gap: clamp(22px, 2.4vw, 34px);
+        grid-template-columns: repeat(auto-fit, minmax(245px, 1fr));
+        align-items: start;
+      }
+
+      .pres-card {
+        border-radius: 8px;
+        background:
+          linear-gradient(180deg, rgba(8, 13, 32, 0.92), rgba(3, 7, 18, 0.96)),
+          rgba(15, 23, 42, 0.9);
+        border-color: rgba(255, 255, 255, 0.14);
+        box-shadow:
+          0 18px 45px rgba(0, 0, 0, 0.34),
+          0 0 0 1px rgba(255, 255, 255, 0.04),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      }
+
+      .pres-card:nth-child(6n + 1)::after {
+        background: linear-gradient(90deg, #22d3ee, #a78bfa);
+      }
+
+      .pres-card:nth-child(6n + 2)::after {
+        background: linear-gradient(90deg, #facc15, #fb7185);
+      }
+
+      .pres-card:nth-child(6n + 3)::after {
+        background: linear-gradient(90deg, #10b981, #22d3ee);
+      }
+
+      .pres-card:nth-child(6n + 4)::after {
+        background: linear-gradient(90deg, #ec4899, #f97316);
+      }
+
+      .pres-card:nth-child(6n + 5)::after {
+        background: linear-gradient(90deg, #8b5cf6, #22d3ee);
+      }
+
+      .pres-card:nth-child(6n)::after {
+        background: linear-gradient(90deg, #84cc16, #facc15);
+      }
+
+      .pres-card:hover {
+        transform: translateY(-9px) scale(1.015);
+        border-color: rgba(255, 255, 255, 0.28);
+        box-shadow:
+          0 26px 64px rgba(0, 0, 0, 0.46),
+          0 0 34px rgba(34, 211, 238, 0.16),
+          0 0 28px rgba(236, 72, 153, 0.14);
+      }
+
+      .card-thumb {
+        height: 132px;
+        background:
+          linear-gradient(135deg, rgba(34, 211, 238, 0.34), rgba(236, 72, 153, 0.24)),
+          repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.11) 0 1px, transparent 1px 9px),
+          rgba(15, 23, 42, 0.8);
+      }
+
+      .card-thumb::before {
+        content: "";
+        position: absolute;
+        inset: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 8px;
+        pointer-events: none;
+      }
+
+      .card-body {
+        padding: 14px 16px 12px;
+      }
+
+      .card-subject {
+        color: #fef08a;
+        font-size: 0.68rem;
+      }
+
+      .card-name {
+        font-size: 0.98rem;
+        margin-bottom: 7px;
+      }
+
+      .card-chapter {
+        font-size: 0.78rem;
+      }
+
+      .card-footer {
+        padding: 12px 16px;
+      }
+
+      .card-open-btn {
+        padding: 7px 14px;
+        background: linear-gradient(135deg, #facc15, #22d3ee 55%, #c084fc);
+      }
+
+      .conn-status {
+        top: 20px;
+        right: 22px;
+        color: #f8fafc;
+        background: rgba(3, 7, 18, 0.78);
+        border-color: rgba(250, 204, 21, 0.34);
+      }
+
+      .waiting-banner {
+        background:
+          linear-gradient(90deg, rgba(34, 211, 238, 0.16), rgba(236, 72, 153, 0.12), rgba(245, 158, 11, 0.14)),
+          rgba(2, 6, 23, 0.82);
+        color: #f8fafc;
+      }
+
       @media (max-width: 760px) {
         #galleryScreen {
-          padding: 18px 14px 86px;
+          padding: 16px 14px 86px;
         }
 
         .gallery-header {
           display: block;
-          padding: 24px 18px;
+          padding: 20px 16px;
         }
 
         .gallery-header::after {
           display: inline-flex;
-          margin-top: 18px;
+          margin-top: 14px;
+        }
+
+        .gallery-title {
+          font-size: clamp(2rem, 12vw, 3rem);
         }
 
         .pres-grid {
           grid-template-columns: 1fr;
+          gap: 18px;
         }
       }
     </style>
@@ -1477,7 +1687,7 @@
           <div class="badge-dot"></div>
           Live Classroom · Presentation Studio
         </div>
-        <h1 class="gallery-title">Presentation<br />Library</h1>
+        <h1 class="gallery-title">Slide Arena</h1>
         <p class="gallery-subtitle">
           Select a presentation to display, or wait for teacher to open one
         </p>
