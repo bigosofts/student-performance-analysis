@@ -2568,7 +2568,6 @@ document.getElementById("btnCloseShare").addEventListener("click", () => {
         if (!src) return;
         socket.emit("pres-share-image", { src });
         showToast("🖼️ Image sent to game screen!", "success");
-        closeModal("imageModal");
       });
 
       // ════════════════════════════════════════════
@@ -2590,7 +2589,6 @@ document.getElementById("btnCloseShare").addEventListener("click", () => {
           data,
         });
         showToast("🌳 Tree sent to game screen!", "success");
-        closeModal("treeModal");
       }
 
       // ════════════════════════════════════════════
@@ -2609,7 +2607,6 @@ document.getElementById("btnCloseShare").addEventListener("click", () => {
         }
         socket.emit("pres-share-note", { title: title || "Note", content });
         showToast("📝 Note sent to game screen!", "success");
-        closeModal("noteModal");
       }
 
       // ════════════════════════════════════════════
@@ -2707,7 +2704,6 @@ function sendDrawing() {
          const dataUrl = canvas.toDataURL("image/png");
          socket.emit("pres-share-image", { src: dataUrl, isDrawing: true });
          showToast("🎨 Drawing sent to game screen!", "success");
-         closeModal("drawModal");
        }
 
        // ════════════════════════════════════════════
@@ -2738,7 +2734,6 @@ function sendDrawing() {
          }
          socket.emit("pres-share-webpage", { url });
          showToast("🌐 Webpage sent to game screen!", "success");
-         closeModal("webpageModal");
        }
 
        document.getElementById("sharePdfBtn").addEventListener("click", () => {
@@ -2773,7 +2768,6 @@ function sendDrawing() {
          if (!url) return;
          socket.emit("pres-share-pdf", { url });
          showToast("📄 PDF sent to game screen!", "success");
-         closeModal("pdfModal");
        }
 
        document.getElementById("youtubeUrlInput").addEventListener("input", (e) => {
@@ -2855,7 +2849,6 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
              }
              socket.emit("pres-share-video", { type: "youtube", videoId, url });
              showToast("🎬 YouTube video sent to game screen!", "success");
-             closeModal("videoModal");
            } else if (videoUploadType === "file" && videoFile) {
              uploadVideoFile();
            }
@@ -2909,7 +2902,6 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
              showToast("🎬 Video uploaded and sent to game screen!", "success");
              progContainer.classList.remove("active");
              progFill.style.width = "0%";
-             closeModal("videoModal");
              fetchUploadedVideos();
            } else {
              showToast("Upload failed: " + xhr.responseText, "error");
@@ -2971,7 +2963,6 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
        function shareUploadedVideo(url, filename) {
          socket.emit("pres-share-video", { type: "upload", url, filename });
          showToast("🎬 Shared uploaded video to screen!", "success");
-         closeModal("videoModal");
        }
 
        async function deleteUploadedVideo(filename) {

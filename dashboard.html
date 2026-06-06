@@ -9,6 +9,11 @@
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700;800;900&display=swap");
 
+      html {
+        scroll-behavior: smooth;
+        overscroll-behavior-y: contain;
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
@@ -19,9 +24,11 @@
         background: radial-gradient(ellipse at top, #0f172a 0%, #020617 100%);
         color: white;
         font-family: "Inter", sans-serif;
-        width: 100vw;
+        width: 100%;
         height: 100vh;
         overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
         /* Projector ready - NO scroll on desktop */
         display: flex;
         flex-direction: column;
@@ -456,6 +463,7 @@
           /* Allow scrolling on smaller screens */
           height: auto;
           min-height: 100vh;
+          min-height: 100svh;
         }
 
         .main-content {

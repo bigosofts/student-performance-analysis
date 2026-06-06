@@ -14,6 +14,11 @@
         inherits: false;
       }
 
+      html {
+        scroll-behavior: smooth;
+        overscroll-behavior-y: contain;
+      }
+
       * {
         box-sizing: border-box;
         margin: 0;
@@ -24,9 +29,11 @@
         background: radial-gradient(ellipse at top, #0f172a 0%, #020617 100%);
         color: white;
         font-family: "Inter", sans-serif;
-        width: 100vw;
+        width: 100%;
         height: 100vh;
         overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+        touch-action: pan-y;
         /* Projector ready - NO scroll on desktop */
         display: flex;
         flex-direction: column;
@@ -99,6 +106,78 @@
         z-index: 10;
       }
 
+      .design-switcher {
+        position: fixed;
+        left: clamp(12px, 2vw, 26px);
+        top: auto;
+        bottom: clamp(14px, 2vh, 24px);
+        z-index: 30;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px;
+        border-radius: 18px;
+        background: rgba(2, 6, 23, 0.68);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        backdrop-filter: blur(18px);
+        box-shadow: 0 18px 45px rgba(0, 0, 0, 0.35);
+      }
+
+      .design-switcher-label {
+        padding: 0 8px;
+        color: #cbd5e1;
+        font-size: 0.72rem;
+        font-weight: 900;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+      }
+
+      .design-option {
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 50%;
+        color: white;
+        font-weight: 900;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease,
+          box-shadow 0.2s ease;
+      }
+
+      .design-option:hover,
+      .design-option.active {
+        transform: translateY(-2px) scale(1.05);
+        border-color: rgba(255, 255, 255, 0.75);
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
+      }
+
+      .design-option[data-theme="classic"] {
+        background: linear-gradient(135deg, #6366f1, #ec4899);
+      }
+
+      .design-option[data-theme="aurora"] {
+        background: linear-gradient(135deg, #14b8a6, #84cc16);
+      }
+
+      .design-option[data-theme="sunrise"] {
+        background: linear-gradient(135deg, #f97316, #facc15);
+      }
+
+      .design-option[data-theme="ocean"] {
+        background: linear-gradient(135deg, #0284c7, #22d3ee);
+      }
+
+      .design-option[data-theme="orchard"] {
+        background: linear-gradient(135deg, #16a34a, #f59e0b);
+      }
+
+      .design-option[data-theme="mono"] {
+        background: linear-gradient(135deg, #475569, #e2e8f0);
+        color: #0f172a;
+      }
+
       /* Beautiful Teacher Badge */
       .teacher-badge {
         background: rgba(255, 255, 255, 0.05);
@@ -165,8 +244,8 @@
       /* ─── Header ─── */
       .header-area {
         text-align: center;
-        padding: clamp(20px, 4vh, 40px) 20px clamp(10px, 2vh, 20px);
-        margin-top: 1vh;
+        padding: clamp(28px, 5vh, 56px) 260px clamp(10px, 2vh, 18px);
+        margin-top: 0;
         animation: slideDown 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         opacity: 0;
         transform: translateY(-30px);
@@ -176,7 +255,7 @@
 
       .title-glitch {
         font-family: "Orbitron", sans-serif;
-        font-size: clamp(2.5rem, 6vw, 4.8rem);
+        font-size: clamp(2.35rem, 5.2vw, 4.35rem);
         font-weight: 900;
         text-transform: uppercase;
         background: linear-gradient(to right, #6366f1, #ec4899, #f59e0b);
@@ -189,7 +268,7 @@
       }
 
       .subtitle {
-        font-size: clamp(0.9rem, 1.5vw, 1.5rem);
+        font-size: clamp(0.82rem, 1.28vw, 1.2rem);
         color: #9ca3af;
         letter-spacing: 4px;
         text-transform: uppercase;
@@ -203,7 +282,7 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        padding: 0 clamp(20px, 4vw, 50px);
+        padding: clamp(8px, 1.5vh, 18px) clamp(20px, 4vw, 50px);
         z-index: 5;
         min-height: 0;
         /* Allows flex items to shrink */
@@ -215,6 +294,7 @@
         gap: clamp(12px, 2vh, 24px);
         width: 100%;
         max-width: 1700px;
+        max-height: 100%;
         perspective: 1200px;
         flex-shrink: 1;
       }
@@ -231,7 +311,7 @@
         background: rgba(10, 15, 30, 0.88);
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: clamp(16px, 2vw, 24px);
-        padding: clamp(14px, 2.5vh, 28px) clamp(12px, 1.5vw, 24px);
+        padding: clamp(12px, 2vh, 24px) clamp(12px, 1.5vw, 24px);
         text-decoration: none;
         color: white;
         transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
@@ -246,6 +326,7 @@
         transform: translateY(40px) rotateX(10deg);
         animation: cardEntrance 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         overflow: hidden;
+        min-height: clamp(230px, 27vh, 268px);
       }
 
       /* Inner blur — color sweep left ↔ right only */
@@ -402,6 +483,7 @@
         flex-direction: row;
         text-align: left;
         padding: clamp(14px, 2.5vh, 24px) clamp(20px, 2.5vw, 35px);
+        min-height: clamp(175px, 21vh, 220px);
         --glow: rgba(91, 33, 182, 0.3);
         --neon-1: #5b21b6;
         --neon-2: #818cf8;
@@ -488,8 +570,8 @@
       }
 
       .game-icon {
-        width: clamp(55px, 9vh, 95px);
-        height: clamp(55px, 9vh, 95px);
+        width: clamp(52px, 8vh, 88px);
+        height: clamp(52px, 8vh, 88px);
         border-radius: clamp(14px, 2vw, 22px);
         display: flex;
         align-items: center;
@@ -498,7 +580,7 @@
         box-shadow:
           0 12px 25px rgba(0, 0, 0, 0.4),
           inset 0 2px 5px rgba(255, 255, 255, 0.3);
-        margin-bottom: clamp(12px, 2vh, 22px);
+        margin-bottom: clamp(10px, 1.6vh, 18px);
         transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         flex-shrink: 0;
       }
@@ -549,15 +631,16 @@
       .game-card p {
         color: #a1a1aa;
         font-size: clamp(0.75rem, 1vw, 0.95rem);
-        line-height: 1.5;
+        line-height: 1.42;
         flex-grow: 1;
-        margin-bottom: clamp(12px, 2vh, 22px);
+        margin-bottom: clamp(10px, 1.6vh, 18px);
         font-weight: 400;
       }
 
       .btn-launch {
         width: 100%;
         padding: clamp(8px, 1.5vh, 14px);
+        min-height: 42px;
         border-radius: clamp(8px, 1vw, 12px);
         font-weight: 800;
         font-size: clamp(0.75rem, 1vw, 0.95rem);
@@ -569,6 +652,8 @@
         color: white;
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         margin-top: auto;
+        margin-bottom: 4px;
+        flex-shrink: 0;
       }
 
       .game-card:hover .btn-launch {
@@ -614,8 +699,8 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        padding: clamp(10px, 2vh, 25px) clamp(20px, 3vw, 40px)
-          clamp(15px, 3vh, 35px);
+        padding: clamp(8px, 1.5vh, 18px) clamp(20px, 3vw, 40px)
+          clamp(14px, 2vh, 24px);
 
         animation: slideInUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         animation-delay: 1.2s;
@@ -705,12 +790,395 @@
       /* ─── Responsive Design (Fallbacks / Reshaping) ─── */
 
       /* Tablet & Small Desktop (Max 1200px) */
+      body[data-theme="aurora"] {
+        background:
+          radial-gradient(circle at 12% 18%, rgba(20, 184, 166, 0.26), transparent 34%),
+          radial-gradient(circle at 88% 75%, rgba(132, 204, 22, 0.2), transparent 36%),
+          linear-gradient(135deg, #021713 0%, #052e2b 48%, #0f172a 100%);
+      }
+
+      body[data-theme="aurora"] .title-glitch {
+        background: linear-gradient(to right, #5eead4, #bef264, #fef08a);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      body[data-theme="aurora"] .game-grid {
+        grid-template-columns: 1.25fr 1fr 1fr 1fr;
+        grid-auto-rows: minmax(132px, 1fr);
+        max-width: 1760px;
+        gap: clamp(12px, 1.55vh, 18px);
+      }
+
+      body[data-theme="aurora"] .game-card {
+        border-radius: 8px;
+        background: rgba(5, 46, 43, 0.78);
+        align-items: flex-start;
+        text-align: left;
+        border-left: 4px solid rgba(94, 234, 212, 0.72);
+      }
+
+      body[data-theme="aurora"] .game-card .game-icon {
+        border-radius: 8px;
+      }
+
+      body[data-theme="aurora"] .game-card:nth-child(1) {
+        grid-row: span 2;
+        justify-content: space-between;
+      }
+
+      body[data-theme="aurora"] .game-card:nth-child(1) .game-icon {
+        width: clamp(74px, 11vh, 120px);
+        height: clamp(74px, 11vh, 120px);
+      }
+
+      body[data-theme="aurora"] .game-card:nth-child(5),
+      body[data-theme="aurora"] .game-card:nth-child(7) {
+        grid-column: span 2;
+        flex-direction: row;
+        align-items: center;
+      }
+
+      body[data-theme="aurora"] .game-card:nth-child(5) .game-icon,
+      body[data-theme="aurora"] .game-card:nth-child(7) .game-icon {
+        margin: 0 clamp(14px, 1.6vw, 24px) 0 0;
+      }
+
+      body[data-theme="sunrise"] {
+        background:
+          linear-gradient(160deg, rgba(15, 23, 42, 0.72), rgba(69, 26, 3, 0.78)),
+          radial-gradient(circle at 70% 20%, rgba(250, 204, 21, 0.24), transparent 34%),
+          #120b04;
+      }
+
+      body[data-theme="sunrise"] .title-glitch {
+        background: linear-gradient(to right, #fff7ed, #fdba74, #fb7185);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      body[data-theme="sunrise"] .game-grid {
+        grid-template-columns: repeat(12, 1fr);
+        grid-auto-rows: minmax(118px, 1fr);
+        align-items: stretch;
+        gap: clamp(10px, 1.45vh, 16px);
+        max-width: 1740px;
+      }
+
+      body[data-theme="sunrise"] .game-card {
+        grid-column: span 3;
+        border-radius: 12px;
+        background: rgba(30, 41, 59, 0.74);
+        transform: translateY(40px) rotateZ(-1deg);
+      }
+
+      body[data-theme="sunrise"] .game-card:nth-child(1),
+      body[data-theme="sunrise"] .game-card:nth-child(5) {
+        grid-column: span 6;
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+      }
+
+      body[data-theme="sunrise"] .game-card:nth-child(2),
+      body[data-theme="sunrise"] .game-card:nth-child(3),
+      body[data-theme="sunrise"] .game-card:nth-child(4) {
+        grid-row: span 2;
+      }
+
+      body[data-theme="sunrise"] .game-card:nth-child(7) {
+        grid-column: span 6;
+      }
+
+      body[data-theme="sunrise"] .game-card:nth-child(1) .game-icon,
+      body[data-theme="sunrise"] .game-card:nth-child(5) .game-icon {
+        margin: 0 clamp(14px, 1.8vw, 28px) 0 0;
+      }
+
+      body[data-theme="ocean"] {
+        background:
+          linear-gradient(180deg, rgba(8, 47, 73, 0.9), rgba(2, 6, 23, 0.94)),
+          radial-gradient(circle at 35% 22%, rgba(34, 211, 238, 0.24), transparent 34%);
+      }
+
+      body[data-theme="ocean"] .title-glitch {
+        background: linear-gradient(to right, #e0f2fe, #22d3ee, #38bdf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      body[data-theme="ocean"] .game-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        max-width: 1840px;
+        gap: clamp(12px, 1.6vh, 18px);
+      }
+
+      body[data-theme="ocean"] .game-card {
+        flex-direction: row;
+        text-align: left;
+        align-items: center;
+        border-radius: 10px;
+      }
+
+      body[data-theme="ocean"] .game-card .game-icon {
+        margin: 0 20px 0 0;
+      }
+
+      body[data-theme="ocean"] .game-card:nth-child(5) {
+        grid-column: span 2;
+      }
+
+      body[data-theme="ocean"] .game-card:nth-child(7) {
+        grid-column: span 2;
+      }
+
+      body[data-theme="orchard"] {
+        background:
+          radial-gradient(circle at 20% 72%, rgba(22, 163, 74, 0.25), transparent 32%),
+          radial-gradient(circle at 86% 18%, rgba(245, 158, 11, 0.18), transparent 34%),
+          linear-gradient(145deg, #03180c, #16220f 52%, #020617);
+      }
+
+      body[data-theme="orchard"] .title-glitch {
+        background: linear-gradient(to right, #bbf7d0, #fef3c7, #86efac);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      body[data-theme="orchard"] .game-grid {
+        grid-template-columns: 1.35fr 0.95fr 0.95fr 1.35fr;
+        grid-auto-rows: minmax(126px, 1fr);
+        perspective: 1800px;
+        max-width: 1760px;
+        gap: clamp(12px, 1.55vh, 18px);
+      }
+
+      body[data-theme="orchard"] .game-card {
+        border-radius: 24px 10px 24px 10px;
+        background: rgba(20, 83, 45, 0.5);
+      }
+
+      body[data-theme="orchard"] .game-card:nth-child(1),
+      body[data-theme="orchard"] .game-card:nth-child(5) {
+        grid-row: span 2;
+      }
+
+      body[data-theme="orchard"] .game-card:nth-child(1) {
+        grid-column: 1 / 2;
+      }
+
+      body[data-theme="orchard"] .game-card:nth-child(5) {
+        grid-column: 4 / 5;
+        flex-direction: column;
+        text-align: center;
+      }
+
+      body[data-theme="orchard"] .game-card:nth-child(5) .game-icon {
+        margin: 0 0 18px;
+      }
+
+      body[data-theme="orchard"] .game-card:nth-child(7) {
+        grid-column: 2 / 4;
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+      }
+
+      body[data-theme="orchard"] .game-card:nth-child(7) .game-icon {
+        margin: 0 clamp(14px, 1.8vw, 28px) 0 0;
+      }
+
+      body[data-theme="mono"] {
+        background:
+          linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(51, 65, 85, 0.86)),
+          repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 28px);
+      }
+
+      body[data-theme="mono"] .title-glitch {
+        background: linear-gradient(to right, #f8fafc, #94a3b8, #e2e8f0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      body[data-theme="mono"] .game-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-auto-rows: minmax(128px, 1fr);
+        gap: 12px;
+        max-width: 1800px;
+      }
+
+      body[data-theme="mono"] .game-card,
+      body[data-theme="mono"] .game-card:nth-child(5) {
+        grid-column: span 3;
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        border-radius: 8px;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(2, 6, 23, 0.94));
+        border-color: rgba(226, 232, 240, 0.18);
+        box-shadow: 0 12px 34px rgba(0, 0, 0, 0.35);
+      }
+
+      body[data-theme="mono"] .game-card::before {
+        opacity: 0.22;
+      }
+
+      body[data-theme="mono"] .game-card:nth-child(5) .game-icon {
+        margin: 0 clamp(12px, 1.4vw, 20px) 0 0;
+      }
+
+      body[data-theme="mono"] .game-card .game-icon {
+        width: clamp(48px, 6vh, 66px);
+        height: clamp(48px, 6vh, 66px);
+        margin: 0 clamp(12px, 1.4vw, 20px) 0 0;
+        border-radius: 8px;
+      }
+
+      body[data-theme="mono"] .game-card:nth-child(5),
+      body[data-theme="mono"] .game-card:nth-child(7) {
+        grid-column: span 6;
+      }
+
+      @media (min-width: 1201px) {
+        body[data-theme="aurora"] .game-grid,
+        body[data-theme="sunrise"] .game-grid,
+        body[data-theme="ocean"] .game-grid,
+        body[data-theme="orchard"] .game-grid,
+        body[data-theme="mono"] .game-grid {
+          grid-template-columns: repeat(5, minmax(0, 1fr));
+          grid-auto-rows: minmax(240px, auto);
+          align-items: stretch;
+          max-width: 1840px;
+          gap: clamp(12px, 1.6vh, 18px);
+          transform: none;
+        }
+
+        body[data-theme="aurora"] .game-card,
+        body[data-theme="sunrise"] .game-card,
+        body[data-theme="ocean"] .game-card,
+        body[data-theme="orchard"] .game-card,
+        body[data-theme="mono"] .game-card {
+          grid-column: auto;
+          grid-row: auto;
+          min-height: 240px;
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(1),
+        body[data-theme="sunrise"] .game-card:nth-child(1),
+        body[data-theme="ocean"] .game-card:nth-child(1),
+        body[data-theme="orchard"] .game-card:nth-child(1),
+        body[data-theme="mono"] .game-card:nth-child(1),
+        body[data-theme="aurora"] .game-card:nth-child(5),
+        body[data-theme="sunrise"] .game-card:nth-child(5),
+        body[data-theme="ocean"] .game-card:nth-child(5),
+        body[data-theme="orchard"] .game-card:nth-child(5),
+        body[data-theme="mono"] .game-card:nth-child(5),
+        body[data-theme="aurora"] .game-card:nth-child(7),
+        body[data-theme="sunrise"] .game-card:nth-child(7),
+        body[data-theme="ocean"] .game-card:nth-child(7),
+        body[data-theme="orchard"] .game-card:nth-child(7),
+        body[data-theme="mono"] .game-card:nth-child(7) {
+          grid-column: span 2;
+          grid-row: auto;
+          flex-direction: row;
+          align-items: center;
+          text-align: left;
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(1) .game-icon,
+        body[data-theme="sunrise"] .game-card:nth-child(1) .game-icon,
+        body[data-theme="ocean"] .game-card:nth-child(1) .game-icon,
+        body[data-theme="orchard"] .game-card:nth-child(1) .game-icon,
+        body[data-theme="mono"] .game-card:nth-child(1) .game-icon,
+        body[data-theme="aurora"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="sunrise"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="ocean"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="orchard"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="mono"] .game-card:nth-child(5) .game-icon,
+        body[data-theme="aurora"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="sunrise"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="ocean"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="orchard"] .game-card:nth-child(7) .game-icon,
+        body[data-theme="mono"] .game-card:nth-child(7) .game-icon {
+          margin: 0 clamp(14px, 1.6vw, 24px) 0 0;
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(5) .btn-launch,
+        body[data-theme="sunrise"] .game-card:nth-child(5) .btn-launch,
+        body[data-theme="ocean"] .game-card:nth-child(5) .btn-launch,
+        body[data-theme="orchard"] .game-card:nth-child(5) .btn-launch,
+        body[data-theme="mono"] .game-card:nth-child(5) .btn-launch {
+          width: auto;
+          min-width: 142px;
+          align-self: center;
+        }
+
+        body[data-theme="mono"] .game-card {
+          border-top: 3px solid rgba(226, 232, 240, 0.22);
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(n),
+        body[data-theme="sunrise"] .game-card:nth-child(n),
+        body[data-theme="ocean"] .game-card:nth-child(n),
+        body[data-theme="orchard"] .game-card:nth-child(n),
+        body[data-theme="mono"] .game-card:nth-child(n) {
+          grid-row: auto;
+        }
+
+        body[data-theme="aurora"] .game-card p,
+        body[data-theme="sunrise"] .game-card p,
+        body[data-theme="ocean"] .game-card p,
+        body[data-theme="orchard"] .game-card p,
+        body[data-theme="mono"] .game-card p {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        body[data-theme="aurora"] .game-card:nth-child(5) p,
+        body[data-theme="sunrise"] .game-card:nth-child(5) p,
+        body[data-theme="ocean"] .game-card:nth-child(5) p,
+        body[data-theme="orchard"] .game-card:nth-child(5) p,
+        body[data-theme="mono"] .game-card:nth-child(5) p {
+          -webkit-line-clamp: 3;
+        }
+      }
+
+      @media (max-height: 820px) and (min-width: 1201px) {
+        .header-area {
+          padding-top: 24px;
+          padding-bottom: 8px;
+        }
+
+        .title-glitch {
+          font-size: clamp(2rem, 4.6vw, 3.45rem);
+        }
+
+        .subtitle {
+          font-size: clamp(0.78rem, 1.1vw, 1.05rem);
+        }
+
+        .game-card p {
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+        }
+
+        .btn-launch {
+          min-height: 38px;
+          padding: 8px 12px;
+        }
+      }
+
       @media (max-width: 1200px) {
         body {
           overflow-y: auto;
           /* Allow scrolling on smaller screens */
           height: auto;
           min-height: 100vh;
+          min-height: 100svh;
         }
 
         .main-content {
@@ -719,6 +1187,21 @@
 
         .game-grid {
           grid-template-columns: repeat(2, 1fr);
+        }
+
+        body[data-theme] .game-grid {
+          grid-template-columns: repeat(2, 1fr);
+          transform: none;
+        }
+
+        body[data-theme] .game-card,
+        body[data-theme] .game-card:nth-child(5),
+        body[data-theme="sunrise"] .game-card:nth-child(7) {
+          grid-column: auto;
+        }
+
+        body[data-theme="classic"] .game-card:nth-child(5) {
+          grid-column: 1 / -1;
         }
 
         .game-card:nth-child(5) {
@@ -734,6 +1217,23 @@
 
       /* Mobile (Max 768px) */
       @media (max-width: 768px) {
+        .design-switcher {
+          left: 50%;
+          top: auto;
+          bottom: 12px;
+          transform: translateX(-50%);
+          max-width: calc(100% - 24px);
+          overflow-x: auto;
+        }
+
+        .design-switcher-label {
+          display: none;
+        }
+
+        .teacher-central-wrap {
+          padding-bottom: 74px;
+        }
+
         .top-bar {
           position: static;
           justify-content: center;
@@ -752,6 +1252,19 @@
 
         .game-grid {
           grid-template-columns: 1fr;
+        }
+
+        body[data-theme] .game-grid {
+          grid-template-columns: 1fr;
+        }
+
+        body[data-theme="ocean"] .game-card {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        body[data-theme="ocean"] .game-card .game-icon {
+          margin: 0 0 22px;
         }
 
         .game-card:nth-child(5) {
@@ -781,6 +1294,16 @@
   </head>
 
   <body>
+    <div class="design-switcher" aria-label="Design version switcher">
+      <span class="design-switcher-label">Design</span>
+      <button class="design-option active" type="button" data-theme="classic" aria-label="Classic design">1</button>
+      <button class="design-option" type="button" data-theme="aurora" aria-label="Aurora design">2</button>
+      <button class="design-option" type="button" data-theme="sunrise" aria-label="Sunrise design">3</button>
+      <button class="design-option" type="button" data-theme="ocean" aria-label="Ocean design">4</button>
+      <button class="design-option" type="button" data-theme="orchard" aria-label="Orchard design">5</button>
+      <button class="design-option" type="button" data-theme="mono" aria-label="Mono design">6</button>
+    </div>
+
     <!-- Background Particles -->
     <div class="bg-animation">
       <div class="bg-circle c1"></div>
@@ -950,6 +1473,25 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
+      const designButtons = document.querySelectorAll(".design-option");
+      const requestedTheme = new URLSearchParams(window.location.search).get("theme");
+      const savedTheme =
+        requestedTheme || localStorage.getItem("classroom-index-theme") || "classic";
+
+      function applyIndexTheme(theme) {
+        document.body.dataset.theme = theme;
+        designButtons.forEach((button) => {
+          button.classList.toggle("active", button.dataset.theme === theme);
+        });
+        localStorage.setItem("classroom-index-theme", theme);
+      }
+
+      designButtons.forEach((button) => {
+        button.addEventListener("click", () => applyIndexTheme(button.dataset.theme));
+      });
+
+      applyIndexTheme(savedTheme);
+
       const socket = io();
       socket.on("classroom-navigate", (data) => {
         if (data && data.url) {
