@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "git:push": "git add --all && git commit -m \"fix padding\" && git push origin main",
+    "git:push": "git add --all && git commit -m \"fix home page for simplicity\" && git push origin main",
     "git:pull": "git pull origin main",
     "git:reset": "git reset --hard HEAD && git clean -fd"
   },
