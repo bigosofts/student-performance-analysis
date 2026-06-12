@@ -1783,9 +1783,10 @@
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🖼️ Share Image to Screen</div>
-          <button class="modal-close" onclick="closeModal('imageModal')">
-            ✕
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('imageModal', '🖼️ Share Image to Screen')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('imageModal')" title="Close">✕</button>
+          </div>
         </div>
 
         <div class="form-row" style="margin-bottom: 16px">
@@ -1817,9 +1818,10 @@
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🌳 Classification Tree</div>
-          <button class="modal-close" onclick="closeModal('treeModal')">
-            ✕
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('treeModal', '🌳 Classification Tree')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('treeModal')" title="Close">✕</button>
+          </div>
         </div>
         <div class="tree-builder">
           <label class="form-label" style="display: block; margin-bottom: 8px"
@@ -1864,9 +1866,10 @@ Kingdom → Plantae
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">📝 Share Note / Text</div>
-          <button class="modal-close" onclick="closeModal('noteModal')">
-            ✕
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('noteModal', '📝 Share Note / Text')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('noteModal')" title="Close">✕</button>
+          </div>
         </div>
         <div class="note-editor">
           <label class="form-label" style="display: block; margin-bottom: 8px"
@@ -1898,10 +1901,11 @@ Kingdom → Plantae
        <div class="modal-box wide">
          <div class="modal-header">
            <div class="modal-title">✏️ Drawing Board</div>
-           <button class="modal-close" onclick="closeModal('drawModal')">
-             ✕
-           </button>
-         </div>
+           <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('drawModal', '✏️ Drawing Board')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('drawModal')" title="Close">✕</button>
+          </div>
+        </div>
 
          <div class="draw-tools">
            <div
@@ -1967,9 +1971,10 @@ Kingdom → Plantae
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🎬 Share Video to Screen</div>
-          <button class="modal-close" onclick="closeModal('videoModal')">
-            ✕
-          </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('videoModal', '🎬 Share Video to Screen')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('videoModal')" title="Close">✕</button>
+          </div>
         </div>
         <div class="hint-text">
           Select a video from the gallery, or enter a new YouTube URL, or upload an MP4 file.
@@ -2049,7 +2054,10 @@ Kingdom → Plantae
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🌐 Share Webpage</div>
-          <button class="modal-close" onclick="closeModal('webpageModal')">✕</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('webpageModal', '🌐 Share Webpage')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('webpageModal')" title="Close">✕</button>
+          </div>
         </div>
         <div class="hint-text">
           Enter a website URL to display it live on the game screen. (Note: Some sites block iframes)
@@ -2069,7 +2077,10 @@ Kingdom → Plantae
       <div class="modal-box wide">
         <div class="modal-header">
           <div class="modal-title">📄 Share PDF Document</div>
-          <button class="modal-close" onclick="closeModal('pdfModal')">✕</button>
+          <div style="display: flex; gap: 8px;">
+            <button class="modal-close" onclick="minimizeShareModal('pdfModal', '📄 Share PDF Document')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('pdfModal')" title="Close">✕</button>
+          </div>
         </div>
         
         <div class="form-row" style="margin-bottom: 16px">
@@ -2108,6 +2119,13 @@ Kingdom → Plantae
         Videos
       </button>
     </nav>
+
+    
+    <!-- Minimized Modals Dock -->
+    <div id="minimizedDock" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(5,7,20,0.95); border-top: 1px solid rgba(124, 58, 237, 0.4); padding: 12px 20px; display: none; gap: 12px; z-index: 2000; overflow-x: auto; align-items: center; backdrop-filter: blur(10px);">
+      <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-right: 10px;">Minimized:</div>
+      <div id="dockItems" style="display: flex; gap: 10px; flex: 1;"></div>
+    </div>
 
     <!-- Toast -->
     <div class="toast" id="toast"></div>
@@ -2206,6 +2224,63 @@ Kingdom → Plantae
       }
 
       // ════════════════════════════════════════════
+      
+      // --- STACKED MODAL CONTROLS ---
+      let minimizedModals = {}; // id -> { title }
+
+      function minimizeShareModal(modalId, title) {
+        document.getElementById(modalId).classList.remove("open");
+        minimizedModals[modalId] = { title };
+        renderDock();
+        
+        // Notify game screen to minimize
+        socket.emit("pres-minimize-specific", { modalId });
+      }
+
+      function restoreShareModal(modalId) {
+        document.getElementById(modalId).classList.add("open");
+        delete minimizedModals[modalId];
+        renderDock();
+
+        // Notify game screen to restore
+        socket.emit("pres-restore-specific", { modalId });
+      }
+
+      function closeSpecificShareModal(modalId) {
+        document.getElementById(modalId).classList.remove("open");
+        delete minimizedModals[modalId];
+        renderDock();
+
+        // Notify game screen to close
+        socket.emit("pres-close-specific", { modalId });
+      }
+
+      function renderDock() {
+        const dock = document.getElementById("minimizedDock");
+        const dockItems = document.getElementById("dockItems");
+        dockItems.innerHTML = "";
+        const keys = Object.keys(minimizedModals);
+        
+        if (keys.length === 0) {
+          dock.style.display = "none";
+          return;
+        }
+        
+        dock.style.display = "flex";
+        keys.forEach(id => {
+          const item = minimizedModals[id];
+          const btn = document.createElement("div");
+          btn.style.cssText = "padding: 8px 16px; background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(124, 58, 237, 0.5); border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap;";
+          btn.innerHTML = `<span>${item.title}</span>`;
+          btn.onclick = () => restoreShareModal(id);
+          
+          btn.onmouseover = () => btn.style.background = "rgba(124, 58, 237, 0.3)";
+          btn.onmouseout = () => btn.style.background = "rgba(124, 58, 237, 0.2)";
+          
+          dockItems.appendChild(btn);
+        });
+      }
+
       //  FILE INPUT HANDLING
       // ════════════════════════════════════════════
       let selectedFileObj = null;

@@ -643,6 +643,19 @@ io.on("connection", (socket) => {
     io.emit("pres-share-pdf", data);
   });
 
+  
+  socket.on("pres-minimize-specific", (data) => {
+    io.emit("pres-minimize-specific", data);
+  });
+  
+  socket.on("pres-restore-specific", (data) => {
+    io.emit("pres-restore-specific", data);
+  });
+  
+  socket.on("pres-close-specific", (data) => {
+    io.emit("pres-close-specific", data);
+  });
+
   socket.on("pres-close-share", () => {
     socket.broadcast.emit("pres-close-share");
   });

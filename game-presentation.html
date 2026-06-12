@@ -99,6 +99,50 @@
         transform: scale(1.02);
       }
 
+      
+      /* ─── TABS ─── */
+      .gallery-tabs {
+        display: flex;
+        justify-content: center;
+        gap: 16px;
+        margin-bottom: 30px;
+        padding: 0 20px;
+        flex-wrap: wrap;
+      }
+      .gallery-tab {
+        padding: 10px 24px;
+        border-radius: 50px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: #94a3b8;
+        font-family: "Outfit", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .gallery-tab:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+      }
+      .gallery-tab.active {
+        background: linear-gradient(135deg, #7c3aed, #4f46e5);
+        color: white;
+        border-color: transparent;
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.4);
+      }
+      .tab-content {
+        display: none;
+      }
+      .tab-content.active {
+        display: block;
+        animation: fadeIn 0.4s ease;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
       /* ─── GALLERY SCREEN ─── */
       #galleryScreen {
         overflow-y: auto;
@@ -1008,7 +1052,17 @@
         </p>
       </div>
 
-      <div class="pres-grid" id="presGrid">
+      
+      <div class="gallery-tabs">
+        <button class="gallery-tab active" onclick="switchPresTab('presTab')">Presentations</button>
+        <button class="gallery-tab" onclick="switchPresTab('imageTab')">Images</button>
+        <button class="gallery-tab" onclick="switchPresTab('videoTab')">Videos</button>
+        <button class="gallery-tab" onclick="switchPresTab('pdfTab')">PDFs</button>
+      </div>
+
+      <div id="presTab" class="tab-content active">
+        <div class="pres-grid" id="presGrid">
+
         <div class="empty-gallery" style="grid-column: 1/-1">
           <span class="eg-icon">📂</span>
           <h2>No Presentations Yet</h2>
@@ -1016,6 +1070,37 @@
             The teacher hasn't uploaded any presentations.<br />Files will
             appear here once uploaded.
           </p>
+        </div>
+      </div>
+      </div>
+
+      <div id="imageTab" class="tab-content">
+        <div class="pres-grid" id="imageGrid">
+           <div class="empty-gallery" style="grid-column: 1/-1">
+            <span class="eg-icon">🖼️</span>
+            <h2>No Images</h2>
+            <p>Images will appear here once uploaded.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="videoTab" class="tab-content">
+        <div class="pres-grid" id="videoGrid">
+          <div class="empty-gallery" style="grid-column: 1/-1">
+            <span class="eg-icon">🎬</span>
+            <h2>No Videos</h2>
+            <p>Videos will appear here once uploaded.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="pdfTab" class="tab-content">
+        <div class="pres-grid" id="pdfGrid">
+          <div class="empty-gallery" style="grid-column: 1/-1">
+            <span class="eg-icon">📄</span>
+            <h2>No PDFs</h2>
+            <p>PDFs will appear here once uploaded.</p>
+          </div>
         </div>
       </div>
 
@@ -1108,6 +1193,19 @@
         <div class="share-modal-title" id="imgModalTitle">🖼️ Shared Image</div>
         <div class="share-modal-sub" id="imgModalSub">From your teacher</div>
         <img id="sharedImg" class="shared-img" src="" alt="Shared" />
+      </div>
+    </div>
+
+    <!-- Drawing Modal (Separated) -->
+    <div class="share-modal" id="drawModal">
+      <div class="share-backdrop" onclick="closeShareModal('drawModal')"></div>
+      <div class="share-box">
+        <button class="modal-close-btn" onclick="closeShareModal('drawModal')">
+          ✕
+        </button>
+        <div class="share-modal-title" id="drawModalTitle">🖼️ Shared Image</div>
+        <div class="share-modal-sub" id="drawModalSub">From your teacher</div>
+        <img id="sharedDrawImg" class="shared-img" src="" alt="Shared" />
       </div>
     </div>
 
@@ -1282,12 +1380,171 @@
       </div>
     </div>
 
-    <script src="/socket.io/socket.io.js"></script>
+    <script src="/socket.io/socket.io.js">
+      // ════════════════════════════════════════════
+      //  TABS AND GALLERY FETCH
+      // ════════════════════════════════════════════
+      function switchPresTab(tabId) {
+        document.querySelectorAll('.gallery-tab').forEach(btn => {
+           btn.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+           content.classList.remove('active');
+        });
+        
+        event.currentTarget.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      }
+
+      async function loadGalleryItems() {
+        try {
+          const res = await fetch("/api/gallery");
+          const gallery = await res.json();
+          
+          const images = gallery.filter(item => item.type === "image");
+          const videos = gallery.filter(item => item.type === "video");
+          const pdfs = gallery.filter(item => item.type === "pdf");
+          
+          renderGalleryGrid("imageGrid", images, "🖼️", "No Images", "image");
+          renderGalleryGrid("videoGrid", videos, "🎬", "No Videos", "video");
+          renderGalleryGrid("pdfGrid", pdfs, "📄", "No PDFs", "pdf");
+          
+        } catch (e) {
+          console.error("Failed to load gallery items:", e);
+        }
+      }
+
+      function renderGalleryGrid(gridId, items, icon, emptyText, type) {
+        const grid = document.getElementById(gridId);
+        if (items.length === 0) {
+          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
+            <span class="eg-icon">${icon}</span>
+            <h2>${emptyText}</h2>
+            <p>Files will appear here once uploaded.</p>
+          </div>`;
+          return;
+        }
+
+        grid.innerHTML = items.map(f => {
+          let thumbHtml = '';
+          if (type === 'image') {
+            thumbHtml = `<img src="${f.url}" onerror="this.style.display='none'" alt="thumb">`;
+          } else if (type === 'video') {
+             if (f.url.includes("youtube.com") || f.url.includes("youtu.be")) {
+                let yid = "";
+                if(f.url.includes("v=")){ yid = f.url.split("v=")[1].split("&")[0]; }
+                else if (f.url.includes("youtu.be/")) { yid = f.url.split("youtu.be/")[1].split("?")[0]; }
+                if(yid) thumbHtml = `<img src="https://img.youtube.com/vi/${yid}/0.jpg" onerror="this.style.display='none'" alt="thumb">`;
+             } else {
+                thumbHtml = `<video src="${f.url}" style="width:100%;height:100%;object-fit:cover;" muted></video>`;
+             }
+          } else if (type === 'pdf') {
+             thumbHtml = `<span style="position:relative;z-index:1;font-size:4rem;">📄</span>`;
+          }
+
+          const onClickAttr = `onclick="openGalleryItem('${type}', '${f.url}', '${f.itemName}')"`;
+
+          return `
+            <div class="pres-card" id="card-${f.id}" ${onClickAttr}>
+              <div class="card-thumb">
+                ${thumbHtml}
+                <div class="card-thumb-overlay"></div>
+                <div class="card-status-dot"></div>
+              </div>
+              <div class="card-body">
+                <div class="card-subject">📚 ${f.chapterName || 'General'}</div>
+                <div class="card-name">${f.itemName}</div>
+              </div>
+              <div class="card-footer">
+                <div class="card-date">⏱ ${new Date(f.createdAt).toLocaleDateString()}</div>
+                <button class="card-open-btn">Open ▶</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function openGalleryItem(type, url, title) {
+        if (type === 'image') {
+           const modal = document.getElementById("imgModal");
+           const img = document.getElementById("sharedImg");
+           document.getElementById("imgModalTitle").textContent = "🖼️ " + title;
+           document.getElementById("imgModalSub").textContent = "Fullscreen View";
+           img.src = url;
+           pushShareModal(modal.id);
+        } else if (type === 'video') {
+           const modal = document.getElementById("videoModal");
+           const youTubePlayer = document.getElementById("youtubePlayer");
+           const youTubeIframe = document.getElementById("youtubeIframe");
+           const uploadedVideo = document.getElementById("uploadedVideo");
+           document.getElementById("videoModalSub").textContent = title;
+           
+           if (url.includes("youtube.com") || url.includes("youtu.be")) {
+              let videoId = "";
+              if(url.includes("v=")){ videoId = url.split("v=")[1].split("&")[0]; }
+              else if (url.includes("youtu.be/")) { videoId = url.split("youtu.be/")[1].split("?")[0]; }
+              
+              youTubePlayer.style.display = "block";
+              uploadedVideo.style.display = "none";
+              youTubeIframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
+           } else {
+              youTubePlayer.style.display = "none";
+              uploadedVideo.style.display = "block";
+              uploadedVideo.src = url;
+              uploadedVideo.play().catch(e=>console.log(e));
+           }
+           pushShareModal(modal.id);
+        } else if (type === 'pdf') {
+           const iframe = document.getElementById("pdfIframe");
+           pushShareModal("pdfModal");
+           document.getElementById("pdfModalSub").textContent = title;
+           iframe.src = ""; // Clear existing
+           fetch("/api/view-pdf?url=" + encodeURIComponent(url))
+             .then(res => res.blob())
+             .then(blob => {
+                 const blobUrl = URL.createObjectURL(blob);
+                 iframe.src = blobUrl;
+             }).catch(e => console.error(e));
+        }
+      }
+
+    </script>
     <script>
       // ════════════════════════════════════════════
       //  STATE
       // ════════════════════════════════════════════
       const socket = io();
+
+      // ════════════════════════════════════════════
+      //  SHARE MODAL STACK MANAGEMENT
+      // ════════════════════════════════════════════
+      let shareModalStack = [];
+      const baseShareZIndex = 2000;
+
+      function pushShareModal(modalId) {
+        // Remove if already in stack to move to top
+        shareModalStack = shareModalStack.filter(id => id !== modalId);
+        shareModalStack.push(modalId);
+        updateShareModalZIndexes();
+        document.getElementById(modalId).classList.add("open");
+      
+        const el = document.getElementById(modalId);
+        if(el) el.style.display = "";
+}
+
+      function popShareModal(modalId) {
+        shareModalStack = shareModalStack.filter(id => id !== modalId);
+        updateShareModalZIndexes();
+        document.getElementById(modalId).classList.remove("open");
+      }
+
+      function updateShareModalZIndexes() {
+        // Z-index starts at baseShareZIndex, incrementing by 10 for each stack item
+        shareModalStack.forEach((id, index) => {
+          document.getElementById(id).style.zIndex = baseShareZIndex + (index * 10);
+        });
+      }
+
       let currentSlide = 0;
       let totalSlides = 0;
       let currentFile = null;
@@ -1315,6 +1572,7 @@
           const res = await fetch("/api/presentations");
           const files = await res.json();
           renderGallery(files);
+          loadGalleryItems();
         } catch (e) {
           console.error("Failed to load presentations:", e);
         }
@@ -1404,19 +1662,27 @@
       });
 
       socket.on("pres-share-image", (data) => {
-        const modal = document.getElementById("imgModal");
-        const img = document.getElementById("sharedImg");
-        const title = document.getElementById("imgModalTitle");
-        const sub = document.getElementById("imgModalSub");
+        if (data.isDrawing) {
+            const modal = document.getElementById("drawModal");
+            const img = document.getElementById("sharedDrawImg");
+            const title = document.getElementById("drawModalTitle");
+            const sub = document.getElementById("drawModalSub");
 
-        img.src = data.src;
-        title.textContent = data.isDrawing
-          ? "🎨 Teacher's Drawing"
-          : "🖼️ Shared Image";
-        sub.textContent = data.isDrawing
-          ? "Hand-drawn by teacher"
-          : "Image shared by teacher";
-        modal.classList.add("open");
+            img.src = data.src;
+            title.textContent = "🎨 Teacher's Drawing";
+            sub.textContent = "Hand-drawn by teacher";
+            pushShareModal(modal.id);
+        } else {
+            const modal = document.getElementById("imgModal");
+            const img = document.getElementById("sharedImg");
+            const title = document.getElementById("imgModalTitle");
+            const sub = document.getElementById("imgModalSub");
+
+            img.src = data.src;
+            title.textContent = "🖼️ Shared Image";
+            sub.textContent = "Image shared by teacher";
+            pushShareModal(modal.id);
+        }
       });
 
       socket.on("pres-share-tree", (data) => {
@@ -1428,13 +1694,13 @@
         } else {
           document.getElementById("treeDisplay").textContent = data.data;
         }
-        document.getElementById("treeModal").classList.add("open");
+        pushShareModal("treeModal");
       });
 
       socket.on("pres-share-note", (data) => {
         document.getElementById("noteTitleDisplay").textContent = data.title;
         document.getElementById("noteDisplay").textContent = data.content;
-        document.getElementById("noteModal").classList.add("open");
+        pushShareModal("noteModal");
       });
 
       socket.on("pres-share-video", (data) => {
@@ -1459,30 +1725,78 @@
           document.getElementById("videoModalSub").textContent =
             "Uploaded video";
         }
-        modal.classList.add("open");
+        pushShareModal(modal.id);
         console.log("Video modal opened");
       });
 
       socket.on("pres-close-share", () => {
-        closeShareModal("imgModal");
-        closeShareModal("treeModal");
-        closeShareModal("noteModal");
-        closeShareModal("videoModal");
-        closeShareModal("webpageModal");
-        closeShareModal("pdfModal");
+      shareModalStack = []; // clear stack
+      const modals = ["imgModal", "drawModal", "treeModal", "noteModal", "videoModal", "webpageModal", "pdfModal"];
+      modals.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+              el.classList.remove("open");
+              el.style.display = ''; // reset inline style
+          }
       });
+      
+      if (document.getElementById("youtubeIframe")) document.getElementById("youtubeIframe").src = "";
+      if (document.getElementById("uploadedVideo")) {
+          document.getElementById("uploadedVideo").pause();
+          document.getElementById("uploadedVideo").src = "";
+      }
+    });
+
+  
+    const dashboardToGameIdMap = {
+      "imageModal": "imgModal",
+      "treeModal": "treeModal",
+      "noteModal": "noteModal",
+      "drawModal": "drawModal", // draw uses imgModal on game screen
+      "videoModal": "videoModal",
+      "webpageModal": "webpageModal",
+      "pdfModal": "pdfModal"
+    };
+
+    socket.on("pres-minimize-specific", (data) => {
+      const gameId = dashboardToGameIdMap[data.modalId] || data.modalId;
+      const el = document.getElementById(gameId);
+      if (el) {
+          el.style.display = 'none';
+          el.classList.remove('open');
+      }
+    });
+    
+    socket.on("pres-restore-specific", (data) => {
+      const gameId = dashboardToGameIdMap[data.modalId] || data.modalId;
+      const el = document.getElementById(gameId);
+      if (el) {
+          el.style.display = '';
+          el.classList.add('open');
+      }
+      
+      // Move to top of stack
+      shareModalStack = shareModalStack.filter(id => id !== gameId);
+      shareModalStack.push(gameId);
+      updateShareModalZIndexes();
+    });
+
+    socket.on("pres-close-specific", (data) => {
+      const gameId = dashboardToGameIdMap[data.modalId] || data.modalId;
+      popShareModal(gameId);
+    });
 
       socket.on("pres-share-webpage", (data) => {
         const iframe = document.getElementById("webpageIframe");
         iframe.src = data.url;
-        document.getElementById("webpageModal").classList.add("open");
+        pushShareModal("webpageModal");
         // Wait for modal to render before resize calculation
         setTimeout(resizeWebpageIframe, 50);
       });
 
       socket.on("pres-share-pdf", async (data) => {
         const iframe = document.getElementById("pdfIframe");
-        document.getElementById("pdfModal").classList.add("open");
+        pushShareModal("pdfModal");
         iframe.src = ""; // Clear existing
 
         try {
@@ -1874,7 +2188,263 @@
 
       // Initial load
       setTimeout(loadPresentations, 300);
+    
+      // ════════════════════════════════════════════
+      //  TABS AND GALLERY FETCH
+      // ════════════════════════════════════════════
+      function switchPresTab(tabId) {
+        document.querySelectorAll('.gallery-tab').forEach(btn => {
+           btn.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+           content.classList.remove('active');
+        });
+        
+        event.currentTarget.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      }
+
+      async function loadGalleryItems() {
+        try {
+          const res = await fetch("/api/gallery");
+          const gallery = await res.json();
+          
+          const images = gallery.filter(item => item.type === "image");
+          const videos = gallery.filter(item => item.type === "video");
+          const pdfs = gallery.filter(item => item.type === "pdf");
+          
+          renderGalleryGrid("imageGrid", images, "🖼️", "No Images", "image");
+          renderGalleryGrid("videoGrid", videos, "🎬", "No Videos", "video");
+          renderGalleryGrid("pdfGrid", pdfs, "📄", "No PDFs", "pdf");
+          
+        } catch (e) {
+          console.error("Failed to load gallery items:", e);
+        }
+      }
+
+      function renderGalleryGrid(gridId, items, icon, emptyText, type) {
+        const grid = document.getElementById(gridId);
+        if (items.length === 0) {
+          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
+            <span class="eg-icon">${icon}</span>
+            <h2>${emptyText}</h2>
+            <p>Files will appear here once uploaded.</p>
+          </div>`;
+          return;
+        }
+
+        grid.innerHTML = items.map(f => {
+          let thumbHtml = '';
+          if (type === 'image') {
+            thumbHtml = `<img src="${f.url}" onerror="this.style.display='none'" alt="thumb">`;
+          } else if (type === 'video') {
+             if (f.url.includes("youtube.com") || f.url.includes("youtu.be")) {
+                let yid = "";
+                if(f.url.includes("v=")){ yid = f.url.split("v=")[1].split("&")[0]; }
+                else if (f.url.includes("youtu.be/")) { yid = f.url.split("youtu.be/")[1].split("?")[0]; }
+                if(yid) thumbHtml = `<img src="https://img.youtube.com/vi/${yid}/0.jpg" onerror="this.style.display='none'" alt="thumb">`;
+             } else {
+                thumbHtml = `<video src="${f.url}" style="width:100%;height:100%;object-fit:cover;" muted></video>`;
+             }
+          } else if (type === 'pdf') {
+             thumbHtml = `<span style="position:relative;z-index:1;font-size:4rem;">📄</span>`;
+          }
+
+          const onClickAttr = `onclick="openGalleryItem('${type}', '${f.url}', '${f.itemName}')"`;
+
+          return `
+            <div class="pres-card" id="card-${f.id}" ${onClickAttr}>
+              <div class="card-thumb">
+                ${thumbHtml}
+                <div class="card-thumb-overlay"></div>
+                <div class="card-status-dot"></div>
+              </div>
+              <div class="card-body">
+                <div class="card-subject">📚 ${f.chapterName || 'General'}</div>
+                <div class="card-name">${f.itemName}</div>
+              </div>
+              <div class="card-footer">
+                <div class="card-date">⏱ ${new Date(f.createdAt).toLocaleDateString()}</div>
+                <button class="card-open-btn">Open ▶</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function openGalleryItem(type, url, title) {
+        if (type === 'image') {
+           const modal = document.getElementById("imgModal");
+           const img = document.getElementById("sharedImg");
+           document.getElementById("imgModalTitle").textContent = "🖼️ " + title;
+           document.getElementById("imgModalSub").textContent = "Fullscreen View";
+           img.src = url;
+           pushShareModal(modal.id);
+        } else if (type === 'video') {
+           const modal = document.getElementById("videoModal");
+           const youTubePlayer = document.getElementById("youtubePlayer");
+           const youTubeIframe = document.getElementById("youtubeIframe");
+           const uploadedVideo = document.getElementById("uploadedVideo");
+           document.getElementById("videoModalSub").textContent = title;
+           
+           if (url.includes("youtube.com") || url.includes("youtu.be")) {
+              let videoId = "";
+              if(url.includes("v=")){ videoId = url.split("v=")[1].split("&")[0]; }
+              else if (url.includes("youtu.be/")) { videoId = url.split("youtu.be/")[1].split("?")[0]; }
+              
+              youTubePlayer.style.display = "block";
+              uploadedVideo.style.display = "none";
+              youTubeIframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
+           } else {
+              youTubePlayer.style.display = "none";
+              uploadedVideo.style.display = "block";
+              uploadedVideo.src = url;
+              uploadedVideo.play().catch(e=>console.log(e));
+           }
+           pushShareModal(modal.id);
+        } else if (type === 'pdf') {
+           const iframe = document.getElementById("pdfIframe");
+           pushShareModal("pdfModal");
+           document.getElementById("pdfModalSub").textContent = title;
+           iframe.src = ""; // Clear existing
+           fetch("/api/view-pdf?url=" + encodeURIComponent(url))
+             .then(res => res.blob())
+             .then(blob => {
+                 const blobUrl = URL.createObjectURL(blob);
+                 iframe.src = blobUrl;
+             }).catch(e => console.error(e));
+        }
+      }
+
     </script>
-    <script src="js/wake-lock.js"></script>
+    <script src="js/wake-lock.js">
+      // ════════════════════════════════════════════
+      //  TABS AND GALLERY FETCH
+      // ════════════════════════════════════════════
+      function switchPresTab(tabId) {
+        document.querySelectorAll('.gallery-tab').forEach(btn => {
+           btn.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-content').forEach(content => {
+           content.classList.remove('active');
+        });
+        
+        event.currentTarget.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+      }
+
+      async function loadGalleryItems() {
+        try {
+          const res = await fetch("/api/gallery");
+          const gallery = await res.json();
+          
+          const images = gallery.filter(item => item.type === "image");
+          const videos = gallery.filter(item => item.type === "video");
+          const pdfs = gallery.filter(item => item.type === "pdf");
+          
+          renderGalleryGrid("imageGrid", images, "🖼️", "No Images", "image");
+          renderGalleryGrid("videoGrid", videos, "🎬", "No Videos", "video");
+          renderGalleryGrid("pdfGrid", pdfs, "📄", "No PDFs", "pdf");
+          
+        } catch (e) {
+          console.error("Failed to load gallery items:", e);
+        }
+      }
+
+      function renderGalleryGrid(gridId, items, icon, emptyText, type) {
+        const grid = document.getElementById(gridId);
+        if (items.length === 0) {
+          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
+            <span class="eg-icon">${icon}</span>
+            <h2>${emptyText}</h2>
+            <p>Files will appear here once uploaded.</p>
+          </div>`;
+          return;
+        }
+
+        grid.innerHTML = items.map(f => {
+          let thumbHtml = '';
+          if (type === 'image') {
+            thumbHtml = `<img src="${f.url}" onerror="this.style.display='none'" alt="thumb">`;
+          } else if (type === 'video') {
+             if (f.url.includes("youtube.com") || f.url.includes("youtu.be")) {
+                let yid = "";
+                if(f.url.includes("v=")){ yid = f.url.split("v=")[1].split("&")[0]; }
+                else if (f.url.includes("youtu.be/")) { yid = f.url.split("youtu.be/")[1].split("?")[0]; }
+                if(yid) thumbHtml = `<img src="https://img.youtube.com/vi/${yid}/0.jpg" onerror="this.style.display='none'" alt="thumb">`;
+             } else {
+                thumbHtml = `<video src="${f.url}" style="width:100%;height:100%;object-fit:cover;" muted></video>`;
+             }
+          } else if (type === 'pdf') {
+             thumbHtml = `<span style="position:relative;z-index:1;font-size:4rem;">📄</span>`;
+          }
+
+          const onClickAttr = `onclick="openGalleryItem('${type}', '${f.url}', '${f.itemName}')"`;
+
+          return `
+            <div class="pres-card" id="card-${f.id}" ${onClickAttr}>
+              <div class="card-thumb">
+                ${thumbHtml}
+                <div class="card-thumb-overlay"></div>
+                <div class="card-status-dot"></div>
+              </div>
+              <div class="card-body">
+                <div class="card-subject">📚 ${f.chapterName || 'General'}</div>
+                <div class="card-name">${f.itemName}</div>
+              </div>
+              <div class="card-footer">
+                <div class="card-date">⏱ ${new Date(f.createdAt).toLocaleDateString()}</div>
+                <button class="card-open-btn">Open ▶</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      function openGalleryItem(type, url, title) {
+        if (type === 'image') {
+           const modal = document.getElementById("imgModal");
+           const img = document.getElementById("sharedImg");
+           document.getElementById("imgModalTitle").textContent = "🖼️ " + title;
+           document.getElementById("imgModalSub").textContent = "Fullscreen View";
+           img.src = url;
+           pushShareModal(modal.id);
+        } else if (type === 'video') {
+           const modal = document.getElementById("videoModal");
+           const youTubePlayer = document.getElementById("youtubePlayer");
+           const youTubeIframe = document.getElementById("youtubeIframe");
+           const uploadedVideo = document.getElementById("uploadedVideo");
+           document.getElementById("videoModalSub").textContent = title;
+           
+           if (url.includes("youtube.com") || url.includes("youtu.be")) {
+              let videoId = "";
+              if(url.includes("v=")){ videoId = url.split("v=")[1].split("&")[0]; }
+              else if (url.includes("youtu.be/")) { videoId = url.split("youtu.be/")[1].split("?")[0]; }
+              
+              youTubePlayer.style.display = "block";
+              uploadedVideo.style.display = "none";
+              youTubeIframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
+           } else {
+              youTubePlayer.style.display = "none";
+              uploadedVideo.style.display = "block";
+              uploadedVideo.src = url;
+              uploadedVideo.play().catch(e=>console.log(e));
+           }
+           pushShareModal(modal.id);
+        } else if (type === 'pdf') {
+           const iframe = document.getElementById("pdfIframe");
+           pushShareModal("pdfModal");
+           document.getElementById("pdfModalSub").textContent = title;
+           iframe.src = ""; // Clear existing
+           fetch("/api/view-pdf?url=" + encodeURIComponent(url))
+             .then(res => res.blob())
+             .then(blob => {
+                 const blobUrl = URL.createObjectURL(blob);
+                 iframe.src = blobUrl;
+             }).catch(e => console.error(e));
+        }
+      }
+
+    </script>
   </body>
 </html>
