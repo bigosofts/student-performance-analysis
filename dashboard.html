@@ -786,7 +786,29 @@
       const socket = io();
 
       function navigateProjector(url) {
+        // Grab the click event to prevent immediate navigation
+        const e = window.event;
+        let targetHref = "";
+        
+        if (e) {
+          // If an 'a' tag was clicked, find its href
+          const aTag = e.target ? e.target.closest("a") : null;
+          if (aTag && aTag.href) {
+            e.preventDefault(); // Stop the browser from leaving the page immediately
+            targetHref = aTag.href;
+          }
+        }
+
+        // Emit the socket event to change the game screen
         socket.emit("classroom-navigate", { url: url });
+        
+        // If there is a target URL, navigate to it after a short delay
+        // This gives the socket emit enough time to reach the server before the page unloads
+        if (targetHref) {
+          setTimeout(() => {
+            window.location.href = targetHref;
+          }, 300); // 300ms delay is usually plenty for a websocket packet
+        }
       }
     </script>
     <script src="js/wake-lock.js"></script>
