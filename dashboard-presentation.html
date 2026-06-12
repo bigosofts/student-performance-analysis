@@ -2159,6 +2159,14 @@ Kingdom → Plantae
         <!-- Image/PDF Upload Section -->
         <div id="galleryImageSection">
           <div class="form-row" style="margin-bottom: 16px">
+            <label class="form-label">Image or PDF Link (Optional)</label>
+            <input type="text" id="galleryImageUrlInput" class="form-input" placeholder="https://drive.google.com/... or https://..." />
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">If you provide a link, you don't need to upload a file below.</div>
+          </div>
+          
+          <div style="text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 16px;">OR</div>
+          
+          <div class="form-row" style="margin-bottom: 16px">
             <label class="form-label">Select File (Image/PDF)</label>
             <div class="file-input-wrapper">
               <div class="file-input-label" id="galleryFileInputLabel">No file chosen...</div>
@@ -3203,6 +3211,9 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         document.getElementById("galleryTypeSelect").value = "image";
         document.getElementById("galleryFileInput").value = "";
         document.getElementById("galleryFileInputLabel").textContent = "No file chosen...";
+        if (document.getElementById("galleryImageUrlInput")) {
+           document.getElementById("galleryImageUrlInput").value = "";
+        }
         galleryUploadFile = null;
         document.getElementById("galleryVideoUrlInput").value = "";
         document.getElementById("galleryPreviewUrlInput").value = "";
@@ -3240,18 +3251,29 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         }
 
         if (type === "media" || type === "image" || type === "pdf") {
-          if (!galleryUploadFile) {
-            showToast("Please select a file", "error");
+          const linkUrl = document.getElementById("galleryImageUrlInput") ? document.getElementById("galleryImageUrlInput").value.trim() : "";
+          
+          if (!galleryUploadFile && !linkUrl) {
+            showToast("Please select a file or provide a link", "error");
             return;
           }
           
           let actualType = "image";
-          if (galleryUploadFile.name.toLowerCase().endsWith(".pdf")) {
+          if (linkUrl) {
+             if (linkUrl.toLowerCase().endsWith(".pdf") || linkUrl.includes("drive.google.com") || linkUrl.includes("docs.google.com")) {
+               actualType = "pdf";
+             }
+          } else if (galleryUploadFile && galleryUploadFile.name.toLowerCase().endsWith(".pdf")) {
             actualType = "pdf";
           }
           
           const formData = new FormData();
-          formData.append("image", galleryUploadFile); // Keeping 'image' as the field name since the backend uses upload.single('image')
+          if (galleryUploadFile) {
+            formData.append("image", galleryUploadFile); // Keeping 'image' as the field name since the backend uses upload.single('image')
+          }
+          if (linkUrl) {
+            formData.append("linkUrl", linkUrl);
+          }
           formData.append("chapterName", chapter);
           formData.append("itemName", name);
           formData.append("type", actualType);

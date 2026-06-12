@@ -1031,11 +1031,19 @@ app.get("/api/gallery", (req, res) => {
 
 // Upload a new gallery image
 app.post("/api/gallery/image", galleryUpload.single("image"), (req, res) => {
-  if (!req.file) return res.status(400).json({ error: "No image uploaded" });
-
   const chapterName = (req.body.chapterName || "Uncategorized").trim();
   const itemName = (req.body.itemName || "Unnamed Image").trim();
-  const url = "/uploads/gallery/" + req.file.filename;
+  
+  const linkUrl = req.body.linkUrl;
+  let url = "";
+
+  if (linkUrl) {
+    url = linkUrl.trim();
+  } else if (req.file) {
+    url = "/uploads/gallery/" + req.file.filename;
+  } else {
+    return res.status(400).json({ error: "No file uploaded or link provided" });
+  }
 
   const gallery = loadGallery();
   const itemType = req.body.type || "image";
@@ -1116,8 +1124,8 @@ app.delete("/api/gallery/:id", (req, res) => {
 
   const item = gallery[index];
 
-  // If it's an image, delete the file
-  if (item.type === "image" && item.url) {
+  // If it's an image or pdf that was uploaded locally, delete the file
+  if ((item.type === "image" || item.type === "pdf") && item.url && item.url.startsWith("/uploads/gallery/")) {
     try {
       const filePath = path.join(__dirname, item.url);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
