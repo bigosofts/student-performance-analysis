@@ -19,11 +19,175 @@
       body {
         background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
         color: #1e293b;
-        overflow: hidden;
         font-family: "Inter", sans-serif;
-        height: 100vh;
+        min-height: 100vh;
         width: 100vw;
+        overflow-x: hidden;
+        overflow-y: auto;
       }
+
+      /* ─── Student filter panel ─── */
+      .student-lb-panel {
+        background: white;
+        border-radius: 20px;
+        padding: 32px;
+        box-shadow: 0 8px 32px rgba(30, 64, 175, 0.12);
+        border: 1px solid #bfdbfe;
+        width: 100%;
+        max-width: 820px;
+        margin: 0 auto;
+        /* ensure it never bleeds on narrow screens */
+        box-sizing: border-box;
+      }
+      .student-lb-panel h2 {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.5rem;
+        font-weight: 900;
+        color: #1e40af;
+        margin-bottom: 6px;
+        text-align: center;
+        letter-spacing: 1px;
+      }
+      .student-lb-panel p {
+        text-align: center;
+        color: #64748b;
+        font-size: 0.95rem;
+        margin-bottom: 24px;
+      }
+      .slb-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .slb-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .slb-group label {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: #475569;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+      }
+      .slb-input {
+        background: #f8fafc;
+        border: 1.5px solid #cbd5e1;
+        border-radius: 10px;
+        color: #1e293b;
+        padding: 11px 14px;
+        font-size: 0.95rem;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .slb-input:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+      .slb-input option {
+        background: #f8fafc;
+        color: #1e293b;
+      }
+      .slb-btn {
+        width: 100%;
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        cursor: pointer;
+        letter-spacing: 0.5px;
+        transition: transform 0.15s, box-shadow 0.2s;
+        margin-top: 8px;
+      }
+      .slb-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+      }
+      .slb-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* ─── Position Modal ─── */
+      .pos-modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.75);
+        backdrop-filter: blur(6px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        animation: fadeInModal 0.35s ease;
+      }
+      @keyframes fadeInModal {
+        from { opacity: 0; transform: scale(0.95); }
+        to   { opacity: 1; transform: scale(1); }
+      }
+      .pos-modal-card {
+        background: white;
+        border-radius: 24px;
+        padding: 40px 36px;
+        max-width: 520px;
+        width: 100%;
+        text-align: center;
+        box-shadow: 0 24px 64px rgba(0,0,0,0.25);
+        border: 2px solid #bfdbfe;
+      }
+      .pos-modal-trophy { font-size: 4rem; margin-bottom: 12px; }
+      .pos-modal-name {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: #1e40af;
+        margin-bottom: 6px;
+      }
+      .pos-modal-rank {
+        font-size: 3.5rem;
+        font-weight: 900;
+        font-family: "Orbitron", sans-serif;
+        color: #0369a1;
+        line-height: 1;
+        margin: 12px 0;
+      }
+      .pos-modal-rank.top1 { color: #ca8a04; }
+      .pos-modal-rank.top2 { color: #475569; }
+      .pos-modal-rank.top3 { color: #c2410c; }
+      .pos-modal-context {
+        font-size: 0.95rem;
+        color: #64748b;
+        line-height: 1.7;
+        margin-bottom: 20px;
+      }
+      .pos-modal-score {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e40af;
+        margin-bottom: 24px;
+      }
+      .pos-modal-close {
+        background: linear-gradient(135deg, #1e40af, #3b82f6);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 12px 32px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .pos-modal-close:hover { opacity: 0.9; }
+
+      /* responsive styles moved to end of <style> — after all base rules */
 
       /* ─── Live badge ─── */
       .live-badge {
@@ -71,6 +235,7 @@
       /* ─── Outer layout ─── */
       .projector-view {
         width: 100vw;
+        min-height: 100vh;
         height: 100vh;
         display: flex;
         flex-direction: column;
@@ -161,7 +326,7 @@
         background: #93c5fd;
       }
       .waiting-screen
-        > div:not(.ws-icon):not(.ws-title):not(.ws-subtitle):not(.ws-dots),
+        > div:not(.ws-icon):not(.ws-title):not(.ws-subtitle):not(.ws-dots):not(#studentLbPanel),
       .waiting-screen > span:not(.ws-dot) {
         display: none;
       }
@@ -450,6 +615,175 @@
         padding: 20px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
       }
+
+      /* ════════════════════════════════════════════════════
+         RESPONSIVE BREAKPOINTS  (must come AFTER all base
+         styles so media-query rules can override them)
+         Desktop  >  900 px  — base styles above
+         Tablet   ≤  900 px
+         Mobile   ≤  600 px
+         ════════════════════════════════════════════════════ */
+
+      /* ── Tablet (≤ 900 px) ── */
+      @media (max-width: 900px) {
+        .projector-view     { padding: 20px 28px 18px; }
+        .header-bar h1      { font-size: 2rem; letter-spacing: 2px; }
+        .header-bar h3      { font-size: 0.95rem; }
+
+        .lb-row {
+          grid-template-columns: 72px 1fr 2fr 180px 40px;
+          gap: 12px;
+          padding: 0 14px;
+          border-radius: 14px;
+        }
+        .lb-rank            { font-size: 1.4rem; }
+        .lb-rank.r1         { font-size: 1.6rem; }
+        .lb-rank.r2         { font-size: 1.5rem; }
+        .lb-rank.r3         { font-size: 1.45rem; }
+        .lb-name            { font-size: 1.1rem; }
+        .lb-roll            { font-size: 0.82rem; }
+        .lb-total           { font-size: 1.8rem; }
+        .lb-sub             { font-size: 0.85rem; gap: 10px; }
+        .lb-badge           { font-size: 0.85rem; }
+        .lb-bar-wrap        { height: 11px; }
+
+        /* Filter: 2-column grid */
+        .slb-grid           { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+        .student-lb-panel   { padding: 24px 22px; border-radius: 16px; }
+      }
+
+      /* ── Mobile (≤ 600 px) ── */
+      @media (max-width: 600px) {
+        /* Outer container: zero padding, fixed 100vh so JS can measure rows */
+        .projector-view {
+          padding: 0;
+          height: 100vh;
+          overflow: hidden;
+        }
+
+        /* ─ Waiting / filter screen ─
+           Scrollable column; content vertically centered in viewport */
+        .waiting-screen {
+          overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
+          scrollbar-width: none;
+          justify-content: center;
+          align-items: center;
+          gap: 6px;
+          padding: 16px 12px;
+        }
+        .waiting-screen::-webkit-scrollbar { display: none; }
+
+        /* Compact hero — give breathing room without dominating the screen */
+        .waiting-screen .ws-icon    { font-size: 2.2rem; }
+        .waiting-screen .ws-title   { font-size: 1.5rem; }
+        .waiting-screen .ws-subtitle {
+          font-size: 0.72rem !important;
+          letter-spacing: 1px;
+          margin-bottom: 8px !important;
+        }
+        .ws-dots { display: none; }
+
+        /* ─ Filter panel ─
+           Comfortable sizing — there IS space, so don't over-shrink */
+        .student-lb-panel {
+          padding: 16px 14px 18px;
+          border-radius: 14px;
+          width: 100%;
+        }
+        .student-lb-panel h2 {
+          font-size: 1rem;
+          margin-bottom: 4px;
+        }
+        .student-lb-panel p {
+          font-size: 0.78rem;
+          margin-bottom: 12px;
+        }
+        /* 2-column grid: Session|Class, Section|Group, then Roll full-width */
+        .slb-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-bottom: 12px;
+        }
+        .slb-grid .slb-group:last-child { grid-column: 1 / -1; }
+        .slb-group label                 { font-size: 0.7rem; }
+        .slb-input {
+          padding: 9px 11px;
+          font-size: 0.85rem;
+          border-radius: 8px;
+        }
+        .slb-btn {
+          padding: 12px 14px;
+          font-size: 0.92rem;
+          border-radius: 10px;
+          margin-top: 6px;
+        }
+
+        /* ─ Leaderboard view ─ */
+        #lbView         { padding: 8px 8px 4px; }
+        .header-bar     { margin-bottom: 6px; }
+        /* Title: tiny, single line, truncated if too long */
+        .header-bar h1 {
+          font-size: 0.82rem;
+          letter-spacing: 0;
+          margin-bottom: 2px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .header-bar h3 {
+          font-size: 0.6rem;
+          letter-spacing: 0.5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        /* Row grid: [rank 36px] [name+roll 1fr] [score auto]
+           Remove progress bar, att/exam, and badge to maximise name space */
+        .lb-row {
+          grid-template-columns: 36px 1fr auto;
+          gap: 6px;
+          padding: 0 8px;
+          border-radius: 8px;
+          border-width: 2px;
+        }
+        .lb-bar-wrap    { display: none !important; }
+        .lb-sub         { display: none !important; }
+        .lb-badge       { display: none !important; }
+
+        /* Rank: keep readable but compact */
+        .lb-rank        { font-size: 1rem; }
+        .lb-rank.r1     { font-size: 1.15rem; text-shadow: none; }
+        .lb-rank.r2     { font-size: 1.1rem; }
+        .lb-rank.r3     { font-size: 1.05rem; }
+
+        /* Name: readable; roll: secondary info below */
+        .lb-name        { font-size: 0.82rem; line-height: 1.2; }
+        .lb-roll        { font-size: 0.62rem; margin-top: 1px; }
+
+        /* Score: compact Orbitron, aligned bottom-right of its cell */
+        .lb-score-cell  { align-items: flex-end; gap: 2px; }
+        .lb-total       { font-size: 1.05rem; }
+
+        /* Position modal */
+        .pos-modal-card    { padding: 20px 14px; }
+        .pos-modal-rank    { font-size: 2.2rem; }
+        .pos-modal-name    { font-size: 1.1rem; }
+        .pos-modal-trophy  { font-size: 2.5rem; margin-bottom: 8px; }
+        .pos-modal-score   { font-size: 0.88rem; }
+        .pos-modal-context { font-size: 0.8rem; }
+
+        /* Live badge */
+        .live-badge {
+          top: 8px; right: 10px;
+          font-size: 0.68rem;
+          padding: 3px 8px;
+          gap: 5px;
+        }
+        .live-badge .dot { width: 7px; height: 7px; }
+      }
     </style>
   </head>
   <body class="qb-font-bn">
@@ -457,16 +791,54 @@
 
     <div id="app" class="projector-view">
       <div class="waiting-screen" id="waitingScreen">
-        <div class="ws-icon">📡</div>
-        <div class="ws-title">Interactive ClassRoom</div>
-        <div class="ws-subtitle">Waiting for teacher...</div>
-        <div class="ws-dots">
-          <span class="ws-dot"></span>
-          <span class="ws-dot"></span>
-          <span class="ws-dot"></span>
+        <div class="ws-icon">🏆</div>
+        <div class="ws-title">Leaderboard</div>
+        <div class="ws-subtitle" style="margin-bottom: 24px;">View your rank or wait for teacher</div>
+
+        <!-- Student Self-View Filter Panel -->
+        <div class="student-lb-panel" id="studentLbPanel">
+          <h2>🔍 Find Your Rank</h2>
+          <p>Filter the leaderboard and enter your roll number to see your position</p>
+          <div class="slb-grid">
+            <div class="slb-group">
+              <label>Session</label>
+              <input list="slbDlSession" id="slbSession" class="slb-input" placeholder="e.g. 2024-25" />
+              <datalist id="slbDlSession"></datalist>
+            </div>
+            <div class="slb-group">
+              <label>Class</label>
+              <input list="slbDlClass" id="slbClass" class="slb-input" placeholder="e.g. Eleven" />
+              <datalist id="slbDlClass"></datalist>
+            </div>
+            <div class="slb-group">
+              <label>Section</label>
+              <input list="slbDlSection" id="slbSection" class="slb-input" placeholder="e.g. Karnaphuli" />
+              <datalist id="slbDlSection"></datalist>
+            </div>
+            <div class="slb-group">
+              <label>Group</label>
+              <input list="slbDlGroup" id="slbGroup" class="slb-input" placeholder="e.g. Science" />
+              <datalist id="slbDlGroup"></datalist>
+            </div>
+            <div class="slb-group">
+              <label>Your Roll Number</label>
+              <input type="text" id="slbRoll" class="slb-input" placeholder="Enter your roll" />
+            </div>
+          </div>
+          <button class="slb-btn" id="slbShowBtn" onclick="studentShowLeaderboard()">🏆 Show Leaderboard &amp; My Rank</button>
         </div>
-        <div>🏫 Interactive ClassRoom</div>
-        <span>Waiting for data…</span>
+      </div>
+
+      <!-- Position Modal -->
+      <div class="pos-modal-overlay" id="posModal" style="display:none;">
+        <div class="pos-modal-card">
+          <div class="pos-modal-trophy" id="posModalTrophy">🏆</div>
+          <div class="pos-modal-name" id="posModalName">Student Name</div>
+          <div class="pos-modal-rank" id="posModalRank">#1</div>
+          <div class="pos-modal-context" id="posModalContext"></div>
+          <div class="pos-modal-score" id="posModalScore"></div>
+          <button class="pos-modal-close" onclick="document.getElementById('posModal').style.display='none'">Close</button>
+        </div>
       </div>
 
       <div id="lbView" style="display: none">
@@ -915,6 +1287,202 @@
             html += `<td style="${cell}color:#f59e0b;font-weight:900;font-size:1.4rem;text-align:center">${tot}</td></tr>`;
           });
           el.innerHTML = html + "</tbody></table>";
+        }
+      }
+      /* ═══════════════════════════════════════════
+         STUDENT SELF-VIEW LEADERBOARD LOGIC
+         Completely separate from teacher socket flow
+         ═══════════════════════════════════════════ */
+
+      // Populate filter datalists
+      fetch('/api/students/filters')
+        .then(r => r.json())
+        .then(data => {
+          const toOpts = arr => arr.map(v => `<option value="${v}">`).join('');
+          document.getElementById('slbDlSession').innerHTML = toOpts(data.sessions || []);
+          document.getElementById('slbDlClass').innerHTML   = toOpts(data.classes  || []);
+          document.getElementById('slbDlSection').innerHTML = toOpts(data.sections || []);
+          document.getElementById('slbDlGroup').innerHTML   = toOpts(data.groups   || []);
+        })
+        .catch(e => console.error('Filter load error:', e));
+
+      function ordinalSuffix(n) {
+        const s = ['th','st','nd','rd'];
+        const v = n % 100;
+        return n + (s[(v - 20) % 10] || s[v] || s[0]);
+      }
+
+      async function studentShowLeaderboard() {
+        const session = document.getElementById('slbSession').value.trim();
+        const className = document.getElementById('slbClass').value.trim();
+        const section  = document.getElementById('slbSection').value.trim();
+        const group    = document.getElementById('slbGroup').value.trim();
+        const roll     = document.getElementById('slbRoll').value.trim();
+
+        const btn = document.getElementById('slbShowBtn');
+        btn.disabled = true;
+        btn.textContent = 'Loading...';
+
+        try {
+          // 1. Fetch students matching the filter
+          let qs = `?session=${encodeURIComponent(session)}&className=${encodeURIComponent(className)}&section=${encodeURIComponent(section)}&group=${encodeURIComponent(group)}`;
+          const studentsRes = await fetch(`/api/students${qs}`);
+          const students = await studentsRes.json();
+
+          if (students.length === 0) {
+            alert('No students found for this filter. Try a different combination.');
+            btn.disabled = false;
+            btn.textContent = '🏆 Show Leaderboard & My Rank';
+            return;
+          }
+
+          // 2. Fetch all performance data
+          const perfRes = await fetch('/api/performance');
+          const allPerf = await perfRes.json();
+          const perfMap = {};
+          allPerf.forEach(p => { perfMap[String(p.roll)] = p; });
+
+          // 3. Build leaderboard data
+          const data = students.map(s => {
+            const perf = perfMap[String(s.roll)] || {};
+            const attCount = (perf.attendance || []).filter(a => a.isPresent).length;
+            const attScore = attCount * 5;
+            let examScore = 0;
+            if (perf.mark) {
+              Object.keys(perf.mark).forEach(k => examScore += (parseFloat(perf.mark[k]) || 0));
+            }
+            return {
+              name: s.name, roll: String(s.roll),
+              attendanceScore: attScore, examScore: examScore,
+              totalScore: attScore + examScore,
+              _badgeCls: 'none', _badgeHtml: ''
+            };
+          });
+          data.sort((a, b) => b.totalScore - a.totalScore);
+
+          // 4. Show the leaderboard using existing teacher rendering
+          waitingScreen.style.display = 'none';
+          lbView.style.display = 'flex';
+          lbView.style.flexDirection = 'column';
+
+          const filterParts = [];
+          if (session)   filterParts.push(`Session: ${session}`);
+          if (className) filterParts.push(`Class: ${className}`);
+          if (section)   filterParts.push(`Section: ${section}`);
+          if (group)     filterParts.push(`Group: ${group}`);
+          const filterLabel = filterParts.length ? filterParts.join('  |  ') : 'All Students';
+
+          document.getElementById('lbTitle').textContent = '🏆 STUDENT LEADERBOARD 🏆';
+          document.getElementById('lbSubtitle').textContent = filterLabel;
+
+          // Clear any existing rows
+          Object.values(rowMap).forEach(e => e.el.remove());
+          Object.keys(rowMap).forEach(k => delete rowMap[k]);
+          if (raceTimer) { cancelAnimationFrame(raceTimer); raceTimer = null; }
+          lbList.classList.remove('racing');
+
+          // Kick off the same race animation as teacher
+          if (data.length > 0) {
+            const targetMaxScore = Math.max(...data.map(d => d.totalScore), 1);
+            const duration = 25000;
+            const totalIncrementPerMs = targetMaxScore / duration;
+
+            let currentData = data.map(s => ({
+              ...s,
+              targetTotal: s.totalScore,
+              targetAtt: s.attendanceScore,
+              targetExam: s.examScore,
+              totalScore: 0, attendanceScore: 0, examScore: 0,
+              _currentTotalFloat: 0,
+            })).sort(() => Math.random() - 0.5);
+
+            currentData.forEach((s, i) => { s._initialRank = i; });
+            renderLeaderboard(currentData, false, targetMaxScore);
+            lbList.classList.add('racing');
+            let startTime = null;
+
+            function studentRaceLoop(timestamp) {
+              if (!startTime) startTime = timestamp;
+              const elapsed = timestamp - startTime;
+              let allDone = true;
+              const currentGlobalTotal = totalIncrementPerMs * elapsed;
+
+              currentData.forEach(s => {
+                if (s._currentTotalFloat < s.targetTotal) {
+                  allDone = false;
+                  s._currentTotalFloat = Math.min(s.targetTotal, currentGlobalTotal);
+                  s.totalScore = Math.round(s._currentTotalFloat);
+                  if (s.targetTotal > 0) {
+                    const ratio = s._currentTotalFloat / s.targetTotal;
+                    s.attendanceScore = Math.round(s.targetAtt * ratio);
+                    s.examScore = s.totalScore - s.attendanceScore;
+                  }
+                }
+              });
+              currentData.sort((a, b) => b._currentTotalFloat - a._currentTotalFloat);
+              renderLeaderboard(currentData, true, targetMaxScore);
+
+              if (allDone || elapsed >= duration * 1.5) {
+                lbList.classList.remove('racing');
+                currentData.forEach(s => {
+                  s._currentTotalFloat = s.targetTotal;
+                  s.totalScore = s.targetTotal;
+                  s.attendanceScore = s.targetAtt;
+                  s.examScore = s.targetExam;
+                });
+                currentData.sort((a, b) => b.totalScore - a.totalScore);
+                currentData.forEach((s, finalIdx) => {
+                  const moved = s._initialRank - finalIdx;
+                  s._badgeCls  = moved > 0 ? 'up' : moved < 0 ? 'down' : 'none';
+                  s._badgeHtml = moved > 0 ? '▲'+moved : moved < 0 ? '▼'+Math.abs(moved) : '—';
+                  s._badgeExpires = Infinity;
+                });
+                renderLeaderboard(currentData, true, targetMaxScore);
+                raceTimer = null;
+
+                // 5. Show position modal after race finishes
+                if (roll) {
+                  const finalIdx = currentData.findIndex(s => String(s.roll) === String(roll));
+                  if (finalIdx !== -1) {
+                    const found = currentData[finalIdx];
+                    const rank  = finalIdx + 1;
+                    const trophy = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🎓';
+                    const rankCls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
+
+                    const contextLines = [];
+                    if (session)   contextLines.push(`Session: <strong>${session}</strong>`);
+                    if (className) contextLines.push(`Class: <strong>${className}</strong>`);
+                    if (section)   contextLines.push(`Section: <strong>${section}</strong>`);
+                    if (group)     contextLines.push(`Group: <strong>${group}</strong>`);
+                    const contextStr = contextLines.length
+                      ? contextLines.join(' &nbsp;·&nbsp; ')
+                      : 'from <strong>All Students</strong>';
+
+                    document.getElementById('posModalTrophy').textContent = trophy;
+                    document.getElementById('posModalName').textContent   = `Hey, ${found.name}!`;
+                    document.getElementById('posModalRank').className = `pos-modal-rank ${rankCls}`;
+                    document.getElementById('posModalRank').textContent   = `${ordinalSuffix(rank)} Place`;
+                    document.getElementById('posModalContext').innerHTML  =
+                      `Your position is <strong>${ordinalSuffix(rank)}</strong> ${contextStr}`;
+                    document.getElementById('posModalScore').textContent  =
+                      `Total Score: ${found.totalScore} pts  (Att: ${found.attendanceScore}  |  Exam: ${found.examScore})`;
+                    document.getElementById('posModal').style.display = 'flex';
+                  } else {
+                    alert(`Roll ${roll} not found in this filter. Make sure the roll matches.`);
+                  }
+                }
+              } else {
+                raceTimer = requestAnimationFrame(studentRaceLoop);
+              }
+            }
+            raceTimer = requestAnimationFrame(studentRaceLoop);
+          }
+
+        } catch(err) {
+          alert('Error loading leaderboard: ' + err.message);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = '🏆 Show Leaderboard & My Rank';
         }
       }
     </script>
