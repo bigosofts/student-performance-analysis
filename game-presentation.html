@@ -1369,18 +1369,8 @@
             margin-top: 10px;
             background: #fff;
             border-radius: 8px;
-            position: relative;
           "
         >
-          <!-- PDF Loading Overlay -->
-          <div id="pdfLoadingOverlay" style="position: absolute; inset: 0; background: rgba(255, 255, 255, 0.95); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 10; border-radius: 8px; color: #1e293b;">
-            <div style="font-size: 3rem; margin-bottom: 10px; animation: pulse 1.5s infinite;">📄</div>
-            <div style="font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; font-family: 'Outfit', sans-serif;">Downloading PDF...</div>
-            <div style="width: 50%; max-width: 300px; height: 12px; background: #e2e8f0; border-radius: 6px; overflow: hidden; margin-bottom: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
-              <div id="pdfProgressBar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #7c3aed, #06b6d4); transition: width 0.3s ease;"></div>
-            </div>
-            <div id="pdfProgressText" style="font-size: 0.95rem; font-weight: 600; color: #64748b; font-family: 'Outfit', sans-serif;">0%</div>
-          </div>
           <iframe
             id="pdfIframe"
             style="width: 100%; height: 100%; border: none; border-radius: 8px"
@@ -1557,57 +1547,14 @@
       let currentFile = null;
       let slides = []; // array of image URLs
 
-      let currentPdfXhr = null;
-
-      function loadPdfWithProgress(url, title) {
+      function loadPdfNative(url, title) {
           const iframe = document.getElementById("pdfIframe");
-          const overlay = document.getElementById("pdfLoadingOverlay");
-          const progressBar = document.getElementById("pdfProgressBar");
-          const progressText = document.getElementById("pdfProgressText");
           
           pushShareModal("pdfModal");
           if (title) document.getElementById("pdfModalSub").textContent = title;
           
-          iframe.src = "";
-          if (overlay) overlay.style.display = "flex";
-          if (progressBar) { progressBar.style.width = "0%"; progressBar.style.background = "linear-gradient(90deg, #7c3aed, #06b6d4)"; }
-          if (progressText) progressText.textContent = "0%";
-
-          if (currentPdfXhr) currentPdfXhr.abort();
-
-          currentPdfXhr = new XMLHttpRequest();
-          currentPdfXhr.open("GET", url, true);
-          currentPdfXhr.responseType = "blob";
-          
-          currentPdfXhr.onprogress = function(e) {
-              if (e.lengthComputable) {
-                  const percentComplete = Math.round((e.loaded / e.total) * 100);
-                  if (progressBar) progressBar.style.width = percentComplete + "%";
-                  if (progressText) progressText.textContent = percentComplete + "% (" + (e.loaded / (1024*1024)).toFixed(1) + "MB / " + (e.total / (1024*1024)).toFixed(1) + "MB)";
-              } else {
-                  if (progressText) progressText.textContent = "Loading... " + (e.loaded / (1024*1024)).toFixed(1) + "MB";
-              }
-          };
-          
-          currentPdfXhr.onload = function() {
-              if (this.status === 200) {
-                  const blobUrl = URL.createObjectURL(this.response);
-                  iframe.src = blobUrl;
-                  if (overlay) overlay.style.display = "none";
-              } else {
-                  if (progressText) progressText.textContent = "Error loading PDF.";
-                  if (progressBar) progressBar.style.background = "red";
-              }
-              currentPdfXhr = null;
-          };
-          
-          currentPdfXhr.onerror = function() {
-              if (progressText) progressText.textContent = "Network error loading PDF.";
-              if (progressBar) progressBar.style.background = "red";
-              currentPdfXhr = null;
-          };
-          
-          currentPdfXhr.send();
+          // Use native browser streaming (first page loads instantly)
+          iframe.src = url;
       }
 
       // ════════════════════════════════════════════
@@ -1805,10 +1752,6 @@
           document.getElementById("uploadedVideo").pause();
           document.getElementById("uploadedVideo").src = "";
       }
-      if (currentPdfXhr) {
-          currentPdfXhr.abort();
-          currentPdfXhr = null;
-      }
     });
 
   
@@ -1859,7 +1802,7 @@
       });
 
       socket.on("pres-share-pdf", async (data) => {
-        loadPdfWithProgress(data.url, "From your teacher");
+        loadPdfNative(data.url, "From your teacher");
       });
 
       function resizeWebpageIframe() {
@@ -2222,11 +2165,6 @@
           document.getElementById("uploadedVideo").src = "";
         } else if (id === "webpageModal") {
           document.getElementById("webpageIframe").src = "";
-        } else if (id === "pdfModal") {
-          if (currentPdfXhr) {
-             currentPdfXhr.abort();
-             currentPdfXhr = null;
-          }
         }
       }
 
@@ -2356,7 +2294,7 @@
            }
            pushShareModal(modal.id);
         } else if (type === 'pdf') {
-           loadPdfWithProgress(url, title);
+           loadPdfNative(url, title);
         }
       }
 
