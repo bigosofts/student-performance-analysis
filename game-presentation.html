@@ -1499,7 +1499,10 @@
            pushShareModal("pdfModal");
            document.getElementById("pdfModalSub").textContent = title;
            iframe.src = ""; // Clear existing
-           fetch("/api/view-pdf?url=" + encodeURIComponent(url))
+           
+           // Fetch directly instead of using the broken /api/view-pdf proxy
+           // Fetching via AJAX prevents IDM from intercepting the download
+           fetch(url)
              .then(res => res.blob())
              .then(blob => {
                  const blobUrl = URL.createObjectURL(blob);
@@ -1800,10 +1803,9 @@
         iframe.src = ""; // Clear existing
 
         try {
-          // Fetching via AJAX prevents IDM from intercepting the download
-          const res = await fetch(
-            "/api/view-pdf?url=" + encodeURIComponent(data.url),
-          );
+          // Fetching directly via AJAX prevents IDM from intercepting the download
+          // Avoid the broken /api/view-pdf proxy to fix the live server load error
+          const res = await fetch(data.url);
           const blob = await res.blob();
 
           // Create a local blob URL and pass it to the iframe
