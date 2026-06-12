@@ -1498,16 +1498,10 @@
            const iframe = document.getElementById("pdfIframe");
            pushShareModal("pdfModal");
            document.getElementById("pdfModalSub").textContent = title;
-           iframe.src = ""; // Clear existing
            
-           // Fetch directly instead of using the broken /api/view-pdf proxy
-           // Fetching via AJAX prevents IDM from intercepting the download
-           fetch(url)
-             .then(res => res.blob())
-             .then(blob => {
-                 const blobUrl = URL.createObjectURL(blob);
-                 iframe.src = blobUrl;
-             }).catch(e => console.error(e));
+           // We set the src directly instead of using fetch.
+           // Fetching a large PDF causes a white screen until 100% downloaded.
+           iframe.src = url;
         }
       }
 
