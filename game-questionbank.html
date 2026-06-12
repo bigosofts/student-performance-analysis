@@ -6,6 +6,7 @@
     <title>Question Bank Projector</title>
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/questionbank.css" />
+    <link rel="stylesheet" href="css/student-practice.css" />
     <script src="/socket.io/socket.io.js"></script>
     <script src="js/questionbank.js"></script>
     <style>
@@ -35,11 +36,44 @@
       <div class="waiting-screen" id="waitingScreen">
         <div class="ws-icon">📡</div>
         <div class="ws-title">Interactive ClassRoom</div>
-        <div class="ws-subtitle">Waiting for teacher...</div>
-        <div class="ws-dots">
-          <span class="ws-dot"></span>
-          <span class="ws-dot"></span>
-          <span class="ws-dot"></span>
+        <div class="ws-subtitle" style="margin-bottom: 20px;">Waiting for teacher... or</div>
+        
+        <div class="student-setup-view" id="studentSetupView">
+          <h2>Student Practice</h2>
+          <div class="student-form-grid">
+            <div class="student-form-group">
+              <label>Name</label>
+              <input type="text" id="studentName" class="student-form-control" placeholder="Enter your name" />
+            </div>
+            <div class="student-form-group">
+              <label>Paper</label>
+              <select id="studentPaper" class="student-form-control">
+                <option value="All">All Papers</option>
+                <option value="1st">1st Paper</option>
+                <option value="2nd">2nd Paper</option>
+              </select>
+            </div>
+            <div class="student-form-group">
+              <label>Amount</label>
+              <select id="studentAmount" class="student-form-control">
+                <option value="10">10 Questions</option>
+                <option value="20">20 Questions</option>
+                <option value="30">30 Questions</option>
+                <option value="All">All Questions</option>
+              </select>
+            </div>
+            <div class="student-form-group">
+              <label>Chapter</label>
+              <select id="studentChapter" class="student-form-control">
+                <option value="">All Chapters</option>
+              </select>
+            </div>
+            <div class="student-form-group">
+              <label>Timer per Q (sec)</label>
+              <input type="number" id="studentTimer" class="student-form-control" value="30" min="5" />
+            </div>
+          </div>
+          <button class="student-btn" onclick="startStudentPractice()">🚀 Start Practice</button>
         </div>
       </div>
 
@@ -68,6 +102,31 @@
         </div>
       </div>
 
+      <!-- ═══════════════ STUDENT MCQ VIEW ═══════════════ -->
+      <div id="studentMcqView" class="qb-view student-interactive">
+        <div class="header-bar">
+          <div id="studentMcqTitle">📝 Practice Quiz</div>
+          <div id="studentMcqTimer">⏱ <span id="studentTimerText">00:00</span></div>
+        </div>
+        <div class="timer-bar-container">
+          <div class="timer-bar" id="studentTimerBar"></div>
+        </div>
+        <div class="content-area">
+          <div id="studentMcqContent" class="qb-content-inner"></div>
+        </div>
+      </div>
+
+      <!-- ═══════════════ STUDENT RESULT VIEW ═══════════════ -->
+      <div id="studentResultView" class="qb-view">
+        <div class="qb-quiz-end">
+          <div class="qb-quiz-end-icon">🎓</div>
+          <div id="studentResultTitle" class="qb-quiz-end-text">Practice Finished!</div>
+          <div id="studentResultScore" style="color: white; font-size: 2.5rem; font-family: 'Exo 2'; margin-top: 10px;">Score: 0/0</div>
+          <div id="studentResultMessage" style="color: #94a3b8; font-size: 1.5rem; margin-top: 10px; text-align: center; max-width: 800px; line-height: 1.4;"></div>
+          <button class="student-btn" style="max-width: 250px; margin-top: 30px;" onclick="location.reload()">Back to Home</button>
+        </div>
+      </div>
+
     </div>
 
     <script>
@@ -88,11 +147,24 @@
       const waitingScreen = document.getElementById('waitingScreen');
       const mcqView       = document.getElementById('mcqView');
       const cqView        = document.getElementById('cqView');
+      const studentMcqView    = document.getElementById('studentMcqView');
+      const studentResultView = document.getElementById('studentResultView');
 
       function showView(view) {
         waitingScreen.style.display = 'none';
         mcqView.style.display       = 'none';
         cqView.style.display        = 'none';
+        studentMcqView.style.display    = 'none';
+        studentResultView.style.display = 'none';
+        
+        // Interrupt student practice if teacher forces a view
+        if (view === mcqView || view === cqView) {
+           if (studentTimerObj) {
+              studentTimerObj.stop();
+              studentTimerObj = null;
+           }
+        }
+        
         if (view) view.style.display = 'flex';
       }
 
@@ -161,9 +233,7 @@
 
       socket.on('qbank-end-quiz', () => {
         if (timerObj) timerObj.stop();
-        waitingScreen.style.display = 'flex';
-        mcqView.style.display       = 'none';
-        cqView.style.display        = 'none';
+        showView(waitingScreen);
       });
 
       /* ── Show Creative ── */
@@ -178,9 +248,7 @@
       });
 
       socket.on('qbank-close-creative', () => {
-        waitingScreen.style.display = 'flex';
-        mcqView.style.display       = 'none';
-        cqView.style.display        = 'none';
+        showView(waitingScreen);
       });
 
       /* ── Render MCQ ── */
@@ -224,6 +292,161 @@
             opt.classList.add('wrong-dim');
           }
         });
+      }
+
+      /* ═════════════════════════════════════════════
+         STUDENT PRACTICE LOGIC
+         ═════════════════════════════════════════════ */
+      let studentQuestions = [];
+      let studentCurrentIdx = 0;
+      let studentScore = 0;
+      let studentTimerObj = null;
+      let studentMaxTime = 30;
+      let studentSelectedOption = null;
+      let studentName = "";
+
+      // Load Chapters on startup
+      fetch('/api/mcq/chapters')
+        .then(res => res.json())
+        .then(chapters => {
+          const select = document.getElementById('studentChapter');
+          chapters.forEach(ch => {
+            const opt = document.createElement('option');
+            let chText = ch.toString();
+            if (!chText.toLowerCase().includes('chapter')) chText = 'Chapter ' + chText;
+            opt.value = chText;
+            opt.innerText = chText;
+            select.appendChild(opt);
+          });
+        })
+        .catch(err => console.error(err));
+
+      function startStudentPractice() {
+        studentName = document.getElementById('studentName').value.trim();
+        const paper = document.getElementById('studentPaper').value;
+        const chapter = document.getElementById('studentChapter').value;
+        const amount = document.getElementById('studentAmount').value;
+        studentMaxTime = parseInt(document.getElementById('studentTimer').value) || 30;
+
+        if (!studentName) return alert("Please enter your name first!");
+
+        let url = `/api/mcq?amount=${amount}&paper=${paper}`;
+        if (chapter) url += `&chapter=${encodeURIComponent(chapter)}`;
+
+        fetch(url)
+          .then(res => res.json())
+          .then(data => {
+            if (data.length === 0) return alert("No questions match the filter.");
+            studentQuestions = data;
+            studentCurrentIdx = 0;
+            studentScore = 0;
+            showView(studentMcqView);
+            renderStudentMcq();
+          })
+          .catch(err => {
+            alert("Failed to load questions. " + err.message);
+          });
+      }
+
+      function renderStudentMcq() {
+        if (studentTimerObj) studentTimerObj.stop();
+        studentTimerObj = null;
+        studentSelectedOption = null;
+
+        const q = studentQuestions[studentCurrentIdx];
+        document.getElementById('studentMcqTitle').innerHTML =
+          `📝 Practice Quiz &nbsp;•&nbsp; প্রশ্ন ${QuestionBank.toBengaliNumber(studentCurrentIdx + 1)}/${QuestionBank.toBengaliNumber(studentQuestions.length)}`;
+
+        const contentEl = document.getElementById('studentMcqContent');
+        contentEl.innerHTML = `<div class="mcq-enter">${QuestionBank.formatMcq(q, studentCurrentIdx + 1)}</div>`;
+
+        // Add click listeners to all options
+        contentEl.querySelectorAll('.mcq-option').forEach(opt => {
+          opt.addEventListener('click', function() {
+            if (studentSelectedOption) return; // Prevent multiple selections
+            
+            // Mark as selected
+            contentEl.querySelectorAll('.mcq-option').forEach(o => o.classList.remove('selected'));
+            this.classList.add('selected');
+            studentSelectedOption = this.dataset.opt;
+          });
+        });
+
+        const timerText = document.getElementById('studentTimerText');
+        const timerBar  = document.getElementById('studentTimerBar');
+
+        studentTimerObj = QuestionBank.createTimer(studentMaxTime, (rem) => {
+          timerText.innerText  = `${Math.floor(rem/60).toString().padStart(2,'0')}:${(rem%60).toString().padStart(2,'0')}`;
+          timerBar.style.width = `${(rem / studentMaxTime) * 100}%`;
+        }, () => {
+          studentTimerObj = null;
+          timerText.innerText  = '00:00';
+          timerBar.style.width = '0%';
+          evaluateStudentAnswer();
+        });
+      }
+
+      function evaluateStudentAnswer() {
+        const q = studentQuestions[studentCurrentIdx];
+        if (!q) return;
+        
+        let correctAns = q.answer;
+        const type = parseInt(q.type);
+        if (type === 4) {
+           // For type 4, there are 2 questions. We will just use the first question's answer for scoring simplicity, 
+           // or we'd need a more complex UI for the student to select 2 answers.
+           // Since the prompt implied a standard MCQ practice, we will highlight both but only score based on Q1 if they clicked it.
+           correctAns = q.answer;
+        }
+
+        // Highlight correct answer
+        const container = document.getElementById('studentMcqContent');
+        
+        if (type === 4) {
+          const q1 = container.querySelector('.mcq-sub-question[data-sub="1"]');
+          if (q1) highlightAnswer(q1, q.answer);
+          const q2 = container.querySelector('.mcq-sub-question[data-sub="2"]');
+          if (q2) highlightAnswer(q2, q.q2_answer);
+        } else {
+          highlightAnswer(container, q.answer);
+        }
+
+        // Check if student selected the correct one
+        if (studentSelectedOption && studentSelectedOption === String(correctAns)) {
+           studentScore++;
+        }
+
+        // Wait 3 seconds then advance
+        setTimeout(() => {
+          studentCurrentIdx++;
+          if (studentCurrentIdx < studentQuestions.length) {
+            renderStudentMcq();
+          } else {
+            showStudentResults();
+          }
+        }, 3000);
+      }
+
+      function showStudentResults() {
+        showView(studentResultView);
+        
+        const total = studentQuestions.length;
+        document.getElementById('studentResultScore').innerText = `Score: ${studentScore} / ${total}`;
+        
+        const percentage = (studentScore / total) * 100;
+        let message = "";
+        
+        if (percentage >= 80) {
+           message = `Excellent, ${studentName}! You are a brilliant student! 🌟`;
+        } else if (percentage >= 60) {
+           message = `Good job, ${studentName}! You are a progressing student. 👍`;
+        } else if (percentage >= 40) {
+           message = `It's ok, ${studentName}. You need to study a bit more. 📚`;
+        } else {
+           message = `Don't give up, ${studentName}! Keep practicing and you will improve. 💪`;
+        }
+        
+        document.getElementById('studentResultMessage').innerText = message;
       }
     </script>
     <script src="js/wake-lock.js"></script>
