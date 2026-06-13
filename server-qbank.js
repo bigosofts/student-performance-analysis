@@ -423,12 +423,13 @@ module.exports = function(app, io, uploadsDir) {
     // ==== PDF Export API ====
     app.get('/api/mcq/export-pdf', (req, res) => {
         let data = readExcel(mcqFile);
-        const { paper, chapter, boardOnly, importantOnly, amount } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
         
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
         if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
         
         data.sort(() => 0.5 - Math.random());
         
@@ -445,12 +446,13 @@ module.exports = function(app, io, uploadsDir) {
 
     app.get('/api/creative/export-pdf', (req, res) => {
         let data = readExcel(creativeFile);
-        const { paper, chapter, boardOnly, importantOnly, amount } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
         
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
         if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
         
         data.sort(() => 0.5 - Math.random());
         
@@ -466,34 +468,36 @@ module.exports = function(app, io, uploadsDir) {
 
     app.get('/api/mcq/export-txt', (req, res) => {
         let data = readExcel(mcqFile);
-        const { paper, chapter, boardOnly, importantOnly, amount } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
         if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
         
         data.sort(() => 0.5 - Math.random());
         if (amount && amount !== 'All') {
             const limit = parseInt(amount);
             if (!isNaN(limit)) data = data.slice(0, limit);
         }
-        generateTXT(res, data, 'MCQ Questions', true);
+        generateTXT(req, res, data, 'MCQ Questions', true);
     });
 
     app.get('/api/creative/export-txt', (req, res) => {
         let data = readExcel(creativeFile);
-        const { paper, chapter, boardOnly, importantOnly, amount } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
         if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
         
         data.sort(() => 0.5 - Math.random());
         if (amount && amount !== 'All') {
             const limit = parseInt(amount);
             if (!isNaN(limit)) data = data.slice(0, limit);
         }
-        generateTXT(res, data, 'Creative Questions', false);
+        generateTXT(req, res, data, 'Creative Questions', false);
     });
 
     function generatePDF(res, data, title, isMcq) {
@@ -536,7 +540,7 @@ module.exports = function(app, io, uploadsDir) {
                             // Center horizontally
                             const x = (doc.page.width - doc.page.margins.left - doc.page.margins.right - targetWidth) / 2 + doc.page.margins.left;
                             
-                            doc.image(img, x, doc.y, { width: targetWidth });
+                            doc.image(imgPath, x, doc.y, { width: targetWidth });
                             doc.y += targetHeight + 15; // manually advance cursor
                         } catch(e) {
                             console.error('Error adding image to pdf:', e);
@@ -552,12 +556,12 @@ module.exports = function(app, io, uploadsDir) {
                 const bnIndex1 = toBengaliNumber(qNum);
                 
                 if (type === 3 || type === 4) {
-                    if (q.passage) {
+                    if (q.passage || q.passage_image) {
                         const hint = type === 4 ? `${bnIndex1} ও ${toBengaliNumber(qNum + 1)}` : `${bnIndex1}`;
                         doc.text(`নিচের উদ্দীপকটি পড়ো এবং ${hint} নং প্রশ্নের উত্তর দাও:`);
-                        doc.text(`${q.passage}`);
+                        if (q.passage) doc.text(`${q.passage}`);
                         doc.moveDown(0.5);
-                        addImageToPdf(q.passage_image);
+                        if (q.passage_image) addImageToPdf(q.passage_image);
                     }
                 }
                 
@@ -623,9 +627,11 @@ module.exports = function(app, io, uploadsDir) {
         }
     }
 
-    function generateTXT(res, data, title, isMcq) {
+    function generateTXT(req, res, data, title, isMcq) {
         res.setHeader('Content-disposition', `attachment; filename="${title.replace(/\s+/g, '_')}.txt"`);
         res.setHeader('Content-type', 'text/plain; charset=utf-8');
+        
+        const baseUrl = `${req.protocol}://${req.get('host')}/uploads/qbank-images/`;
         
         let output = `${title}\n`;
         output += `===============================\n\n`;
@@ -637,14 +643,21 @@ module.exports = function(app, io, uploadsDir) {
                 const bnIndex1 = toBengaliNumber(qNum);
                 
                 if (type === 3 || type === 4) {
-                    if (q.passage) {
+                    if (q.passage || q.passage_image) {
                         const hint = type === 4 ? `${bnIndex1} ও ${toBengaliNumber(qNum + 1)}` : `${bnIndex1}`;
                         output += `নিচের উদ্দীপকটি পড়ো এবং ${hint} নং প্রশ্নের উত্তর দাও:\n`;
-                        output += `${q.passage}\n\n`;
+                        if (q.passage) output += `${q.passage}\n`;
+                        if (q.passage_image) {
+                            output += `[Image Link: ${baseUrl}${q.passage_image}]\n`;
+                        }
+                        output += `\n`;
                     }
                 }
                 
                 output += `${bnIndex1}। ${q.question || ''}\n`;
+                if (q.question_image) {
+                    output += `[Image Link: ${baseUrl}${q.question_image}]\n`;
+                }
                 
                 const appendOptions = (a, b, c, d) => {
                     const row1 = (a ? `ক) ${a}` : '').padEnd(30, ' ') + (b ? `    খ) ${b}` : '');
@@ -668,6 +681,9 @@ module.exports = function(app, io, uploadsDir) {
                     qNum++;
                     const bnIndex2 = toBengaliNumber(qNum);
                     output += `${bnIndex2}। ${q.question2}\n`;
+                    if (q.question2_image) {
+                        output += `[Image Link: ${baseUrl}${q.question2_image}]\n`;
+                    }
                     
                     if (q.q2_type === 'point') {
                         if (q.q2_option_a) output += `i) ${q.q2_option_a}\n`;
@@ -684,6 +700,9 @@ module.exports = function(app, io, uploadsDir) {
             } else {
                 const bnIndex = toBengaliNumber(qNum);
                 output += `প্রশ্ন ${bnIndex}। ${q.passage || ''}\n`;
+                if (q.passage_image) {
+                    output += `[Image Link: ${baseUrl}${q.passage_image}]\n`;
+                }
                 if (q.knowledge) output += `ক) ${q.knowledge}\n`;
                 if (q.understanding) output += `খ) ${q.understanding}\n`;
                 if (q.application) output += `গ) ${q.application}\n`;
