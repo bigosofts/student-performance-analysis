@@ -446,7 +446,7 @@ module.exports = function(app, io, uploadsDir) {
 
     app.get('/api/creative/export-pdf', (req, res) => {
         let data = readExcel(creativeFile);
-        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics, showAnswer } = req.query;
         
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
@@ -463,7 +463,7 @@ module.exports = function(app, io, uploadsDir) {
             }
         }
 
-        generatePDF(res, data, 'Creative Questions', false);
+        generatePDF(res, data, 'Creative Questions', false, showAnswer === 'true');
     });
 
     app.get('/api/mcq/export-txt', (req, res) => {
@@ -485,7 +485,7 @@ module.exports = function(app, io, uploadsDir) {
 
     app.get('/api/creative/export-txt', (req, res) => {
         let data = readExcel(creativeFile);
-        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
+        const { paper, chapter, boardOnly, importantOnly, amount, topics, showAnswer } = req.query;
         if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
         if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
         if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
@@ -497,10 +497,10 @@ module.exports = function(app, io, uploadsDir) {
             const limit = parseInt(amount);
             if (!isNaN(limit)) data = data.slice(0, limit);
         }
-        generateTXT(req, res, data, 'Creative Questions', false);
+        generateTXT(req, res, data, 'Creative Questions', false, showAnswer === 'true');
     });
 
-    function generatePDF(res, data, title, isMcq) {
+    function generatePDF(res, data, title, isMcq, showAnswer = false) {
         try {
             const doc = new PDFDocument({ margin: 50, size: 'A4' });
             
@@ -609,10 +609,23 @@ module.exports = function(app, io, uploadsDir) {
                 doc.text(`প্রশ্ন ${bnIndex}। ${q.passage || ''}`);
                 doc.moveDown(0.5);
                 addImageToPdf(q.passage_image);
-                if (q.knowledge) doc.text(`ক) ${q.knowledge}`);
-                if (q.understanding) doc.text(`খ) ${q.understanding}`);
-                if (q.application) doc.text(`গ) ${q.application}`);
-                if (q.higher_thinking) doc.text(`ঘ) ${q.higher_thinking}`);
+                const formatAns = (ans) => `    উত্তর:\n` + String(ans).split('\n').map(l => `        ${l}`).join('\n');
+                if (q.knowledge) {
+                    doc.text(`ক) ${q.knowledge}`);
+                    if (showAnswer && q.answer_k) doc.text(formatAns(q.answer_k));
+                }
+                if (q.understanding) {
+                    doc.text(`খ) ${q.understanding}`);
+                    if (showAnswer && q.answer_u) doc.text(formatAns(q.answer_u));
+                }
+                if (q.application) {
+                    doc.text(`গ) ${q.application}`);
+                    if (showAnswer && q.answer_a) doc.text(formatAns(q.answer_a));
+                }
+                if (q.higher_thinking) {
+                    doc.text(`ঘ) ${q.higher_thinking}`);
+                    if (showAnswer && q.answer_h) doc.text(formatAns(q.answer_h));
+                }
                 doc.moveDown();
                 qNum++;
             }
@@ -627,7 +640,7 @@ module.exports = function(app, io, uploadsDir) {
         }
     }
 
-    function generateTXT(req, res, data, title, isMcq) {
+    function generateTXT(req, res, data, title, isMcq, showAnswer = false) {
         res.setHeader('Content-disposition', `attachment; filename="${title.replace(/\s+/g, '_')}.txt"`);
         res.setHeader('Content-type', 'text/plain; charset=utf-8');
         
@@ -703,10 +716,23 @@ module.exports = function(app, io, uploadsDir) {
                 if (q.passage_image) {
                     output += `[Image Link: ${baseUrl}${q.passage_image}]\n`;
                 }
-                if (q.knowledge) output += `ক) ${q.knowledge}\n`;
-                if (q.understanding) output += `খ) ${q.understanding}\n`;
-                if (q.application) output += `গ) ${q.application}\n`;
-                if (q.higher_thinking) output += `ঘ) ${q.higher_thinking}\n`;
+                const formatAnsTxt = (ans) => `    উত্তর:\n` + String(ans).split('\n').map(l => `        ${l}`).join('\n') + `\n`;
+                if (q.knowledge) {
+                    output += `ক) ${q.knowledge}\n`;
+                    if (showAnswer && q.answer_k) output += formatAnsTxt(q.answer_k);
+                }
+                if (q.understanding) {
+                    output += `খ) ${q.understanding}\n`;
+                    if (showAnswer && q.answer_u) output += formatAnsTxt(q.answer_u);
+                }
+                if (q.application) {
+                    output += `গ) ${q.application}\n`;
+                    if (showAnswer && q.answer_a) output += formatAnsTxt(q.answer_a);
+                }
+                if (q.higher_thinking) {
+                    output += `ঘ) ${q.higher_thinking}\n`;
+                    if (showAnswer && q.answer_h) output += formatAnsTxt(q.answer_h);
+                }
                 output += '\n';
                 qNum++;
             }

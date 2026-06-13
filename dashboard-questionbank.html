@@ -473,6 +473,25 @@
               <input type="text" id="cqH" class="form-control" required />
             </div>
           </div>
+          
+          <div class="form-grid">
+            <div class="form-group">
+              <label>ক) জ্ঞানমূলক (উত্তর)</label>
+              <textarea id="cqAnsK" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label>খ) অনুধাবনমূলক (উত্তর)</label>
+              <textarea id="cqAnsU" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label>গ) প্রয়োগমূলক (উত্তর)</label>
+              <textarea id="cqAnsA" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="form-group">
+              <label>ঘ) উচ্চতর দক্ষতামূলক (উত্তর)</label>
+              <textarea id="cqAnsH" class="form-control" rows="2"></textarea>
+            </div>
+          </div>
 
           <div class="form-grid">
             <div class="form-group">
@@ -561,6 +580,9 @@
           </div>
           <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
             <input type="checkbox" id="cqFilterImportant" /> <label style="margin:0">Important Only</label>
+          </div>
+          <div class="form-group" style="flex-direction: row; align-items: center; gap: 10px;">
+            <input type="checkbox" id="cqFilterShowAnswer" /> <label style="margin:0">Show Answer</label>
           </div>
         </div>
         <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
@@ -810,6 +832,10 @@
         understanding: document.getElementById('cqU').value,
         application: document.getElementById('cqA').value,
         higher_thinking: document.getElementById('cqH').value,
+        answer_k: document.getElementById('cqAnsK').value,
+        answer_u: document.getElementById('cqAnsU').value,
+        answer_a: document.getElementById('cqAnsA').value,
+        answer_h: document.getElementById('cqAnsH').value,
         paper: document.getElementById('cqPaper').value,
         chapter: document.getElementById('cqChapter').value,
         topics: document.getElementById('cqTopics').value,
@@ -863,6 +889,7 @@
 
       if (document.getElementById(prefix + 'Board')?.checked) qs += `&boardOnly=true`;
       if (document.getElementById(prefix + 'Important')?.checked) qs += `&importantOnly=true`;
+      if (document.getElementById(prefix + 'ShowAnswer')?.checked) qs += `&showAnswer=true`;
 
       return qs;
     }
@@ -926,7 +953,7 @@
       const questions = await res.json();
       if (questions.length === 0) return alert('No questions match the filter');
 
-      socket.emit('qbank-show-creative', { questions });
+      socket.emit('qbank-show-creative', { questions, showAnswer: document.getElementById('cqFilterShowAnswer').checked });
     }
 
     function closeCqOnProjector() {
@@ -1138,6 +1165,10 @@
         document.getElementById('cqU').value = record.understanding || '';
         document.getElementById('cqA').value = record.application || '';
         document.getElementById('cqH').value = record.higher_thinking || '';
+        document.getElementById('cqAnsK').value = record.answer_k || '';
+        document.getElementById('cqAnsU').value = record.answer_u || '';
+        document.getElementById('cqAnsA').value = record.answer_a || '';
+        document.getElementById('cqAnsH').value = record.answer_h || '';
 
         document.getElementById('cqPaper').value = record.paper || '1st';
         let ch = record.chapter || 'Chapter 1';

@@ -41,6 +41,10 @@
         <div class="student-setup-view" id="studentSetupView">
           <h2>Student Practice</h2>
           <div class="student-form-grid">
+            <div class="student-form-group" style="grid-column: 1 / -1; flex-direction: row; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
+              <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="studentQType" value="mcq" checked onchange="toggleStudentQType()"> MCQ Quiz</label>
+              <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="studentQType" value="cq" onchange="toggleStudentQType()"> Creative Question</label>
+            </div>
             <div class="student-form-group">
               <label>Name</label>
               <input type="text" id="studentName" class="student-form-control" placeholder="Enter your name" />
@@ -54,6 +58,16 @@
               </select>
             </div>
             <div class="student-form-group">
+              <label>Chapter</label>
+              <select id="studentChapter" class="student-form-control">
+                <option value="">All Chapters</option>
+              </select>
+            </div>
+            <div class="student-form-group">
+              <label>Topics</label>
+              <input type="text" id="studentTopics" class="student-form-control" placeholder="All Topics" />
+            </div>
+            <div class="student-form-group">
               <label>Amount</label>
               <select id="studentAmount" class="student-form-control">
                 <option value="10">10 Questions</option>
@@ -62,15 +76,21 @@
                 <option value="All">All Questions</option>
               </select>
             </div>
-            <div class="student-form-group">
-              <label>Chapter</label>
-              <select id="studentChapter" class="student-form-control">
-                <option value="">All Chapters</option>
-              </select>
+            <div class="student-form-group" style="flex-direction: row; align-items: center; gap: 10px; padding-top: 10px;">
+              <input type="checkbox" id="studentBoard" />
+              <label style="margin:0">Board Question</label>
             </div>
-            <div class="student-form-group">
+            <div class="student-form-group" style="flex-direction: row; align-items: center; gap: 10px; padding-top: 10px;">
+              <input type="checkbox" id="studentCollege" />
+              <label style="margin:0">College</label>
+            </div>
+            <div class="student-form-group" id="studentTimerGroup">
               <label>Timer per Q (sec)</label>
               <input type="number" id="studentTimer" class="student-form-control" value="30" min="5" />
+            </div>
+            <div class="student-form-group" id="studentShowAnswerGroup" style="display: none; flex-direction: row; align-items: center; gap: 10px; padding-top: 10px;">
+              <input type="checkbox" id="studentShowAnswer" />
+              <label style="margin:0">Show Answer</label>
             </div>
           </div>
           <button class="student-btn" onclick="startStudentPractice()">🚀 Start Practice</button>
@@ -116,6 +136,17 @@
         </div>
       </div>
 
+      <!-- ═══════════════ STUDENT CREATIVE QUESTION VIEW ═══════════════ -->
+      <div id="studentCqView" class="qb-view student-interactive">
+        <div class="header-bar">
+          <div id="studentCqTitle">✍️ Creative Questions Practice</div>
+          <button class="student-btn" style="padding: 6px 12px; font-size: 14px; width: auto;" onclick="showView(document.getElementById('waitingScreen'))">🔙 Go Back</button>
+        </div>
+        <div class="content-area">
+          <div id="studentCqContent" class="qb-content-inner"></div>
+        </div>
+      </div>
+
       <!-- ═══════════════ STUDENT RESULT VIEW ═══════════════ -->
       <div id="studentResultView" class="qb-view">
         <div class="qb-quiz-end">
@@ -148,6 +179,7 @@
       const mcqView       = document.getElementById('mcqView');
       const cqView        = document.getElementById('cqView');
       const studentMcqView    = document.getElementById('studentMcqView');
+      const studentCqView     = document.getElementById('studentCqView');
       const studentResultView = document.getElementById('studentResultView');
 
       function showView(view) {
@@ -155,17 +187,24 @@
         mcqView.style.display       = 'none';
         cqView.style.display        = 'none';
         studentMcqView.style.display    = 'none';
+        studentCqView.style.display     = 'none';
         studentResultView.style.display = 'none';
         
         // Interrupt student practice if teacher forces a view
         if (view === mcqView || view === cqView) {
-           if (studentTimerObj) {
+           if (typeof studentTimerObj !== 'undefined' && studentTimerObj) {
               studentTimerObj.stop();
               studentTimerObj = null;
            }
         }
         
         if (view) view.style.display = 'flex';
+      }
+
+      function toggleStudentQType() {
+        const isCq = document.querySelector('input[name="studentQType"]:checked').value === 'cq';
+        document.getElementById('studentTimerGroup').style.display = isCq ? 'none' : 'flex';
+        document.getElementById('studentShowAnswerGroup').style.display = isCq ? 'flex' : 'none';
       }
 
       /* ── Start MCQ Quiz ── */
@@ -243,7 +282,7 @@
         inner.innerHTML = '<div class="cq-grid"></div>';
         const grid = inner.querySelector('.cq-grid');
         data.questions.forEach((q, i) => {
-          grid.innerHTML += QuestionBank.formatCreative(q, i + 1);
+          grid.innerHTML += QuestionBank.formatCreative(q, i + 1, data.showAnswer);
         });
       });
 
@@ -323,25 +362,46 @@
 
       function startStudentPractice() {
         studentName = document.getElementById('studentName').value.trim();
+        const qType = document.querySelector('input[name="studentQType"]:checked').value;
         const paper = document.getElementById('studentPaper').value;
         const chapter = document.getElementById('studentChapter').value;
         const amount = document.getElementById('studentAmount').value;
+        const topics = document.getElementById('studentTopics').value.trim();
+        const boardOnly = document.getElementById('studentBoard').checked;
+        const importantOnly = document.getElementById('studentCollege').checked;
+        const showAnswer = document.getElementById('studentShowAnswer').checked;
+
         studentMaxTime = parseInt(document.getElementById('studentTimer').value) || 30;
 
         if (!studentName) return alert("Please enter your name first!");
 
-        let url = `/api/mcq?amount=${amount}&paper=${paper}`;
+        let url = `/api/${qType === 'cq' ? 'creative' : 'mcq'}?amount=${amount}&paper=${paper}`;
         if (chapter) url += `&chapter=${encodeURIComponent(chapter)}`;
+        if (topics) url += `&topics=${encodeURIComponent(topics)}`;
+        if (boardOnly) url += `&boardOnly=true`;
+        if (importantOnly) url += `&importantOnly=true`;
+        if (qType === 'cq' && showAnswer) url += `&showAnswer=true`;
 
         fetch(url)
           .then(res => res.json())
           .then(data => {
             if (data.length === 0) return alert("No questions match the filter.");
-            studentQuestions = data;
-            studentCurrentIdx = 0;
-            studentScore = 0;
-            showView(studentMcqView);
-            renderStudentMcq();
+            
+            if (qType === 'mcq') {
+              studentQuestions = data;
+              studentCurrentIdx = 0;
+              studentScore = 0;
+              showView(studentMcqView);
+              renderStudentMcq();
+            } else {
+              showView(studentCqView);
+              const inner = document.getElementById('studentCqContent');
+              inner.innerHTML = '<div class="cq-grid"></div>';
+              const grid = inner.querySelector('.cq-grid');
+              data.forEach((q, i) => {
+                grid.innerHTML += QuestionBank.formatCreative(q, i + 1, showAnswer);
+              });
+            }
           })
           .catch(err => {
             alert("Failed to load questions. " + err.message);

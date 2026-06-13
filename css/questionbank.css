@@ -702,6 +702,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 20px;
 }
 
 .cq-item {
@@ -936,4 +937,15 @@
   border-radius: 5px;
   margin-bottom: 20px;
   overflow: hidden;
+}
+
+.cq-answer {
+  color: #10b981;
+  font-size: 0.9em;
+  margin-top: 4px;
+  padding-left: 20px;
+}
+.cq-ans-label {
+  font-weight: bold;
+  color: #10b981;
 }

@@ -175,17 +175,29 @@ window.QuestionBank = {
     /* ─────────────────────────────────────────
        Format Creative Question
     ───────────────────────────────────────── */
-    formatCreative: function(q, index) {
+    formatCreative: function(q, index, showAnswer = false) {
         const bnIndex = this.toBengaliNumber(index);
         let html = `<div class="cq-container">
             <div class="cq-number-badge">${bnIndex}</div>
             <div class="cq-passage">${q.passage}</div>
             ${q.passage_image ? `<div class="cq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
             <div class="cq-questions">`;
-        if (q.knowledge)       html += `<div class="cq-item"><span class="cq-label">ক)</span>${q.knowledge}</div>`;
-        if (q.understanding)   html += `<div class="cq-item"><span class="cq-label">খ)</span>${q.understanding}</div>`;
-        if (q.application)     html += `<div class="cq-item"><span class="cq-label">গ)</span>${q.application}</div>`;
-        if (q.higher_thinking) html += `<div class="cq-item"><span class="cq-label">ঘ)</span>${q.higher_thinking}</div>`;
+        if (q.knowledge) {
+            html += `<div class="cq-item"><span class="cq-label">ক)</span>${q.knowledge}</div>`;
+            if (showAnswer && q.answer_k) html += `<div class="cq-answer"><span class="cq-ans-label">উত্তর:</span><br>${String(q.answer_k).replace(/\n/g, '<br>')}</div>`;
+        }
+        if (q.understanding) {
+            html += `<div class="cq-item"><span class="cq-label">খ)</span>${q.understanding}</div>`;
+            if (showAnswer && q.answer_u) html += `<div class="cq-answer"><span class="cq-ans-label">উত্তর:</span><br>${String(q.answer_u).replace(/\n/g, '<br>')}</div>`;
+        }
+        if (q.application) {
+            html += `<div class="cq-item"><span class="cq-label">গ)</span>${q.application}</div>`;
+            if (showAnswer && q.answer_a) html += `<div class="cq-answer"><span class="cq-ans-label">উত্তর:</span><br>${String(q.answer_a).replace(/\n/g, '<br>')}</div>`;
+        }
+        if (q.higher_thinking) {
+            html += `<div class="cq-item"><span class="cq-label">ঘ)</span>${q.higher_thinking}</div>`;
+            if (showAnswer && q.answer_h) html += `<div class="cq-answer"><span class="cq-ans-label">উত্তর:</span><br>${String(q.answer_h).replace(/\n/g, '<br>')}</div>`;
+        }
         html += `</div></div>`;
         return html;
     }
