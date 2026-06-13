@@ -34,41 +34,68 @@
 
       <!-- ═══════════════ WAITING SCREEN ═══════════════ -->
       <div class="waiting-screen" id="waitingScreen">
-        <div class="ws-icon">📡</div>
-        <div class="ws-title">Interactive ClassRoom</div>
-        <div class="ws-subtitle" style="margin-bottom: 20px;">Waiting for teacher... or</div>
-        
+
+        <!-- Waiting for teacher indicator -->
+        <div class="ws-waiting-pill">
+          <span class="ws-dot"></span>
+          <span>📡 Waiting for teacher &mdash; or start below</span>
+        </div>
+
         <div class="student-setup-view" id="studentSetupView">
-          <h2>Student Practice</h2>
-          <div class="student-form-grid">
-            <div class="student-form-group" style="grid-column: 1 / -1; flex-direction: row; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px;">
-              <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="studentQType" value="mcq" checked onchange="toggleStudentQType()"> MCQ Quiz</label>
-              <label style="cursor:pointer; display:flex; align-items:center; gap:5px;"><input type="radio" name="studentQType" value="cq" onchange="toggleStudentQType()"> Creative Question</label>
+
+          <!-- Panel Header -->
+          <div class="ssp-header">
+            <span class="ssp-icon">📚</span>
+            <div>
+              <div class="ssp-title">Student Practice</div>
+              <div class="ssp-subtitle">Interactive ClassRoom &mdash; set your filters and start</div>
             </div>
-            <div class="student-form-group">
-              <label>Name</label>
+          </div>
+
+          <!-- Question Type Toggle -->
+          <div class="ssp-type-toggle">
+            <label class="ssp-radio-label">
+              <input type="radio" name="studentQType" value="mcq" checked onchange="toggleStudentQType()">
+              <span class="ssp-radio-box">📝 MCQ Quiz</span>
+            </label>
+            <label class="ssp-radio-label">
+              <input type="radio" name="studentQType" value="cq" onchange="toggleStudentQType()">
+              <span class="ssp-radio-box">✍️ Creative</span>
+            </label>
+          </div>
+
+          <!-- Two-column form grid -->
+          <div class="ssp-grid">
+
+            <div class="ssp-field">
+              <label class="ssp-label"><span class="ssp-field-icon">👤</span> Name</label>
               <input type="text" id="studentName" class="student-form-control" placeholder="Enter your name" />
             </div>
-            <div class="student-form-group">
-              <label>Paper</label>
+
+            <div class="ssp-field">
+              <label class="ssp-label"><span class="ssp-field-icon">📄</span> Paper</label>
               <select id="studentPaper" class="student-form-control">
                 <option value="All">All Papers</option>
                 <option value="1st">1st Paper</option>
                 <option value="2nd">2nd Paper</option>
               </select>
             </div>
-            <div class="student-form-group">
-              <label>Chapter</label>
+
+            <div class="ssp-field">
+              <label class="ssp-label"><span class="ssp-field-icon">📖</span> Chapter</label>
               <select id="studentChapter" class="student-form-control">
                 <option value="">All Chapters</option>
               </select>
             </div>
-            <div class="student-form-group">
-              <label>Topics</label>
-              <input type="text" id="studentTopics" class="student-form-control" placeholder="All Topics" />
+
+            <div class="ssp-field">
+              <label class="ssp-label"><span class="ssp-field-icon">🏷️</span> Topics</label>
+              <input type="text" id="studentTopics" class="student-form-control" placeholder="All Topics" list="topicsSuggestions" autocomplete="off" />
+              <datalist id="topicsSuggestions"></datalist>
             </div>
-            <div class="student-form-group">
-              <label>Amount</label>
+
+            <div class="ssp-field">
+              <label class="ssp-label"><span class="ssp-field-icon">🔢</span> Amount</label>
               <select id="studentAmount" class="student-form-control">
                 <option value="10">10 Questions</option>
                 <option value="20">20 Questions</option>
@@ -76,23 +103,30 @@
                 <option value="All">All Questions</option>
               </select>
             </div>
-            <div class="student-form-group" style="flex-direction: row; align-items: center; gap: 10px; padding-top: 10px;">
-              <input type="checkbox" id="studentBoard" />
-              <label style="margin:0">Board Question</label>
-            </div>
-            <div class="student-form-group" style="flex-direction: row; align-items: center; gap: 10px; padding-top: 10px;">
-              <input type="checkbox" id="studentCollege" />
-              <label style="margin:0">College</label>
-            </div>
-            <div class="student-form-group" id="studentTimerGroup">
-              <label>Timer per Q (sec)</label>
+
+            <div class="ssp-field" id="studentTimerGroup">
+              <label class="ssp-label"><span class="ssp-field-icon">⏱️</span> Timer per Q (sec)</label>
               <input type="number" id="studentTimer" class="student-form-control" value="30" min="5" />
             </div>
-            <div class="student-form-group" id="studentShowAnswerGroup" style="display: none; flex-direction: row; align-items: center; gap: 10px; padding-top: 10px;">
-              <input type="checkbox" id="studentShowAnswer" />
-              <label style="margin:0">Show Answer</label>
+
+            <!-- Checkbox row spanning full width -->
+            <div class="ssp-checks">
+              <label class="ssp-check-label">
+                <input type="checkbox" id="studentBoard" class="ssp-checkbox" />
+                <span class="ssp-check-box">🏫 Board Q</span>
+              </label>
+              <label class="ssp-check-label">
+                <input type="checkbox" id="studentCollege" class="ssp-checkbox" />
+                <span class="ssp-check-box">🏢 College</span>
+              </label>
+              <label class="ssp-check-label" id="studentShowAnswerGroup" style="display:none;">
+                <input type="checkbox" id="studentShowAnswer" class="ssp-checkbox" />
+                <span class="ssp-check-box">🔑 Show Answer</span>
+              </label>
             </div>
+
           </div>
+
           <button class="student-btn" onclick="startStudentPractice()">🚀 Start Practice</button>
         </div>
       </div>
@@ -204,7 +238,7 @@
       function toggleStudentQType() {
         const isCq = document.querySelector('input[name="studentQType"]:checked').value === 'cq';
         document.getElementById('studentTimerGroup').style.display = isCq ? 'none' : 'flex';
-        document.getElementById('studentShowAnswerGroup').style.display = isCq ? 'flex' : 'none';
+        document.getElementById('studentShowAnswerGroup').style.display = isCq ? '' : 'none';
       }
 
       /* ── Start MCQ Quiz ── */
@@ -359,6 +393,20 @@
           });
         })
         .catch(err => console.error(err));
+
+      // Load all unique topics from MCQ + CQ for suggestions datalist
+      Promise.all([
+        fetch('/api/mcq/topics').then(r => r.json()).catch(() => []),
+        fetch('/api/creative/topics').then(r => r.json()).catch(() => [])
+      ]).then(([mcqTopics, cqTopics]) => {
+        const allTopics = [...new Set([...mcqTopics, ...cqTopics])].sort();
+        const datalist = document.getElementById('topicsSuggestions');
+        allTopics.forEach(t => {
+          const opt = document.createElement('option');
+          opt.value = t;
+          datalist.appendChild(opt);
+        });
+      });
 
       function startStudentPractice() {
         studentName = document.getElementById('studentName').value.trim();

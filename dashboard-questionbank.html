@@ -739,6 +739,19 @@
       }
 
       container.innerHTML = html;
+
+      // Auto-fill combo fields with standard values for type 2 and 4
+      // Only auto-fill if fields are currently empty (i.e. not editing an existing record)
+      if (type === '2' || type === '4') {
+        const c1 = document.getElementById('f_c1');
+        const c2 = document.getElementById('f_c2');
+        const c3 = document.getElementById('f_c3');
+        const c4 = document.getElementById('f_c4');
+        if (c1 && !c1.value) c1.value = 'i ও ii';
+        if (c2 && !c2.value) c2.value = 'i ও iii';
+        if (c3 && !c3.value) c3.value = 'ii ও iii';
+        if (c4 && !c4.value) c4.value = 'i, ii ও iii';
+      }
     }
 
     updateMcqForm(); // init
