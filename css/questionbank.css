@@ -949,3 +949,53 @@
   font-weight: bold;
   color: #10b981;
 }
+
+/* ══════════════════════════════════════════════
+   MOBILE RESPONSIVE — Type 3 & Type 4
+   Stack passage + question into single column
+   ══════════════════════════════════════════════ */
+@media (max-width: 768px) {
+  /* Reduce shell padding on mobile */
+  .projector-view {
+    padding: 10px 12px 14px 12px;
+  }
+
+  /* TYPE 3 — stack into single column */
+  .mcq-type3-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* TYPE 4 — stack into single column */
+  .mcq-type4-layout {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Passage container adjustments for mobile */
+  .mcq-passage-container {
+    padding: 16px 18px;
+  }
+
+  /* Options grid: single column on mobile */
+  .mcq-options-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  /* Slightly smaller option cards */
+  .mcq-option {
+    padding: 14px 18px;
+    gap: 12px;
+  }
+
+  .mcq-option .opt-label {
+    min-width: 36px;
+    height: 36px;
+  }
+
+  /* Sub-question cards for type 4 */
+  .mcq-sub-question {
+    padding: 14px 16px;
+  }
+}

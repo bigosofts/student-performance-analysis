@@ -708,9 +708,15 @@
       @media (max-width: 1200px) {
         body {
           overflow-y: auto;
-          /* Allow scrolling on smaller screens */
           height: auto;
           min-height: 100vh;
+          -webkit-overflow-scrolling: touch;
+          scroll-behavior: smooth;
+        }
+
+        /* Kill the scanline overlay — it's a full-screen fixed layer that causes repaint on every scroll frame */
+        body::after {
+          display: none !important;
         }
 
         .main-content {
@@ -719,6 +725,7 @@
 
         .game-grid {
           grid-template-columns: repeat(2, 1fr);
+          perspective: none; /* remove 3D compositing overhead */
         }
 
         .game-card:nth-child(5) {
@@ -727,7 +734,6 @@
 
         .teacher-central-wrap {
           justify-content: center;
-          /* Center the button on tablet */
           padding-top: 20px;
         }
       }
@@ -743,6 +749,7 @@
         .teacher-badge {
           transform: translateX(0);
           animation: slideDown 0.8s ease forwards;
+          backdrop-filter: none; /* save GPU */
         }
 
         .header-area {
@@ -752,6 +759,43 @@
 
         .game-grid {
           grid-template-columns: 1fr;
+        }
+
+        /* ── Scroll Performance: disable expensive per-card effects ── */
+
+        /* Disable the continuously-spinning neon border conic-gradient */
+        .game-card::before {
+          animation: none;
+          background: linear-gradient(135deg, var(--neon-1), var(--neon-2));
+          opacity: 0.4;
+        }
+
+        /* Disable the sweeping inner color wash animation */
+        .game-card::after {
+          animation: none;
+          background-position: 50% 50%;
+          filter: blur(24px); /* slightly less blur */
+        }
+
+        /* Remove backdrop-filter from cards (very expensive during scroll) */
+        .game-card {
+          backdrop-filter: none;
+          -webkit-backdrop-filter: none;
+          /* Promote each card to its own GPU layer so the browser doesn't
+             repaint neighbours during momentum scroll */
+          transform: translateZ(0);
+          will-change: transform;
+        }
+
+        /* Finished entrance animation: clear will-change to free GPU memory */
+        .game-card {
+          animation-fill-mode: forwards;
+        }
+
+        /* Reduce background circle blur + kill their animation */
+        .bg-circle {
+          filter: blur(60px);
+          animation: none;
         }
 
         .game-card:nth-child(5) {
@@ -775,6 +819,7 @@
         .btn-dashboard {
           width: 100%;
           justify-content: center;
+          backdrop-filter: none;
         }
       }
     </style>
