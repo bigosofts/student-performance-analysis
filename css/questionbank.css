@@ -998,4 +998,17 @@
   .mcq-sub-question {
     padding: 14px 16px;
   }
+
+  /* Creative Questions: force single column on mobile
+     The minmax(380px, 1fr) is wider than a phone screen */
+  .cq-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cq-container {
+    padding: 16px 14px;
+    /* Prevent any internal content from pushing width */
+    overflow-x: hidden;
+    max-width: 100%;
+  }
 }
