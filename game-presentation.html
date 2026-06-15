@@ -1852,6 +1852,7 @@
           socket.emit("pres-slide-count", { total: totalSlides });
           showLoader(false);
           goToSlide(currentSlide, false);
+          preloadSlides();
         } else {
           // Request server-side conversion
           try {
@@ -1875,6 +1876,7 @@
               showLoader(false);
               showFallback(false);
               goToSlide(0, false);
+              preloadSlides();
               // Reload gallery to update slide count
               loadPresentations();
             } else {
@@ -1900,6 +1902,26 @@
         }
       }
 
+      let preloadIndex = 0;
+      function preloadNextSlide() {
+        if (preloadIndex >= slides.length) return;
+        const img = new Image();
+        img.onload = () => {
+          preloadIndex++;
+          preloadNextSlide();
+        };
+        img.onerror = () => {
+          preloadIndex++;
+          preloadNextSlide();
+        };
+        img.src = slides[preloadIndex];
+      }
+      
+      function preloadSlides() {
+        preloadIndex = 0;
+        preloadNextSlide();
+      }
+
       function goToSlide(idx, animate = true) {
         if (idx < 0 || (totalSlides > 0 && idx >= totalSlides)) return;
         const direction = idx > currentSlide ? "forward" : "backward";
@@ -1912,16 +1934,20 @@
           const url = slides[currentSlide];
           showFallback(false);
 
+          const targetSlide = currentSlide;
+
           if (animate) {
             showLoader(true);
             const nextImg = new Image();
 
             nextImg.onload = () => {
+              if (currentSlide !== targetSlide) return;
               showLoader(false);
               img.classList.add(
                 direction === "forward" ? "slide-out-left" : "slide-out-right",
               );
               setTimeout(() => {
+                if (currentSlide !== targetSlide) return;
                 img.src = url;
                 img.style.display = "";
                 img.classList.remove("slide-out-left", "slide-out-right");
@@ -1936,6 +1962,7 @@
             };
 
             nextImg.onerror = () => {
+              if (currentSlide !== targetSlide) return;
               showLoader(false);
               img.style.display = "none";
               showFallback(
@@ -1950,11 +1977,13 @@
             showLoader(true);
             const nextImg = new Image();
             nextImg.onload = () => {
+              if (currentSlide !== targetSlide) return;
               showLoader(false);
               img.src = url;
               img.style.display = "";
             };
             nextImg.onerror = () => {
+              if (currentSlide !== targetSlide) return;
               showLoader(false);
               img.style.display = "none";
               showFallback(
