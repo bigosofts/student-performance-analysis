@@ -215,6 +215,10 @@ module.exports = function(app, io, uploadsDir) {
 
     app.get('/api/mcq/topics', (req, res) => {
         let data = readExcel(mcqFile);
+        const { paper, chapter } = req.query;
+        if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
+        if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
+
         let topics = new Set();
         data.forEach(d => {
             if (d.topics) {
@@ -378,6 +382,10 @@ module.exports = function(app, io, uploadsDir) {
 
     app.get('/api/creative/topics', (req, res) => {
         let data = readExcel(creativeFile);
+        const { paper, chapter } = req.query;
+        if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
+        if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
+
         let topics = new Set();
         data.forEach(d => {
             if (d.topics) {

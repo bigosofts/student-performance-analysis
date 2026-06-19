@@ -74,7 +74,7 @@
 
             <div class="ssp-field">
               <label class="ssp-label"><span class="ssp-field-icon">📄</span> Paper</label>
-              <select id="studentPaper" class="student-form-control">
+              <select id="studentPaper" class="student-form-control" onchange="updateTopics()">
                 <option value="All">All Papers</option>
                 <option value="1st">1st Paper</option>
                 <option value="2nd">2nd Paper</option>
@@ -83,7 +83,7 @@
 
             <div class="ssp-field">
               <label class="ssp-label"><span class="ssp-field-icon">📖</span> Chapter</label>
-              <select id="studentChapter" class="student-form-control">
+              <select id="studentChapter" class="student-form-control" onchange="updateTopics()">
                 <option value="">All Chapters</option>
               </select>
             </div>
@@ -395,18 +395,31 @@
         .catch(err => console.error(err));
 
       // Load all unique topics from MCQ + CQ for suggestions datalist
-      Promise.all([
-        fetch('/api/mcq/topics').then(r => r.json()).catch(() => []),
-        fetch('/api/creative/topics').then(r => r.json()).catch(() => [])
-      ]).then(([mcqTopics, cqTopics]) => {
-        const allTopics = [...new Set([...mcqTopics, ...cqTopics])].sort();
-        const datalist = document.getElementById('topicsSuggestions');
-        allTopics.forEach(t => {
-          const opt = document.createElement('option');
-          opt.value = t;
-          datalist.appendChild(opt);
+      function updateTopics() {
+        const paper = document.getElementById('studentPaper').value;
+        const chapter = document.getElementById('studentChapter').value;
+        
+        let urlParams = new URLSearchParams();
+        if (paper && paper !== 'All') urlParams.append('paper', paper);
+        if (chapter && chapter !== 'All') urlParams.append('chapter', chapter);
+        const qs = urlParams.toString() ? '?' + urlParams.toString() : '';
+
+        Promise.all([
+          fetch('/api/mcq/topics' + qs).then(r => r.json()).catch(() => []),
+          fetch('/api/creative/topics' + qs).then(r => r.json()).catch(() => [])
+        ]).then(([mcqTopics, cqTopics]) => {
+          const allTopics = [...new Set([...mcqTopics, ...cqTopics])].sort();
+          const datalist = document.getElementById('topicsSuggestions');
+          datalist.innerHTML = '';
+          allTopics.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t;
+            datalist.appendChild(opt);
+          });
         });
-      });
+      }
+
+      updateTopics();
 
       function startStudentPractice() {
         studentName = document.getElementById('studentName').value.trim();

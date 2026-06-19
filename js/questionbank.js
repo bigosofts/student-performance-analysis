@@ -121,40 +121,55 @@ window.QuestionBank = {
         const bnIndex1 = this.toBengaliNumber(index);
         const bnIndex2 = this.toBengaliNumber(index + 1);
 
+        let hintText = '';
+        if (q.question && q.question2) {
+            hintText = `${bnIndex1} ও ${bnIndex2}`;
+        } else if (q.question) {
+            hintText = `${bnIndex1}`;
+        } else if (q.question2) {
+            hintText = `${bnIndex2}`;
+        }
+
         /* Passage */
         const passage = `<div class="mcq-passage-container">
-            <div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${bnIndex1} ও ${bnIndex2} নং প্রশ্নের উত্তর দাও</div>
+            <div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${hintText} নং প্রশ্নের উত্তর দাও</div>
             <div class="mcq-passage">${q.passage}</div>
             ${q.passage_image ? `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
         </div>`;
 
         /* Q1 – always point/combo type */
-        let q1 = `<div class="mcq-sub-question" data-sub="1">
-            <div class="mcq-q-text">${bnIndex1}। ${q.question}</div>
-            ${q.question_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt=""/></div>` : ''}
-            ${this._pointBlock(
-                ['option_a','option_b','option_c'], q,
-                ['combo_option_1','combo_option_2','combo_option_3','combo_option_4'], q
-            )}
-        </div>`;
-
-        /* Q2 – may be simple or point */
-        let q2Inner = `<div class="mcq-q-text">${bnIndex2}। ${q.question2}</div>
-            ${q.question2_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question2_image}" alt=""/></div>` : ''}`;
-
-        if (q.q2_type === 'point') {
-            q2Inner += this._pointBlock(
-                ['q2_option_a','q2_option_b','q2_option_c'], q,
-                ['q2_combo_option_1','q2_combo_option_2','q2_combo_option_3','q2_combo_option_4'], q
-            );
-        } else {
-            q2Inner += this._simpleOptions(q,
-                ['q2_option_a','q2_option_b','q2_option_c','q2_option_d'],
-                i => String.fromCharCode(65+i)
-            );
+        let q1 = '';
+        if (q.question) {
+            q1 = `<div class="mcq-sub-question" data-sub="1">
+                <div class="mcq-q-text">${bnIndex1}। ${q.question}</div>
+                ${q.question_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question_image}" alt=""/></div>` : ''}
+                ${this._pointBlock(
+                    ['option_a','option_b','option_c'], q,
+                    ['combo_option_1','combo_option_2','combo_option_3','combo_option_4'], q
+                )}
+            </div>`;
         }
 
-        const q2 = `<div class="mcq-sub-question" data-sub="2">${q2Inner}</div>`;
+        /* Q2 – may be simple or point */
+        let q2 = '';
+        if (q.question2) {
+            let q2Inner = `<div class="mcq-q-text">${bnIndex2}। ${q.question2}</div>
+                ${q.question2_image ? `<div class="mcq-q-img"><img src="/uploads/qbank-images/${q.question2_image}" alt=""/></div>` : ''}`;
+
+            if (q.q2_type === 'point') {
+                q2Inner += this._pointBlock(
+                    ['q2_option_a','q2_option_b','q2_option_c'], q,
+                    ['q2_combo_option_1','q2_combo_option_2','q2_combo_option_3','q2_combo_option_4'], q
+                );
+            } else {
+                q2Inner += this._simpleOptions(q,
+                    ['q2_option_a','q2_option_b','q2_option_c','q2_option_d'],
+                    i => String.fromCharCode(65+i)
+                );
+            }
+
+            q2 = `<div class="mcq-sub-question" data-sub="2">${q2Inner}</div>`;
+        }
 
         return `<div class="mcq-type4-layout">${passage}<div class="mcq-type4-questions">${q1}${q2}</div></div>`;
     },

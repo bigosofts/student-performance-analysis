@@ -397,7 +397,7 @@
           </div>
           <div class="form-group">
             <label>Paper</label>
-            <select id="quizPaper" class="form-control">
+            <select id="quizPaper" class="form-control" onchange="updateQuizTopics()">
               <option value="All">All</option>
               <option value="1st">1st Paper</option>
               <option value="2nd">2nd Paper</option>
@@ -406,7 +406,7 @@
           <div class="form-group">
             <label>Chapter</label>
             <input type="text" id="quizChapter" list="quizChapterList" class="form-control" placeholder="All Chapters"
-              autocomplete="off" />
+              autocomplete="off" oninput="updateQuizTopics()" onchange="updateQuizTopics()" />
             <datalist id="quizChapterList"></datalist>
           </div>
           <div class="form-group">
@@ -555,7 +555,7 @@
         <div class="form-grid">
           <div class="form-group">
             <label>Paper</label>
-            <select id="cqFilterPaper" class="form-control">
+            <select id="cqFilterPaper" class="form-control" onchange="updateCqTopics()">
               <option value="All">All</option>
               <option value="1st">1st Paper</option>
               <option value="2nd">2nd Paper</option>
@@ -564,7 +564,7 @@
           <div class="form-group">
             <label>Chapter</label>
             <input type="text" id="cqFilterChapter" list="cqFilterChapterList" class="form-control"
-              placeholder="All Chapters" autocomplete="off" />
+              placeholder="All Chapters" autocomplete="off" oninput="updateCqTopics()" onchange="updateCqTopics()" />
             <datalist id="cqFilterChapterList"></datalist>
           </div>
           <div class="form-group">
@@ -1004,6 +1004,38 @@
       } catch (e) { console.error("Error fetching topics/chapters", e); }
     }
     fetchTopics();
+
+    async function updateQuizTopics() {
+      const paper = document.getElementById('quizPaper').value;
+      const chapter = document.getElementById('quizChapter').value;
+      let urlParams = new URLSearchParams();
+      if (paper && paper !== 'All') urlParams.append('paper', paper);
+      if (chapter && chapter !== 'All' && chapter !== '') urlParams.append('chapter', chapter);
+      const qs = urlParams.toString() ? '?' + urlParams.toString() : '';
+
+      try {
+        const res = await fetch('/api/mcq/topics' + qs);
+        const topics = await res.json();
+        const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
+        document.getElementById('quizTopicsList').innerHTML = toOptions(topics);
+      } catch(e) { console.error(e); }
+    }
+
+    async function updateCqTopics() {
+      const paper = document.getElementById('cqFilterPaper').value;
+      const chapter = document.getElementById('cqFilterChapter').value;
+      let urlParams = new URLSearchParams();
+      if (paper && paper !== 'All') urlParams.append('paper', paper);
+      if (chapter && chapter !== 'All' && chapter !== '') urlParams.append('chapter', chapter);
+      const qs = urlParams.toString() ? '?' + urlParams.toString() : '';
+
+      try {
+        const res = await fetch('/api/creative/topics' + qs);
+        const topics = await res.json();
+        const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
+        document.getElementById('cqFilterTopicsList').innerHTML = toOptions(topics);
+      } catch(e) { console.error(e); }
+    }
 
     // Table Management Logic
     let currentTableType = '';
