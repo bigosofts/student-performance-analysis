@@ -1151,6 +1151,9 @@ module.exports = function(app, io, uploadsDir) {
         socket.on('qbank-resume-timer', () => {
             socket.broadcast.emit('qbank-resume-timer');
         });
+        socket.on('qbank-sync-question', (data) => {
+            socket.broadcast.emit('qbank-sync-question', data);
+        });
         socket.on('leaderboard-show', (data) => {
             socket.broadcast.emit('leaderboard-show', data);
         });

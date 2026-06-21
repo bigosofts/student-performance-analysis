@@ -430,13 +430,20 @@
         </div>
         <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
           <button class="btn btn-primary" onclick="launchMcqQuiz()">🎮 Launch Quiz on Projector</button>
-          <button class="btn btn-warning" id="mcqPauseBtn" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause
-            Timer</button>
+          <button class="btn btn-warning" id="mcqPauseBtn" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause Timer</button>
           <button class="btn btn-danger" onclick="closeMcqQuiz()">🛑 Close Screen</button>
           <button class="btn btn-success" onclick="exportPdf('mcq')">📥 Download PDF</button>
           <button class="btn btn-info" onclick="exportTxt('mcq')">📄 Download TXT</button>
-          <a href="/api/mcq/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download
-            XLSX</a>
+          <a href="/api/mcq/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download XLSX</a>
+        </div>
+      </div>
+
+      <div class="glass-panel card" id="liveQuizMonitor" style="display: none; border-color: #3b82f6;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <h2 style="color: #3b82f6;">🔴 Live Projector View</h2>
+          <span id="liveQuizCounter" style="color: #94a3b8; font-weight: bold; font-size: 1.2rem;"></span>
+        </div>
+        <div id="liveQuizContent" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
         </div>
       </div>
     </div>
@@ -975,6 +982,42 @@
       if (btn) { btn.innerText = '⏸ Pause Timer'; btn.classList.replace('btn-success', 'btn-warning'); }
       socket.emit('qbank-close-creative');
     }
+
+    // Live Quiz Monitor Socket Handlers
+    socket.on('qbank-sync-question', (data) => {
+      document.getElementById('liveQuizMonitor').style.display = 'block';
+      document.getElementById('liveQuizCounter').innerText = `Question ${data.index + 1} / ${data.total}`;
+      
+      const contentEl = document.getElementById('liveQuizContent');
+      contentEl.innerHTML = QuestionBank.formatMcq(data.question, data.index + 1);
+      
+      // Automatically highlight the correct answer
+      const type = parseInt(data.question.type);
+      if (type === 4) {
+        const q1 = contentEl.querySelector('.mcq-sub-question[data-sub="1"]');
+        if (q1 && data.question.answer) highlightDashboardAnswer(q1, data.question.answer);
+        const q2 = contentEl.querySelector('.mcq-sub-question[data-sub="2"]');
+        if (q2 && data.question.q2_answer) highlightDashboardAnswer(q2, data.question.q2_answer);
+      } else {
+        if (data.question.answer) highlightDashboardAnswer(contentEl, data.question.answer);
+      }
+    });
+    
+    function highlightDashboardAnswer(container, correctAns) {
+      container.querySelectorAll('.mcq-option').forEach(opt => {
+        if (opt.dataset.opt === String(correctAns)) {
+          // highlight with green background
+          opt.style.background = 'rgba(16, 185, 129, 0.3)';
+          opt.style.borderColor = '#10b981';
+          opt.style.color = '#10b981';
+        }
+      });
+    }
+
+    socket.on('qbank-end-quiz', () => {
+      document.getElementById('liveQuizMonitor').style.display = 'none';
+      document.getElementById('liveQuizContent').innerHTML = '';
+    });
 
     // Fetch Topics and Chapters for all datalists
     async function fetchTopics() {
