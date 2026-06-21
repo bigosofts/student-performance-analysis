@@ -281,26 +281,32 @@
     /* ===== QUESTION MAKER ===== */
     .qmaker-layout {
       display: flex;
-      gap: 14px;
+      gap: 20px;
       align-items: flex-start;
+      padding: 10px;
     }
     .qmaker-filter-panel {
-      width: 230px;
+      width: 260px;
       flex-shrink: 0;
       position: sticky;
       top: 20px;
+      padding: 20px;
     }
     .qmaker-browse-panel {
       flex: 1;
       min-width: 0;
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+      padding-right: 10px;
     }
     .qmaker-paper-panel {
-      width: 290px;
+      width: 320px;
       flex-shrink: 0;
       position: sticky;
       top: 20px;
-      max-height: calc(100vh - 60px);
+      max-height: calc(100vh - 100px);
       overflow-y: auto;
+      padding: 20px;
     }
     .qm-type-toggle {
       display: flex;
@@ -1816,7 +1822,8 @@
 
       let passageHtml = '';
       if (type === 3 || type === 4) {
-        passageHtml = `<span class="qm-passage-tag">📖 উদ্দীপকভিত্তিক</span>`;
+        const hintText = (type === 4 && q.question2) ? "নিচের উদ্দীপকটি পড় এবং প্রশ্নের উত্তর দাওঃ" : "নিচের উদ্দীপকটি পড় এবং প্রশ্নের উত্তর দাওঃ";
+        passageHtml = `<span class="qm-passage-tag">📖 ${hintText}</span>`;
         if (q.passage) {
           const short = q.passage.length > 90 ? q.passage.slice(0, 90) + '…' : q.passage;
           passageHtml += `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:5px;padding:3px 8px;background:rgba(255,255,255,0.03);border-radius:5px;line-height:1.4;">${short}</div>`;

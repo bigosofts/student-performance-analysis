@@ -564,46 +564,49 @@ module.exports = function(app, io, uploadsDir) {
             const MARGIN = convertInchesToTwip(0.5);
             const BORDER_NONE = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
             const { college = '', exam = '', subject = '', time = '', marks = '' } = meta;
-            const docChildren = [];
+            const headerChildren = [];
             const answerKey = [];
+            const docSections = [];
 
             const P = (children, opts = {}) => new Paragraph({ children, ...opts });
             const T = (text, opts = {}) => new TextRun({ text: String(text || ''), ...opts });
             const bnNum = (n) => toBengaliNumber(n);
 
-            function addImgRuns(imgFilename, runsArr, maxW = 280) {
-                if (!imgFilename) return;
+            function getImgPara(imgFilename, maxW = 280) {
+                if (!imgFilename) return null;
                 const fullPath = path.join(qbankImagesDir, imgFilename);
-                if (!fs.existsSync(fullPath)) return;
+                if (!fs.existsSync(fullPath)) return null;
                 try {
                     const buf = fs.readFileSync(fullPath);
                     const dim = sizeOf(buf);
                     let w = dim.width, h = dim.height;
                     if (w > maxW) { h = Math.round((maxW / w) * h); w = maxW; }
-                    runsArr.push(new TextRun({ text: '', break: 1 }));
-                    runsArr.push(new ImageRun({ data: buf, transformation: { width: w, height: h } }));
-                    runsArr.push(new TextRun({ text: '', break: 1 }));
-                } catch(e) { console.error('img error:', e.message); }
+                    return new Paragraph({
+                        children: [new ImageRun({ data: buf, transformation: { width: w, height: h } })],
+                        alignment: AlignmentType.CENTER,
+                        spacing: { before: 60, after: 60 }
+                    });
+                } catch(e) { console.error('img error:', e.message); return null; }
             }
 
             // ── HEADER ──
             if (college) {
-                docChildren.push(P([T(college, { bold: true, size: 36 })], {
+                headerChildren.push(P([T(college, { bold: true, size: 36 })], {
                     alignment: AlignmentType.CENTER, spacing: { after: 80 }
                 }));
             }
             if (exam) {
-                docChildren.push(P([T(exam, { size: 26 })], {
+                headerChildren.push(P([T(exam, { size: 26 })], {
                     alignment: AlignmentType.CENTER, spacing: { after: 60 }
                 }));
             }
             if (subject) {
-                docChildren.push(P([T(subject, { size: 26 })], {
+                headerChildren.push(P([T(subject, { size: 26 })], {
                     alignment: AlignmentType.CENTER, spacing: { after: 100 }
                 }));
             }
             if (time || marks) {
-                docChildren.push(new Table({
+                headerChildren.push(new Table({
                     width: { size: 100, type: WidthType.PERCENTAGE },
                     borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE, insideHorizontal: BORDER_NONE, insideVertical: BORDER_NONE },
                     rows: [new TableRow({ children: [
@@ -616,7 +619,7 @@ module.exports = function(app, io, uploadsDir) {
                     ]})]
                 }));
             }
-            docChildren.push(new Paragraph({
+            headerChildren.push(new Paragraph({
                 border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: '334155' } },
                 spacing: { before: 80, after: 160 }
             }));
@@ -627,37 +630,47 @@ module.exports = function(app, io, uploadsDir) {
                 questions.forEach(q => {
                     const blockRuns = [T(`প্রশ্ন ${bnNum(qNum)}।  `, { bold: true, size: 22 })];
                     if (q.passage) blockRuns.push(T(q.passage, { size: 22 }));
-                    addImgRuns(q.passage_image, blockRuns, 320);
-                    docChildren.push(P(blockRuns, { spacing: { before: 80, after: 100 } }));
+                    headerChildren.push(P(blockRuns, { spacing: { before: 80, after: 100 } }));
+                    
+                    const imgPara = getImgPara(q.passage_image, 320);
+                    if (imgPara) headerChildren.push(imgPara);
 
                     [{ label: 'ক', text: q.knowledge }, { label: 'খ', text: q.understanding },
                      { label: 'গ', text: q.application }, { label: 'ঘ', text: q.higher_thinking }
                     ].forEach(sub => {
                         if (sub.text) {
-                            docChildren.push(P([
+                            headerChildren.push(P([
                                 T(`   ${sub.label}) `, { bold: true, size: 22 }),
                                 T(sub.text, { size: 22 })
                             ], { spacing: { after: 80 } }));
                         }
                     });
-                    docChildren.push(P([T('')], { spacing: { after: 80 } }));
+                    headerChildren.push(P([T('')], { spacing: { after: 80 } }));
                     qNum++;
                 });
 
+                docSections.push({
+                    properties: {
+                        page: {
+                            margin: { top: MARGIN, right: MARGIN, bottom: MARGIN, left: MARGIN },
+                            size: { width: convertInchesToTwip(8.27), height: convertInchesToTwip(11.69) }
+                        }
+                    },
+                    children: headerChildren
+                });
+
             } else {
-                // ── MCQ: 2-column ──
+                // ── MCQ: native 2-column sections ──
                 const questionCounts = questions.map(q => {
                     const t = parseInt(q.type) || 1;
                     return (t === 4 && q.question2) ? 2 : 1;
                 });
-                const totalQNums = questionCounts.reduce((a, b) => a + b, 0);
-                const midPoint = Math.ceil(totalQNums / 2);
 
-                const leftQ = [], rightQ = [];
+                const mcqParas = [];
                 let runningCount = 0;
                 questions.forEach((q, i) => {
                     const startNum = runningCount + 1;
-                    (startNum <= midPoint ? leftQ : rightQ).push({ q, startNum });
+                    mcqParas.push(...renderMcqParas({ q, startNum }));
                     runningCount += questionCounts[i];
                 });
 
@@ -671,17 +684,21 @@ module.exports = function(app, io, uploadsDir) {
                     // Passage block (type 3 & 4)
                     if ((qtype === 3 || qtype === 4) && (q.passage || q.passage_image)) {
                         const hint = (qtype === 4 && q.question2) ? `${bnNum(qN)} ও ${bnNum(qN + 1)}` : `${bnNum(qN)}`;
-                        const pRuns = [T(`[উদ্দীপক ${hint}] `, { bold: true, size: SZ, color: '7c3aed' })];
+                        const pRuns = [T(`নিচের উদ্দীপকটি পড় এবং ${hint} নং প্রশ্নের উত্তর দাওঃ\n`, { bold: true, size: SZ })];
                         if (q.passage) pRuns.push(T(q.passage, { size: SZ, italics: true }));
-                        addImgRuns(q.passage_image, pRuns, 200);
                         paras.push(P(pRuns, { spacing: { after: 60 } }));
+                        
+                        const imgPara = getImgPara(q.passage_image, 200);
+                        if (imgPara) paras.push(imgPara);
                     }
 
                     // Q1
                     if (q.question) {
                         const qRuns = [T(`${bnNum(qN)}। `, { bold: true, size: SZ }), T(q.question, { size: SZ })];
-                        addImgRuns(q.question_image, qRuns, 200);
                         paras.push(P(qRuns, { spacing: { after: 50 } }));
+                        
+                        const imgPara = getImgPara(q.question_image, 200);
+                        if (imgPara) paras.push(imgPara);
 
                         if (qtype === 1 || qtype === 3) {
                             const r1 = [], r2 = [];
@@ -714,8 +731,10 @@ module.exports = function(app, io, uploadsDir) {
                             if (qtype === 4 && q.question2) {
                                 qN++;
                                 const q2Runs = [T(`${bnNum(qN)}। `, { bold: true, size: SZ }), T(q.question2, { size: SZ })];
-                                addImgRuns(q.question2_image, q2Runs, 200);
                                 paras.push(P(q2Runs, { spacing: { before: 40, after: 50 } }));
+                                
+                                const imgPara = getImgPara(q.question2_image, 200);
+                                if (imgPara) paras.push(imgPara);
 
                                 if (q.q2_type === 'point') {
                                     if (q.q2_option_a) paras.push(P([T(`   i) ${q.q2_option_a}`, { size: SZ })], { spacing: { after: 20 } }));
@@ -748,44 +767,53 @@ module.exports = function(app, io, uploadsDir) {
                     return paras;
                 }
 
-                const leftParas = leftQ.flatMap(renderMcqParas);
-                const rightParas = rightQ.flatMap(renderMcqParas);
-                if (leftParas.length === 0) leftParas.push(P([T('')]));
-                if (rightParas.length === 0) rightParas.push(P([T('')]));
+                docSections.push({
+                    properties: {
+                        page: {
+                            margin: { top: MARGIN, right: MARGIN, bottom: MARGIN, left: MARGIN },
+                            size: { width: convertInchesToTwip(8.27), height: convertInchesToTwip(11.69) }
+                        }
+                    },
+                    children: headerChildren
+                });
+
+                docSections.push({
+                    properties: {
+                        type: 'continuous',
+                        column: { count: 2, space: convertInchesToTwip(0.3) },
+                        page: {
+                            margin: { top: MARGIN, right: MARGIN, bottom: MARGIN, left: MARGIN },
+                            size: { width: convertInchesToTwip(8.27), height: convertInchesToTwip(11.69) }
+                        }
+                    },
+                    children: mcqParas
+                });
 
                 // Sort answer key by question number
                 answerKey.sort((a, b) => a.num - b.num);
 
-                docChildren.push(new Table({
-                    width: { size: 100, type: WidthType.PERCENTAGE },
-                    borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE, insideHorizontal: BORDER_NONE, insideVertical: BORDER_NONE },
-                    rows: [new TableRow({ children: [
-                        new TableCell({
-                            children: leftParas,
-                            borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: { style: BorderStyle.SINGLE, size: 4, color: 'cccccc' } },
-                            width: { size: 50, type: WidthType.PERCENTAGE },
-                            margins: { right: convertInchesToTwip(0.1) }
-                        }),
-                        new TableCell({
-                            children: rightParas,
-                            borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE },
-                            width: { size: 50, type: WidthType.PERCENTAGE },
-                            margins: { left: convertInchesToTwip(0.1) }
-                        })
-                    ]})]
-                }));
-
                 // ── ANSWER KEY (new page) ──
                 if (answerKey.length > 0) {
-                    docChildren.push(new Paragraph({ children: [T('')], pageBreakBefore: true }));
-                    docChildren.push(P([T('উত্তরমালা', { bold: true, size: 28 })], {
+                    const ansChildren = [];
+                    ansChildren.push(P([T('উত্তরমালা', { bold: true, size: 28 })], {
                         alignment: AlignmentType.CENTER, spacing: { after: 200 }
                     }));
                     const CHUNK = 10;
                     for (let i = 0; i < answerKey.length; i += CHUNK) {
                         const row = answerKey.slice(i, i + CHUNK).map(a => `${a.num}.${a.label}`).join('   ');
-                        docChildren.push(P([T(row, { size: 22 })], { spacing: { after: 80 } }));
+                        ansChildren.push(P([T(row, { size: 22 })], { spacing: { after: 80 } }));
                     }
+
+                    docSections.push({
+                        properties: {
+                            type: 'nextPage',
+                            page: {
+                                margin: { top: MARGIN, right: MARGIN, bottom: MARGIN, left: MARGIN },
+                                size: { width: convertInchesToTwip(8.27), height: convertInchesToTwip(11.69) }
+                            }
+                        },
+                        children: ansChildren
+                    });
                 }
             }
 
@@ -793,15 +821,7 @@ module.exports = function(app, io, uploadsDir) {
             const doc = new Document({
                 creator: 'Question Bank',
                 title: exam || 'Question Paper',
-                sections: [{
-                    properties: {
-                        page: {
-                            margin: { top: MARGIN, right: MARGIN, bottom: MARGIN, left: MARGIN },
-                            size: { width: convertInchesToTwip(8.27), height: convertInchesToTwip(11.69) }
-                        }
-                    },
-                    children: docChildren
-                }]
+                sections: docSections
             });
 
             const buffer = await Packer.toBuffer(doc);
