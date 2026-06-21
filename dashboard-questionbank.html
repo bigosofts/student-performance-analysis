@@ -242,14 +242,17 @@
     .mobile-tab-bar {
       display: none;
       position: fixed;
-      bottom: 0; left: 0; right: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
       background: #1e293b;
       border-top: 1px solid #334155;
       padding: 8px 4px;
       z-index: 200;
       justify-content: space-around;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
     }
+
     .mobile-tab-btn {
       background: transparent;
       border: none;
@@ -265,29 +268,64 @@
       transition: all 0.2s;
       border-radius: 8px;
     }
+
     .mobile-tab-btn.active {
       color: #3b82f6;
-      background: rgba(59,130,246,0.1);
+      background: rgba(59, 130, 246, 0.1);
     }
-    .mobile-tab-btn .tab-icon { font-size: 1.2rem; }
+
+    .mobile-tab-btn .tab-icon {
+      font-size: 1.2rem;
+    }
 
     @media (max-width: 768px) {
-      body { padding-bottom: 80px; }
-      .dashboard-container { padding: 12px; }
-      .mobile-tab-bar { display: flex; }
-      .tabs-container { display: none !important; }
-      .tab-content { display: none !important; }
-      .tab-content.mob-active { display: block !important; }
-      .header h1 { font-size: 1.3rem; }
+      body {
+        padding-bottom: 80px;
+      }
+
+      .dashboard-container {
+        padding: 12px;
+      }
+
+      .mobile-tab-bar {
+        display: flex;
+      }
+
+      .tabs-container {
+        display: none !important;
+      }
+
+      .tab-content {
+        display: none !important;
+      }
+
+      .tab-content.mob-active {
+        display: block !important;
+      }
+
+      .header h1 {
+        font-size: 1.3rem;
+      }
+
       .header {
         align-items: stretch;
         flex-direction: column;
         gap: 12px;
         padding: 16px;
       }
-      .back-btn { width: 100%; }
-      .glass-panel.card { border-radius: 12px; }
-      .glass-panel.card .btn { width: 100%; margin-bottom: 8px; }
+
+      .back-btn {
+        width: 100%;
+      }
+
+      .glass-panel.card {
+        border-radius: 12px;
+      }
+
+      .glass-panel.card .btn {
+        width: 100%;
+        margin-bottom: 8px;
+      }
     }
   </style>
 </head>
@@ -430,20 +468,28 @@
         </div>
         <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
           <button class="btn btn-primary" onclick="launchMcqQuiz()">🎮 Launch Quiz on Projector</button>
-          <button class="btn btn-warning" id="mcqPauseBtn" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause Timer</button>
+          <button class="btn btn-warning" id="mcqPauseBtn" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause
+            Timer</button>
           <button class="btn btn-danger" onclick="closeMcqQuiz()">🛑 Close Screen</button>
           <button class="btn btn-success" onclick="exportPdf('mcq')">📥 Download PDF</button>
           <button class="btn btn-info" onclick="exportTxt('mcq')">📄 Download TXT</button>
-          <a href="/api/mcq/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download XLSX</a>
+          <a href="/api/mcq/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download
+            XLSX</a>
         </div>
       </div>
 
       <div class="glass-panel card" id="liveQuizMonitor" style="display: none; border-color: #3b82f6;">
         <div style="display: flex; justify-content: space-between; align-items: center;">
           <h2 style="color: #3b82f6;">🔴 Live Projector View</h2>
-          <span id="liveQuizCounter" style="color: #94a3b8; font-weight: bold; font-size: 1.2rem;"></span>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <span id="liveQuizCounter" style="color: #94a3b8; font-weight: bold; font-size: 1.2rem;"></span>
+            <button class="btn btn-warning"
+              style="padding: 6px 12px; font-size: 16px; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 6px rgba(0,0,0,0.2);"
+              title="Edit Question" onclick="editCurrentLiveQuestion()">✏️</button>
+          </div>
         </div>
-        <div id="liveQuizContent" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+        <div id="liveQuizContent"
+          style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
         </div>
       </div>
     </div>
@@ -480,7 +526,7 @@
               <input type="text" id="cqH" class="form-control" required />
             </div>
           </div>
-          
+
           <div class="form-grid">
             <div class="form-group">
               <label>ক) জ্ঞানমূলক (উত্তর)</label>
@@ -834,6 +880,13 @@
         return alert('Error: ' + (err.error || 'Failed to write to Excel'));
       }
 
+      const savedResponse = await res.json();
+
+      // If updating a live question, broadcast the change
+      if (editId && typeof currentLiveQuestion !== 'undefined' && currentLiveQuestion && editId === currentLiveQuestion.id) {
+        socket.emit('qbank-live-update-question', savedResponse.record);
+      }
+
       alert('MCQ Saved Successfully!');
       form.reset();
       document.getElementById('mcqBoardYearGroup').style.display = 'none';
@@ -984,13 +1037,19 @@
     }
 
     // Live Quiz Monitor Socket Handlers
+    let currentLiveQuestion = null;
+    let currentLiveQuestionIndex = 0;
+
     socket.on('qbank-sync-question', (data) => {
+      currentLiveQuestion = data.question;
+      currentLiveQuestionIndex = data.index;
+
       document.getElementById('liveQuizMonitor').style.display = 'block';
       document.getElementById('liveQuizCounter').innerText = `Question ${data.index + 1} / ${data.total}`;
-      
+
       const contentEl = document.getElementById('liveQuizContent');
       contentEl.innerHTML = QuestionBank.formatMcq(data.question, data.index + 1);
-      
+
       // Automatically highlight the correct answer
       const type = parseInt(data.question.type);
       if (type === 4) {
@@ -1002,7 +1061,7 @@
         if (data.question.answer) highlightDashboardAnswer(contentEl, data.question.answer);
       }
     });
-    
+
     function highlightDashboardAnswer(container, correctAns) {
       container.querySelectorAll('.mcq-option').forEach(opt => {
         if (opt.dataset.opt === String(correctAns)) {
@@ -1017,7 +1076,66 @@
     socket.on('qbank-end-quiz', () => {
       document.getElementById('liveQuizMonitor').style.display = 'none';
       document.getElementById('liveQuizContent').innerHTML = '';
+      currentLiveQuestion = null;
     });
+
+    function editCurrentLiveQuestion() {
+      if (!currentLiveQuestion) return;
+
+      // Pause timer automatically
+      if (!isTimerPaused) {
+        toggleQuizTimer('mcqPauseBtn');
+      }
+
+      const record = currentLiveQuestion;
+
+      switchTab('mcq');
+      document.getElementById('mcqType').value = record.type || '1';
+      updateMcqForm(); // Redraw dynamic fields
+
+      setTimeout(() => {
+        document.getElementById('mcqForm').setAttribute('data-edit-id', record.id);
+        document.getElementById('mcqSaveBtn').innerText = 'Update MCQ (Live)';
+
+        document.getElementById('mcqPaper').value = record.paper || '1st';
+        let ch = record.chapter || 'Chapter 1';
+        if (!ch.toString().toLowerCase().includes('chapter')) ch = 'Chapter ' + ch;
+        document.getElementById('mcqChapter').value = ch;
+        document.getElementById('mcqTopics').value = record.topics || '';
+
+        const isBoard = String(record.board_question).toUpperCase() === 'TRUE';
+        document.getElementById('mcqBoard').checked = isBoard;
+        document.getElementById('mcqBoardYearGroup').style.display = isBoard ? 'block' : 'none';
+        document.getElementById('mcqBoardYear').value = record.board_year || '';
+        document.getElementById('mcqImportant').checked = String(record.marked_important).toUpperCase() === 'TRUE';
+
+        if (document.getElementById('f_question')) document.getElementById('f_question').value = record.question || '';
+        if (document.getElementById('f_opta')) document.getElementById('f_opta').value = record.option_a || '';
+        if (document.getElementById('f_optb')) document.getElementById('f_optb').value = record.option_b || '';
+        if (document.getElementById('f_optc')) document.getElementById('f_optc').value = record.option_c || '';
+        if (document.getElementById('f_optd')) document.getElementById('f_optd').value = record.option_d || '';
+        if (document.getElementById('f_ans')) document.getElementById('f_ans').value = record.answer || 'A';
+
+        if (document.getElementById('f_c1')) document.getElementById('f_c1').value = record.combo_option_1 || '';
+        if (document.getElementById('f_c2')) document.getElementById('f_c2').value = record.combo_option_2 || '';
+        if (document.getElementById('f_c3')) document.getElementById('f_c3').value = record.combo_option_3 || '';
+        if (document.getElementById('f_c4')) document.getElementById('f_c4').value = record.combo_option_4 || '';
+
+        if (document.getElementById('f_passage')) document.getElementById('f_passage').value = record.passage || '';
+
+        if (document.getElementById('f_q2')) {
+          document.getElementById('f_q2').value = record.question2 || '';
+          document.getElementById('f_q2a').value = record.q2_option_a || '';
+          document.getElementById('f_q2b').value = record.q2_option_b || '';
+          document.getElementById('f_q2c').value = record.q2_option_c || '';
+          document.getElementById('f_q2d').value = record.q2_option_d || '';
+          document.getElementById('f_q2ans').value = record.q2_answer || 'A';
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 100);
+    }
+
 
     // Fetch Topics and Chapters for all datalists
     async function fetchTopics() {
@@ -1061,7 +1179,7 @@
         const topics = await res.json();
         const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
         document.getElementById('quizTopicsList').innerHTML = toOptions(topics);
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error(e); }
     }
 
     async function updateCqTopics() {
@@ -1077,7 +1195,7 @@
         const topics = await res.json();
         const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
         document.getElementById('cqFilterTopicsList').innerHTML = toOptions(topics);
-      } catch(e) { console.error(e); }
+      } catch (e) { console.error(e); }
     }
 
     // Table Management Logic
@@ -1287,7 +1405,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    (function() {
+    (function () {
       if (window.innerWidth <= 768) {
         switchMobileTabQB('mcq');
       }

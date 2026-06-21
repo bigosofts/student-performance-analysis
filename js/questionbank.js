@@ -99,7 +99,7 @@ window.QuestionBank = {
 
         const passage = `<div class="mcq-passage-container">
             <div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${bnIndex} নং প্রশ্নের উত্তর দাও</div>
-            <div class="mcq-passage">${q.passage}</div>
+            ${q.passage ? `<div class="mcq-passage">${q.passage}</div>` : ''}
             ${q.passage_image ? `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
         </div>`;
 
@@ -133,7 +133,7 @@ window.QuestionBank = {
         /* Passage */
         const passage = `<div class="mcq-passage-container">
             <div class="mcq-passage-hint">নিচের উদ্দীপকটি পড়ো এবং ${hintText} নং প্রশ্নের উত্তর দাও</div>
-            <div class="mcq-passage">${q.passage}</div>
+            ${q.passage ? `<div class="mcq-passage">${q.passage}</div>` : ''}
             ${q.passage_image ? `<div class="mcq-passage-img"><img src="/uploads/qbank-images/${q.passage_image}" alt=""/></div>` : ''}
         </div>`;
 

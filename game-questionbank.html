@@ -454,6 +454,25 @@
         });
       }
 
+      socket.on('qbank-live-update-question', (updatedQ) => {
+        if (questions && questions.length > 0 && currentIdx < questions.length) {
+            if (questions[currentIdx].id === updatedQ.id) {
+                questions[currentIdx] = updatedQ;
+                // Just re-render the content area without touching the timer
+                const contentEl = document.getElementById('mcqContent');
+                contentEl.innerHTML = `<div class="mcq-enter">${QuestionBank.formatMcq(updatedQ, currentIdx + 1)}</div>`;
+                
+                // If it's already showing the answer (timer stopped), show it again
+                if (!timerObj && !autoAdvanceTimeoutId) {
+                   showCurrentAnswer();
+                }
+            } else {
+                const idx = questions.findIndex(q => q.id === updatedQ.id);
+                if (idx !== -1) questions[idx] = updatedQ;
+            }
+        }
+      });
+
       /* ── Highlight Answer (uses CSS classes, no inline styles that break animation) ── */
       function highlightAnswer(container, correctAns) {
         if (!correctAns) return;
