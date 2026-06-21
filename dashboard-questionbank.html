@@ -278,6 +278,221 @@
       font-size: 1.2rem;
     }
 
+    /* ===== QUESTION MAKER ===== */
+    .qmaker-layout {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+    .qmaker-filter-panel {
+      width: 230px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 20px;
+    }
+    .qmaker-browse-panel {
+      flex: 1;
+      min-width: 0;
+    }
+    .qmaker-paper-panel {
+      width: 290px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 60px);
+      overflow-y: auto;
+    }
+    .qm-type-toggle {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .qm-type-btn {
+      flex: 1;
+      padding: 8px 10px;
+      border: 1.5px solid rgba(148,163,184,0.2);
+      border-radius: 8px;
+      background: transparent;
+      color: rgba(255,255,255,0.55);
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 700;
+      transition: all 0.18s;
+    }
+    .qm-type-btn.active {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-color: transparent;
+      color: white;
+    }
+    .qm-browse-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .qm-card {
+      background: rgba(255,255,255,0.04);
+      border: 1.5px solid rgba(148,163,184,0.12);
+      border-radius: 10px;
+      padding: 13px 15px;
+      cursor: pointer;
+      transition: all 0.18s;
+      position: relative;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+    .qm-card:hover {
+      border-color: rgba(96,165,250,0.45);
+      background: rgba(96,165,250,0.05);
+      transform: translateY(-1px);
+    }
+    .qm-card.qm-selected {
+      border-color: #22c55e;
+      background: rgba(34,197,94,0.07);
+    }
+    .qm-sel-badge {
+      display: none;
+      position: absolute;
+      top: 9px;
+      right: 9px;
+      background: #22c55e;
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
+    .qm-card.qm-selected .qm-sel-badge { display: inline-block; }
+    .qm-passage-tag {
+      font-size: 10px;
+      color: #f59e0b;
+      font-weight: 700;
+      margin-bottom: 5px;
+      display: inline-block;
+      background: rgba(245,158,11,0.12);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    .qm-q-text {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.92);
+      margin-bottom: 7px;
+      line-height: 1.5;
+    }
+    .qm-opts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3px 10px;
+    }
+    .qm-opt {
+      font-size: 12px;
+      color: rgba(255,255,255,0.58);
+      padding: 2px 0;
+    }
+    .qm-opt.ans-ok { color: #22c55e; font-weight: 700; }
+    .qm-sub-q {
+      font-size: 12px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 3px;
+      padding-left: 10px;
+    }
+    .qm-paper-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .qm-count-badge {
+      background: rgba(99,102,241,0.18);
+      border: 1px solid rgba(99,102,241,0.35);
+      color: #a5b4fc;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 20px;
+    }
+    .qm-selected-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      margin-bottom: 7px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .qm-selected-list {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .qm-sel-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 7px;
+      background: rgba(255,255,255,0.04);
+      border-radius: 7px;
+      padding: 6px 9px;
+    }
+    .qm-sel-num {
+      color: #60a5fa;
+      font-weight: 800;
+      font-size: 12px;
+      flex-shrink: 0;
+      min-width: 20px;
+    }
+    .qm-sel-text {
+      flex: 1;
+      font-size: 11.5px;
+      color: rgba(255,255,255,0.72);
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .qm-sel-rm {
+      background: none;
+      border: none;
+      color: rgba(255,100,100,0.65);
+      cursor: pointer;
+      font-size: 14px;
+      padding: 0;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .qm-sel-rm:hover { color: #f87171; }
+    .qm-fab {
+      display: none;
+      position: fixed;
+      bottom: 80px;
+      right: 16px;
+      z-index: 600;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      font-weight: 800;
+      font-size: 13px;
+      padding: 13px 20px;
+      border-radius: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+      cursor: pointer;
+      border: none;
+      align-items: center;
+      gap: 7px;
+      animation: popIn 0.25s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.8); opacity:0; }
+      to   { transform: scale(1);   opacity:1; }
+    }
+    /* Mobile */
+    @media (max-width: 900px) {
+      .qmaker-layout { flex-direction: column; }
+      .qmaker-filter-panel, .qmaker-paper-panel {
+        width: 100%; position: static; max-height: none;
+      }
+      .qm-fab { display: flex !important; }
+    }
+
     @media (max-width: 768px) {
       body {
         padding-bottom: 80px;
@@ -340,6 +555,7 @@
     <div class="tabs-container">
       <button class="tab-btn active" onclick="switchTab('mcq')">MCQ Bank</button>
       <button class="tab-btn" onclick="switchTab('cq')">Creative Question Bank</button>
+      <button class="tab-btn" onclick="switchTab('qmaker')">📄 Question Maker</button>
     </div>
 
     <!-- MCQ TAB -->
@@ -466,15 +682,16 @@
             <input type="checkbox" id="quizImportant" /> <label style="margin:0">Important Only</label>
           </div>
         </div>
-        <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
-          <button class="btn btn-primary" onclick="launchMcqQuiz()">🎮 Launch Quiz on Projector</button>
-          <button class="btn btn-warning" id="mcqPauseBtn" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause
-            Timer</button>
-          <button class="btn btn-danger" onclick="closeMcqQuiz()">🛑 Close Screen</button>
-          <button class="btn btn-success" onclick="exportPdf('mcq')">📥 Download PDF</button>
-          <button class="btn btn-info" onclick="exportTxt('mcq')">📄 Download TXT</button>
-          <a href="/api/mcq/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download
-            XLSX</a>
+        <div style="margin-top: 15px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-primary" onclick="launchMcqQuiz()">🎮 Launch Quiz on Projector</button>
+            <button class="btn btn-danger" onclick="closeMcqQuiz()">🛑 Close Screen</button>
+            <button class="btn btn-success" onclick="exportPdf('mcq')">📥 Download PDF</button>
+            <button class="btn btn-info" onclick="exportTxt('mcq')">📄 Download TXT</button>
+            <button class="btn" style="background:#2563eb;" onclick="exportDocx('mcq')">📝 Download DOCX</button>
+            <button class="btn" style="background:#8b5cf6;" onclick="window.location.href='/api/mcq/download-xlsx'">📊 Download XLSX</button>
+          </div>
+          <button class="btn btn-warning" id="mcqPauseBtn" style="width: 100%;" onclick="toggleQuizTimer('mcqPauseBtn')">⏸ Pause Timer</button>
         </div>
       </div>
 
@@ -638,18 +855,116 @@
             <input type="checkbox" id="cqFilterShowAnswer" /> <label style="margin:0">Show Answer</label>
           </div>
         </div>
-        <div style="margin-top: 15px; display:flex; flex-wrap:wrap; gap:8px;">
-          <button class="btn btn-primary" onclick="showCqOnProjector()">📽️ Show on Projector</button>
-          <button class="btn btn-warning" id="cqPauseBtn" onclick="toggleQuizTimer('cqPauseBtn')">⏸ Pause Timer</button>
-          <button class="btn btn-danger" onclick="closeCqOnProjector()">❌ Close Display</button>
-          <button class="btn btn-success" onclick="exportPdf('creative')">📥 Download PDF</button>
-          <button class="btn btn-info" onclick="exportTxt('creative')">📄 Download TXT</button>
-          <a href="/api/creative/download-xlsx" class="btn" style="background:#7c3aed;text-decoration:none;">📊 Download
-            XLSX</a>
+        <div style="margin-top: 15px; display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn btn-primary" onclick="showCqOnProjector()">📽️ Show on Projector</button>
+            <button class="btn btn-danger" onclick="closeCqOnProjector()">❌ Close Display</button>
+            <button class="btn btn-success" onclick="exportPdf('creative')">📥 Download PDF</button>
+            <button class="btn btn-info" onclick="exportTxt('creative')">📄 Download TXT</button>
+            <button class="btn" style="background:#2563eb;" onclick="exportDocx('creative')">📝 Download DOCX</button>
+            <button class="btn" style="background:#8b5cf6;" onclick="window.location.href='/api/creative/download-xlsx'">📊 Download XLSX</button>
+          </div>
+          <button class="btn btn-warning" id="cqPauseBtn" style="width: 100%;" onclick="toggleQuizTimer('cqPauseBtn')">⏸ Pause Timer</button>
         </div>
       </div>
     </div>
 
+  </div>
+
+  <!-- ===== QUESTION MAKER TAB ===== -->
+  <div id="tab-qmaker" class="tab-content">
+
+    <!-- Floating Action Button (mobile) -->
+    <button class="qm-fab" id="qmFab" onclick="scrollToQmPaper()">📋 <span id="qmFabCount">0</span> selected →</button>
+
+    <div class="qmaker-layout">
+
+      <!-- LEFT: Filters -->
+      <div class="qmaker-filter-panel glass-panel card">
+        <h3 style="margin:0 0 14px;">🔍 Filter</h3>
+        <div class="qm-type-toggle">
+          <button class="qm-type-btn active" id="qmBtnMcq" onclick="setQmType('mcq')">📝 MCQ</button>
+          <button class="qm-type-btn" id="qmBtnCq" onclick="setQmType('cq')">✍️ CQ</button>
+        </div>
+        <div class="form-group">
+          <label>Paper</label>
+          <select id="qmPaper" class="form-control" onchange="qmLoadChapters()">
+            <option value="All">All Papers</option>
+            <option value="1st">1st Paper</option>
+            <option value="2nd">2nd Paper</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Chapter</label>
+          <input type="text" id="qmChapter" list="qmChapterList" class="form-control" placeholder="All Chapters" oninput="qmLoadTopics()">
+          <datalist id="qmChapterList"></datalist>
+        </div>
+        <div class="form-group">
+          <label>Topics</label>
+          <input type="text" id="qmTopics" list="qmTopicList" class="form-control" placeholder="All Topics">
+          <datalist id="qmTopicList"></datalist>
+        </div>
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+          <input type="checkbox" id="qmBoard"> <label style="margin:0">Board Only</label>
+        </div>
+        <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;">
+          <input type="checkbox" id="qmImportant"> <label style="margin:0">Important Only</label>
+        </div>
+        <button class="btn btn-primary" style="width:100%;margin-top:10px;" onclick="qmLoad()">🔍 Load Questions</button>
+      </div>
+
+      <!-- MIDDLE: Question Cards -->
+      <div class="qmaker-browse-panel">
+        <div class="qm-browse-header">
+          <span id="qmBrowseInfo" style="color:rgba(255,255,255,0.45);font-size:12px;">Load questions to begin</span>
+          <button class="btn" style="background:rgba(255,255,255,0.08);padding:5px 12px;font-size:12px;" onclick="qmSelectAll()">Select All</button>
+        </div>
+        <div id="qmList"></div>
+      </div>
+
+      <!-- RIGHT: Paper Builder -->
+      <div class="qmaker-paper-panel glass-panel card" id="qmPaperPanel">
+        <div class="qm-paper-header">
+          <h3 style="margin:0;font-size:15px;">📄 Question Paper</h3>
+          <span class="qm-count-badge" id="qmCountBadge">0 selected</span>
+        </div>
+
+        <div class="form-group" style="margin-top:14px;">
+          <label>College Name</label>
+          <input type="text" id="qmCollege" class="form-control" placeholder="e.g. Dhaka College">
+        </div>
+        <div class="form-group">
+          <label>Exam Name</label>
+          <input type="text" id="qmExam" class="form-control" placeholder="e.g. Half Yearly 2025">
+        </div>
+        <div class="form-group">
+          <label>Subject</label>
+          <input type="text" id="qmSubject" class="form-control" placeholder="e.g. জীববিজ্ঞান">
+        </div>
+        <div style="display:flex;gap:10px;">
+          <div class="form-group" style="flex:1;">
+            <label>সময়</label>
+            <input type="text" id="qmTime" class="form-control" placeholder="৩ ঘণ্টা">
+          </div>
+          <div class="form-group" style="flex:1;">
+            <label>পূর্ণমান</label>
+            <input type="text" id="qmMarks" class="form-control" placeholder="৭৫">
+          </div>
+        </div>
+
+        <div class="qm-selected-header">
+          <span style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.75);">Selected Questions</span>
+          <button class="btn" style="background:rgba(239,68,68,0.12);color:#f87171;padding:3px 9px;font-size:11px;" onclick="qmClearAll()">Clear All</button>
+        </div>
+        <div class="qm-selected-list" id="qmSelList">
+          <p style="color:rgba(255,255,255,0.25);font-size:12px;text-align:center;padding:16px 0;">No questions selected yet</p>
+        </div>
+
+        <button class="btn btn-primary" id="qmDownloadBtn" style="width:100%;margin-top:12px;padding:13px;font-size:14px;" onclick="qmDownload()">
+          📝 Download Question Paper DOCX
+        </button>
+      </div>
+    </div>
   </div>
 
   <!-- Mobile Tab Bar -->
@@ -661,6 +976,10 @@
     <button class="mobile-tab-btn" data-tab="cq" onclick="switchMobileTabQB('cq')">
       <span class="tab-icon">✍️</span>
       CQ Bank
+    </button>
+    <button class="mobile-tab-btn" data-tab="qmaker" onclick="switchMobileTabQB('qmaker')">
+      <span class="tab-icon">📄</span>
+      Q. Maker
     </button>
   </nav>
 
@@ -977,6 +1296,12 @@
       let prefix = type === 'mcq' ? 'quiz' : 'cqFilter';
       const qs = buildQueryString(prefix);
       window.open(`/api/${type}/export-txt${qs}`, '_blank');
+    }
+
+    function exportDocx(type) {
+      let prefix = type === 'mcq' ? 'quiz' : 'cqFilter';
+      const qs = buildQueryString(prefix);
+      window.open(`/api/${type}/export-docx${qs}`, '_blank');
     }
 
     function launchMcqQuiz() {
@@ -1410,6 +1735,239 @@
         switchMobileTabQB('mcq');
       }
     })();
+    // ===== QUESTION MAKER =====
+    let qmType = 'mcq';
+    let qmQuestions = [];
+    let qmSelected = []; // ordered array of IDs
+
+    function setQmType(t) {
+      qmType = t;
+      document.getElementById('qmBtnMcq').classList.toggle('active', t === 'mcq');
+      document.getElementById('qmBtnCq').classList.toggle('active', t === 'cq');
+      qmQuestions = [];
+      qmSelected = [];
+      document.getElementById('qmList').innerHTML = '';
+      document.getElementById('qmBrowseInfo').textContent = 'Load questions to begin';
+      qmRenderSelected();
+      qmLoadChapters();
+    }
+
+    async function qmLoadChapters() {
+      const ep = qmType === 'mcq' ? 'mcq' : 'creative';
+      try {
+        const chaps = await fetch(`/api/${ep}/chapters`).then(r => r.json());
+        document.getElementById('qmChapterList').innerHTML = chaps.map(c => `<option value="${c}">`).join('');
+      } catch(e) {}
+      qmLoadTopics();
+    }
+
+    async function qmLoadTopics() {
+      const ep = qmType === 'mcq' ? 'mcq' : 'creative';
+      const paper = document.getElementById('qmPaper').value;
+      const chapter = document.getElementById('qmChapter').value;
+      try {
+        let url = `/api/${ep}/topics?paper=${paper}`;
+        if (chapter) url += `&chapter=${encodeURIComponent(chapter)}`;
+        const topics = await fetch(url).then(r => r.json());
+        document.getElementById('qmTopicList').innerHTML = topics.map(t => `<option value="${t}">`).join('');
+      } catch(e) {}
+    }
+
+    async function qmLoad() {
+      const ep = qmType === 'mcq' ? 'mcq' : 'creative';
+      const paper = document.getElementById('qmPaper').value;
+      const chapter = document.getElementById('qmChapter').value;
+      const topics = document.getElementById('qmTopics').value;
+      const board = document.getElementById('qmBoard').checked;
+      const imp = document.getElementById('qmImportant').checked;
+
+      let url = `/api/${ep}?paper=${paper}`;
+      if (chapter) url += `&chapter=${encodeURIComponent(chapter)}`;
+      if (topics) url += `&topics=${encodeURIComponent(topics)}`;
+      if (board) url += '&boardOnly=true';
+      if (imp) url += '&importantOnly=true';
+
+      const list = document.getElementById('qmList');
+      list.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.4);padding:30px 0;">⏳ Loading...</p>';
+
+      try {
+        qmQuestions = await fetch(url).then(r => r.json());
+        document.getElementById('qmBrowseInfo').textContent = `${qmQuestions.length} questions loaded`;
+        qmRenderCards();
+      } catch(e) {
+        list.innerHTML = '<p style="text-align:center;color:#f87171;padding:30px 0;">Failed to load questions</p>';
+      }
+    }
+
+    function qmRenderCards() {
+      const list = document.getElementById('qmList');
+      if (!qmQuestions.length) {
+        list.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.3);padding:30px 0;">No questions found</p>';
+        return;
+      }
+      list.innerHTML = qmQuestions.map(q => qmType === 'mcq' ? qmMcqCard(q) : qmCqCard(q)).join('');
+    }
+
+    function qmMcqCard(q) {
+      const type = parseInt(q.type) || 1;
+      const selIdx = qmSelected.indexOf(q.id);
+      const isSel = selIdx !== -1;
+      const badge = isSel ? `<span class="qm-sel-badge">#${selIdx + 1}</span>` : `<span class="qm-sel-badge"></span>`;
+
+      let passageHtml = '';
+      if (type === 3 || type === 4) {
+        passageHtml = `<span class="qm-passage-tag">📖 উদ্দীপকভিত্তিক</span>`;
+        if (q.passage) {
+          const short = q.passage.length > 90 ? q.passage.slice(0, 90) + '…' : q.passage;
+          passageHtml += `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:5px;padding:3px 8px;background:rgba(255,255,255,0.03);border-radius:5px;line-height:1.4;">${short}</div>`;
+        }
+        if (q.passage_image) passageHtml += `<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:4px;">🖼 Image attached</div>`;
+      }
+
+      let optsHtml = '';
+      if (type === 1 || type === 3) {
+        const ansIdx = {A:0,B:1,C:2,D:3}[String(q.answer||'').toUpperCase()];
+        const opts = [q.option_a, q.option_b, q.option_c, q.option_d];
+        const labels = ['ক','খ','গ','ঘ'];
+        optsHtml = `<div class="qm-opts-grid">${opts.map((o,i) => o ? `<div class="qm-opt${i===ansIdx?' ans-ok':''}">${labels[i]}) ${o}</div>` : '').join('')}</div>`;
+      } else if (type === 2 || type === 4) {
+        const ansIdx = parseInt(q.answer) - 1;
+        let pts = '';
+        if (q.option_a) pts += `i) ${q.option_a}  `;
+        if (q.option_b) pts += `ii) ${q.option_b}  `;
+        if (q.option_c) pts += `iii) ${q.option_c}`;
+        optsHtml = `<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:4px;">${pts}</div>`;
+        const combos = [q.combo_option_1, q.combo_option_2, q.combo_option_3, q.combo_option_4];
+        const labels = ['ক','খ','গ','ঘ'];
+        optsHtml += `<div class="qm-opts-grid">${combos.map((c,i) => c ? `<div class="qm-opt${i===ansIdx?' ans-ok':''}">${labels[i]}) ${c}</div>` : '').join('')}</div>`;
+        if (type === 4 && q.question2) {
+          optsHtml += `<div class="qm-q-text" style="margin-top:9px;font-size:12.5px;color:rgba(255,255,255,0.75);">Q2: ${q.question2}</div>`;
+        }
+      }
+
+      return `<div class="qm-card${isSel?' qm-selected':''}" onclick="qmToggle('${q.id}')" data-id="${q.id}">
+        ${badge}
+        ${passageHtml}
+        <div class="qm-q-text">${q.question || '(No question text)'}</div>
+        ${optsHtml}
+      </div>`;
+    }
+
+    function qmCqCard(q) {
+      const selIdx = qmSelected.indexOf(q.id);
+      const isSel = selIdx !== -1;
+      const badge = isSel ? `<span class="qm-sel-badge">#${selIdx + 1}</span>` : `<span class="qm-sel-badge"></span>`;
+      const short = q.passage ? (q.passage.length > 100 ? q.passage.slice(0,100)+'…' : q.passage) : '(No passage)';
+      return `<div class="qm-card${isSel?' qm-selected':''}" onclick="qmToggle('${q.id}')" data-id="${q.id}">
+        ${badge}
+        <div class="qm-q-text">${short}</div>
+        ${q.passage_image ? `<div style="font-size:11px;color:rgba(255,255,255,0.3);">🖼 Image attached</div>` : ''}
+        ${q.knowledge ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">ক)</span> ${q.knowledge}</div>` : ''}
+        ${q.understanding ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">খ)</span> ${q.understanding}</div>` : ''}
+        ${q.application ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">গ)</span> ${q.application}</div>` : ''}
+        ${q.higher_thinking ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">ঘ)</span> ${q.higher_thinking}</div>` : ''}
+      </div>`;
+    }
+
+    function qmToggle(id) {
+      const idx = qmSelected.indexOf(id);
+      if (idx === -1) { qmSelected.push(id); }
+      else { qmSelected.splice(idx, 1); }
+      // Re-render all cards to update badge numbers
+      qmRenderCards();
+      qmRenderSelected();
+      qmUpdateFab();
+    }
+
+    function qmSelectAll() {
+      qmSelected = qmQuestions.map(q => q.id);
+      qmRenderCards();
+      qmRenderSelected();
+      qmUpdateFab();
+    }
+
+    function qmClearAll() {
+      qmSelected = [];
+      qmRenderCards();
+      qmRenderSelected();
+      qmUpdateFab();
+    }
+
+    function qmRemoveItem(id) {
+      qmSelected = qmSelected.filter(x => x !== id);
+      qmRenderCards();
+      qmRenderSelected();
+      qmUpdateFab();
+    }
+
+    function qmRenderSelected() {
+      const count = qmSelected.length;
+      document.getElementById('qmCountBadge').textContent = `${count} selected`;
+      const listEl = document.getElementById('qmSelList');
+      if (!count) {
+        listEl.innerHTML = '<p style="color:rgba(255,255,255,0.25);font-size:12px;text-align:center;padding:16px 0;">No questions selected yet</p>';
+        return;
+      }
+      const qMap = {};
+      qmQuestions.forEach(q => qMap[q.id] = q);
+      listEl.innerHTML = qmSelected.map((id, i) => {
+        const q = qMap[id];
+        if (!q) return '';
+        const text = qmType === 'mcq'
+          ? (q.question || '(MCQ)').slice(0, 65) + (q.question?.length > 65 ? '…' : '')
+          : (q.passage || '(CQ)').slice(0, 65) + ((q.passage?.length > 65) ? '…' : '');
+        return `<div class="qm-sel-item">
+          <span class="qm-sel-num">${i+1}.</span>
+          <span class="qm-sel-text">${text}</span>
+          <button class="qm-sel-rm" onclick="event.stopPropagation();qmRemoveItem('${id}')" title="Remove">✕</button>
+        </div>`;
+      }).join('');
+    }
+
+    function qmUpdateFab() {
+      const fab = document.getElementById('qmFab');
+      const count = qmSelected.length;
+      document.getElementById('qmFabCount').textContent = count;
+      fab.style.display = count > 0 ? 'flex' : 'none';
+    }
+
+    function scrollToQmPaper() {
+      document.getElementById('qmPaperPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    async function qmDownload() {
+      if (!qmSelected.length) return alert('Please select at least one question.');
+      const meta = {
+        college: document.getElementById('qmCollege').value.trim(),
+        exam: document.getElementById('qmExam').value.trim(),
+        subject: document.getElementById('qmSubject').value.trim(),
+        time: document.getElementById('qmTime').value.trim(),
+        marks: document.getElementById('qmMarks').value.trim()
+      };
+      const btn = document.getElementById('qmDownloadBtn');
+      btn.textContent = '⏳ Generating DOCX...';
+      btn.disabled = true;
+      try {
+        const resp = await fetch('/api/qmaker/generate-docx', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ type: qmType, ids: qmSelected, meta })
+        });
+        if (!resp.ok) { const e = await resp.json(); throw new Error(e.error || 'Failed'); }
+        const blob = await resp.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = (meta.exam || 'question-paper').replace(/[^\w\u0980-\u09FF _-]/g, '_') + '.docx';
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch(e) {
+        alert('Error: ' + e.message);
+      } finally {
+        btn.textContent = '📝 Download Question Paper DOCX';
+        btn.disabled = false;
+      }
+    }
   </script>
   <script src="js/wake-lock.js"></script>
 </body>

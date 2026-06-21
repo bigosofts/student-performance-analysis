@@ -3,6 +3,8 @@ const path = require('path');
 const multer = require('multer');
 const XLSX = require('xlsx');
 const PDFDocument = require('pdfkit');
+const { imageSize: sizeOf } = require('image-size');
+const { Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType, BorderStyle, Table, TableRow, TableCell, WidthType, ShadingType, convertInchesToTwip, ImageRun } = require('docx');
 
 module.exports = function(app, io, uploadsDir) {
     const qbankImagesDir = path.join(uploadsDir, 'qbank-images');
@@ -508,6 +510,312 @@ module.exports = function(app, io, uploadsDir) {
         generateTXT(req, res, data, 'Creative Questions', false, showAnswer === 'true');
     });
 
+    app.get('/api/mcq/export-docx', async (req, res) => {
+        let data = readExcel(mcqFile);
+        const { paper, chapter, boardOnly, importantOnly, amount, topics } = req.query;
+        if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
+        if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
+        if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
+        if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
+        
+        data.sort(() => 0.5 - Math.random());
+        if (amount && amount !== 'All') {
+            const limit = parseInt(amount);
+            if (!isNaN(limit)) data = data.slice(0, limit);
+        }
+        await generateDOCX(res, data, 'MCQ Questions', true);
+    });
+
+    app.get('/api/creative/export-docx', async (req, res) => {
+        let data = readExcel(creativeFile);
+        const { paper, chapter, boardOnly, importantOnly, amount, topics, showAnswer } = req.query;
+        if (paper && paper !== 'All') data = data.filter(d => d.paper === paper);
+        if (chapter && chapter !== 'All') data = data.filter(d => String(d.chapter) === chapter);
+        if (boardOnly === 'true') data = data.filter(d => String(d.board_question).toUpperCase() === 'TRUE');
+        if (importantOnly === 'true') data = data.filter(d => String(d.marked_important).toUpperCase() === 'TRUE');
+        if (topics && topics !== 'All') data = data.filter(d => d.topics && String(d.topics).toLowerCase().includes(topics.toLowerCase()));
+        
+        data.sort(() => 0.5 - Math.random());
+        if (amount && amount !== 'All') {
+            const limit = parseInt(amount);
+            if (!isNaN(limit)) data = data.slice(0, limit);
+        }
+        await generateDOCX(res, data, 'Creative Questions', false, showAnswer === 'true');
+    });
+
+    // ==== Question Maker ====
+    app.post('/api/qmaker/generate-docx', async (req, res) => {
+        const { type, ids, meta } = req.body;
+        if (!ids || !Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({ error: 'No question IDs provided' });
+        }
+        const sourceFile = type === 'cq' ? creativeFile : mcqFile;
+        const allData = readExcel(sourceFile);
+        const dataMap = {};
+        allData.forEach(q => { if (q.id) dataMap[q.id] = q; });
+        const questions = ids.map(id => dataMap[id]).filter(Boolean);
+        if (questions.length === 0) return res.status(404).json({ error: 'No matching questions found' });
+        await generateQuestionPaperDocx(res, questions, type || 'mcq', meta || {});
+    });
+
+    async function generateQuestionPaperDocx(res, questions, type, meta) {
+        try {
+            const MARGIN = convertInchesToTwip(0.5);
+            const BORDER_NONE = { style: BorderStyle.NONE, size: 0, color: 'FFFFFF' };
+            const { college = '', exam = '', subject = '', time = '', marks = '' } = meta;
+            const docChildren = [];
+            const answerKey = [];
+
+            const P = (children, opts = {}) => new Paragraph({ children, ...opts });
+            const T = (text, opts = {}) => new TextRun({ text: String(text || ''), ...opts });
+            const bnNum = (n) => toBengaliNumber(n);
+
+            function addImgRuns(imgFilename, runsArr, maxW = 280) {
+                if (!imgFilename) return;
+                const fullPath = path.join(qbankImagesDir, imgFilename);
+                if (!fs.existsSync(fullPath)) return;
+                try {
+                    const buf = fs.readFileSync(fullPath);
+                    const dim = sizeOf(buf);
+                    let w = dim.width, h = dim.height;
+                    if (w > maxW) { h = Math.round((maxW / w) * h); w = maxW; }
+                    runsArr.push(new TextRun({ text: '', break: 1 }));
+                    runsArr.push(new ImageRun({ data: buf, transformation: { width: w, height: h } }));
+                    runsArr.push(new TextRun({ text: '', break: 1 }));
+                } catch(e) { console.error('img error:', e.message); }
+            }
+
+            // ── HEADER ──
+            if (college) {
+                docChildren.push(P([T(college, { bold: true, size: 36 })], {
+                    alignment: AlignmentType.CENTER, spacing: { after: 80 }
+                }));
+            }
+            if (exam) {
+                docChildren.push(P([T(exam, { size: 26 })], {
+                    alignment: AlignmentType.CENTER, spacing: { after: 60 }
+                }));
+            }
+            if (subject) {
+                docChildren.push(P([T(subject, { size: 26 })], {
+                    alignment: AlignmentType.CENTER, spacing: { after: 100 }
+                }));
+            }
+            if (time || marks) {
+                docChildren.push(new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE, insideHorizontal: BORDER_NONE, insideVertical: BORDER_NONE },
+                    rows: [new TableRow({ children: [
+                        new TableCell({ children: [P([T(`সময়ঃ ${time}`, { size: 22 })], { alignment: AlignmentType.LEFT })],
+                            borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE },
+                            width: { size: 50, type: WidthType.PERCENTAGE } }),
+                        new TableCell({ children: [P([T(`পূর্ণমানঃ ${marks}`, { size: 22 })], { alignment: AlignmentType.RIGHT })],
+                            borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE },
+                            width: { size: 50, type: WidthType.PERCENTAGE } })
+                    ]})]
+                }));
+            }
+            docChildren.push(new Paragraph({
+                border: { bottom: { style: BorderStyle.SINGLE, size: 8, color: '334155' } },
+                spacing: { before: 80, after: 160 }
+            }));
+
+            // ── CQ: single column ──
+            if (type === 'cq') {
+                let qNum = 1;
+                questions.forEach(q => {
+                    const blockRuns = [T(`প্রশ্ন ${bnNum(qNum)}।  `, { bold: true, size: 22 })];
+                    if (q.passage) blockRuns.push(T(q.passage, { size: 22 }));
+                    addImgRuns(q.passage_image, blockRuns, 320);
+                    docChildren.push(P(blockRuns, { spacing: { before: 80, after: 100 } }));
+
+                    [{ label: 'ক', text: q.knowledge }, { label: 'খ', text: q.understanding },
+                     { label: 'গ', text: q.application }, { label: 'ঘ', text: q.higher_thinking }
+                    ].forEach(sub => {
+                        if (sub.text) {
+                            docChildren.push(P([
+                                T(`   ${sub.label}) `, { bold: true, size: 22 }),
+                                T(sub.text, { size: 22 })
+                            ], { spacing: { after: 80 } }));
+                        }
+                    });
+                    docChildren.push(P([T('')], { spacing: { after: 80 } }));
+                    qNum++;
+                });
+
+            } else {
+                // ── MCQ: 2-column ──
+                const questionCounts = questions.map(q => {
+                    const t = parseInt(q.type) || 1;
+                    return (t === 4 && q.question2) ? 2 : 1;
+                });
+                const totalQNums = questionCounts.reduce((a, b) => a + b, 0);
+                const midPoint = Math.ceil(totalQNums / 2);
+
+                const leftQ = [], rightQ = [];
+                let runningCount = 0;
+                questions.forEach((q, i) => {
+                    const startNum = runningCount + 1;
+                    (startNum <= midPoint ? leftQ : rightQ).push({ q, startNum });
+                    runningCount += questionCounts[i];
+                });
+
+                function renderMcqParas(qObj) {
+                    const { q, startNum } = qObj;
+                    const qtype = parseInt(q.type) || 1;
+                    const paras = [];
+                    let qN = startNum;
+                    const SZ = 20; // 10pt
+
+                    // Passage block (type 3 & 4)
+                    if ((qtype === 3 || qtype === 4) && (q.passage || q.passage_image)) {
+                        const hint = (qtype === 4 && q.question2) ? `${bnNum(qN)} ও ${bnNum(qN + 1)}` : `${bnNum(qN)}`;
+                        const pRuns = [T(`[উদ্দীপক ${hint}] `, { bold: true, size: SZ, color: '7c3aed' })];
+                        if (q.passage) pRuns.push(T(q.passage, { size: SZ, italics: true }));
+                        addImgRuns(q.passage_image, pRuns, 200);
+                        paras.push(P(pRuns, { spacing: { after: 60 } }));
+                    }
+
+                    // Q1
+                    if (q.question) {
+                        const qRuns = [T(`${bnNum(qN)}। `, { bold: true, size: SZ }), T(q.question, { size: SZ })];
+                        addImgRuns(q.question_image, qRuns, 200);
+                        paras.push(P(qRuns, { spacing: { after: 50 } }));
+
+                        if (qtype === 1 || qtype === 3) {
+                            const r1 = [], r2 = [];
+                            if (q.option_a) r1.push(`ক) ${q.option_a}`);
+                            if (q.option_b) r1.push(`খ) ${q.option_b}`);
+                            if (q.option_c) r2.push(`গ) ${q.option_c}`);
+                            if (q.option_d) r2.push(`ঘ) ${q.option_d}`);
+                            if (r1.length) paras.push(P([T('   ' + r1.join('   '), { size: SZ })], { spacing: { after: 30 } }));
+                            if (r2.length) paras.push(P([T('   ' + r2.join('   '), { size: SZ })], { spacing: { after: 80 } }));
+                            const ans = String(q.answer || '').toUpperCase();
+                            answerKey.push({ num: qN, label: ans });
+
+                        } else if (qtype === 2 || qtype === 4) {
+                            if (q.option_a) paras.push(P([T(`   i) ${q.option_a}`, { size: SZ })], { spacing: { after: 20 } }));
+                            if (q.option_b) paras.push(P([T(`   ii) ${q.option_b}`, { size: SZ })], { spacing: { after: 20 } }));
+                            if (q.option_c) paras.push(P([T(`   iii) ${q.option_c}`, { size: SZ })], { spacing: { after: 20 } }));
+                            paras.push(P([T('   নিচের কোনটি সঠিক?', { size: SZ, italics: true })], { spacing: { before: 20, after: 30 } }));
+                            const cb = [q.combo_option_1, q.combo_option_2, q.combo_option_3, q.combo_option_4];
+                            const cr1 = [], cr2 = [];
+                            if (cb[0]) cr1.push(`ক) ${cb[0]}`);
+                            if (cb[1]) cr1.push(`খ) ${cb[1]}`);
+                            if (cb[2]) cr2.push(`গ) ${cb[2]}`);
+                            if (cb[3]) cr2.push(`ঘ) ${cb[3]}`);
+                            if (cr1.length) paras.push(P([T('   ' + cr1.join('   '), { size: SZ })], { spacing: { after: 30 } }));
+                            if (cr2.length) paras.push(P([T('   ' + cr2.join('   '), { size: SZ })], { spacing: { after: 60 } }));
+                            const ansMap = {'1':'A','2':'B','3':'C','4':'D'};
+                            answerKey.push({ num: qN, label: ansMap[String(q.answer)] || '?' });
+
+                            // Q2 for type 4
+                            if (qtype === 4 && q.question2) {
+                                qN++;
+                                const q2Runs = [T(`${bnNum(qN)}। `, { bold: true, size: SZ }), T(q.question2, { size: SZ })];
+                                addImgRuns(q.question2_image, q2Runs, 200);
+                                paras.push(P(q2Runs, { spacing: { before: 40, after: 50 } }));
+
+                                if (q.q2_type === 'point') {
+                                    if (q.q2_option_a) paras.push(P([T(`   i) ${q.q2_option_a}`, { size: SZ })], { spacing: { after: 20 } }));
+                                    if (q.q2_option_b) paras.push(P([T(`   ii) ${q.q2_option_b}`, { size: SZ })], { spacing: { after: 20 } }));
+                                    if (q.q2_option_c) paras.push(P([T(`   iii) ${q.q2_option_c}`, { size: SZ })], { spacing: { after: 20 } }));
+                                    paras.push(P([T('   নিচের কোনটি সঠিক?', { size: SZ, italics: true })], { spacing: { before: 20, after: 30 } }));
+                                    const q2cb = [q.q2_combo_option_1, q.q2_combo_option_2, q.q2_combo_option_3, q.q2_combo_option_4];
+                                    const qr1 = [], qr2 = [];
+                                    if (q2cb[0]) qr1.push(`ক) ${q2cb[0]}`);
+                                    if (q2cb[1]) qr1.push(`খ) ${q2cb[1]}`);
+                                    if (q2cb[2]) qr2.push(`গ) ${q2cb[2]}`);
+                                    if (q2cb[3]) qr2.push(`ঘ) ${q2cb[3]}`);
+                                    if (qr1.length) paras.push(P([T('   ' + qr1.join('   '), { size: SZ })], { spacing: { after: 30 } }));
+                                    if (qr2.length) paras.push(P([T('   ' + qr2.join('   '), { size: SZ })], { spacing: { after: 60 } }));
+                                    const ansMap2 = {'1':'A','2':'B','3':'C','4':'D'};
+                                    answerKey.push({ num: qN, label: ansMap2[String(q.q2_answer)] || '?' });
+                                } else {
+                                    const qr1 = [], qr2 = [];
+                                    if (q.q2_option_a) qr1.push(`ক) ${q.q2_option_a}`);
+                                    if (q.q2_option_b) qr1.push(`খ) ${q.q2_option_b}`);
+                                    if (q.q2_option_c) qr2.push(`গ) ${q.q2_option_c}`);
+                                    if (q.q2_option_d) qr2.push(`ঘ) ${q.q2_option_d}`);
+                                    if (qr1.length) paras.push(P([T('   ' + qr1.join('   '), { size: SZ })], { spacing: { after: 30 } }));
+                                    if (qr2.length) paras.push(P([T('   ' + qr2.join('   '), { size: SZ })], { spacing: { after: 60 } }));
+                                    answerKey.push({ num: qN, label: String(q.q2_answer || '').toUpperCase() || '?' });
+                                }
+                            }
+                        }
+                    }
+                    return paras;
+                }
+
+                const leftParas = leftQ.flatMap(renderMcqParas);
+                const rightParas = rightQ.flatMap(renderMcqParas);
+                if (leftParas.length === 0) leftParas.push(P([T('')]));
+                if (rightParas.length === 0) rightParas.push(P([T('')]));
+
+                // Sort answer key by question number
+                answerKey.sort((a, b) => a.num - b.num);
+
+                docChildren.push(new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE, insideHorizontal: BORDER_NONE, insideVertical: BORDER_NONE },
+                    rows: [new TableRow({ children: [
+                        new TableCell({
+                            children: leftParas,
+                            borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: { style: BorderStyle.SINGLE, size: 4, color: 'cccccc' } },
+                            width: { size: 50, type: WidthType.PERCENTAGE },
+                            margins: { right: convertInchesToTwip(0.1) }
+                        }),
+                        new TableCell({
+                            children: rightParas,
+                            borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE },
+                            width: { size: 50, type: WidthType.PERCENTAGE },
+                            margins: { left: convertInchesToTwip(0.1) }
+                        })
+                    ]})]
+                }));
+
+                // ── ANSWER KEY (new page) ──
+                if (answerKey.length > 0) {
+                    docChildren.push(new Paragraph({ children: [T('')], pageBreakBefore: true }));
+                    docChildren.push(P([T('উত্তরমালা', { bold: true, size: 28 })], {
+                        alignment: AlignmentType.CENTER, spacing: { after: 200 }
+                    }));
+                    const CHUNK = 10;
+                    for (let i = 0; i < answerKey.length; i += CHUNK) {
+                        const row = answerKey.slice(i, i + CHUNK).map(a => `${a.num}.${a.label}`).join('   ');
+                        docChildren.push(P([T(row, { size: 22 })], { spacing: { after: 80 } }));
+                    }
+                }
+            }
+
+            // ── BUILD DOC ──
+            const doc = new Document({
+                creator: 'Question Bank',
+                title: exam || 'Question Paper',
+                sections: [{
+                    properties: {
+                        page: {
+                            margin: { top: MARGIN, right: MARGIN, bottom: MARGIN, left: MARGIN },
+                            size: { width: convertInchesToTwip(8.27), height: convertInchesToTwip(11.69) }
+                        }
+                    },
+                    children: docChildren
+                }]
+            });
+
+            const buffer = await Packer.toBuffer(doc);
+            const safeTitle = (exam || 'question-paper').replace(/[^a-zA-Z0-9\u0980-\u09FF _-]/g, '_');
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(safeTitle)}.docx`);
+            res.send(buffer);
+
+        } catch (err) {
+            console.error('Question paper DOCX error:', err);
+            res.status(500).json({ error: err.message });
+        }
+    }
+
     function generatePDF(res, data, title, isMcq, showAnswer = false) {
         try {
             const doc = new PDFDocument({ margin: 50, size: 'A4' });
@@ -747,6 +1055,229 @@ module.exports = function(app, io, uploadsDir) {
         });
         
         res.send('\uFEFF' + output); // Add BOM for excel/notepad unicode rendering
+    }
+
+    async function generateDOCX(res, data, title, isMcq, showAnswer = false) {
+        try {
+            const BORDER_NONE = { style: BorderStyle.NONE, size: 0, color: "FFFFFF" };
+            const docChildren = [];
+
+            docChildren.push(new Paragraph({
+                text: title,
+                heading: HeadingLevel.HEADING_1,
+                spacing: { after: 300 },
+                alignment: AlignmentType.CENTER
+            }));
+
+            function createTextRuns(text, options = {}) {
+                if (!text) return [];
+                const lines = String(text).split('\n');
+                const runs = [];
+                lines.forEach((line, i) => {
+                    const runOpt = { text: line, ...options };
+                    if (i > 0) runOpt.break = 1;
+                    runs.push(new TextRun(runOpt));
+                });
+                return runs;
+            }
+
+            function addImage(imgPath, runsArray) {
+                if (!imgPath) return;
+                const fullPath = path.join(qbankImagesDir, imgPath);
+                if (fs.existsSync(fullPath)) {
+                    try {
+                        const buf = fs.readFileSync(fullPath);
+                        const dim = sizeOf(buf);
+                        let w = dim.width;
+                        let h = dim.height;
+                        if (w > 300) {
+                            h = Math.round((300 / w) * h);
+                            w = 300;
+                        }
+                        runsArray.push(new TextRun({ text: "", break: 1 }));
+                        runsArray.push(new ImageRun({
+                            data: buf,
+                            transformation: { width: w, height: h }
+                        }));
+                        runsArray.push(new TextRun({ text: "", break: 1 }));
+                    } catch(e) {
+                        console.error("Image export error:", e.message);
+                    }
+                }
+            }
+
+            let qNum = 1;
+            data.forEach((q) => {
+                const blockChildren = [];
+                
+                if (isMcq) {
+                    const type = parseInt(q.type) || 1;
+                    const bnIndex1 = toBengaliNumber(qNum);
+                    
+                    if (type === 3 || type === 4) {
+                        if (q.passage || q.passage_image) {
+                            const hint = type === 4 ? `${bnIndex1} ও ${toBengaliNumber(qNum + 1)}` : `${bnIndex1}`;
+                            const passageRuns = [
+                                new TextRun({ text: `নিচের উদ্দীপকটি পড়ো এবং ${hint} নং প্রশ্নের উত্তর দাও:`, bold: true, size: 24 })
+                            ];
+                            if (q.passage) {
+                                passageRuns.push(new TextRun({ break: 1 }));
+                                passageRuns.push(...createTextRuns(q.passage, { size: 24 }));
+                            }
+                            addImage(q.passage_image, passageRuns);
+                            blockChildren.push(new Paragraph({
+                                children: passageRuns,
+                                spacing: { after: 120 }
+                            }));
+                        }
+                    }
+                    
+                    const qRuns = [
+                        new TextRun({ text: `${bnIndex1}। ${q.question || ''}`, bold: true, size: 24 })
+                    ];
+                    addImage(q.question_image, qRuns);
+                    blockChildren.push(new Paragraph({
+                        children: qRuns,
+                        spacing: { before: 100, after: 120 }
+                    }));
+
+                    const appendOptionsDocx = (a, b, c, d) => {
+                        const row1 = (a ? `ক) ${a}` : '').padEnd(30, ' ') + (b ? `    খ) ${b}` : '');
+                        const row2 = (c ? `গ) ${c}` : '').padEnd(30, ' ') + (d ? `    ঘ) ${d}` : '');
+                        if (row1.trim()) blockChildren.push(new Paragraph({ children: createTextRuns(row1, { size: 22 }), spacing: { after: 40 } }));
+                        if (row2.trim()) blockChildren.push(new Paragraph({ children: createTextRuns(row2, { size: 22 }), spacing: { after: 80 } }));
+                    };
+
+                    if (type === 1 || type === 3) {
+                        appendOptionsDocx(q.option_a, q.option_b, q.option_c, q.option_d);
+                    } else if (type === 2 || type === 4) {
+                        if (q.option_a) blockChildren.push(new Paragraph({ children: [new TextRun({ text: `i) ${q.option_a}`, size: 22 })] }));
+                        if (q.option_b) blockChildren.push(new Paragraph({ children: [new TextRun({ text: `ii) ${q.option_b}`, size: 22 })] }));
+                        if (q.option_c) blockChildren.push(new Paragraph({ children: [new TextRun({ text: `iii) ${q.option_c}`, size: 22 })] }));
+                        blockChildren.push(new Paragraph({ children: [new TextRun({ text: `নিচের কোনটি সঠিক?`, size: 22, italics: true })], spacing: { before: 40, after: 40 } }));
+                        appendOptionsDocx(q.combo_option_1, q.combo_option_2, q.combo_option_3, q.combo_option_4);
+                    }
+                    
+                    if (type === 4 && q.question2) {
+                        qNum++;
+                        const bnIndex2 = toBengaliNumber(qNum);
+                        const q2Runs = [
+                            new TextRun({ text: `${bnIndex2}। ${q.question2 || ''}`, bold: true, size: 24, break: 1 })
+                        ];
+                        addImage(q.question2_image, q2Runs);
+                        blockChildren.push(new Paragraph({
+                            children: q2Runs,
+                            spacing: { before: 100, after: 120 }
+                        }));
+                        
+                        if (q.q2_type === 'point') {
+                            if (q.q2_option_a) blockChildren.push(new Paragraph({ children: [new TextRun({ text: `i) ${q.q2_option_a}`, size: 22 })] }));
+                            if (q.q2_option_b) blockChildren.push(new Paragraph({ children: [new TextRun({ text: `ii) ${q.q2_option_b}`, size: 22 })] }));
+                            if (q.q2_option_c) blockChildren.push(new Paragraph({ children: [new TextRun({ text: `iii) ${q.q2_option_c}`, size: 22 })] }));
+                            blockChildren.push(new Paragraph({ children: [new TextRun({ text: `নিচের কোনটি সঠিক?`, size: 22, italics: true })], spacing: { before: 40, after: 40 } }));
+                            appendOptionsDocx(q.q2_combo_option_1, q.q2_combo_option_2, q.q2_combo_option_3, q.q2_combo_option_4);
+                        } else {
+                            appendOptionsDocx(q.q2_option_a, q.q2_option_b, q.q2_option_c, q.q2_option_d);
+                        }
+                    }
+                    qNum++;
+                } else {
+                    const bnIndex = toBengaliNumber(qNum);
+                    const cqRuns = [
+                        new TextRun({ text: `প্রশ্ন ${bnIndex}। ${q.passage || ''}`, bold: true, size: 24 })
+                    ];
+                    addImage(q.passage_image, cqRuns);
+                    blockChildren.push(new Paragraph({
+                        children: cqRuns,
+                        spacing: { before: 100, after: 120 }
+                    }));
+                    
+                    const formatAnsDocx = (ans) => {
+                        const runs = [new TextRun({ text: `    উত্তর:`, bold: true, size: 22, color: "065F46", break: 1 })];
+                        runs.push(...createTextRuns(ans, { size: 22, color: "065F46" }));
+                        return runs;
+                    };
+                    
+                    if (q.knowledge) {
+                        const kRuns = [new TextRun({ text: `ক) ${q.knowledge}`, size: 22 })];
+                        if (showAnswer && q.answer_k) kRuns.push(...formatAnsDocx(q.answer_k));
+                        blockChildren.push(new Paragraph({ children: kRuns, spacing: { after: 80 } }));
+                    }
+                    if (q.understanding) {
+                        const uRuns = [new TextRun({ text: `খ) ${q.understanding}`, size: 22 })];
+                        if (showAnswer && q.answer_u) uRuns.push(...formatAnsDocx(q.answer_u));
+                        blockChildren.push(new Paragraph({ children: uRuns, spacing: { after: 80 } }));
+                    }
+                    if (q.application) {
+                        const aRuns = [new TextRun({ text: `গ) ${q.application}`, size: 22 })];
+                        if (showAnswer && q.answer_a) aRuns.push(...formatAnsDocx(q.answer_a));
+                        blockChildren.push(new Paragraph({ children: aRuns, spacing: { after: 80 } }));
+                    }
+                    if (q.higher_thinking) {
+                        const hRuns = [new TextRun({ text: `ঘ) ${q.higher_thinking}`, size: 22 })];
+                        if (showAnswer && q.answer_h) hRuns.push(...formatAnsDocx(q.answer_h));
+                        blockChildren.push(new Paragraph({ children: hRuns, spacing: { after: 80 } }));
+                    }
+                    qNum++;
+                }
+
+                // Table to prevent split
+                const table = new Table({
+                    width: { size: 100, type: WidthType.PERCENTAGE },
+                    borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE, insideHorizontal: BORDER_NONE, insideVertical: BORDER_NONE },
+                    rows: [
+                        new TableRow({
+                            cantSplit: true,
+                            children: [
+                                new TableCell({
+                                    children: blockChildren,
+                                    borders: { top: BORDER_NONE, bottom: BORDER_NONE, left: BORDER_NONE, right: BORDER_NONE },
+                                    margins: { top: 0, bottom: convertInchesToTwip(0.15), left: 0, right: 0 }
+                                })
+                            ]
+                        })
+                    ]
+                });
+                docChildren.push(table);
+                
+                docChildren.push(new Paragraph({
+                    children: [new TextRun({ text: '━'.repeat(50), color: 'E5E7EB', size: 16 })],
+                    spacing: { after: 120 }
+                }));
+            });
+
+            const doc = new Document({
+                creator: 'Question Bank',
+                title: title,
+                sections: [{
+                    properties: {
+                        page: {
+                            margin: {
+                                top: convertInchesToTwip(1),
+                                right: convertInchesToTwip(1),
+                                bottom: convertInchesToTwip(1),
+                                left: convertInchesToTwip(1),
+                            },
+                            size: {
+                                width: convertInchesToTwip(8.27),
+                                height: convertInchesToTwip(11.69)
+                            }
+                        }
+                    },
+                    children: docChildren
+                }]
+            });
+
+            const buffer = await Packer.toBuffer(doc);
+            const safeTitle = title.replace(/[^a-zA-Z0-9-_\u0980-\u09FF ]/g, '_');
+
+            res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            res.setHeader('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(safeTitle)}.docx`);
+            res.send(buffer);
+        } catch (error) {
+            console.error("DOCX export error:", error);
+            res.status(500).json({ error: error.message });
+        }
     }
 
     // ==== Student Bank API ====
