@@ -1212,6 +1212,15 @@
         socket.emit('qbank-live-update-question', savedResponse.record);
       }
 
+      if (editId && typeof qmQuestions !== 'undefined' && qmQuestions) {
+        const qmIdx = qmQuestions.findIndex(q => q.id === editId);
+        if (qmIdx !== -1) {
+          qmQuestions[qmIdx] = savedResponse.record;
+          qmRenderCards();
+          qmRenderSelected();
+        }
+      }
+
       alert('MCQ Saved Successfully!');
       form.reset();
       document.getElementById('mcqBoardYearGroup').style.display = 'none';
@@ -1257,6 +1266,17 @@
       if (!res.ok) {
         const err = await res.json();
         return alert('Error: ' + (err.error || 'Failed to write to Excel'));
+      }
+
+      const savedResponse = await res.json();
+      
+      if (editId && typeof qmQuestions !== 'undefined' && qmQuestions) {
+        const qmIdx = qmQuestions.findIndex(q => q.id === editId);
+        if (qmIdx !== -1) {
+          qmQuestions[qmIdx] = savedResponse.record;
+          qmRenderCards();
+          qmRenderSelected();
+        }
       }
 
       alert('Creative Question Saved!');
@@ -1812,6 +1832,24 @@
         return;
       }
       list.innerHTML = qmQuestions.map(q => qmType === 'mcq' ? qmMcqCard(q) : qmCqCard(q)).join('');
+
+      if (qmType === 'mcq') {
+        list.querySelectorAll('.qm-card').forEach(card => {
+          const qId = card.getAttribute('data-id');
+          const q = qmQuestions.find(x => x.id === qId);
+          if (q) {
+            const type = parseInt(q.type) || 1;
+            if (type === 4) {
+              const q1 = card.querySelector('.mcq-sub-question[data-sub="1"]');
+              if (q1 && q.answer) highlightDashboardAnswer(q1, q.answer);
+              const q2 = card.querySelector('.mcq-sub-question[data-sub="2"]');
+              if (q2 && q.q2_answer) highlightDashboardAnswer(q2, q.q2_answer);
+            } else {
+              if (q.answer) highlightDashboardAnswer(card, q.answer);
+            }
+          }
+        });
+      }
     }
 
     function qmMcqCard(q) {
@@ -1824,6 +1862,7 @@
 
       return `<div class="qm-card${isSel?' qm-selected':''}" onclick="qmToggle('${q.id}')" data-id="${q.id}">
         ${badge}
+        <button class="student-btn" style="position:absolute; top:8px; right:${isSel ? '40px' : '8px'}; padding:4px 8px; font-size:12px; z-index:10; border-radius:5px; background:linear-gradient(135deg, #f59e0b, #d97706); border:none; color:white; min-width:auto; height:auto; line-height:1; cursor:pointer;" onclick="event.stopPropagation(); qmEditQuestion('${q.id}')">✏️ Edit</button>
         <div style="pointer-events:none;">${content}</div>
       </div>`;
     }
@@ -1838,8 +1877,17 @@
 
       return `<div class="qm-card${isSel?' qm-selected':''}" onclick="qmToggle('${q.id}')" data-id="${q.id}">
         ${badge}
+        <button class="student-btn" style="position:absolute; top:8px; right:${isSel ? '40px' : '8px'}; padding:4px 8px; font-size:12px; z-index:10; border-radius:5px; background:linear-gradient(135deg, #f59e0b, #d97706); border:none; color:white; min-width:auto; height:auto; line-height:1; cursor:pointer;" onclick="event.stopPropagation(); qmEditQuestion('${q.id}')">✏️ Edit</button>
         <div style="pointer-events:none;">${content}</div>
       </div>`;
+    }
+
+    function qmEditQuestion(id) {
+      const q = qmQuestions.find(x => x.id === id);
+      if (!q) return;
+      currentTableType = qmType; 
+      currentTableData = [q]; 
+      editRecord(0); 
     }
 
     function qmToggle(id) {
