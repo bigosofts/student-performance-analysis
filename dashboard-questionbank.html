@@ -1815,48 +1815,16 @@
     }
 
     function qmMcqCard(q) {
-      const type = parseInt(q.type) || 1;
       const selIdx = qmSelected.indexOf(q.id);
       const isSel = selIdx !== -1;
       const badge = isSel ? `<span class="qm-sel-badge">#${selIdx + 1}</span>` : `<span class="qm-sel-badge"></span>`;
-
-      let passageHtml = '';
-      if (type === 3 || type === 4) {
-        const hintText = (type === 4 && q.question2) ? "নিচের উদ্দীপকটি পড় এবং প্রশ্নের উত্তর দাওঃ" : "নিচের উদ্দীপকটি পড় এবং প্রশ্নের উত্তর দাওঃ";
-        passageHtml = `<span class="qm-passage-tag">📖 ${hintText}</span>`;
-        if (q.passage) {
-          const short = q.passage.length > 90 ? q.passage.slice(0, 90) + '…' : q.passage;
-          passageHtml += `<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:5px;padding:3px 8px;background:rgba(255,255,255,0.03);border-radius:5px;line-height:1.4;">${short}</div>`;
-        }
-        if (q.passage_image) passageHtml += `<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:4px;">🖼 Image attached</div>`;
-      }
-
-      let optsHtml = '';
-      if (type === 1 || type === 3) {
-        const ansIdx = {A:0,B:1,C:2,D:3}[String(q.answer||'').toUpperCase()];
-        const opts = [q.option_a, q.option_b, q.option_c, q.option_d];
-        const labels = ['ক','খ','গ','ঘ'];
-        optsHtml = `<div class="qm-opts-grid">${opts.map((o,i) => o ? `<div class="qm-opt${i===ansIdx?' ans-ok':''}">${labels[i]}) ${o}</div>` : '').join('')}</div>`;
-      } else if (type === 2 || type === 4) {
-        const ansIdx = parseInt(q.answer) - 1;
-        let pts = '';
-        if (q.option_a) pts += `i) ${q.option_a}  `;
-        if (q.option_b) pts += `ii) ${q.option_b}  `;
-        if (q.option_c) pts += `iii) ${q.option_c}`;
-        optsHtml = `<div style="font-size:11px;color:rgba(255,255,255,0.45);margin-bottom:4px;">${pts}</div>`;
-        const combos = [q.combo_option_1, q.combo_option_2, q.combo_option_3, q.combo_option_4];
-        const labels = ['ক','খ','গ','ঘ'];
-        optsHtml += `<div class="qm-opts-grid">${combos.map((c,i) => c ? `<div class="qm-opt${i===ansIdx?' ans-ok':''}">${labels[i]}) ${c}</div>` : '').join('')}</div>`;
-        if (type === 4 && q.question2) {
-          optsHtml += `<div class="qm-q-text" style="margin-top:9px;font-size:12.5px;color:rgba(255,255,255,0.75);">Q2: ${q.question2}</div>`;
-        }
-      }
+      
+      const qIndex = qmQuestions.indexOf(q) + 1;
+      const content = QuestionBank.formatMcq(q, qIndex);
 
       return `<div class="qm-card${isSel?' qm-selected':''}" onclick="qmToggle('${q.id}')" data-id="${q.id}">
         ${badge}
-        ${passageHtml}
-        <div class="qm-q-text">${q.question || '(No question text)'}</div>
-        ${optsHtml}
+        <div style="pointer-events:none;">${content}</div>
       </div>`;
     }
 
@@ -1864,15 +1832,13 @@
       const selIdx = qmSelected.indexOf(q.id);
       const isSel = selIdx !== -1;
       const badge = isSel ? `<span class="qm-sel-badge">#${selIdx + 1}</span>` : `<span class="qm-sel-badge"></span>`;
-      const short = q.passage ? (q.passage.length > 100 ? q.passage.slice(0,100)+'…' : q.passage) : '(No passage)';
+      
+      const qIndex = qmQuestions.indexOf(q) + 1;
+      const content = QuestionBank.formatCreative(q, qIndex, true);
+
       return `<div class="qm-card${isSel?' qm-selected':''}" onclick="qmToggle('${q.id}')" data-id="${q.id}">
         ${badge}
-        <div class="qm-q-text">${short}</div>
-        ${q.passage_image ? `<div style="font-size:11px;color:rgba(255,255,255,0.3);">🖼 Image attached</div>` : ''}
-        ${q.knowledge ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">ক)</span> ${q.knowledge}</div>` : ''}
-        ${q.understanding ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">খ)</span> ${q.understanding}</div>` : ''}
-        ${q.application ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">গ)</span> ${q.application}</div>` : ''}
-        ${q.higher_thinking ? `<div class="qm-sub-q"><span style="color:#60a5fa;font-weight:700;">ঘ)</span> ${q.higher_thinking}</div>` : ''}
+        <div style="pointer-events:none;">${content}</div>
       </div>`;
     }
 
