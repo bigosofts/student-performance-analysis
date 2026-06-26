@@ -1424,7 +1424,7 @@ module.exports = function(app, io, uploadsDir) {
         
         // Trigger leaderboard update immediately with calculated scores
         const initPayload = students.map(s => {
-            const pData = perfData.find(p => String(p.roll) === String(s.roll)) || s;
+            const pData = perfData.find(p => String(p.roll) === String(s.roll) && String(p.id) === String(s.id)) || s;
             const attCount = (pData.attendance || []).filter(a => a.isPresent).length;
             const attScore = attCount * 5;
             
@@ -1462,7 +1462,7 @@ module.exports = function(app, io, uploadsDir) {
         console.log(`[ATTENDANCE GRID SAVE] Date: ${normTargetDate}, records count: ${records ? records.length : 0}`);
         
         records.forEach(r => {
-            const student = perfData.find(p => String(p.roll) === String(r.roll));
+            const student = perfData.find(p => String(p.roll) === String(r.roll) && String(p.id) === String(r.id));
             if (student) {
                 if (!student.attendance) student.attendance = [];
                 const existingDate = student.attendance.find(a => normalizeDate(a.date) === normTargetDate);
@@ -1484,11 +1484,11 @@ module.exports = function(app, io, uploadsDir) {
         const perfData = readJson(perfFile);
         
         records.forEach(r => {
-            const student = perfData.find(p => String(p.roll) === String(r.roll));
+            const student = perfData.find(p => String(p.roll) === String(r.roll) && String(p.id) === String(r.id));
             if (student) {
                 if (!student.mark) student.mark = {};
                 Object.keys(r).forEach(k => {
-                    if (k !== 'roll') {
+                    if (k !== 'roll' && k !== 'id') {
                         student.mark[k] = parseFloat(r[k]) || 0;
                     }
                 });
@@ -1510,9 +1510,9 @@ module.exports = function(app, io, uploadsDir) {
             console.log(`[ATTENDANCE BULK ROW] Keys: ${Object.keys(r).join(', ')} | name: ${r.name} | isPresent: ${r.isPresent} | id: ${r.id} | roll: ${r.roll}`);
             
             const student = perfData.find(p => {
-                const searchId = r.id || r.ID || r.Id;
-                if (searchId) return String(p.id) === String(searchId);
-                return String(p.roll) === String(r.roll || r.Roll);
+                const searchId = String(r.id || r.ID || r.Id || "");
+                const searchRoll = String(r.roll || r.Roll || "");
+                return String(p.id) === searchId && String(p.roll) === searchRoll;
             });
             
             if (student) {
@@ -1549,7 +1549,11 @@ module.exports = function(app, io, uploadsDir) {
         let perfData = readJson(perfFile);
         
         newRows.forEach(r => {
-            const student = perfData.find(p => String(p.roll) === String(r.Roll || r.roll));
+            const student = perfData.find(p => {
+                const searchId = String(r.id || r.ID || r.Id || "");
+                const searchRoll = String(r.roll || r.Roll || "");
+                return String(p.id) === searchId && String(p.roll) === searchRoll;
+            });
             if (student) {
                 student.mark = {}; // Completely replace marks object
                 ['CT1','CT2','CT3','CT4','CT5','HY','Y','PT','T','MT1','MT2','MCQ1','MCQ2','MCQ3', 'Rewards'].forEach(k => {

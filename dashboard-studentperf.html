@@ -380,12 +380,12 @@
         <button class="btn btn-success" onclick="initPerformance()">📥 Initialize Performance Records for Filtered
           Students</button>
 
-        <div class="data-table-wrapper">
+        <div class="data-table-wrapper no-id-sticky">
           <table class="data-table">
             <thead>
               <tr>
-                <th>Roll</th>
-                <th>Name</th>
+                <th class="sticky-col sticky-roll">Roll</th>
+                <th class="sticky-col sticky-name">Name</th>
                 <th>ID</th>
                 <th>Session</th>
                 <th>Class</th>
@@ -430,12 +430,12 @@
 
           <button class="btn btn-primary" onclick="loadAttendanceGrid()">Load Grid for Selected Filter</button>
 
-          <div class="data-table-wrapper">
+          <div class="data-table-wrapper no-id-sticky">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Roll</th>
-                  <th>Name</th>
+                  <th class="sticky-col sticky-roll">Roll</th>
+                  <th class="sticky-col sticky-name">Name</th>
                   <th>✅ Present</th>
                 </tr>
               </thead>
@@ -464,8 +464,9 @@
             <table class="data-table">
               <thead>
                 <tr>
-                  <th>Roll</th>
-                  <th>Name</th>
+                  <th class="sticky-col sticky-id">ID</th>
+                  <th class="sticky-col sticky-roll">Roll</th>
+                  <th class="sticky-col sticky-name">Name</th>
                   <th>CT1</th>
                   <th>CT2</th>
                   <th>CT3</th>
@@ -645,7 +646,9 @@
       let html = '';
       currentStudents.forEach(s => {
         html += `<tr>
-                  <td>${s.roll}</td><td>${s.name}</td><td>${s.id}</td>
+                  <td class="sticky-col sticky-roll">${s.roll}</td>
+                  <td class="sticky-col sticky-name">${s.name}</td>
+                  <td>${s.id}</td>
                   <td>${s.session}</td><td>${s.class}</td><td>${s.section}</td><td>${s.group}</td>
                   <td>
                       <button class="btn btn-primary" onclick="editStudent('${s.roll}')">✏️</button>
@@ -676,13 +679,16 @@
     let perfData = [];
 
     async function loadPerfData() {
+      // Make sure we have the latest filtered students before filtering the performance records
+      await loadStudents();
+      
       if (currentStudents.length === 0) {
         perfData = [];
         return;
       }
       const res = await fetch('/api/performance');
       const allPerf = await res.json();
-      perfData = allPerf.filter(p => currentStudents.find(s => String(s.roll) === String(p.roll)));
+      perfData = allPerf.filter(p => currentStudents.find(s => String(s.roll) === String(p.roll) && String(s.id) === String(p.id)));
     }
 
     async function loadAttendanceGrid() {
@@ -695,8 +701,9 @@
         const att = (p.attendance || []).find(a => a.date === date);
         const checked = att && att.isPresent ? 'checked' : '';
         html += `<tr>
-                  <td>${p.roll}</td><td>${p.name}</td>
-                  <td><input type="checkbox" data-roll="${p.roll}" class="att-check" style="transform: scale(1.5)" ${checked} /></td>
+                  <td class="sticky-col sticky-roll">${p.roll}</td>
+                  <td class="sticky-col sticky-name">${p.name}</td>
+                  <td><input type="checkbox" data-roll="${p.roll}" data-id="${p.id}" class="att-check" style="transform: scale(1.5)" ${checked} /></td>
               </tr>`;
       });
       tbody.innerHTML = html;
@@ -707,7 +714,7 @@
       if (!date) return alert('Select date');
       const records = [];
       document.querySelectorAll('.att-check').forEach(cb => {
-        records.push({ roll: cb.dataset.roll, isPresent: cb.checked });
+        records.push({ roll: cb.dataset.roll, id: cb.dataset.id, isPresent: cb.checked });
       });
 
       await fetch('/api/performance/attendance', {
@@ -725,10 +732,13 @@
 
       let finalHtml = '';
       perfData.forEach(p => {
-        let html = `<tr><td>${p.roll}</td><td>${p.name}</td>`;
+        let html = `<tr>
+            <td class="sticky-col sticky-id">${p.id || ''}</td>
+            <td class="sticky-col sticky-roll">${p.roll}</td>
+            <td class="sticky-col sticky-name">${p.name}</td>`;
         cols.forEach(c => {
           const val = (p.mark && p.mark[c]) ? p.mark[c] : '';
-          html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-col="${c}" value="${val}" /></td>`;
+          html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-id="${p.id}" data-col="${c}" value="${val}" /></td>`;
         });
         html += `</tr>`;
         finalHtml += html;
@@ -740,9 +750,11 @@
       const recordsMap = {};
       document.querySelectorAll('.mark-input').forEach(inp => {
         const roll = inp.dataset.roll;
+        const id = inp.dataset.id;
         const col = inp.dataset.col;
-        if (!recordsMap[roll]) recordsMap[roll] = { roll };
-        recordsMap[roll][col] = inp.value;
+        const key = roll + '_' + id;
+        if (!recordsMap[key]) recordsMap[key] = { roll, id };
+        recordsMap[key][col] = inp.value;
       });
 
       await fetch('/api/performance/marks', {
