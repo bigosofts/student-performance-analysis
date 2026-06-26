@@ -868,6 +868,7 @@
 
       let currentMode = null;
       let raceTimer = null;
+      let currentLeaderboardData = [];
 
       // Map: roll → { el, rank }  — persistent row elements
       const rowMap = {};
@@ -1001,7 +1002,8 @@
         // Update / create each row, then set its `top`
         data.forEach((student, idx) => {
           const targetTop = idx * (ROW_H + GAP);
-          const pct = ((student.totalScore / maxScore) * 100).toFixed(1);
+          const scoreForBar = student._currentTotalFloat !== undefined ? student._currentTotalFloat : student.totalScore;
+          const pct = ((scoreForBar / maxScore) * 100).toFixed(3);
 
           let entry = rowMap[student.roll];
 
@@ -1095,7 +1097,7 @@
           const totalIncrementPerMs = targetMaxScore / duration;
 
           // Initial random order, 0 scores
-          let currentData = data
+          currentLeaderboardData = data
             .map((s) => ({
               ...s,
               targetTotal: s.totalScore,
@@ -1109,11 +1111,11 @@
             .sort(() => Math.random() - 0.5);
 
           // Record initial random rank for each student
-          currentData.forEach((s, i) => {
+          currentLeaderboardData.forEach((s, i) => {
             s._initialRank = i;
           });
 
-          renderLeaderboard(currentData, false, targetMaxScore);
+          renderLeaderboard(currentLeaderboardData, false, targetMaxScore);
 
           lbList.classList.add("racing");
           let startTime = null;
@@ -1125,7 +1127,7 @@
             let allDone = true;
             const currentGlobalTotal = totalIncrementPerMs * elapsed;
 
-            currentData.forEach((s) => {
+            currentLeaderboardData.forEach((s) => {
               if (s._currentTotalFloat < s.targetTotal) {
                 allDone = false;
                 s._currentTotalFloat = Math.min(
@@ -1142,23 +1144,23 @@
               }
             });
 
-            currentData.sort(
+            currentLeaderboardData.sort(
               (a, b) => b._currentTotalFloat - a._currentTotalFloat,
             );
-            renderLeaderboard(currentData, true, targetMaxScore);
+            renderLeaderboard(currentLeaderboardData, true, targetMaxScore);
 
             if (allDone || elapsed >= duration * 1.5) {
               lbList.classList.remove("racing");
               // Ensure perfect final values
-              currentData.forEach((s) => {
+              currentLeaderboardData.forEach((s) => {
                 s._currentTotalFloat = s.targetTotal;
                 s.totalScore = s.targetTotal;
                 s.attendanceScore = s.targetAtt;
                 s.examScore = s.targetExam;
               });
-              currentData.sort((a, b) => b.totalScore - a.totalScore);
+              currentLeaderboardData.sort((a, b) => b.totalScore - a.totalScore);
               // Lock in permanent badges comparing final rank vs initial random rank
-              currentData.forEach((s, finalIdx) => {
+              currentLeaderboardData.forEach((s, finalIdx) => {
                 const moved = s._initialRank - finalIdx; // positive = moved up from start
                 if (moved > 0) {
                   s._badgeCls = "up";
@@ -1172,7 +1174,7 @@
                 }
                 s._badgeExpires = Infinity; // never expire
               });
-              renderLeaderboard(currentData, true, targetMaxScore);
+              renderLeaderboard(currentLeaderboardData, true, targetMaxScore);
               raceTimer = null;
             } else {
               raceTimer = requestAnimationFrame(raceLoop);
@@ -1196,13 +1198,36 @@
       // ── Socket: live update ───────────────────────────────────────────────────
       socket.on("leaderboard-live-update", ({ data }) => {
         if (currentMode !== "leaderboard") return;
-        flashBadge();
-        if (raceTimer) {
-          cancelAnimationFrame(raceTimer);
-          raceTimer = null;
+        
+        if (currentLeaderboardData && currentLeaderboardData.length > 0) {
+          const newDataMap = {};
+          data.forEach(d => newDataMap[d.roll] = d);
+          
+          currentLeaderboardData.forEach(student => {
+            if (newDataMap[student.roll]) {
+              const fresh = newDataMap[student.roll];
+              student.targetAtt = fresh.attendanceScore;
+              student.targetExam = fresh.examScore;
+              student.targetTotal = fresh.totalScore;
+              
+              // If not racing, update instantly
+              if (!lbList.classList.contains("racing")) {
+                student.attendanceScore = fresh.attendanceScore;
+                student.examScore = fresh.examScore;
+                student.totalScore = fresh.totalScore;
+                student._currentTotalFloat = fresh.totalScore;
+              }
+            }
+          });
+          
+          // Re-sort only if not currently mid-race (race loop handles its own sorting)
+          if (!lbList.classList.contains("racing")) {
+            currentLeaderboardData.sort((a, b) => b.totalScore - a.totalScore);
+          }
+          
+          flashBadge();
+          renderLeaderboard(currentLeaderboardData, true);
         }
-        lbList.classList.remove("racing");
-        renderLeaderboard(data, true);
       });
 
       socket.on("classroom-navigate", ({ url }) => {
@@ -1383,11 +1408,12 @@
 
           // Kick off the same race animation as teacher
           if (data.length > 0) {
+            currentMode = "leaderboard";
             const targetMaxScore = Math.max(...data.map(d => d.totalScore), 1);
             const duration = 25000;
             const totalIncrementPerMs = targetMaxScore / duration;
 
-            let currentData = data.map(s => ({
+            currentLeaderboardData = data.map(s => ({
               ...s,
               targetTotal: s.totalScore,
               targetAtt: s.attendanceScore,
@@ -1396,8 +1422,8 @@
               _currentTotalFloat: 0,
             })).sort(() => Math.random() - 0.5);
 
-            currentData.forEach((s, i) => { s._initialRank = i; });
-            renderLeaderboard(currentData, false, targetMaxScore);
+            currentLeaderboardData.forEach((s, i) => { s._initialRank = i; });
+            renderLeaderboard(currentLeaderboardData, false, targetMaxScore);
             lbList.classList.add('racing');
             let startTime = null;
 
@@ -1407,7 +1433,7 @@
               let allDone = true;
               const currentGlobalTotal = totalIncrementPerMs * elapsed;
 
-              currentData.forEach(s => {
+              currentLeaderboardData.forEach(s => {
                 if (s._currentTotalFloat < s.targetTotal) {
                   allDone = false;
                   s._currentTotalFloat = Math.min(s.targetTotal, currentGlobalTotal);
@@ -1419,32 +1445,32 @@
                   }
                 }
               });
-              currentData.sort((a, b) => b._currentTotalFloat - a._currentTotalFloat);
-              renderLeaderboard(currentData, true, targetMaxScore);
+              currentLeaderboardData.sort((a, b) => b._currentTotalFloat - a._currentTotalFloat);
+              renderLeaderboard(currentLeaderboardData, true, targetMaxScore);
 
               if (allDone || elapsed >= duration * 1.5) {
                 lbList.classList.remove('racing');
-                currentData.forEach(s => {
+                currentLeaderboardData.forEach(s => {
                   s._currentTotalFloat = s.targetTotal;
                   s.totalScore = s.targetTotal;
                   s.attendanceScore = s.targetAtt;
                   s.examScore = s.targetExam;
                 });
-                currentData.sort((a, b) => b.totalScore - a.totalScore);
-                currentData.forEach((s, finalIdx) => {
+                currentLeaderboardData.sort((a, b) => b.totalScore - a.totalScore);
+                currentLeaderboardData.forEach((s, finalIdx) => {
                   const moved = s._initialRank - finalIdx;
                   s._badgeCls  = moved > 0 ? 'up' : moved < 0 ? 'down' : 'none';
                   s._badgeHtml = moved > 0 ? '▲'+moved : moved < 0 ? '▼'+Math.abs(moved) : '—';
                   s._badgeExpires = Infinity;
                 });
-                renderLeaderboard(currentData, true, targetMaxScore);
+                renderLeaderboard(currentLeaderboardData, true, targetMaxScore);
                 raceTimer = null;
 
                 // 5. Show position modal after race finishes
                 if (roll) {
-                  const finalIdx = currentData.findIndex(s => String(s.roll) === String(roll));
+                  const finalIdx = currentLeaderboardData.findIndex(s => String(s.roll) === String(roll));
                   if (finalIdx !== -1) {
-                    const found = currentData[finalIdx];
+                    const found = currentLeaderboardData[finalIdx];
                     const rank  = finalIdx + 1;
                     const trophy = rank === 1 ? '🥇' : rank === 2 ? '🥈' : rank === 3 ? '🥉' : '🎓';
                     const rankCls = rank === 1 ? 'top1' : rank === 2 ? 'top2' : rank === 3 ? 'top3' : '';
