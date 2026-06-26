@@ -641,9 +641,10 @@
       const res = await fetch(`/api/students${buildStudentQuery()}`);
       currentStudents = await res.json();
       const tbody = document.getElementById('studentTableBody');
-      tbody.innerHTML = '';
+      
+      let html = '';
       currentStudents.forEach(s => {
-        tbody.innerHTML += `<tr>
+        html += `<tr>
                   <td>${s.roll}</td><td>${s.name}</td><td>${s.id}</td>
                   <td>${s.session}</td><td>${s.class}</td><td>${s.section}</td><td>${s.group}</td>
                   <td>
@@ -652,6 +653,7 @@
                   </td>
               </tr>`;
       });
+      tbody.innerHTML = html;
     }
 
     async function deleteStudent(roll) {
@@ -687,15 +689,17 @@
       await loadPerfData();
       const date = document.getElementById('attDate').value;
       const tbody = document.getElementById('attTableBody');
-      tbody.innerHTML = '';
+      
+      let html = '';
       perfData.forEach(p => {
         const att = (p.attendance || []).find(a => a.date === date);
         const checked = att && att.isPresent ? 'checked' : '';
-        tbody.innerHTML += `<tr>
+        html += `<tr>
                   <td>${p.roll}</td><td>${p.name}</td>
                   <td><input type="checkbox" data-roll="${p.roll}" class="att-check" style="transform: scale(1.5)" ${checked} /></td>
               </tr>`;
       });
+      tbody.innerHTML = html;
     }
 
     async function saveAttendance() {
@@ -717,9 +721,9 @@
     async function loadMarksGrid() {
       await loadPerfData();
       const tbody = document.getElementById('marksTableBody');
-      tbody.innerHTML = '';
       const cols = ['CT1', 'CT2', 'CT3', 'CT4', 'CT5', 'HY', 'Y', 'PT', 'T', 'MT1', 'MT2', 'MCQ1', 'MCQ2', 'MCQ3', 'Rewards'];
 
+      let finalHtml = '';
       perfData.forEach(p => {
         let html = `<tr><td>${p.roll}</td><td>${p.name}</td>`;
         cols.forEach(c => {
@@ -727,8 +731,9 @@
           html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-col="${c}" value="${val}" /></td>`;
         });
         html += `</tr>`;
-        tbody.innerHTML += html;
+        finalHtml += html;
       });
+      tbody.innerHTML = finalHtml;
     }
 
     async function saveMarks() {
