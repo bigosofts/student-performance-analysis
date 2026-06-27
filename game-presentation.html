@@ -743,6 +743,39 @@
         }
       }
 
+      .share-box.drawing-share-box {
+        width: 100vw;
+        height: 100vh;
+        max-width: 100vw;
+        max-height: 100vh;
+        border-radius: 0;
+        border: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        background: rgba(0, 0, 0, 0.95);
+        overflow-y: auto;
+      }
+      .share-box.drawing-share-box .shared-img {
+        width: 100vw;
+        height: auto;
+        max-height: none;
+        border-radius: 0;
+        border: none;
+        object-fit: contain;
+      }
+      .share-box.drawing-share-box .share-modal-title,
+      .share-box.drawing-share-box .share-modal-sub {
+        display: none;
+      }
+      .share-box.drawing-share-box .modal-close-btn {
+        top: 20px;
+        right: 20px;
+        z-index: 10;
+        background: rgba(0, 0, 0, 0.5);
+      }
+
       .share-box::-webkit-scrollbar {
         width: 4px;
       }
@@ -1199,7 +1232,7 @@
     <!-- Drawing Modal (Separated) -->
     <div class="share-modal" id="drawModal">
       <div class="share-backdrop" onclick="closeShareModal('drawModal')"></div>
-      <div class="share-box">
+      <div class="share-box drawing-share-box">
         <button class="modal-close-btn" onclick="closeShareModal('drawModal')">
           ✕
         </button>
