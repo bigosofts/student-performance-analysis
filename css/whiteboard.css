@@ -1,0 +1,184 @@
+/* ── Whiteboard Overlay & Container ── */
+#whiteboard-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Passes clicks through when closed */
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  overflow: hidden;
+}
+
+#whiteboard-overlay.active {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+#whiteboard-bg {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 1); /* White canvas background */
+  z-index: 1;
+  transition: background-color 0.1s ease;
+}
+
+#whiteboard-wrapper {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  /* We will center the canvas manually or let it scroll from top-left */
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Presenter screens don't scroll, they scale to fit */
+.is-presenter #whiteboard-wrapper {
+  overflow: hidden;
+}
+
+.is-presenter .canvas-container {
+  transform-origin: top left;
+}
+
+/* ── Floating Dashboard Trigger ── */
+#wb-trigger-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9998;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#wb-trigger-btn:hover {
+  transform: scale(1.1) rotate(10deg);
+}
+
+#wb-trigger-btn.active {
+  background: linear-gradient(135deg, #ef4444, #f43f5e);
+}
+
+/* ── UI Toolbar ── */
+#wb-toolbar {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 20px;
+  padding: 8px 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  pointer-events: auto; /* Ensure toolbar is clickable */
+}
+
+/* Hide toolbar on presenter screens (non-dashboard) */
+.is-presenter #wb-toolbar {
+  display: none !important;
+}
+
+.wb-tool-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid transparent;
+  color: #f8fafc;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.wb-tool-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.wb-tool-btn.active {
+  background: rgba(59, 130, 246, 0.3);
+  border-color: #3b82f6;
+  color: #60a5fa;
+}
+
+.wb-separator {
+  width: 1px;
+  height: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  margin: 0 4px;
+}
+
+/* ── Sliders & Inputs ── */
+.wb-control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 8px;
+}
+
+.wb-control-group span {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+input[type="color"].wb-color-picker {
+  -webkit-appearance: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  background: none;
+}
+input[type="color"].wb-color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+input[type="color"].wb-color-picker::-webkit-color-swatch {
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+}
+
+input[type="range"].wb-slider {
+  -webkit-appearance: none;
+  width: 80px;
+  height: 4px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 2px;
+  outline: none;
+}
+input[type="range"].wb-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #3b82f6;
+  cursor: pointer;
+}

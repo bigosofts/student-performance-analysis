@@ -676,6 +676,18 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("pres-slide-count", data);
   });
 
+  // ── Whiteboard events ─────────────────────────────────────────
+  socket.on("wb-open", (data) => socket.broadcast.emit("wb-open", data));
+  socket.on("wb-close", () => socket.broadcast.emit("wb-close"));
+  socket.on("wb-state", (data) => socket.broadcast.emit("wb-state", data));
+  socket.on("wb-pan", (data) => socket.broadcast.emit("wb-pan", data));
+  socket.on("wb-zoom", (data) => socket.broadcast.emit("wb-zoom", data));
+  socket.on("wb-bg", (data) => socket.broadcast.emit("wb-bg", data));
+  socket.on("wb-add", (data) => socket.broadcast.emit("wb-add", data));
+  socket.on("wb-modify", (data) => socket.broadcast.emit("wb-modify", data));
+  socket.on("wb-remove", (data) => socket.broadcast.emit("wb-remove", data));
+  socket.on("wb-clear", () => socket.broadcast.emit("wb-clear"));
+
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
