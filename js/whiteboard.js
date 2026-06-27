@@ -392,15 +392,26 @@
       showMobileUI();
     }
 
+    function getMobileHeightFitScale() {
+      if (!scrollEl) return 1;
+      const h = scrollEl.clientHeight;
+      if (h <= 0) return 1;
+      return h / CANVAS_HEIGHT;
+    }
+
+    function getMobileScale() {
+      return getMobileHeightFitScale() * viewportZoom;
+    }
+
     function initMobileZoom() {
       if (!isMobile() || isPresenter || !scrollEl) return;
-      const fitW = scrollEl.clientWidth / CANVAS_WIDTH;
-      viewportZoom = Math.min(1, Math.max(0.35, fitW * 0.95));
+      viewportZoom = 1;
     }
 
     function mobileZoomBy(factor) {
       if (useFitViewport()) return;
-      applyViewportZoom(viewportZoom * factor);
+      viewportZoom = Math.min(1, Math.max(0.35, viewportZoom * factor));
+      applyCanvasLayout();
       showMobileUI();
     }
 
@@ -438,14 +449,16 @@
         resizeCanvas();
         return;
       }
-      viewportZoom = Math.min(3, Math.max(0.25, zoom));
+      viewportZoom = Math.min(1, Math.max(0.35, zoom));
       applyCanvasLayout();
     }
 
     function updateScrollSpacer() {
       if (!scrollSpacer || useFitViewport()) return;
-      scrollSpacer.style.width = Math.ceil(CANVAS_WIDTH * viewportZoom) + 'px';
-      scrollSpacer.style.height = Math.ceil(CANVAS_HEIGHT * viewportZoom) + 'px';
+      const scale = getMobileScale();
+      scrollSpacer.style.width = Math.ceil(CANVAS_WIDTH * scale) + 'px';
+      scrollSpacer.style.height = '100%';
+      scrollSpacer.style.minHeight = scrollEl.clientHeight + 'px';
     }
 
     function updateZoomLabel() {
@@ -476,11 +489,13 @@
       } else {
         overlay.classList.remove('wb-fit-viewport');
         overlay.classList.add('wb-mobile-mode');
-        canvasStack.style.transform = `scale(${viewportZoom})`;
-        canvasStack.style.transformOrigin = 'top left';
+        const scale = getMobileScale();
+        canvasStack.style.transform = `scale(${scale})`;
+        canvasStack.style.transformOrigin = 'left center';
         canvasStack.style.marginLeft = '';
         canvasStack.style.marginTop = '';
         updateScrollSpacer();
+        scrollEl.scrollTop = 0;
       }
 
       updateZoomLabel();
@@ -680,7 +695,6 @@
           } else {
             touchGestureMode = 'pan';
             scrollEl.scrollLeft -= (midX - touchLastMid.x);
-            scrollEl.scrollTop -= (midY - touchLastMid.y);
           }
           touchLastMid = { x: midX, y: midY };
           e.preventDefault();

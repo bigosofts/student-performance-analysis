@@ -48,8 +48,8 @@
   flex: 1;
   min-height: 0;
   -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
-  touch-action: pan-x pan-y;
+  overscroll-behavior-x: contain;
+  overscroll-behavior-y: none;
 }
 
 /* Presenter + desktop editor: scale 1920×1080 to fit, centered, no scrollbars */
@@ -81,18 +81,43 @@
   transform-origin: center center;
 }
 
-/* Mobile editor only: scroll + pinch zoom */
-.is-editor:not(.wb-fit-viewport) #wb-canvas-scroll {
-  overflow: auto;
+/* Mobile editor: full height (like presenter), scroll horizontally only */
+.is-editor.wb-mobile-mode #wb-canvas-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  touch-action: pan-x;
   background: #cbd5e1;
 }
 
-.is-editor:not(.wb-fit-viewport) #wb-scroll-spacer {
+.is-editor.wb-mobile-mode #wb-scroll-spacer {
+  position: relative;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.is-editor.wb-mobile-mode #wb-canvas-stack {
+  position: relative;
+  top: auto;
+  left: 0;
+  flex-shrink: 0;
+  transform-origin: left center;
+}
+
+/* Legacy selector kept for non-mobile-mode edge cases */
+.is-editor:not(.wb-fit-viewport):not(.wb-mobile-mode) #wb-canvas-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #cbd5e1;
+}
+
+.is-editor:not(.wb-fit-viewport):not(.wb-mobile-mode) #wb-scroll-spacer {
   position: relative;
   flex-shrink: 0;
 }
 
-.is-editor:not(.wb-fit-viewport) #wb-canvas-stack {
+.is-editor:not(.wb-fit-viewport):not(.wb-mobile-mode) #wb-canvas-stack {
   position: absolute;
   top: 0;
   left: 0;
@@ -312,8 +337,9 @@
 }
 
 .wb-scroll-mode #wb-canvas-scroll {
-  touch-action: pan-x pan-y !important;
-  overflow: auto !important;
+  touch-action: pan-x !important;
+  overflow-x: auto !important;
+  overflow-y: hidden !important;
   -webkit-overflow-scrolling: touch;
 }
 
