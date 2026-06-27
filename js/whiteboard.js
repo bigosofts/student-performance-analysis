@@ -13,7 +13,11 @@
 
   const script = document.createElement('script');
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js';
-  script.onload = () => setupWhiteboard();
+  script.onload = () => {
+    if (typeof fabric === 'undefined') return;
+    setupWhiteboard();
+  };
+  script.onerror = () => console.warn('Whiteboard: Fabric.js failed to load');
   document.head.appendChild(script);
 
   const isPresenter = !window.location.href.includes('dashboard');
@@ -34,8 +38,6 @@
 
   function setupWhiteboard() {
     const uiHTML = `
-      ${!isPresenter ? `<div id="wb-trigger-btn" title="Open Interactive Board"><span class="wb-trigger-icon">🖌️</span><span class="wb-trigger-label">Board</span></div>` : ''}
-
       <div id="whiteboard-overlay" class="${isPresenter ? 'is-presenter' : 'is-editor'}">
         <div id="whiteboard-bg" style="background:rgba(255,255,255,1);"></div>
         <div id="whiteboard-wrapper">
@@ -49,11 +51,15 @@
           </div>
 
           <div id="wb-mobile-bar">
-            <button type="button" class="wb-mobile-toggle wb-mobile-close" id="wb-mobile-close-btn" aria-label="Close board">✕ Close</button>
-            <button type="button" class="wb-mobile-toggle" id="wb-mobile-tools-toggle" aria-label="Tools">🛠️ Tools</button>
+            <button type="button" class="wb-mobile-toggle wb-mobile-close" id="wb-mobile-close-btn" aria-label="Close board">✕</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-scroll-toggle" aria-label="Scroll canvas">👆 Scroll</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-out" aria-label="Zoom out">−</button>
             <span id="wb-mobile-zoom-label">100%</span>
-            <button type="button" class="wb-mobile-toggle" id="wb-mobile-fit-btn" aria-label="Fit view">⊡ Fit</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-tools-toggle" aria-label="Tools">🛠️</button>
           </div>
+
+          <button type="button" id="wb-mobile-ui-reveal" class="wb-mobile-ui-reveal" hidden aria-label="Show tools">🛠️ Tools</button>
 
           <div id="wb-toolbar">
             <div class="wb-toolbar-row wb-toolbar-primary">
@@ -147,10 +153,16 @@
     const scrollSpacer = document.getElementById('wb-scroll-spacer');
     const canvasStack = document.getElementById('wb-canvas-stack');
     const alignGrid = document.getElementById('wb-align-grid');
-    const triggerBtn = document.getElementById('wb-trigger-btn');
     const mobileZoomLabel = document.getElementById('wb-mobile-zoom-label');
+    const mobileUiReveal = document.getElementById('wb-mobile-ui-reveal');
     let gridVisible = true;
     let gridOpacity = 0.25;
+    let mobileScrollMode = false;
+    let mobileUiHideTimer = null;
+    const MOBILE_UI_HIDE_MS = 4500;
+    let touchGestureMode = null;
+    let touchStartDist = 0;
+    let touchLastMid = null;
 
     const canvas = new fabric.Canvas('wb-canvas', {
       isDrawingMode: true,
@@ -163,10 +175,9 @@
 
     let currentTool = 'draw';
     let viewportZoom = 1;
-    let pinchStartDist = 0;
     let pinchStartZoom = 1;
-    let isPinching = false;
     let galleryCache = null;
+    let triggerBtnRef = null;
 
     canvas.freeDrawingBrush.color = '#000000';
     canvas.freeDrawingBrush.width = 5;
@@ -348,6 +359,51 @@
     const btnErase = document.getElementById('wb-tool-erase');
     const btnSelect = document.getElementById('wb-tool-select');
 
+    function showMobileUI() {
+      if (!isMobile() || isPresenter) return;
+      overlay.classList.remove('wb-mobile-ui-hidden');
+      if (mobileUiReveal) mobileUiReveal.hidden = true;
+      scheduleMobileUIHide();
+    }
+
+    function scheduleMobileUIHide() {
+      if (!isMobile() || isPresenter) return;
+      clearTimeout(mobileUiHideTimer);
+      mobileUiHideTimer = setTimeout(() => {
+        if (!overlay.classList.contains('active')) return;
+        overlay.classList.add('wb-mobile-ui-hidden');
+        if (mobileUiReveal) mobileUiReveal.hidden = false;
+      }, MOBILE_UI_HIDE_MS);
+    }
+
+    function setMobileScrollMode(on) {
+      if (!isMobile() || isPresenter) return;
+      mobileScrollMode = on;
+      overlay.classList.toggle('wb-scroll-mode', on);
+      const scrollBtn = document.getElementById('wb-mobile-scroll-toggle');
+      if (scrollBtn) scrollBtn.classList.toggle('active', on);
+      if (on) {
+        canvas.isDrawingMode = false;
+        canvas.selection = false;
+      } else {
+        setActiveTool(currentTool);
+      }
+      canvas.calcOffset();
+      showMobileUI();
+    }
+
+    function initMobileZoom() {
+      if (!isMobile() || isPresenter || !scrollEl) return;
+      const fitW = scrollEl.clientWidth / CANVAS_WIDTH;
+      viewportZoom = Math.min(1, Math.max(0.35, fitW * 0.95));
+    }
+
+    function mobileZoomBy(factor) {
+      if (useFitViewport()) return;
+      applyViewportZoom(viewportZoom * factor);
+      showMobileUI();
+    }
+
     function setActiveTool(tool) {
       if (isPresenter) return;
       currentTool = tool;
@@ -362,6 +418,7 @@
       if (tool === 'draw') btnDraw.classList.add('active');
       if (tool === 'erase') btnErase.classList.add('active');
       if (tool === 'select') btnSelect.classList.add('active');
+      if (mobileScrollMode && tool !== 'select') setMobileScrollMode(false);
     }
 
     function getFitScale() {
@@ -538,11 +595,18 @@
     function toggleWhiteboard(show) {
       if (show) {
         overlay.classList.add('active');
-        if (triggerBtn) triggerBtn.classList.add('active');
+        if (triggerBtnRef) triggerBtnRef.classList.add('active');
+        if (isMobile() && !isPresenter) {
+          initMobileZoom();
+          showMobileUI();
+        }
         setTimeout(() => { canvas.calcOffset(); resizeCanvas(); }, 300);
       } else {
         overlay.classList.remove('active');
-        if (triggerBtn) triggerBtn.classList.remove('active');
+        overlay.classList.remove('wb-mobile-ui-hidden');
+        if (mobileUiReveal) mobileUiReveal.hidden = true;
+        clearTimeout(mobileUiHideTimer);
+        if (triggerBtnRef) triggerBtnRef.classList.remove('active');
       }
     }
 
@@ -582,45 +646,51 @@
       }
     });
 
-    // ── Mobile pinch zoom (editor mobile only) ──
+    // ── Mobile touch: two-finger pan scroll + pinch zoom ──
     if (!isPresenter) {
       scrollEl.addEventListener('touchstart', (e) => {
         if (!isMobile() || useFitViewport()) return;
         if (e.touches.length === 2) {
-          isPinching = true;
-          pinchStartDist = Math.hypot(
+          touchGestureMode = null;
+          touchStartDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
           );
           pinchStartZoom = viewportZoom;
-          e.preventDefault();
+          touchLastMid = {
+            x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
+            y: (e.touches[0].clientY + e.touches[1].clientY) / 2
+          };
         }
-      }, { passive: false });
+      }, { passive: true });
 
       scrollEl.addEventListener('touchmove', (e) => {
         if (!isMobile() || useFitViewport()) return;
-        if (isPinching && e.touches.length === 2) {
+        if (e.touches.length === 2 && touchLastMid && touchStartDist > 0) {
           const dist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
           );
           const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
           const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-          applyViewportZoom(pinchStartZoom * (dist / pinchStartDist));
+
+          if (touchGestureMode === 'pinch' || (touchGestureMode === null && Math.abs(dist - touchStartDist) > 14)) {
+            touchGestureMode = 'pinch';
+            applyViewportZoom(pinchStartZoom * (dist / touchStartDist));
+          } else {
+            touchGestureMode = 'pan';
+            scrollEl.scrollLeft -= (midX - touchLastMid.x);
+            scrollEl.scrollTop -= (midY - touchLastMid.y);
+          }
+          touchLastMid = { x: midX, y: midY };
           e.preventDefault();
         }
       }, { passive: false });
 
-      scrollEl.addEventListener('touchend', () => { isPinching = false; });
-
-      scrollEl.addEventListener('wheel', (e) => {
-        if (!isMobile() || useFitViewport()) return;
-        if (e.ctrlKey || e.metaKey) {
-          e.preventDefault();
-          const delta = e.deltaY > 0 ? 0.92 : 1.08;
-          applyViewportZoom(viewportZoom * delta);
-        }
-      }, { passive: false });
+      scrollEl.addEventListener('touchend', () => {
+        touchGestureMode = null;
+        touchLastMid = null;
+      });
     }
 
     function closeWhiteboard() {
@@ -679,18 +749,35 @@
       const mobileToggle = document.getElementById('wb-mobile-tools-toggle');
       const toolbar = document.getElementById('wb-toolbar');
       if (mobileToggle) {
-        mobileToggle.onclick = () => toolbar.classList.toggle('wb-toolbar-expanded');
+        mobileToggle.onclick = () => {
+          toolbar.classList.toggle('wb-toolbar-expanded');
+          showMobileUI();
+        };
       }
       document.getElementById('wb-mobile-close-btn')?.addEventListener('click', closeWhiteboard);
-      document.getElementById('wb-mobile-fit-btn')?.addEventListener('click', () => {
-        viewportZoom = 1;
-        scrollEl.scrollLeft = 0;
-        scrollEl.scrollTop = 0;
-        applyCanvasLayout();
+      document.getElementById('wb-mobile-scroll-toggle')?.addEventListener('click', () => {
+        setMobileScrollMode(!mobileScrollMode);
       });
+      document.getElementById('wb-mobile-zoom-in')?.addEventListener('click', () => mobileZoomBy(1.15));
+      document.getElementById('wb-mobile-zoom-out')?.addEventListener('click', () => mobileZoomBy(0.87));
+      if (mobileUiReveal) {
+        mobileUiReveal.addEventListener('click', () => {
+          showMobileUI();
+          toolbar?.classList.add('wb-toolbar-expanded');
+        });
+      }
+      toolbar?.addEventListener('click', () => showMobileUI());
 
-      if (triggerBtn) {
-        triggerBtn.onclick = () => {
+      if (!isPresenter) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = 'wb-trigger-btn';
+        btn.className = 'wb-ready';
+        btn.title = 'Open Interactive Board';
+        btn.innerHTML = '<span class="wb-trigger-icon">🖌️</span><span class="wb-trigger-label">Board</span>';
+        document.body.appendChild(btn);
+        triggerBtnRef = btn;
+        btn.addEventListener('click', () => {
           const isOpen = overlay.classList.contains('active');
           toggleWhiteboard(!isOpen);
           if (socket) socket.emit(!isOpen ? 'wb-open' : 'wb-close');
@@ -700,7 +787,7 @@
               socket.emit('wb-grid', { visible: gridVisible, opacity: gridOpacity });
             }
           }
-        };
+        });
       }
 
       canvas.on('path:created', function(opt) {

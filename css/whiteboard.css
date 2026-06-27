@@ -1,10 +1,17 @@
+/* ── Z-index layer stack ──
+   100010  class session modal (dashboard.html)
+   100002  whiteboard floating trigger
+   100000  whiteboard overlay / drawer
+   (app UI stays below 100000)
+────────────────────────────────── */
+
 /* ── Whiteboard Overlay & Container ── */
 #whiteboard-overlay {
   position: fixed;
   inset: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 9999;
+  z-index: 100000;
   display: flex;
   align-items: stretch;
   justify-content: stretch;
@@ -173,11 +180,11 @@
 /* ── Trigger Button ── */
 #wb-trigger-btn {
   position: fixed;
-  bottom: 20px;
+  bottom: 70px;
   right: 20px;
-  z-index: 9998;
-  min-width: 60px;
-  height: 60px;
+  z-index: 100002;
+  min-width: 56px;
+  min-height: 56px;
   padding: 0 16px;
   border-radius: 50px;
   background: linear-gradient(135deg, #3b82f6, #6366f1);
@@ -191,7 +198,21 @@
   font-size: 22px;
   font-weight: 700;
   cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.25s ease,
+    visibility 0.25s ease;
+}
+
+#wb-trigger-btn.wb-ready {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
 }
 
 #wb-trigger-btn .wb-trigger-label {
@@ -246,6 +267,54 @@
 
 .wb-mobile-mode #wb-mobile-bar {
   display: flex;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#wb-mobile-scroll-toggle.active {
+  background: rgba(59, 130, 246, 0.35);
+  border-color: #3b82f6;
+  color: #93c5fd;
+}
+
+.wb-mobile-ui-reveal {
+  position: absolute;
+  bottom: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 35;
+  background: rgba(15, 23, 42, 0.92);
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50px;
+  padding: 10px 20px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.wb-mobile-ui-reveal[hidden] {
+  display: none !important;
+}
+
+.wb-mobile-ui-hidden #wb-toolbar,
+.wb-mobile-ui-hidden #wb-mobile-bar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(16px);
+}
+
+.wb-scroll-mode #wb-canvas-stack,
+.wb-scroll-mode #wb-canvas-stack .canvas-container,
+.wb-scroll-mode #wb-canvas-stack canvas {
+  pointer-events: none !important;
+}
+
+.wb-scroll-mode #wb-canvas-scroll {
+  touch-action: pan-x pan-y !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* ── Toolbar ── */
@@ -564,6 +633,7 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
     max-width: none;
     max-height: 50vh;
     overflow-y: auto;
+    transition: opacity 0.3s ease, transform 0.3s ease;
   }
 
   .is-editor #wb-toolbar .wb-toolbar-primary {
@@ -603,12 +673,11 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
   }
 
   #wb-trigger-btn {
-    bottom: 16px;
+    bottom: 70px;
     right: 16px;
-    height: 52px;
+    min-height: 52px;
     min-width: 52px;
     padding: 0 12px;
-    
   }
 
   #wb-trigger-btn .wb-trigger-label {
