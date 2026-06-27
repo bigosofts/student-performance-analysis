@@ -830,6 +830,7 @@
     <div id="screensaverOverlay" style="display: none; position: fixed; inset: 0; z-index: 9999; background: #87CEEB;">
       <div id="screensaverCanvasContainer" style="width: 100%; height: 100%;"></div>
       <div id="screensaverText" style="
+        display: none;
         position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
         background: rgba(15, 23, 42, 0.6);
         backdrop-filter: blur(12px);
@@ -1024,12 +1025,12 @@
       });
     </script>
     <script type="module">
-      import { initScreensaver, startScreensaver, stopScreensaver } from './js/screensaver.js';
+      import * as screensaver from './js/screensaver.js?v=20260628-titlefix';
 
       let screensaverTimeout = null;
 
       // Initialize 3D scene (hidden initially)
-      initScreensaver('screensaverCanvasContainer');
+      screensaver.initScreensaver('screensaverCanvasContainer');
 
       socket.on("class-session-start", (data) => {
         console.log("Class session starting:", data);
@@ -1039,11 +1040,16 @@
         const c = data.chapter + (data.chapterName ? `: ${data.chapterName}` : "");
         document.getElementById('ssPaper').innerText = p;
         document.getElementById('ssChapter').innerText = c;
+        try {
+          screensaver.updateScreensaverTitle?.(p, c);
+        } catch (err) {
+          console.warn("3D screensaver title update failed:", err);
+        }
         
         // Start 10-second timer
         clearTimeout(screensaverTimeout);
         screensaverTimeout = setTimeout(() => {
-          startScreensaver();
+          screensaver.startScreensaver();
         }, 10000);
       });
 
@@ -1052,7 +1058,7 @@
       
       stopEvents.forEach(evt => {
         socket.on(evt, () => {
-          stopScreensaver();
+          screensaver.stopScreensaver();
           clearTimeout(screensaverTimeout);
         });
       });
