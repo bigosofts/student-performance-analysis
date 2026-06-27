@@ -109,6 +109,183 @@
           flex-direction: column;
         }
       }
+
+      /* ============================================================
+         LIGHT MODE FOR PRESENTER VIEW (PROJECTOR)
+         ============================================================ */
+      body {
+        background-color: #f8fafc;
+        /* Adjusted scanlines for light mode */
+        background-image:
+          radial-gradient(circle at 20% 20%, rgba(99,102,241,.15) 0%, transparent 40%),
+          radial-gradient(circle at 80% 80%, rgba(236,72,153,.15) 0%, transparent 40%),
+          repeating-linear-gradient(0deg, rgba(0,0,0,.03) 0px, rgba(0,0,0,.03) 1px, transparent 1px, transparent 32px),
+          repeating-linear-gradient(90deg, rgba(0,0,0,.03) 0px, rgba(0,0,0,.03) 1px, transparent 1px, transparent 32px);
+      }
+
+      /* Override dark variables just for this view */
+      .projector-view {
+        --qb-opt-bg: rgba(255, 255, 255, 0.95); 
+      }
+
+      /* Header / Titles */
+      #mcqTitle, #cqTitle, #studentMcqTitle, #studentCqTitle,
+      .ws-title, .qb-quiz-end-text {
+        color: #1e293b;
+        text-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+      }
+      
+      .header-bar {
+        background: rgba(255, 255, 255, 0.85);
+        border: 1px solid rgba(99, 102, 241, 0.3);
+      }
+      
+      .header-bar::before {
+         background: linear-gradient(90deg,
+          rgba(99, 102, 241, 0.1),
+          rgba(236, 72, 153, 0.1),
+          rgba(6, 182, 212, 0.1));
+      }
+
+      /* Question Text */
+      .mcq-q-text {
+        color: #0f172a;
+        text-shadow: 0 0 15px rgba(99, 102, 241, 0.1);
+      }
+      
+      /* Options */
+      .mcq-option {
+        color: #334155;
+        background: #ffffff;
+        border: 1.5px solid rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      }
+      
+      .mcq-option.correct {
+        background: rgba(16, 185, 129, 0.15) !important;
+        color: #047857 !important;
+        border-color: #10b981 !important;
+        box-shadow: 
+          0 0 0 2px rgba(16, 185, 129, 0.2),
+          0 4px 12px rgba(16, 185, 129, 0.1) !important;
+      }
+      
+      .mcq-option.wrong-dim {
+        opacity: 0.5;
+        filter: grayscale(0.5);
+      }
+
+      /* Passage / Points */
+      .mcq-passage-container, .cq-container {
+        background: rgba(255, 255, 255, 0.95);
+        border: 1.5px solid rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+      }
+      
+      .mcq-passage {
+        color: #1e293b;
+      }
+      
+      .mcq-points {
+        background: rgba(6, 182, 212, 0.08);
+        border: 1px solid rgba(6, 182, 212, 0.25);
+      }
+      
+      .mcq-point {
+        color: #334155;
+      }
+      
+      .mcq-subtext {
+        color: #b45309; 
+      }
+      
+      .mcq-sub-question {
+        background: #ffffff;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      }
+      
+      /* CQ specific */
+      .cq-passage {
+        color: #1e293b;
+      }
+      
+      .cq-item {
+        background: rgba(255, 255, 255, 0.8);
+        color: #334155;
+        border: 1px solid rgba(0,0,0,0.05);
+      }
+      
+      /* Waiting screen text */
+      .waiting-screen .ws-subtitle {
+        color: #64748b;
+      }
+      
+      /* Timer */
+      #mcqTimer, #studentMcqTimer {
+        color: #0369a1; 
+        background: rgba(6, 182, 212, 0.15);
+        border-color: rgba(6, 182, 212, 0.4);
+        text-shadow: none;
+      }
+      
+      .ws-waiting-pill {
+        background: #ffffff;
+        color: #334155;
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+      }
+      
+      /* Reading Mode Modal Light Theme */
+      .reading-modal {
+        background: #f8fafc;
+      }
+      .rm-header {
+        background: #ffffff;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .rm-title {
+        color: #1e293b;
+      }
+      .rm-item {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        color: #334155;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      }
+      .rm-mcq-correct {
+        background: rgba(16, 185, 129, 0.15) !important;
+        border-color: #10b981 !important;
+        color: #047857 !important;
+      }
+
+      /* Student practice panel overrides */
+      .student-setup-view {
+        background: #ffffff;
+        border-color: rgba(0,0,0,0.1);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+        color: #334155;
+      }
+      .ssp-title { color: #1e293b; }
+      .ssp-subtitle { color: #64748b; }
+      .ssp-radio-box, .ssp-check-box {
+        background: #f1f5f9;
+        border-color: #cbd5e1;
+        color: #475569;
+      }
+      .student-form-control {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+        color: #1e293b;
+      }
+      .ssp-label { color: #475569; }
+      .student-btn {
+        background: linear-gradient(135deg, #6366f1, #4f46e5);
+        color: white;
+      }
+      .qb-quiz-end-text { color: #1e293b; }
+      #studentResultScore { color: #0f172a !important; }
+      #studentResultMessage { color: #475569 !important; }
     </style>
   </head>
   <body class="qb-font-bn">
