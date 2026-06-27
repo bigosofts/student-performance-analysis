@@ -826,6 +826,27 @@
   </head>
 
   <body>
+    <!-- 3D Screensaver Overlay -->
+    <div id="screensaverOverlay" style="display: none; position: fixed; inset: 0; z-index: 9999; background: #87CEEB;">
+      <div id="screensaverCanvasContainer" style="width: 100%; height: 100%;"></div>
+      <div id="screensaverText" style="
+        position: absolute; bottom: 10%; left: 50%; transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(12px);
+        padding: 30px 50px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        text-align: center;
+        color: white;
+        opacity: 0;
+        transition: opacity 1s ease-in-out;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+      ">
+        <h2 id="ssPaper" style="font-size: 1.5rem; font-weight: 600; color: #a78bfa; margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase;">1st Paper</h2>
+        <h1 id="ssChapter" style="font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, #f8fafc, #cbd5e1); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Chapter 01: বাংলাদেশের কৃষি</h1>
+      </div>
+    </div>
+
     <!-- Background Particles -->
     <div class="bg-animation">
       <div class="bg-circle c1"></div>
@@ -1000,6 +1021,40 @@
         if (data && data.url) {
           window.location.href = data.url;
         }
+      });
+    </script>
+    <script type="module">
+      import { initScreensaver, startScreensaver, stopScreensaver } from './js/screensaver.js';
+
+      let screensaverTimeout = null;
+
+      // Initialize 3D scene (hidden initially)
+      initScreensaver('screensaverCanvasContainer');
+
+      socket.on("class-session-start", (data) => {
+        console.log("Class session starting:", data);
+        
+        // Update overlay text
+        const p = data.subject + " - " + data.paper;
+        const c = data.chapter + (data.chapterName ? `: ${data.chapterName}` : "");
+        document.getElementById('ssPaper').innerText = p;
+        document.getElementById('ssChapter').innerText = c;
+        
+        // Start 10-second timer
+        clearTimeout(screensaverTimeout);
+        screensaverTimeout = setTimeout(() => {
+          startScreensaver();
+        }, 10000);
+      });
+
+      // Stop screensaver on other events
+      const stopEvents = ["pres-open", "classroom-navigate", "pres-share-image", "pres-share-tree", "pres-share-note", "pres-share-video", "pres-share-webpage", "pres-share-pdf"];
+      
+      stopEvents.forEach(evt => {
+        socket.on(evt, () => {
+          stopScreensaver();
+          clearTimeout(screensaverTimeout);
+        });
       });
     </script>
     <script src="js/wake-lock.js"></script>

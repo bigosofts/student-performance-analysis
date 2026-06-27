@@ -660,6 +660,10 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("pres-close-share");
   });
 
+  socket.on("class-session-start", (data) => {
+    socket.broadcast.emit("class-session-start", data);
+  });
+
   socket.on("classroom-navigate", (data) => {
     socket.broadcast.emit("classroom-navigate", data);
   });
