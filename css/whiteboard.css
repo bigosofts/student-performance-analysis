@@ -11,6 +11,7 @@
   inset: 0;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   z-index: 100000;
   display: flex;
   align-items: stretch;
@@ -81,12 +82,20 @@
   transform-origin: center center;
 }
 
-/* Mobile editor: full height (like presenter), scroll horizontally only */
+/* Mobile editor: full height, pan horizontally via control buttons only */
 .is-editor.wb-mobile-mode #wb-canvas-scroll {
-  overflow-x: auto;
+  overflow-x: scroll;
   overflow-y: hidden;
-  touch-action: pan-x;
+  touch-action: none;
   background: #cbd5e1;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.is-editor.wb-mobile-mode #wb-canvas-scroll::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
 .is-editor.wb-mobile-mode #wb-scroll-spacer {
@@ -295,12 +304,6 @@
   transition: opacity 0.3s ease, transform 0.3s ease;
 }
 
-#wb-mobile-scroll-toggle.active {
-  background: rgba(59, 130, 246, 0.35);
-  border-color: #3b82f6;
-  color: #93c5fd;
-}
-
 .wb-mobile-ui-reveal {
   position: absolute;
   bottom: 14px;
@@ -330,17 +333,9 @@
   transform: translateY(16px);
 }
 
-.wb-scroll-mode #wb-canvas-stack,
-.wb-scroll-mode #wb-canvas-stack .canvas-container,
-.wb-scroll-mode #wb-canvas-stack canvas {
-  pointer-events: none !important;
-}
-
-.wb-scroll-mode #wb-canvas-scroll {
-  touch-action: pan-x !important;
-  overflow-x: auto !important;
-  overflow-y: hidden !important;
-  -webkit-overflow-scrolling: touch;
+#whiteboard-overlay.wb-mobile-viewport-fit.is-editor {
+  inset: auto;
+  max-height: none;
 }
 
 /* ── Toolbar ── */
@@ -652,7 +647,7 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
 
   .is-editor #wb-toolbar {
     top: auto;
-    bottom: 52px;
+    bottom: calc(var(--wb-mobile-bar-h, 52px) + 8px);
     left: 8px;
     right: 8px;
     transform: none;
@@ -688,7 +683,7 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
   }
 
   .wb-panel {
-    bottom: 130px;
+    bottom: calc(var(--wb-mobile-bar-h, 52px) + 88px);
     max-height: 42vh;
     z-index: 50;
   }

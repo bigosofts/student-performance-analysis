@@ -44,7 +44,7 @@
           <div id="wb-canvas-scroll">
             <div id="wb-scroll-spacer">
               <div id="wb-canvas-stack">
-                <canvas id="wb-canvas"></canvas>
+          <canvas id="wb-canvas"></canvas>
                 <div id="wb-align-grid" aria-hidden="true"></div>
               </div>
             </div>
@@ -52,7 +52,10 @@
 
           <div id="wb-mobile-bar">
             <button type="button" class="wb-mobile-toggle wb-mobile-close" id="wb-mobile-close-btn" aria-label="Close board">✕</button>
-            <button type="button" class="wb-mobile-toggle" id="wb-mobile-scroll-toggle" aria-label="Scroll canvas">👆 Scroll</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-pan-left" aria-label="Pan left">◀</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-pan-right" aria-label="Pan right">▶</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-undo" aria-label="Undo">↩</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-redo" aria-label="Redo">↪</button>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-out" aria-label="Zoom out">−</button>
             <span id="wb-mobile-zoom-label">100%</span>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-in" aria-label="Zoom in">+</button>
@@ -66,13 +69,13 @@
               <button class="wb-tool-btn active" id="wb-tool-draw" title="Draw" data-tool="draw">✏️</button>
               <button class="wb-tool-btn" id="wb-tool-erase" title="Eraser" data-tool="erase">🧹</button>
               <button class="wb-tool-btn" id="wb-tool-select" title="Select / Move" data-tool="select">🖐️</button>
-              <div class="wb-separator"></div>
+            <div class="wb-separator"></div>
               <button class="wb-tool-btn" id="wb-tool-shapes" title="Shapes & Arrows">⬡</button>
               <button class="wb-tool-btn" id="wb-tool-bullets" title="Bullets & Markers">●</button>
               <button class="wb-tool-btn" id="wb-tool-emoji" title="Emoji">😄</button>
               <button class="wb-tool-btn" id="wb-tool-image" title="Gallery Image">🖼️</button>
               <button class="wb-tool-btn active" id="wb-tool-grid" title="Toggle alignment grid">⊞</button>
-              <div class="wb-separator"></div>
+            <div class="wb-separator"></div>
               <button class="wb-tool-btn" id="wb-tool-clear" title="Clear">🗑️</button>
               <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
               <button class="wb-tool-btn wb-tool-close-main" id="wb-tool-close" title="Close">❌</button>
@@ -82,11 +85,11 @@
               <div class="wb-control-group">
                 <span>Color</span>
                 <input type="color" id="wb-color" class="wb-color-picker" value="#000000" title="Color">
-              </div>
-              <div class="wb-control-group">
-                <span>Size</span>
-                <input type="range" id="wb-size" class="wb-slider" min="1" max="50" value="5">
-              </div>
+            </div>
+            <div class="wb-control-group">
+              <span>Size</span>
+              <input type="range" id="wb-size" class="wb-slider" min="1" max="50" value="5">
+            </div>
               <div class="wb-control-group">
                 <span>Ink</span>
                 <input type="range" id="wb-ink-depth" class="wb-slider" min="0.1" max="1" step="0.05" value="1" title="Ink depth / opacity">
@@ -95,7 +98,7 @@
                 <span>Stroke</span>
                 <input type="range" id="wb-stroke-width" class="wb-slider" min="1" max="30" value="4" title="Shape stroke width">
               </div>
-              <div class="wb-separator"></div>
+            <div class="wb-separator"></div>
               <div class="wb-control-group">
                 <span>BG</span>
                 <input type="range" id="wb-bg-alpha" class="wb-slider" min="0" max="1" step="0.05" value="1" title="Background transparency">
@@ -113,8 +116,8 @@
               <button type="button" class="wb-panel-close" data-panel="wb-panel-shapes">✕</button>
             </div>
             <div class="wb-panel-grid" id="wb-shapes-grid"></div>
-          </div>
-
+            </div>
+            
           <div id="wb-panel-bullets" class="wb-panel" hidden>
             <div class="wb-panel-header">
               <span>Bullets & Markers</span>
@@ -157,12 +160,15 @@
     const mobileUiReveal = document.getElementById('wb-mobile-ui-reveal');
     let gridVisible = true;
     let gridOpacity = 0.25;
-    let mobileScrollMode = false;
     let mobileUiHideTimer = null;
     const MOBILE_UI_HIDE_MS = 4500;
-    let touchGestureMode = null;
     let touchStartDist = 0;
-    let touchLastMid = null;
+    let suppressDraw = false;
+    let lastPathTime = 0;
+    let modifyUndoTimer = null;
+    const undoHistory = [];
+    let undoIndex = -1;
+    const WB_JSON_PROPS = ['id', 'wbBackground'];
 
     const canvas = new fabric.Canvas('wb-canvas', {
       isDrawingMode: true,
@@ -309,6 +315,7 @@
       closeAllPanels();
       setActiveTool('select');
       syncAdd(obj);
+      recordUndoState();
     });
 
     populateGrid('wb-bullets-grid', BULLET_DEFS, (def) => {
@@ -317,6 +324,7 @@
       closeAllPanels();
       setActiveTool('select');
       syncAdd(obj);
+      recordUndoState();
     });
 
     const emojiGrid = document.getElementById('wb-emoji-grid');
@@ -335,6 +343,7 @@
         closeAllPanels();
         setActiveTool('select');
         syncAdd(t);
+        recordUndoState();
       };
     });
 
@@ -376,25 +385,106 @@
       }, MOBILE_UI_HIDE_MS);
     }
 
-    function setMobileScrollMode(on) {
-      if (!isMobile() || isPresenter) return;
-      mobileScrollMode = on;
-      overlay.classList.toggle('wb-scroll-mode', on);
-      const scrollBtn = document.getElementById('wb-mobile-scroll-toggle');
-      if (scrollBtn) scrollBtn.classList.toggle('active', on);
-      if (on) {
-        canvas.isDrawingMode = false;
-        canvas.selection = false;
-      } else {
-        setActiveTool(currentTool);
+    function updateMobileBarOffset() {
+      const bar = document.getElementById('wb-mobile-bar');
+      if (bar && isMobile() && !isPresenter) {
+        document.documentElement.style.setProperty('--wb-mobile-bar-h', `${bar.offsetHeight}px`);
       }
-      canvas.calcOffset();
+    }
+
+    function updateMobileViewportHeight() {
+      if (isPresenter || !isMobile() || !overlay.classList.contains('active')) return;
+      const vv = window.visualViewport;
+      overlay.classList.add('wb-mobile-viewport-fit');
+      if (vv) {
+        overlay.style.position = 'fixed';
+        overlay.style.top = `${vv.offsetTop}px`;
+        overlay.style.left = `${vv.offsetLeft}px`;
+        overlay.style.width = `${vv.width}px`;
+        overlay.style.height = `${vv.height}px`;
+      } else {
+        overlay.style.position = 'fixed';
+        overlay.style.top = '0';
+        overlay.style.left = '0';
+        overlay.style.width = '100vw';
+        overlay.style.height = `${window.innerHeight}px`;
+      }
+      updateMobileBarOffset();
+    }
+
+    function captureCanvasState() {
+      return JSON.stringify(canvas.toJSON(WB_JSON_PROPS));
+    }
+
+    function recordUndoState() {
+      if (isPresenter) return;
+      const snap = captureCanvasState();
+      if (undoIndex >= 0 && undoHistory[undoIndex] === snap) return;
+      undoHistory.splice(undoIndex + 1);
+      undoHistory.push(snap);
+      if (undoHistory.length > 50) {
+        undoHistory.shift();
+      } else {
+        undoIndex++;
+      }
+    }
+
+    function restoreCanvasState(jsonStr, syncPresenter) {
+      canvas.loadFromJSON(JSON.parse(jsonStr), () => {
+        canvas.renderAll();
+        if (!isPresenter) setActiveTool(currentTool);
+        applyCanvasLayout();
+        canvas.calcOffset();
+        if (syncPresenter && socket) {
+          socket.emit('wb-state', canvas.toJSON(WB_JSON_PROPS));
+        }
+      });
+    }
+
+    function undoAction() {
+      if (undoIndex <= 0) return;
+      undoIndex--;
+      restoreCanvasState(undoHistory[undoIndex], true);
       showMobileUI();
+    }
+
+    function redoAction() {
+      if (undoIndex >= undoHistory.length - 1) return;
+      undoIndex++;
+      restoreCanvasState(undoHistory[undoIndex], true);
+      showMobileUI();
+    }
+
+    function mobilePanHorizontal(dir) {
+      if (!scrollEl || useFitViewport()) return;
+      const step = Math.max(scrollEl.clientWidth * 0.4, 80);
+      scrollEl.scrollLeft += dir * step;
+      showMobileUI();
+    }
+
+    function scheduleModifyUndo() {
+      clearTimeout(modifyUndoTimer);
+      modifyUndoTimer = setTimeout(recordUndoState, 400);
+    }
+
+    function removeAccidentalPinchDot() {
+      if (Date.now() - lastPathTime > 400) return;
+      const objs = canvas.getObjects();
+      const last = objs[objs.length - 1];
+      if (!last || last.wbBackground) return;
+      if (socket && last.id) socket.emit('wb-remove', last.id);
+      canvas.remove(last);
+      canvas.renderAll();
     }
 
     function getMobileHeightFitScale() {
       if (!scrollEl) return 1;
-      const h = scrollEl.clientHeight;
+      let h = scrollEl.clientHeight;
+      if (h <= 0 && wrapper) {
+        const bar = document.getElementById('wb-mobile-bar');
+        const barH = bar ? bar.offsetHeight : 0;
+        h = (overlay.clientHeight || window.innerHeight) - barH;
+      }
       if (h <= 0) return 1;
       return h / CANVAS_HEIGHT;
     }
@@ -414,12 +504,11 @@
       applyCanvasLayout();
       showMobileUI();
     }
-
+    
     function setActiveTool(tool) {
       if (isPresenter) return;
       currentTool = tool;
       [btnDraw, btnErase, btnSelect].forEach(b => b.classList.remove('active'));
-      canvas.isDrawingMode = (tool === 'draw');
       canvas.selection = (tool === 'select');
       canvas.getObjects().forEach(obj => {
         if (obj.wbBackground) return;
@@ -429,7 +518,7 @@
       if (tool === 'draw') btnDraw.classList.add('active');
       if (tool === 'erase') btnErase.classList.add('active');
       if (tool === 'select') btnSelect.classList.add('active');
-      if (mobileScrollMode && tool !== 'select') setMobileScrollMode(false);
+      if (!suppressDraw) canvas.isDrawingMode = (tool === 'draw');
     }
 
     function getFitScale() {
@@ -496,6 +585,7 @@
         canvasStack.style.marginTop = '';
         updateScrollSpacer();
         scrollEl.scrollTop = 0;
+        updateMobileBarOffset();
       }
 
       updateZoomLabel();
@@ -530,6 +620,7 @@
     }
 
     function resizeCanvas() {
+      updateMobileViewportHeight();
       applyCanvasLayout();
       if (isMobile() && !isPresenter) {
         document.getElementById('wb-toolbar')?.classList.add('wb-toolbar-expanded');
@@ -537,6 +628,10 @@
     }
 
     window.addEventListener('resize', resizeCanvas);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', resizeCanvas);
+      window.visualViewport.addEventListener('scroll', resizeCanvas);
+    }
     setTimeout(resizeCanvas, 100);
 
     function syncModifiedObject(target) {
@@ -599,6 +694,7 @@
               closeAllPanels();
               setActiveTool('select');
               syncAdd(img);
+              recordUndoState();
             }, { crossOrigin: 'anonymous' });
           };
         });
@@ -612,13 +708,25 @@
         overlay.classList.add('active');
         if (triggerBtnRef) triggerBtnRef.classList.add('active');
         if (isMobile() && !isPresenter) {
+          updateMobileViewportHeight();
           initMobileZoom();
           showMobileUI();
+          undoHistory.length = 0;
+          undoIndex = -1;
+          setTimeout(() => {
+            recordUndoState();
+          }, 350);
         }
         setTimeout(() => { canvas.calcOffset(); resizeCanvas(); }, 300);
       } else {
         overlay.classList.remove('active');
         overlay.classList.remove('wb-mobile-ui-hidden');
+        overlay.classList.remove('wb-mobile-viewport-fit');
+        overlay.style.position = '';
+        overlay.style.top = '';
+        overlay.style.left = '';
+        overlay.style.width = '';
+        overlay.style.height = '';
         if (mobileUiReveal) mobileUiReveal.hidden = true;
         clearTimeout(mobileUiHideTimer);
         if (triggerBtnRef) triggerBtnRef.classList.remove('active');
@@ -628,6 +736,7 @@
     // ── Pointer / pan (desktop: alt+drag) ──
     canvas.on('mouse:down', function(opt) {
       const evt = opt.e;
+      if (suppressDraw || (evt.touches && evt.touches.length >= 2)) return;
       if (currentTool === 'erase' && opt.target && !opt.target.wbBackground) {
         syncRemove(opt.target);
         canvas.remove(opt.target);
@@ -661,50 +770,52 @@
       }
     });
 
-    // ── Mobile touch: two-finger pan scroll + pinch zoom ──
+    // ── Mobile: two-finger pinch zoom only (no pan, no accidental dots) ──
     if (!isPresenter) {
-      scrollEl.addEventListener('touchstart', (e) => {
-        if (!isMobile() || useFitViewport()) return;
-        if (e.touches.length === 2) {
-          touchGestureMode = null;
+      const onMobileTouchStart = (e) => {
+        if (!isMobile() || useFitViewport() || !overlay.classList.contains('active')) return;
+        if (e.touches.length >= 2) {
+          suppressDraw = true;
+          canvas.isDrawingMode = false;
+          removeAccidentalPinchDot();
           touchStartDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
           );
           pinchStartZoom = viewportZoom;
-          touchLastMid = {
-            x: (e.touches[0].clientX + e.touches[1].clientX) / 2,
-            y: (e.touches[0].clientY + e.touches[1].clientY) / 2
-          };
+          e.preventDefault();
         }
-      }, { passive: true });
+      };
 
-      scrollEl.addEventListener('touchmove', (e) => {
-        if (!isMobile() || useFitViewport()) return;
-        if (e.touches.length === 2 && touchLastMid && touchStartDist > 0) {
+      const onMobileTouchMove = (e) => {
+        if (!isMobile() || useFitViewport() || !overlay.classList.contains('active')) return;
+        if (e.touches.length === 2 && touchStartDist > 0) {
           const dist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
             e.touches[0].clientY - e.touches[1].clientY
           );
-          const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-          const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-
-          if (touchGestureMode === 'pinch' || (touchGestureMode === null && Math.abs(dist - touchStartDist) > 14)) {
-            touchGestureMode = 'pinch';
-            applyViewportZoom(pinchStartZoom * (dist / touchStartDist));
-          } else {
-            touchGestureMode = 'pan';
-            scrollEl.scrollLeft -= (midX - touchLastMid.x);
-          }
-          touchLastMid = { x: midX, y: midY };
+          applyViewportZoom(pinchStartZoom * (dist / touchStartDist));
           e.preventDefault();
         }
-      }, { passive: false });
+      };
 
-      scrollEl.addEventListener('touchend', () => {
-        touchGestureMode = null;
-        touchLastMid = null;
-      });
+      const onMobileTouchEnd = (e) => {
+        if (e.touches.length < 2) {
+          touchStartDist = 0;
+          suppressDraw = false;
+          if (currentTool === 'draw') canvas.isDrawingMode = true;
+        }
+      };
+
+      scrollEl.addEventListener('touchstart', onMobileTouchStart, { passive: false });
+      scrollEl.addEventListener('touchmove', onMobileTouchMove, { passive: false });
+      scrollEl.addEventListener('touchend', onMobileTouchEnd, { passive: true });
+      scrollEl.addEventListener('touchcancel', onMobileTouchEnd, { passive: true });
+      if (canvas.upperCanvasEl) {
+        canvas.upperCanvasEl.addEventListener('touchstart', onMobileTouchStart, { passive: false });
+        canvas.upperCanvasEl.addEventListener('touchmove', onMobileTouchMove, { passive: false });
+        canvas.upperCanvasEl.addEventListener('touchend', onMobileTouchEnd, { passive: true });
+      }
     }
 
     function closeWhiteboard() {
@@ -745,8 +856,10 @@
 
       document.getElementById('wb-tool-clear').onclick = () => {
         if (confirm('Clear entire board?')) {
+          recordUndoState();
           canvas.getObjects().slice().forEach(o => canvas.remove(o));
           canvas.renderAll();
+          recordUndoState();
           if (socket) socket.emit('wb-clear');
         }
       };
@@ -769,9 +882,10 @@
         };
       }
       document.getElementById('wb-mobile-close-btn')?.addEventListener('click', closeWhiteboard);
-      document.getElementById('wb-mobile-scroll-toggle')?.addEventListener('click', () => {
-        setMobileScrollMode(!mobileScrollMode);
-      });
+      document.getElementById('wb-mobile-pan-left')?.addEventListener('click', () => mobilePanHorizontal(-1));
+      document.getElementById('wb-mobile-pan-right')?.addEventListener('click', () => mobilePanHorizontal(1));
+      document.getElementById('wb-mobile-undo')?.addEventListener('click', undoAction);
+      document.getElementById('wb-mobile-redo')?.addEventListener('click', redoAction);
       document.getElementById('wb-mobile-zoom-in')?.addEventListener('click', () => mobileZoomBy(1.15));
       document.getElementById('wb-mobile-zoom-out')?.addEventListener('click', () => mobileZoomBy(0.87));
       if (mobileUiReveal) {
@@ -806,17 +920,20 @@
 
       canvas.on('path:created', function(opt) {
         opt.path.set({ id: newId() });
+        lastPathTime = Date.now();
         if (socket) socket.emit('wb-add', opt.path.toJSON(['id']));
+        recordUndoState();
       });
 
       canvas.on('object:modified', function(opt) {
         syncModifiedObject(opt.target);
+        scheduleModifyUndo();
       });
-
+      
     } else if (socket) {
       socket.on('wb-open', () => toggleWhiteboard(true));
       socket.on('wb-close', () => toggleWhiteboard(false));
-
+      
       socket.on('wb-state', (data) => {
         canvas.loadFromJSON(data, () => {
           canvas.getObjects().forEach(o => {
@@ -830,11 +947,11 @@
       socket.on('wb-pan', () => { /* fit-viewport mode: pan not used */ });
 
       socket.on('wb-zoom', () => { /* fit-viewport mode: zoom not used */ });
-
+      
       socket.on('wb-bg', (alpha) => {
         bg.style.background = `rgba(255,255,255,${alpha})`;
       });
-
+      
       socket.on('wb-add', (objData) => {
         fabric.util.enlivenObjects([objData], (objects) => {
           const prev = canvas.renderOnAddRemove;
@@ -848,7 +965,7 @@
           canvas.requestRenderAll();
         });
       });
-
+      
       socket.on('wb-modify', (objData) => {
         const obj = canvas.getObjects().find(o => o.id === objData.id);
         if (obj) {
@@ -868,7 +985,7 @@
         });
         canvas.requestRenderAll();
       });
-
+      
       socket.on('wb-remove', (id) => {
         const obj = canvas.getObjects().find(o => o.id === id);
         if (obj) canvas.remove(obj);
