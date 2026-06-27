@@ -1,5 +1,4 @@
-// js/whiteboard.js
-// Inject styles and fabric.js dynamically
+// js/whiteboard.js — Interactive Whiteboard (Editor + Presenter sync)
 (function initWhiteboardSystem() {
   if (document.getElementById('wb-injected')) return;
   const marker = document.createElement('div');
@@ -7,72 +6,133 @@
   marker.style.display = 'none';
   document.body.appendChild(marker);
 
-  // 1. Inject CSS
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = 'css/whiteboard.css';
   document.head.appendChild(link);
 
-  // 2. Inject Fabric.js
   const script = document.createElement('script');
   script.src = 'https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js';
   script.onload = () => setupWhiteboard();
   document.head.appendChild(script);
 
   const isPresenter = !window.location.href.includes('dashboard');
+  const isMobile = () => window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+
+  const CANVAS_WIDTH = 1920;
+  const CANVAS_HEIGHT = 1080;
+  const GRID_CELL = 60; /* divides 1920 (32 cols) and 1080 (18 rows) evenly */
+
+  const EMOJIS = [
+    '😀','😃','😄','😁','😊','🙂','😉','😍','🥰','😘',
+    '🤔','😮','😲','😢','😭','😡','🤯','😴','🤗','👍',
+    '👎','👏','🙌','✋','👋','💪','🎉','⭐','❤️','💡',
+    '✅','❌','❓','❗','⚠️','🔥','💯','🏆','🎯','📌',
+    '📚','✏️','📝','🔬','🌱','🌾','🐄','🐔','🚜','🌍',
+    '☀️','🌧️','💧','🌳','🍎','🥕','🌽','🐝','🦋','🐛'
+  ];
 
   function setupWhiteboard() {
-    // 3. Inject UI
     const uiHTML = `
-      <!-- Trigger Button (Dashboard Only) -->
-      ${!isPresenter ? `<div id="wb-trigger-btn" title="Open Interactive Board">🖌️</div>` : ''}
+      ${!isPresenter ? `<div id="wb-trigger-btn" title="Open Interactive Board"><span class="wb-trigger-icon">🖌️</span><span class="wb-trigger-label">Board</span></div>` : ''}
 
-      <!-- Overlay -->
-      <div id="whiteboard-overlay" class="${isPresenter ? 'is-presenter' : ''}">
-        <div id="whiteboard-bg" style="background: rgba(255,255,255,1);"></div>
+      <div id="whiteboard-overlay" class="${isPresenter ? 'is-presenter' : 'is-editor'}">
+        <div id="whiteboard-bg" style="background:rgba(255,255,255,1);"></div>
         <div id="whiteboard-wrapper">
-          <canvas id="wb-canvas"></canvas>
-          
-          <!-- Toolbar -->
+          <div id="wb-canvas-scroll">
+            <div id="wb-scroll-spacer">
+              <div id="wb-canvas-stack">
+                <canvas id="wb-canvas"></canvas>
+                <div id="wb-align-grid" aria-hidden="true"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="wb-mobile-bar">
+            <button type="button" class="wb-mobile-toggle wb-mobile-close" id="wb-mobile-close-btn" aria-label="Close board">✕ Close</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-tools-toggle" aria-label="Tools">🛠️ Tools</button>
+            <span id="wb-mobile-zoom-label">100%</span>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-fit-btn" aria-label="Fit view">⊡ Fit</button>
+          </div>
+
           <div id="wb-toolbar">
-            <button class="wb-tool-btn active" id="wb-tool-draw" title="Draw">✏️</button>
-            <button class="wb-tool-btn" id="wb-tool-erase" title="Eraser">🧹</button>
-            <button class="wb-tool-btn" id="wb-tool-select" title="Select/Move Objects">🖐️</button>
-            
-            <div class="wb-separator"></div>
-            
-            <button class="wb-tool-btn" id="wb-tool-rect" title="Add Rectangle">🟦</button>
-            <button class="wb-tool-btn" id="wb-tool-circle" title="Add Circle">🔵</button>
-            <button class="wb-tool-btn" id="wb-tool-triangle" title="Add Triangle">🔺</button>
-            <button class="wb-tool-btn" id="wb-tool-star" title="Add Star">⭐</button>
-            <button class="wb-tool-btn" id="wb-tool-arrow" title="Add Pointer/Arrow">➡️</button>
-            <button class="wb-tool-btn" id="wb-tool-text" title="Add Emoji/Text">😄</button>
-            
-            <div class="wb-separator"></div>
-            
-            <div class="wb-control-group">
-              <input type="color" id="wb-color" class="wb-color-picker" value="#000000" title="Pen Color">
+            <div class="wb-toolbar-row wb-toolbar-primary">
+              <button class="wb-tool-btn active" id="wb-tool-draw" title="Draw" data-tool="draw">✏️</button>
+              <button class="wb-tool-btn" id="wb-tool-erase" title="Eraser" data-tool="erase">🧹</button>
+              <button class="wb-tool-btn" id="wb-tool-select" title="Select / Move" data-tool="select">🖐️</button>
+              <div class="wb-separator"></div>
+              <button class="wb-tool-btn" id="wb-tool-shapes" title="Shapes & Arrows">⬡</button>
+              <button class="wb-tool-btn" id="wb-tool-bullets" title="Bullets & Markers">●</button>
+              <button class="wb-tool-btn" id="wb-tool-emoji" title="Emoji">😄</button>
+              <button class="wb-tool-btn" id="wb-tool-image" title="Gallery Image">🖼️</button>
+              <button class="wb-tool-btn active" id="wb-tool-grid" title="Toggle alignment grid">⊞</button>
+              <div class="wb-separator"></div>
+              <button class="wb-tool-btn" id="wb-tool-clear" title="Clear">🗑️</button>
+              <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
+              <button class="wb-tool-btn wb-tool-close-main" id="wb-tool-close" title="Close">❌</button>
             </div>
-            <div class="wb-control-group">
-              <span>Size</span>
-              <input type="range" id="wb-size" class="wb-slider" min="1" max="50" value="5">
+
+            <div class="wb-toolbar-row wb-toolbar-controls">
+              <div class="wb-control-group">
+                <span>Color</span>
+                <input type="color" id="wb-color" class="wb-color-picker" value="#000000" title="Color">
+              </div>
+              <div class="wb-control-group">
+                <span>Size</span>
+                <input type="range" id="wb-size" class="wb-slider" min="1" max="50" value="5">
+              </div>
+              <div class="wb-control-group">
+                <span>Ink</span>
+                <input type="range" id="wb-ink-depth" class="wb-slider" min="0.1" max="1" step="0.05" value="1" title="Ink depth / opacity">
+              </div>
+              <div class="wb-control-group">
+                <span>Stroke</span>
+                <input type="range" id="wb-stroke-width" class="wb-slider" min="1" max="30" value="4" title="Shape stroke width">
+              </div>
+              <div class="wb-separator"></div>
+              <div class="wb-control-group">
+                <span>BG</span>
+                <input type="range" id="wb-bg-alpha" class="wb-slider" min="0" max="1" step="0.05" value="1" title="Background transparency">
+              </div>
+              <div class="wb-control-group">
+                <span>Grid</span>
+                <input type="range" id="wb-grid-opacity" class="wb-slider" min="0" max="1" step="0.05" value="0.25" title="Alignment grid opacity">
+              </div>
             </div>
-            
-            <div class="wb-separator"></div>
-            
-            <div class="wb-control-group">
-              <span>BG Alpha</span>
-              <input type="range" id="wb-bg-alpha" class="wb-slider" min="0" max="1" step="0.05" value="1" title="Background Transparency">
+          </div>
+
+          <div id="wb-panel-shapes" class="wb-panel" hidden>
+            <div class="wb-panel-header">
+              <span>Shapes & Arrows</span>
+              <button type="button" class="wb-panel-close" data-panel="wb-panel-shapes">✕</button>
             </div>
-            
-            <div class="wb-separator"></div>
-            
-            <button class="wb-tool-btn" id="wb-tool-image" title="Add Image">🖼️</button>
-            <input type="file" id="wb-image-input" accept="image/*" style="display:none;">
-            
-            <button class="wb-tool-btn" id="wb-tool-clear" title="Clear Canvas">🗑️</button>
-            <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
-            <button class="wb-tool-btn" id="wb-tool-close" title="Close Board">❌</button>
+            <div class="wb-panel-grid" id="wb-shapes-grid"></div>
+          </div>
+
+          <div id="wb-panel-bullets" class="wb-panel" hidden>
+            <div class="wb-panel-header">
+              <span>Bullets & Markers</span>
+              <button type="button" class="wb-panel-close" data-panel="wb-panel-bullets">✕</button>
+            </div>
+            <div class="wb-panel-grid" id="wb-bullets-grid"></div>
+          </div>
+
+          <div id="wb-panel-emoji" class="wb-panel wb-panel-wide" hidden>
+            <div class="wb-panel-header">
+              <span>Emoji</span>
+              <button type="button" class="wb-panel-close" data-panel="wb-panel-emoji">✕</button>
+            </div>
+            <div class="wb-panel-grid wb-emoji-grid" id="wb-emoji-grid"></div>
+          </div>
+
+          <div id="wb-panel-gallery" class="wb-panel wb-panel-wide" hidden>
+            <div class="wb-panel-header">
+              <span>Gallery Images</span>
+              <button type="button" class="wb-panel-close" data-panel="wb-panel-gallery">✕</button>
+            </div>
+            <div class="wb-panel-grid wb-gallery-grid" id="wb-gallery-grid">
+              <p class="wb-panel-loading">Loading gallery…</p>
+            </div>
           </div>
         </div>
       </div>
@@ -82,226 +142,396 @@
 
     const overlay = document.getElementById('whiteboard-overlay');
     const bg = document.getElementById('whiteboard-bg');
+    const wrapper = document.getElementById('whiteboard-wrapper');
+    const scrollEl = document.getElementById('wb-canvas-scroll');
+    const scrollSpacer = document.getElementById('wb-scroll-spacer');
+    const canvasStack = document.getElementById('wb-canvas-stack');
+    const alignGrid = document.getElementById('wb-align-grid');
     const triggerBtn = document.getElementById('wb-trigger-btn');
-    // ── FIXED CANVAS DIMENSIONS ──
-    const CANVAS_WIDTH = 1920;
-    const CANVAS_HEIGHT = 1080;
+    const mobileZoomLabel = document.getElementById('wb-mobile-zoom-label');
+    let gridVisible = true;
+    let gridOpacity = 0.25;
 
-    // Initialize Fabric Canvas
     const canvas = new fabric.Canvas('wb-canvas', {
       isDrawingMode: true,
       selection: false,
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
-      allowTouchScrolling: true // Let browser scroll if not interacting
+      allowTouchScrolling: false,
+      preserveObjectStacking: true
     });
 
-    // Make canvas responsive
-    function resizeCanvas() {
-      if (isPresenter) {
-        // Presenter: Scale to fit perfectly in viewport
-        const scale = Math.min(window.innerWidth / CANVAS_WIDTH, window.innerHeight / CANVAS_HEIGHT);
-        const wrapper = document.querySelector('.canvas-container');
-        if (wrapper) {
-          wrapper.style.transform = `scale(${scale})`;
-          
-          // Center it
-          const scaledW = CANVAS_WIDTH * scale;
-          const scaledH = CANVAS_HEIGHT * scale;
-          wrapper.style.marginLeft = `${(window.innerWidth - scaledW) / 2}px`;
-          wrapper.style.marginTop = `${(window.innerHeight - scaledH) / 2}px`;
-        }
-      } else {
-        // Dashboard: No CSS scale, allow native scrolling.
-        // We will just let the wrapper overflow and native browser handle pinch-zoom.
-      }
-    }
-    window.addEventListener('resize', resizeCanvas);
-    setTimeout(resizeCanvas, 100); // Initial resize
+    let currentTool = 'draw';
+    let viewportZoom = 1;
+    let pinchStartDist = 0;
+    let pinchStartZoom = 1;
+    let isPinching = false;
+    let galleryCache = null;
 
-    // Tools state
-    let currentTool = 'draw'; // 'draw', 'erase', 'select'
-    
-    // Brush setup
     canvas.freeDrawingBrush.color = '#000000';
     canvas.freeDrawingBrush.width = 5;
 
-    // Default Eraser brush (we will use a custom approach or just remove objects on click/swipe)
-    // A robust eraser in Fabric is tricky. We'll implement an object eraser: in erase mode, touching an object removes it.
-    
-    // ── Tool Selection ──
+    if (canvasStack) {
+      canvasStack.style.width = CANVAS_WIDTH + 'px';
+      canvasStack.style.height = CANVAS_HEIGHT + 'px';
+      if (alignGrid) canvasStack.appendChild(alignGrid);
+    }
+
+    function getColor() {
+      return document.getElementById('wb-color').value;
+    }
+    function getInkOpacity() {
+      return parseFloat(document.getElementById('wb-ink-depth').value);
+    }
+    function getStrokeWidth() {
+      return parseInt(document.getElementById('wb-stroke-width').value, 10);
+    }
+    function hexToRgba(hex, alpha) {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r},${g},${b},${alpha})`;
+    }
+    function shapeStyle(extra = {}) {
+      const color = getColor();
+      const opacity = getInkOpacity();
+      const strokeW = getStrokeWidth();
+      return {
+        fill: hexToRgba(color, opacity * 0.35),
+        stroke: hexToRgba(color, opacity),
+        strokeWidth: strokeW,
+        strokeUniform: true,
+        id: Date.now().toString() + Math.random().toString(36).slice(2, 6),
+        ...extra
+      };
+    }
+    function centerPos(w = 100, h = 100) {
+      return {
+        left: CANVAS_WIDTH / 2 - w / 2,
+        top: CANVAS_HEIGHT / 2 - h / 2
+      };
+    }
+    function newId() {
+      return Date.now().toString() + Math.random().toString(36).slice(2, 6);
+    }
+
+    const SHAPE_DEFS = [
+      { id: 'rect', icon: '▭', label: 'Rectangle', create: () => new fabric.Rect({ ...centerPos(120, 80), width: 120, height: 80, ...shapeStyle() }) },
+      { id: 'round-rect', icon: '▢', label: 'Rounded', create: () => new fabric.Rect({ ...centerPos(120, 80), width: 120, height: 80, rx: 16, ry: 16, ...shapeStyle() }) },
+      { id: 'circle', icon: '○', label: 'Circle', create: () => new fabric.Circle({ ...centerPos(100, 100), radius: 50, ...shapeStyle() }) },
+      { id: 'ellipse', icon: '⬭', label: 'Ellipse', create: () => new fabric.Ellipse({ ...centerPos(120, 70), rx: 60, ry: 35, ...shapeStyle() }) },
+      { id: 'triangle', icon: '△', label: 'Triangle', create: () => new fabric.Triangle({ ...centerPos(100, 100), width: 100, height: 100, ...shapeStyle() }) },
+      { id: 'right-tri', icon: '◺', label: 'Right Tri', create: () => new fabric.Polygon([{ x: 0, y: 0 }, { x: 100, y: 100 }, { x: 0, y: 100 }], { ...centerPos(100, 100), ...shapeStyle() }) },
+      { id: 'star', icon: '★', label: 'Star', create: () => new fabric.Polygon([
+        { x: 50, y: 0 }, { x: 61, y: 35 }, { x: 98, y: 35 }, { x: 68, y: 57 }, { x: 79, y: 91 },
+        { x: 50, y: 70 }, { x: 21, y: 91 }, { x: 32, y: 57 }, { x: 2, y: 35 }, { x: 39, y: 35 }
+      ], { ...centerPos(100, 100), ...shapeStyle() }) },
+      { id: 'pentagon', icon: '⬠', label: 'Pentagon', create: () => {
+        const pts = []; for (let i = 0; i < 5; i++) { const a = (i * 72 - 90) * Math.PI / 180; pts.push({ x: 50 + 50 * Math.cos(a), y: 50 + 50 * Math.sin(a) }); }
+        return new fabric.Polygon(pts, { ...centerPos(100, 100), ...shapeStyle() });
+      }},
+      { id: 'hexagon', icon: '⬡', label: 'Hexagon', create: () => {
+        const pts = []; for (let i = 0; i < 6; i++) { const a = (i * 60 - 30) * Math.PI / 180; pts.push({ x: 50 + 50 * Math.cos(a), y: 50 + 50 * Math.sin(a) }); }
+        return new fabric.Polygon(pts, { ...centerPos(100, 100), ...shapeStyle() });
+      }},
+      { id: 'octagon', icon: '🛑', label: 'Octagon', create: () => {
+        const pts = []; for (let i = 0; i < 8; i++) { const a = (i * 45 - 22.5) * Math.PI / 180; pts.push({ x: 50 + 50 * Math.cos(a), y: 50 + 50 * Math.sin(a) }); }
+        return new fabric.Polygon(pts, { ...centerPos(100, 100), ...shapeStyle() });
+      }},
+      { id: 'diamond', icon: '◆', label: 'Diamond', create: () => new fabric.Polygon([{ x: 50, y: 0 }, { x: 100, y: 50 }, { x: 50, y: 100 }, { x: 0, y: 50 }], { ...centerPos(100, 100), ...shapeStyle() }) },
+      { id: 'parallelogram', icon: '▱', label: 'Parallel', create: () => new fabric.Polygon([{ x: 25, y: 0 }, { x: 125, y: 0 }, { x: 100, y: 80 }, { x: 0, y: 80 }], { ...centerPos(125, 80), ...shapeStyle() }) },
+      { id: 'trapezoid', icon: '⏢', label: 'Trapezoid', create: () => new fabric.Polygon([{ x: 20, y: 0 }, { x: 100, y: 0 }, { x: 120, y: 80 }, { x: 0, y: 80 }], { ...centerPos(120, 80), ...shapeStyle() }) },
+      { id: 'cross', icon: '✚', label: 'Cross', create: () => new fabric.Polygon([
+        { x: 35, y: 0 }, { x: 65, y: 0 }, { x: 65, y: 35 }, { x: 100, y: 35 },
+        { x: 100, y: 65 }, { x: 65, y: 65 }, { x: 65, y: 100 }, { x: 35, y: 100 },
+        { x: 35, y: 65 }, { x: 0, y: 65 }, { x: 0, y: 35 }, { x: 35, y: 35 }
+      ], { ...centerPos(100, 100), ...shapeStyle() }) },
+      { id: 'plus', icon: '＋', label: 'Plus', create: () => new fabric.Path('M 45 0 L 55 0 L 55 45 L 100 45 L 100 55 L 55 55 L 55 100 L 45 100 L 45 55 L 0 55 L 0 45 L 45 45 Z', { ...centerPos(100, 100), ...shapeStyle() }) },
+      { id: 'heart', icon: '♥', label: 'Heart', create: () => new fabric.Path('M 50 90 C 20 60 0 40 0 25 C 0 10 12 0 25 0 C 35 0 42 6 50 15 C 58 6 65 0 75 0 C 88 0 100 10 100 25 C 100 40 80 60 50 90 Z', { ...centerPos(100, 100), ...shapeStyle() }) },
+      { id: 'cloud', icon: '☁', label: 'Cloud', create: () => new fabric.Path('M 25 70 C 5 70 0 55 10 45 C 0 35 10 20 25 20 C 30 8 45 0 60 5 C 75 0 95 10 95 30 C 110 30 115 50 100 60 C 105 75 85 80 70 75 C 60 85 40 85 25 70 Z', { ...centerPos(110, 80), ...shapeStyle() }) },
+      { id: 'speech', icon: '💬', label: 'Speech', create: () => new fabric.Path('M 10 10 L 110 10 Q 120 10 120 20 L 120 60 Q 120 70 110 70 L 50 70 L 30 90 L 35 70 L 10 70 Q 0 70 0 60 L 0 20 Q 0 10 10 10 Z', { ...centerPos(120, 90), ...shapeStyle() }) },
+      { id: 'arrow-r', icon: '→', label: 'Arrow R', create: () => new fabric.Path('M 0 40 L 80 40 M 55 15 L 80 40 L 55 65', { ...centerPos(90, 80), fill: '', strokeLineCap: 'round', strokeLineJoin: 'round', ...shapeStyle({ fill: '' }) }) },
+      { id: 'arrow-l', icon: '←', label: 'Arrow L', create: () => new fabric.Path('M 80 40 L 0 40 M 25 15 L 0 40 L 25 65', { ...centerPos(90, 80), fill: '', strokeLineCap: 'round', strokeLineJoin: 'round', ...shapeStyle({ fill: '' }) }) },
+      { id: 'arrow-u', icon: '↑', label: 'Arrow U', create: () => new fabric.Path('M 40 80 L 40 0 M 15 25 L 40 0 L 65 25', { ...centerPos(80, 90), fill: '', strokeLineCap: 'round', strokeLineJoin: 'round', ...shapeStyle({ fill: '' }) }) },
+      { id: 'arrow-d', icon: '↓', label: 'Arrow D', create: () => new fabric.Path('M 40 0 L 40 80 M 15 55 L 40 80 L 65 55', { ...centerPos(80, 90), fill: '', strokeLineCap: 'round', strokeLineJoin: 'round', ...shapeStyle({ fill: '' }) }) },
+      { id: 'arrow-double', icon: '⇄', label: 'Double', create: () => new fabric.Path('M 10 30 L 50 30 M 35 15 L 50 30 L 35 45 M 90 50 L 50 50 M 65 35 L 50 50 L 65 65', { ...centerPos(100, 80), fill: '', strokeLineCap: 'round', strokeLineJoin: 'round', ...shapeStyle({ fill: '' }) }) },
+      { id: 'arrow-curved', icon: '↷', label: 'Curved', create: () => new fabric.Path('M 10 70 Q 10 10 70 10 L 70 10 M 55 0 L 70 10 L 60 25', { ...centerPos(90, 80), fill: '', strokeLineCap: 'round', strokeLineJoin: 'round', ...shapeStyle({ fill: '' }) }) },
+      { id: 'line', icon: '—', label: 'Line', create: () => new fabric.Line([0, 0, 140, 0], { ...centerPos(140, 4), ...shapeStyle({ fill: '' }) }) },
+      { id: 'line-dashed', icon: '┄', label: 'Dashed', create: () => new fabric.Line([0, 0, 140, 0], { ...centerPos(140, 4), strokeDashArray: [12, 8], ...shapeStyle({ fill: '' }) }) }
+    ];
+
+    const BULLET_DEFS = [
+      { id: 'bullet-dot', icon: '●', label: 'Dot', create: () => new fabric.Circle({ ...centerPos(24, 24), radius: 12, fill: hexToRgba(getColor(), getInkOpacity()), stroke: '', id: newId() }) },
+      { id: 'bullet-ring', icon: '◯', label: 'Ring', create: () => new fabric.Circle({ ...centerPos(24, 24), radius: 12, fill: '', stroke: hexToRgba(getColor(), getInkOpacity()), strokeWidth: getStrokeWidth(), id: newId() }) },
+      { id: 'bullet-square', icon: '■', label: 'Square', create: () => new fabric.Rect({ ...centerPos(24, 24), width: 24, height: 24, fill: hexToRgba(getColor(), getInkOpacity()), stroke: '', id: newId() }) },
+      { id: 'bullet-diamond', icon: '◆', label: 'Diamond', create: () => new fabric.Polygon([{ x: 12, y: 0 }, { x: 24, y: 12 }, { x: 12, y: 24 }, { x: 0, y: 12 }], { ...centerPos(24, 24), fill: hexToRgba(getColor(), getInkOpacity()), stroke: '', id: newId() }) },
+      { id: 'bullet-star', icon: '★', label: 'Star', create: () => new fabric.Polygon([
+        { x: 12, y: 0 }, { x: 15, y: 8 }, { x: 24, y: 8 }, { x: 17, y: 13 }, { x: 20, y: 22 },
+        { x: 12, y: 17 }, { x: 4, y: 22 }, { x: 7, y: 13 }, { x: 0, y: 8 }, { x: 9, y: 8 }
+      ], { ...centerPos(24, 24), fill: hexToRgba(getColor(), getInkOpacity()), stroke: '', id: newId() }) },
+      { id: 'bullet-check', icon: '✓', label: 'Check', create: () => new fabric.Path('M 5 14 L 12 22 L 28 4', { ...centerPos(32, 28), fill: '', stroke: hexToRgba(getColor(), getInkOpacity()), strokeWidth: getStrokeWidth(), strokeLineCap: 'round', strokeLineJoin: 'round', id: newId() }) },
+      { id: 'bullet-x', icon: '✕', label: 'X', create: () => new fabric.Path('M 4 4 L 26 26 M 26 4 L 4 26', { ...centerPos(30, 30), fill: '', stroke: hexToRgba(getColor(), getInkOpacity()), strokeWidth: getStrokeWidth(), strokeLineCap: 'round', id: newId() }) },
+      { id: 'bullet-arrow', icon: '➤', label: 'Pointer', create: () => new fabric.Triangle({ ...centerPos(30, 30), width: 30, height: 30, angle: 90, fill: hexToRgba(getColor(), getInkOpacity()), stroke: '', id: newId() }) },
+      { id: 'bullet-num1', icon: '①', label: 'One', create: () => new fabric.Text('①', { ...centerPos(40, 40), fontSize: 36, fill: hexToRgba(getColor(), getInkOpacity()), fontFamily: 'sans-serif', id: newId() }) },
+      { id: 'bullet-num2', icon: '②', label: 'Two', create: () => new fabric.Text('②', { ...centerPos(40, 40), fontSize: 36, fill: hexToRgba(getColor(), getInkOpacity()), fontFamily: 'sans-serif', id: newId() }) }
+    ];
+
+    function populateGrid(gridId, defs, onPick) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = defs.map(d => `
+        <button type="button" class="wb-pick-btn" title="${d.label}" data-id="${d.id}">
+          <span class="wb-pick-icon">${d.icon}</span>
+          <span class="wb-pick-label">${d.label}</span>
+        </button>
+      `).join('');
+      grid.querySelectorAll('.wb-pick-btn').forEach(btn => {
+        btn.onclick = () => {
+          const def = defs.find(x => x.id === btn.dataset.id);
+          if (def) onPick(def);
+        };
+      });
+    }
+
+    populateGrid('wb-shapes-grid', SHAPE_DEFS, (def) => {
+      const obj = def.create();
+      canvas.add(obj);
+      closeAllPanels();
+      setActiveTool('select');
+      syncAdd(obj);
+    });
+
+    populateGrid('wb-bullets-grid', BULLET_DEFS, (def) => {
+      const obj = def.create();
+      canvas.add(obj);
+      closeAllPanels();
+      setActiveTool('select');
+      syncAdd(obj);
+    });
+
+    const emojiGrid = document.getElementById('wb-emoji-grid');
+    emojiGrid.innerHTML = EMOJIS.map(e => `<button type="button" class="wb-emoji-btn" data-emoji="${e}">${e}</button>`).join('');
+    emojiGrid.querySelectorAll('.wb-emoji-btn').forEach(btn => {
+      btn.onclick = () => {
+        const t = new fabric.Text(btn.dataset.emoji, {
+          ...centerPos(80, 80),
+          fontSize: 72,
+          fontFamily: 'Segoe UI Emoji, Apple Color Emoji, sans-serif',
+          fill: getColor(),
+          opacity: getInkOpacity(),
+          id: newId()
+        });
+        canvas.add(t);
+        closeAllPanels();
+        setActiveTool('select');
+        syncAdd(t);
+      };
+    });
+
+    function closeAllPanels() {
+      document.querySelectorAll('.wb-panel').forEach(p => { p.hidden = true; });
+    }
+    function togglePanel(id) {
+      const panel = document.getElementById(id);
+      const wasOpen = !panel.hidden;
+      closeAllPanels();
+      if (!wasOpen) {
+        panel.hidden = false;
+        if (isMobile()) document.getElementById('wb-toolbar')?.classList.add('wb-toolbar-expanded');
+      }
+    }
+
+    document.querySelectorAll('.wb-panel-close').forEach(btn => {
+      btn.onclick = () => { document.getElementById(btn.dataset.panel).hidden = true; };
+    });
+
     const btnDraw = document.getElementById('wb-tool-draw');
     const btnErase = document.getElementById('wb-tool-erase');
     const btnSelect = document.getElementById('wb-tool-select');
-    
+
     function setActiveTool(tool) {
-      if(isPresenter) return;
+      if (isPresenter) return;
       currentTool = tool;
-      btnDraw.classList.remove('active');
-      btnErase.classList.remove('active');
-      btnSelect.classList.remove('active');
-      
+      [btnDraw, btnErase, btnSelect].forEach(b => b.classList.remove('active'));
       canvas.isDrawingMode = (tool === 'draw');
       canvas.selection = (tool === 'select');
-      
-      // Make objects selectable only in select mode
       canvas.getObjects().forEach(obj => {
+        if (obj.wbBackground) return;
         obj.selectable = (tool === 'select');
         obj.evented = (tool === 'select' || tool === 'erase');
       });
-      
-      if(tool === 'draw') btnDraw.classList.add('active');
-      if(tool === 'erase') btnErase.classList.add('active');
-      if(tool === 'select') btnSelect.classList.add('active');
+      if (tool === 'draw') btnDraw.classList.add('active');
+      if (tool === 'erase') btnErase.classList.add('active');
+      if (tool === 'select') btnSelect.classList.add('active');
     }
 
-    if (!isPresenter) {
-      btnDraw.onclick = () => setActiveTool('draw');
-      btnErase.onclick = () => setActiveTool('erase');
-      btnSelect.onclick = () => setActiveTool('select');
-      
-      // Properties
-      document.getElementById('wb-color').onchange = (e) => {
-        canvas.freeDrawingBrush.color = e.target.value;
-      };
-      document.getElementById('wb-size').oninput = (e) => {
-        canvas.freeDrawingBrush.width = parseInt(e.target.value);
-      };
-      document.getElementById('wb-bg-alpha').oninput = (e) => {
-        const val = e.target.value;
-        bg.style.background = `rgba(255,255,255,${val})`;
-        if (socket) socket.emit('wb-bg', val);
-      };
-      
-      // Shapes
-      document.getElementById('wb-tool-rect').onclick = () => {
-        const rect = new fabric.Rect({
-          left: window.innerWidth / 2 - 50, top: window.innerHeight / 2 - 50, fill: document.getElementById('wb-color').value,
-          width: 100, height: 100, id: Date.now().toString()
-        });
-        canvas.add(rect);
-        setActiveTool('select');
-        syncAdd(rect);
-      };
-      
-      document.getElementById('wb-tool-circle').onclick = () => {
-        const circle = new fabric.Circle({
-          left: window.innerWidth / 2 - 50, top: window.innerHeight / 2 - 50, fill: document.getElementById('wb-color').value,
-          radius: 50, id: Date.now().toString()
-        });
-        canvas.add(circle);
-        setActiveTool('select');
-        syncAdd(circle);
-      };
+    function getFitScale() {
+      if (!scrollEl) return 1;
+      const w = scrollEl.clientWidth;
+      const h = scrollEl.clientHeight;
+      if (w <= 0 || h <= 0) return 1;
+      return Math.min(w / CANVAS_WIDTH, h / CANVAS_HEIGHT);
+    }
 
-      document.getElementById('wb-tool-triangle').onclick = () => {
-        const tri = new fabric.Triangle({
-          left: window.innerWidth / 2 - 50, top: window.innerHeight / 2 - 50, fill: document.getElementById('wb-color').value,
-          width: 100, height: 100, id: Date.now().toString()
-        });
-        canvas.add(tri);
-        setActiveTool('select');
-        syncAdd(tri);
-      };
+    function useFitViewport() {
+      return isPresenter || !isMobile();
+    }
 
-      document.getElementById('wb-tool-star').onclick = () => {
-        // Fabric doesn't have a native 'Star' class, we use a Polygon
-        const pts = [
-            {x: 50, y: 0}, {x: 61, y: 35}, {x: 98, y: 35},
-            {x: 68, y: 57}, {x: 79, y: 91}, {x: 50, y: 70},
-            {x: 21, y: 91}, {x: 32, y: 57}, {x: 2, y: 35}, {x: 39, y: 35}
-        ];
-        const star = new fabric.Polygon(pts, {
-          left: window.innerWidth / 2 - 50, top: window.innerHeight / 2 - 50, fill: document.getElementById('wb-color').value,
-          id: Date.now().toString()
-        });
-        canvas.add(star);
-        setActiveTool('select');
-        syncAdd(star);
-      };
+    function applyViewportZoom(zoom) {
+      if (useFitViewport()) {
+        resizeCanvas();
+        return;
+      }
+      viewportZoom = Math.min(3, Math.max(0.25, zoom));
+      applyCanvasLayout();
+    }
 
-      document.getElementById('wb-tool-arrow').onclick = () => {
-        // Draw an arrow using Path
-        const path = "M 0 50 L 100 50 M 70 20 L 100 50 L 70 80";
-        const arrow = new fabric.Path(path, {
-          left: window.innerWidth / 2 - 50, top: window.innerHeight / 2 - 50,
-          fill: '', stroke: document.getElementById('wb-color').value, strokeWidth: 10,
-          strokeLineCap: 'round', strokeLineJoin: 'round', id: Date.now().toString()
-        });
-        canvas.add(arrow);
-        setActiveTool('select');
-        syncAdd(arrow);
-      };
+    function updateScrollSpacer() {
+      if (!scrollSpacer || useFitViewport()) return;
+      scrollSpacer.style.width = Math.ceil(CANVAS_WIDTH * viewportZoom) + 'px';
+      scrollSpacer.style.height = Math.ceil(CANVAS_HEIGHT * viewportZoom) + 'px';
+    }
 
-      document.getElementById('wb-tool-text').onclick = () => {
-        const text = prompt("Enter text or emoji:", "😄");
-        if (text) {
-          const t = new fabric.Text(text, {
-            left: window.innerWidth / 2 - 50, top: window.innerHeight / 2 - 50,
-            fill: document.getElementById('wb-color').value,
-            fontSize: 80, fontFamily: 'sans-serif', id: Date.now().toString()
-          });
-          canvas.add(t);
-          setActiveTool('select');
-          syncAdd(t);
+    function updateZoomLabel() {
+      if (mobileZoomLabel) {
+        const pct = useFitViewport()
+          ? Math.round(getFitScale() * 100)
+          : Math.round(viewportZoom * 100);
+        mobileZoomLabel.textContent = pct + '%';
+      }
+    }
+
+    function applyCanvasLayout() {
+      canvas.setViewportTransform([1, 0, 0, 1, 0, 0]);
+      if (!canvasStack) return;
+
+      if (useFitViewport()) {
+        overlay.classList.add('wb-fit-viewport');
+        overlay.classList.remove('wb-mobile-mode');
+        const fitScale = getFitScale();
+        canvasStack.style.transform = `scale(${fitScale})`;
+        canvasStack.style.transformOrigin = 'center center';
+        canvasStack.style.marginLeft = '';
+        canvasStack.style.marginTop = '';
+        if (scrollSpacer) {
+          scrollSpacer.style.width = '';
+          scrollSpacer.style.height = '';
         }
-      };
-      
-      // Image
-      document.getElementById('wb-tool-image').onclick = () => {
-        document.getElementById('wb-image-input').click();
-      };
-      document.getElementById('wb-image-input').onchange = (e) => {
-        const file = e.target.files[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = (f) => {
-          fabric.Image.fromURL(f.target.result, (img) => {
-            img.set({ left: 100, top: 100, id: Date.now().toString() });
-            img.scaleToWidth(300);
-            canvas.add(img);
-            setActiveTool('select');
-            syncAdd(img);
-          });
-        };
-        reader.readAsDataURL(file);
-      };
-      
-      // Clear
-      document.getElementById('wb-tool-clear').onclick = () => {
-        if(confirm("Clear entire board?")) {
-          canvas.clear();
-          if (socket) socket.emit('wb-clear');
+      } else {
+        overlay.classList.remove('wb-fit-viewport');
+        overlay.classList.add('wb-mobile-mode');
+        canvasStack.style.transform = `scale(${viewportZoom})`;
+        canvasStack.style.transformOrigin = 'top left';
+        canvasStack.style.marginLeft = '';
+        canvasStack.style.marginTop = '';
+        updateScrollSpacer();
+      }
+
+      updateZoomLabel();
+      canvas.calcOffset();
+    }
+
+    function applyGridStyle() {
+      if (!alignGrid) return;
+      alignGrid.style.opacity = gridVisible ? gridOpacity : 0;
+      alignGrid.style.display = gridVisible ? 'block' : 'none';
+      alignGrid.style.backgroundSize = `${GRID_CELL}px ${GRID_CELL}px`;
+    }
+
+    function setGridOpacity(value, sync) {
+      gridOpacity = Math.min(1, Math.max(0, parseFloat(value)));
+      const slider = document.getElementById('wb-grid-opacity');
+      if (slider) slider.value = gridOpacity;
+      applyGridStyle();
+      if (sync && !isPresenter && socket) {
+        socket.emit('wb-grid', { visible: gridVisible, opacity: gridOpacity });
+      }
+    }
+
+    function toggleGrid(sync) {
+      gridVisible = !gridVisible;
+      const btn = document.getElementById('wb-tool-grid');
+      if (btn) btn.classList.toggle('active', gridVisible);
+      applyGridStyle();
+      if (sync && !isPresenter && socket) {
+        socket.emit('wb-grid', { visible: gridVisible, opacity: gridOpacity });
+      }
+    }
+
+    function resizeCanvas() {
+      applyCanvasLayout();
+      if (isMobile() && !isPresenter) {
+        document.getElementById('wb-toolbar')?.classList.add('wb-toolbar-expanded');
+      }
+    }
+
+    window.addEventListener('resize', resizeCanvas);
+    setTimeout(resizeCanvas, 100);
+
+    function syncModifiedObject(target) {
+      if (!socket || isPresenter) return;
+      if (target.type === 'activeSelection') {
+        const items = target.getObjects().slice();
+        canvas.discardActiveObject();
+        const payloads = [];
+        items.forEach(o => {
+          o.setCoords();
+          if (o.id) payloads.push(o.toJSON(['id', 'wbBackground']));
+        });
+        if (payloads.length) socket.emit('wb-modify-batch', payloads);
+        if (items.length > 1) {
+          const sel = new fabric.ActiveSelection(items, { canvas });
+          canvas.setActiveObject(sel);
+        } else if (items.length === 1) {
+          canvas.setActiveObject(items[0]);
         }
-      };
-      
-      // Save
-      document.getElementById('wb-tool-save').onclick = () => {
-        const data = canvas.toDataURL({ format: 'png' });
-        const a = document.createElement('a');
-        a.href = data;
-        a.download = 'whiteboard.png';
-        a.click();
-      };
-      
-      // Close
-      document.getElementById('wb-tool-close').onclick = () => {
-        toggleWhiteboard(false);
-        if (socket) socket.emit('wb-close');
-      };
-      
-      // Trigger
-      if (triggerBtn) {
-        triggerBtn.onclick = () => {
-          const isOpen = overlay.classList.contains('active');
-          toggleWhiteboard(!isOpen);
-          if (socket) socket.emit(!isOpen ? 'wb-open' : 'wb-close');
-          
-          if (!isOpen) {
-             // Sync full state when opening
-             if (socket) socket.emit('wb-state', canvas.toJSON(['id']));
-          }
-        };
+        canvas.requestRenderAll();
+      } else if (target.id && !target.wbBackground) {
+        socket.emit('wb-modify', target.toJSON(['id', 'wbBackground']));
+      }
+    }
+
+    function syncAdd(obj) {
+      if (socket && !isPresenter && obj.id) {
+        socket.emit('wb-add', obj.toJSON(['id', 'wbBackground']));
+      }
+    }
+
+    function syncRemove(obj) {
+      if (socket && !isPresenter && obj.id) {
+        socket.emit('wb-remove', obj.id);
+      }
+    }
+
+    async function loadGalleryImages() {
+      const grid = document.getElementById('wb-gallery-grid');
+      try {
+        const res = await fetch('/api/gallery');
+        galleryCache = await res.json();
+        const images = galleryCache.filter(i => i.type === 'image' && i.url);
+        if (!images.length) {
+          grid.innerHTML = '<p class="wb-panel-empty">No gallery images yet. Add images in Presentation → Gallery.</p>';
+          return;
+        }
+        grid.innerHTML = images.map(img => `
+          <button type="button" class="wb-gallery-item" data-url="${img.url.replace(/"/g, '&quot;')}" title="${(img.itemName || img.name || 'Image').replace(/"/g, '&quot;')}">
+            <img src="${img.url}" alt="" loading="lazy"/>
+            <span>${img.itemName || img.name || 'Image'}</span>
+          </button>
+        `).join('');
+        grid.querySelectorAll('.wb-gallery-item').forEach(btn => {
+          btn.onclick = () => {
+            fabric.Image.fromURL(btn.dataset.url, (img) => {
+              img.set({ ...centerPos(300, 200), id: newId() });
+              img.scaleToWidth(320);
+              canvas.add(img);
+              closeAllPanels();
+              setActiveTool('select');
+              syncAdd(img);
+            }, { crossOrigin: 'anonymous' });
+          };
+        });
+      } catch (e) {
+        grid.innerHTML = '<p class="wb-panel-empty">Could not load gallery.</p>';
       }
     }
 
@@ -309,155 +539,252 @@
       if (show) {
         overlay.classList.add('active');
         if (triggerBtn) triggerBtn.classList.add('active');
-        // Fix fabric offsets when un-hiding
-        setTimeout(() => { canvas.calcOffset(); resizeCanvas(); }, 300); 
+        setTimeout(() => { canvas.calcOffset(); resizeCanvas(); }, 300);
       } else {
         overlay.classList.remove('active');
         if (triggerBtn) triggerBtn.classList.remove('active');
       }
     }
 
-    // ── Infinite Canvas & Panning (Two Finger / Alt+Drag) ──
+    // ── Pointer / pan (desktop: alt+drag) ──
     canvas.on('mouse:down', function(opt) {
       const evt = opt.e;
-      // Eraser logic
-      if (currentTool === 'erase' && opt.target) {
+      if (currentTool === 'erase' && opt.target && !opt.target.wbBackground) {
         syncRemove(opt.target);
         canvas.remove(opt.target);
         return;
       }
-
-      // Panning logic: Alt key or 2 touches
-      if (evt.altKey || (evt.touches && evt.touches.length >= 2)) {
-        this.isDragging = true;
-        this.selection = false;
-        this.lastPosX = evt.clientX || evt.touches[0].clientX;
-        this.lastPosY = evt.clientY || evt.touches[0].clientY;
-      }
+      // Pan via scrollbars / touch scroll on editor (not fabric viewport)
     });
 
     canvas.on('mouse:move', function(opt) {
       if (this.isDragging) {
         const e = opt.e;
-        let clientX = e.clientX;
-        let clientY = e.clientY;
-        if (e.touches && e.touches.length > 0) {
-           clientX = e.touches[0].clientX;
-           clientY = e.touches[0].clientY;
-        }
-        
         const vpt = this.viewportTransform;
-        vpt[4] += clientX - this.lastPosX;
-        vpt[5] += clientY - this.lastPosY;
+        vpt[4] += e.clientX - this.lastPosX;
+        vpt[5] += e.clientY - this.lastPosY;
         this.requestRenderAll();
-        
-        this.lastPosX = clientX;
-        this.lastPosY = clientY;
-        
-        // Sync Pan
-        if (!isPresenter && socket) {
-          socket.emit('wb-pan', { x: vpt[4], y: vpt[5] });
-        }
+        this.lastPosX = e.clientX;
+        this.lastPosY = e.clientY;
+        if (!isPresenter && socket) socket.emit('wb-pan', { x: vpt[4], y: vpt[5] });
       }
     });
 
-    canvas.on('mouse:up', function(opt) {
+    canvas.on('mouse:up', function() {
       this.isDragging = false;
       this.selection = (currentTool === 'select');
     });
 
-    // Support object selection on double tap / double click
-    // We already have 'select' mode, so double tap isn't strictly needed if we have the toolbar, 
-    // but we can auto-switch to select mode on double click.
     canvas.on('mouse:dblclick', function(opt) {
-      if (!isPresenter && opt.target) {
+      if (!isPresenter && opt.target && !opt.target.wbBackground) {
         setActiveTool('select');
         canvas.setActiveObject(opt.target);
       }
     });
 
-    // ── Socket.io Syncing ──
+    // ── Mobile pinch zoom (editor mobile only) ──
+    if (!isPresenter) {
+      scrollEl.addEventListener('touchstart', (e) => {
+        if (!isMobile() || useFitViewport()) return;
+        if (e.touches.length === 2) {
+          isPinching = true;
+          pinchStartDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          pinchStartZoom = viewportZoom;
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      scrollEl.addEventListener('touchmove', (e) => {
+        if (!isMobile() || useFitViewport()) return;
+        if (isPinching && e.touches.length === 2) {
+          const dist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+          const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+          applyViewportZoom(pinchStartZoom * (dist / pinchStartDist));
+          e.preventDefault();
+        }
+      }, { passive: false });
+
+      scrollEl.addEventListener('touchend', () => { isPinching = false; });
+
+      scrollEl.addEventListener('wheel', (e) => {
+        if (!isMobile() || useFitViewport()) return;
+        if (e.ctrlKey || e.metaKey) {
+          e.preventDefault();
+          const delta = e.deltaY > 0 ? 0.92 : 1.08;
+          applyViewportZoom(viewportZoom * delta);
+        }
+      }, { passive: false });
+    }
+
+    function closeWhiteboard() {
+      toggleWhiteboard(false);
+      if (socket) socket.emit('wb-close');
+    }
+
     const socket = window.io ? io() : null;
 
-    if (!isPresenter && socket) {
-      // Teacher -> Presenter syncs
-      
-      // 1. Drawing paths
-      canvas.on('path:created', function(opt) {
-        opt.path.set({ id: Date.now().toString() });
-        socket.emit('wb-add', opt.path.toJSON(['id']));
+    if (!isPresenter) {
+      btnDraw.onclick = () => setActiveTool('draw');
+      btnErase.onclick = () => setActiveTool('erase');
+      btnSelect.onclick = () => setActiveTool('select');
+
+      document.getElementById('wb-color').onchange = (e) => {
+        canvas.freeDrawingBrush.color = hexToRgba(e.target.value, getInkOpacity());
+      };
+      document.getElementById('wb-size').oninput = (e) => {
+        canvas.freeDrawingBrush.width = parseInt(e.target.value, 10);
+      };
+      document.getElementById('wb-ink-depth').oninput = () => {
+        canvas.freeDrawingBrush.color = hexToRgba(getColor(), getInkOpacity());
+      };
+      document.getElementById('wb-bg-alpha').oninput = (e) => {
+        bg.style.background = `rgba(255,255,255,${e.target.value})`;
+        if (socket) socket.emit('wb-bg', e.target.value);
+      };
+
+      document.getElementById('wb-tool-shapes').onclick = () => togglePanel('wb-panel-shapes');
+      document.getElementById('wb-tool-bullets').onclick = () => togglePanel('wb-panel-bullets');
+      document.getElementById('wb-tool-emoji').onclick = () => togglePanel('wb-panel-emoji');
+      document.getElementById('wb-tool-image').onclick = () => {
+        togglePanel('wb-panel-gallery');
+        if (!galleryCache) loadGalleryImages();
+      };
+      document.getElementById('wb-tool-grid').onclick = () => toggleGrid(true);
+      document.getElementById('wb-grid-opacity').oninput = (e) => setGridOpacity(e.target.value, true);
+
+      document.getElementById('wb-tool-clear').onclick = () => {
+        if (confirm('Clear entire board?')) {
+          canvas.getObjects().slice().forEach(o => canvas.remove(o));
+          canvas.renderAll();
+          if (socket) socket.emit('wb-clear');
+        }
+      };
+
+      document.getElementById('wb-tool-save').onclick = () => {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL({ format: 'png' });
+        a.download = 'whiteboard.png';
+        a.click();
+      };
+
+      document.getElementById('wb-tool-close').onclick = closeWhiteboard;
+
+      const mobileToggle = document.getElementById('wb-mobile-tools-toggle');
+      const toolbar = document.getElementById('wb-toolbar');
+      if (mobileToggle) {
+        mobileToggle.onclick = () => toolbar.classList.toggle('wb-toolbar-expanded');
+      }
+      document.getElementById('wb-mobile-close-btn')?.addEventListener('click', closeWhiteboard);
+      document.getElementById('wb-mobile-fit-btn')?.addEventListener('click', () => {
+        viewportZoom = 1;
+        scrollEl.scrollLeft = 0;
+        scrollEl.scrollTop = 0;
+        applyCanvasLayout();
       });
 
-      // 2. Object modifications (move, scale, rotate)
-      canvas.on('object:modified', function(opt) {
-        socket.emit('wb-modify', opt.target.toJSON(['id']));
+      if (triggerBtn) {
+        triggerBtn.onclick = () => {
+          const isOpen = overlay.classList.contains('active');
+          toggleWhiteboard(!isOpen);
+          if (socket) socket.emit(!isOpen ? 'wb-open' : 'wb-close');
+          if (!isOpen) {
+            if (socket) {
+              socket.emit('wb-state', canvas.toJSON(['id', 'wbBackground']));
+              socket.emit('wb-grid', { visible: gridVisible, opacity: gridOpacity });
+            }
+          }
+        };
+      }
+
+      canvas.on('path:created', function(opt) {
+        opt.path.set({ id: newId() });
+        if (socket) socket.emit('wb-add', opt.path.toJSON(['id']));
       });
-      
-    } else if (isPresenter && socket) {
-      // Presenter receives syncs
-      
+
+      canvas.on('object:modified', function(opt) {
+        syncModifiedObject(opt.target);
+      });
+
+    } else if (socket) {
       socket.on('wb-open', () => toggleWhiteboard(true));
       socket.on('wb-close', () => toggleWhiteboard(false));
-      
+
       socket.on('wb-state', (data) => {
-        canvas.loadFromJSON(data, canvas.renderAll.bind(canvas));
+        canvas.loadFromJSON(data, () => {
+          canvas.getObjects().forEach(o => {
+            o.selectable = false;
+            o.evented = false;
+          });
+          canvas.renderAll();
+        });
       });
-      
-      socket.on('wb-pan', (data) => {
-        canvas.viewportTransform[4] = data.x;
-        canvas.viewportTransform[5] = data.y;
-        canvas.requestRenderAll();
-      });
-      
+
+      socket.on('wb-pan', () => { /* fit-viewport mode: pan not used */ });
+
+      socket.on('wb-zoom', () => { /* fit-viewport mode: zoom not used */ });
+
       socket.on('wb-bg', (alpha) => {
         bg.style.background = `rgba(255,255,255,${alpha})`;
       });
-      
+
       socket.on('wb-add', (objData) => {
-        fabric.util.enlivenObjects([objData], function(objects) {
-          const origRenderOnAddRemove = canvas.renderOnAddRemove;
+        fabric.util.enlivenObjects([objData], (objects) => {
+          const prev = canvas.renderOnAddRemove;
           canvas.renderOnAddRemove = false;
-          objects.forEach(function(o) {
-            o.selectable = false; // Presenter shouldn't interact
+          objects.forEach(o => {
+            o.selectable = false;
             o.evented = false;
             canvas.add(o);
           });
-          canvas.renderOnAddRemove = origRenderOnAddRemove;
+          canvas.renderOnAddRemove = prev;
           canvas.requestRenderAll();
         });
       });
-      
+
       socket.on('wb-modify', (objData) => {
         const obj = canvas.getObjects().find(o => o.id === objData.id);
         if (obj) {
           obj.set(objData);
+          obj.setCoords();
           canvas.requestRenderAll();
         }
       });
-      
+
+      socket.on('wb-modify-batch', (payloads) => {
+        payloads.forEach(objData => {
+          const obj = canvas.getObjects().find(o => o.id === objData.id);
+          if (obj) {
+            obj.set(objData);
+            obj.setCoords();
+          }
+        });
+        canvas.requestRenderAll();
+      });
+
       socket.on('wb-remove', (id) => {
         const obj = canvas.getObjects().find(o => o.id === id);
-        if (obj) {
-          canvas.remove(obj);
+        if (obj) canvas.remove(obj);
+      });
+
+      socket.on('wb-clear', () => canvas.clear());
+
+      socket.on('wb-grid', (data) => {
+        if (data) {
+          gridVisible = data.visible !== false;
+          gridOpacity = typeof data.opacity === 'number' ? data.opacity : gridOpacity;
+          applyGridStyle();
         }
       });
-      
-      socket.on('wb-clear', () => {
-        canvas.clear();
-      });
     }
 
-    // Helper to sync added objects
-    function syncAdd(obj) {
-      if (socket && !isPresenter) {
-        socket.emit('wb-add', obj.toJSON(['id']));
-      }
-    }
-    function syncRemove(obj) {
-      if (socket && !isPresenter && obj.id) {
-        socket.emit('wb-remove', obj.id);
-      }
-    }
-
-  } // end setupWhiteboard
+    applyGridStyle();
+    resizeCanvas();
+  }
 })();

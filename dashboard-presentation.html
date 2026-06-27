@@ -814,22 +814,22 @@
         border-color: rgba(6, 182, 212, 0.5);
       }
 
-.share-card.draw-share {
-         border-color: rgba(236, 72, 153, 0.25);
-       }
-       .share-card.draw-share:hover {
-         background: rgba(236, 72, 153, 0.08);
-         border-color: rgba(236, 72, 153, 0.5);
-       }
+      .share-card.draw-share {
+        border-color: rgba(236, 72, 153, 0.25);
+      }
+      .share-card.draw-share:hover {
+        background: rgba(236, 72, 153, 0.08);
+        border-color: rgba(236, 72, 153, 0.5);
+      }
 
-       /* Video share card */
-       .share-card.video-share {
-         border-color: rgba(239, 68, 68, 0.25);
-       }
-       .share-card.video-share:hover {
-         background: rgba(239, 68, 68, 0.08);
-         border-color: rgba(239, 68, 68, 0.5);
-       }
+      /* Video share card */
+      .share-card.video-share {
+        border-color: rgba(239, 68, 68, 0.25);
+      }
+      .share-card.video-share:hover {
+        background: rgba(239, 68, 68, 0.08);
+        border-color: rgba(239, 68, 68, 0.5);
+      }
 
       /* ─── MODALS ─── */
       .modal-overlay {
@@ -872,7 +872,7 @@
       .modal-box.wide {
         max-width: 800px;
       }
-      
+
       #drawModal {
         padding: 0 0 60px 0 !important;
       }
@@ -888,7 +888,7 @@
         display: flex;
         flex-direction: column;
       }
-      
+
       @media (max-width: 768px) {
         .modal-box.drawing-board-modal {
           padding: 10px;
@@ -1142,7 +1142,7 @@
       .toast {
         position: fixed;
         bottom: 30px;
-        right: 30px;
+
         padding: 14px 22px;
         border-radius: 14px;
         font-size: 0.88rem;
@@ -1331,7 +1331,7 @@
           border: none;
           background: transparent;
           color: #64748b;
-          font-family: 'Outfit', sans-serif;
+          font-family: "Outfit", sans-serif;
           font-size: 0.62rem;
           font-weight: 700;
           cursor: pointer;
@@ -1476,23 +1476,25 @@
             </div>
           </div>
 
-           <div class="upload-zone" id="dropZone">
-             <span class="upload-icon">🗂️</span>
-             <div class="upload-title">Drop your PowerPoint here</div>
-             <div class="upload-hint">or click to browse — .pptx, .ppt, or .zip</div>
-             <input
-               type="file"
-               id="fileDropInput"
-               accept=".pptx,.ppt,.zip"
-               style="
-                 position: absolute;
-                 inset: 0;
-                 opacity: 0;
-                 cursor: pointer;
-                 width: 100%;
-               "
-             />
-           </div>
+          <div class="upload-zone" id="dropZone">
+            <span class="upload-icon">🗂️</span>
+            <div class="upload-title">Drop your PowerPoint here</div>
+            <div class="upload-hint">
+              or click to browse — .pptx, .ppt, or .zip
+            </div>
+            <input
+              type="file"
+              id="fileDropInput"
+              accept=".pptx,.ppt,.zip"
+              style="
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                cursor: pointer;
+                width: 100%;
+              "
+            />
+          </div>
 
           <div class="upload-form">
             <div class="form-row">
@@ -1606,7 +1608,18 @@
           </div>
 
           <div style="padding: 16px 20px 0">
-            <button class="btn-upload" style="width:100%; margin-bottom: 12px; display:flex; align-items:center; justify-content:center; gap:8px;" onclick="openGalleryUploadModal()">
+            <button
+              class="btn-upload"
+              style="
+                width: 100%;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+              "
+              onclick="openGalleryUploadModal()"
+            >
               ➕ Add to Gallery
             </button>
             <input
@@ -1614,11 +1627,22 @@
               class="form-input"
               id="searchGallery"
               placeholder="🔍 Search gallery items..."
-              style="width: 100%;"
+              style="width: 100%"
             />
           </div>
 
-          <div class="file-list" id="galleryList" style="margin-top: 12px; max-height: 450px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(124, 58, 237, 0.3) transparent; padding-right: 10px;">
+          <div
+            class="file-list"
+            id="galleryList"
+            style="
+              margin-top: 12px;
+              max-height: 450px;
+              overflow-y: auto;
+              scrollbar-width: thin;
+              scrollbar-color: rgba(124, 58, 237, 0.3) transparent;
+              padding-right: 10px;
+            "
+          >
             <div class="empty-state">
               <span class="empty-icon">🖼️</span>
               <p>No gallery items yet.</p>
@@ -1648,8 +1672,19 @@
               </div>
             </div>
           </div>
-          
-          <div class="file-list" id="uploadedVideosList" style="margin-top: 12px; max-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(239, 68, 68, 0.3) transparent; padding-right: 10px;">
+
+          <div
+            class="file-list"
+            id="uploadedVideosList"
+            style="
+              margin-top: 12px;
+              max-height: 250px;
+              overflow-y: auto;
+              scrollbar-width: thin;
+              scrollbar-color: rgba(239, 68, 68, 0.3) transparent;
+              padding-right: 10px;
+            "
+          >
             <div class="empty-state">
               <span class="empty-icon">🎞️</span>
               <p>No uploaded videos yet.</p>
@@ -1667,8 +1702,8 @@
             <span class="np-icon">🎯</span>
             <h3>No Presentation Selected</h3>
             <p>
-              Select a presentation from the <strong>📚 Library</strong> to start
-              controlling it on the game screen.
+              Select a presentation from the <strong>📚 Library</strong> to
+              start controlling it on the game screen.
             </p>
           </div>
 
@@ -1734,20 +1769,34 @@
                   <div class="share-name">Notes / Text</div>
                   <div class="share-desc">Plain text or notes</div>
                 </div>
-                <div class="share-card webpage-share" id="shareWebpageBtn" style="background: rgba(14, 165, 233, 0.05); border-color: rgba(14, 165, 233, 0.2);">
+                <div
+                  class="share-card webpage-share"
+                  id="shareWebpageBtn"
+                  style="
+                    background: rgba(14, 165, 233, 0.05);
+                    border-color: rgba(14, 165, 233, 0.2);
+                  "
+                >
                   <span class="share-icon">🌐</span>
                   <div class="share-name">Share Webpage</div>
                   <div class="share-desc">Live site in iframe</div>
                 </div>
-                <div class="share-card pdf-share" id="sharePdfBtn" style="background: rgba(220, 38, 38, 0.05); border-color: rgba(220, 38, 38, 0.2);">
+                <div
+                  class="share-card pdf-share"
+                  id="sharePdfBtn"
+                  style="
+                    background: rgba(220, 38, 38, 0.05);
+                    border-color: rgba(220, 38, 38, 0.2);
+                  "
+                >
                   <span class="share-icon">📄</span>
                   <div class="share-name">Share PDF</div>
                   <div class="share-desc">Show PDF from gallery</div>
                 </div>
-               </div>
-             </div>
-           </div>
-         </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <!-- Live Game Screen URL -->
         <div class="panel">
@@ -1806,9 +1855,23 @@
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🖼️ Share Image to Screen</div>
-          <div style="display: flex; gap: 8px;">
-            <button class="modal-close" onclick="minimizeShareModal('imageModal', '🖼️ Share Image to Screen')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('imageModal')" title="Close">✕</button>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="modal-close"
+              onclick="
+                minimizeShareModal('imageModal', '🖼️ Share Image to Screen')
+              "
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('imageModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
@@ -1820,7 +1883,14 @@
         </div>
 
         <div class="divider"></div>
-        <div style="margin: 12px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+        <div
+          style="
+            margin: 12px 0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+          "
+        >
           OR UPLOAD NEW
         </div>
 
@@ -1841,9 +1911,23 @@
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🌳 Classification Tree</div>
-          <div style="display: flex; gap: 8px;">
-            <button class="modal-close" onclick="minimizeShareModal('treeModal', '🌳 Classification Tree')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('treeModal')" title="Close">✕</button>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="modal-close"
+              onclick="
+                minimizeShareModal('treeModal', '🌳 Classification Tree')
+              "
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('treeModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
         <div class="tree-builder">
@@ -1857,41 +1941,77 @@
             placeholder="e.g. Plant Kingdom Classification"
             style="margin-bottom: 14px"
           />
-<label class="form-label" style="display: block; margin-bottom: 8px"
-             >Tree Data (JSON or text)</label
-           >
-           <div class="tree-helper-buttons" style="display: flex; gap: 8px; margin-bottom: 8px;">
-             <button type="button" class="btn-ctrl" style="padding: 6px 12px; font-size: 0.8rem;" onclick="insertTreeHelper('→')">Part Of →</button>
-             <button type="button" class="btn-ctrl" style="padding: 6px 12px; font-size: 0.8rem;" onclick="insertTreeHelper('└──')">Child Of └──</button>
-             <button type="button" class="btn-ctrl" style="padding: 6px 12px; font-size: 0.8rem;" onclick="insertTreeHelper('├──')">Sibling Of ├──</button>
-           </div>
-           <textarea
-             id="treeData"
-             placeholder="Example:
+          <label class="form-label" style="display: block; margin-bottom: 8px"
+            >Tree Data (JSON or text)</label
+          >
+          <div
+            class="tree-helper-buttons"
+            style="display: flex; gap: 8px; margin-bottom: 8px"
+          >
+            <button
+              type="button"
+              class="btn-ctrl"
+              style="padding: 6px 12px; font-size: 0.8rem"
+              onclick="insertTreeHelper('→')"
+            >
+              Part Of →
+            </button>
+            <button
+              type="button"
+              class="btn-ctrl"
+              style="padding: 6px 12px; font-size: 0.8rem"
+              onclick="insertTreeHelper('└──')"
+            >
+              Child Of └──
+            </button>
+            <button
+              type="button"
+              class="btn-ctrl"
+              style="padding: 6px 12px; font-size: 0.8rem"
+              onclick="insertTreeHelper('├──')"
+            >
+              Sibling Of ├──
+            </button>
+          </div>
+          <textarea
+            id="treeData"
+            placeholder="Example:
 Kingdom → Plantae
   ├── Division → Bryophyta (Mosses)
   ├── Division → Pteridophyta (Ferns)
   └── Division → Spermatophyta"
-           ></textarea>
-           <div class="tree-hint">
-             📌 Use indentation with → and ├── └── to define the tree structure.
-             It will be rendered as a visual hierarchy on the game screen.
-           </div>
-           <button class="btn-share green" onclick="sendTree()">
-             🌿 Send to Game Screen
-           </button>
-         </div>
-       </div>
-     </div>
+          ></textarea>
+          <div class="tree-hint">
+            📌 Use indentation with → and ├── └── to define the tree structure.
+            It will be rendered as a visual hierarchy on the game screen.
+          </div>
+          <button class="btn-share green" onclick="sendTree()">
+            🌿 Send to Game Screen
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- Note / Text Modal -->
     <div class="modal-overlay" id="noteModal">
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">📝 Share Note / Text</div>
-          <div style="display: flex; gap: 8px;">
-            <button class="modal-close" onclick="minimizeShareModal('noteModal', '📝 Share Note / Text')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('noteModal')" title="Close">✕</button>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="modal-close"
+              onclick="minimizeShareModal('noteModal', '📝 Share Note / Text')"
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('noteModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
         <div class="note-editor">
@@ -1919,88 +2039,136 @@ Kingdom → Plantae
       </div>
     </div>
 
-<!-- Drawing Modal -->
-     <div class="modal-overlay" id="drawModal">
-       <div class="modal-box wide drawing-board-modal">
-         <div class="modal-header" style="margin-bottom: 12px;">
-           <div class="modal-title">✏️ Drawing Board</div>
-           <div style="display: flex; gap: 8px; align-items: center;">
-            <button class="btn-share pink" onclick="sendDrawing()" style="width: auto; padding: 6px 16px; margin: 0; box-shadow: none;">
+    <!-- Drawing Modal -->
+    <div class="modal-overlay" id="drawModal">
+      <div class="modal-box wide drawing-board-modal">
+        <div class="modal-header" style="margin-bottom: 12px">
+          <div class="modal-title">✏️ Drawing Board</div>
+          <div style="display: flex; gap: 8px; align-items: center">
+            <button
+              class="btn-share pink"
+              onclick="sendDrawing()"
+              style="
+                width: auto;
+                padding: 6px 16px;
+                margin: 0;
+                box-shadow: none;
+              "
+            >
               🎨 Send to Screen
             </button>
-            <button class="modal-close" onclick="if(typeof minimizeDrawModal === 'function'){minimizeDrawModal()}else{minimizeShareModal('drawModal', '✏️ Drawing Board')}" title="Minimize">_</button>
-            <button class="modal-close" onclick="if(typeof closeDrawModal === 'function'){closeDrawModal()}else{closeSpecificShareModal('drawModal')}" title="Close">✕</button>
+            <button
+              class="modal-close"
+              onclick="
+                if (typeof minimizeDrawModal === 'function') {
+                  minimizeDrawModal();
+                } else {
+                  minimizeShareModal('drawModal', '✏️ Drawing Board');
+                }
+              "
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="
+                if (typeof closeDrawModal === 'function') {
+                  closeDrawModal();
+                } else {
+                  closeSpecificShareModal('drawModal');
+                }
+              "
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
-         <div class="draw-tools">
-           <div
-             class="color-btn active"
-             style="background: #ec4899"
-             data-color="#ec4899"
-             onclick="setDrawColor(this, '#ec4899')"
-           ></div>
-           <div
-             class="color-btn"
-             style="background: #60a5fa"
-             data-color="#60a5fa"
-             onclick="setDrawColor(this, '#60a5fa')"
-           ></div>
-           <div
-             class="color-btn"
-             style="background: #34d399"
-             data-color="#34d399"
-             onclick="setDrawColor(this, '#34d399')"
-           ></div>
-           <div
-             class="color-btn"
-             style="background: #fbbf24"
-             data-color="#fbbf24"
-             onclick="setDrawColor(this, '#fbbf24')"
-           ></div>
-           <div
-             class="color-btn"
-             style="background: #f8fafc"
-             data-color="#f8fafc"
-             onclick="setDrawColor(this, '#f8fafc')"
-           ></div>
-           <div
-             class="color-btn"
-             style="background: #a78bfa"
-             data-color="#a78bfa"
-             onclick="setDrawColor(this, '#a78bfa')"
-           ></div>
-           <div
-             style="
-               width: 1px;
-               background: rgba(255, 255, 255, 0.1);
-               margin: 0 4px;
-             "
-           ></div>
-           <div class="brush-slider">
-             <span>Size:</span>
-             <input type="range" id="brushSize" min="2" max="30" value="5" />
-             <span id="brushSizeVal">5</span>
-           </div>
-           <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
-         </div>
+        <div class="draw-tools">
+          <div
+            class="color-btn active"
+            style="background: #ec4899"
+            data-color="#ec4899"
+            onclick="setDrawColor(this, '#ec4899')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #60a5fa"
+            data-color="#60a5fa"
+            onclick="setDrawColor(this, '#60a5fa')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #34d399"
+            data-color="#34d399"
+            onclick="setDrawColor(this, '#34d399')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #fbbf24"
+            data-color="#fbbf24"
+            onclick="setDrawColor(this, '#fbbf24')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #f8fafc"
+            data-color="#f8fafc"
+            onclick="setDrawColor(this, '#f8fafc')"
+          ></div>
+          <div
+            class="color-btn"
+            style="background: #a78bfa"
+            data-color="#a78bfa"
+            onclick="setDrawColor(this, '#a78bfa')"
+          ></div>
+          <div
+            style="
+              width: 1px;
+              background: rgba(255, 255, 255, 0.1);
+              margin: 0 4px;
+            "
+          ></div>
+          <div class="brush-slider">
+            <span>Size:</span>
+            <input type="range" id="brushSize" min="2" max="30" value="5" />
+            <span id="brushSizeVal">5</span>
+          </div>
+          <button class="draw-btn" onclick="clearCanvas()">🗑️ Clear</button>
+        </div>
 
-         <canvas id="drawCanvas"></canvas>
-       </div>
-     </div>
+        <canvas id="drawCanvas"></canvas>
+      </div>
+    </div>
 
     <!-- Video Share Modal -->
     <div class="modal-overlay" id="videoModal">
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🎬 Share Video to Screen</div>
-          <div style="display: flex; gap: 8px;">
-            <button class="modal-close" onclick="minimizeShareModal('videoModal', '🎬 Share Video to Screen')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('videoModal')" title="Close">✕</button>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="modal-close"
+              onclick="
+                minimizeShareModal('videoModal', '🎬 Share Video to Screen')
+              "
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('videoModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
         <div class="hint-text">
-          Select a video from the gallery, or enter a new YouTube URL, or upload an MP4 file.
+          Select a video from the gallery, or enter a new YouTube URL, or upload
+          an MP4 file.
         </div>
 
         <div class="form-row" style="margin-bottom: 16px">
@@ -2011,7 +2179,14 @@ Kingdom → Plantae
         </div>
 
         <div class="divider"></div>
-        <div style="margin: 12px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+        <div
+          style="
+            margin: 12px 0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+          "
+        >
           OR ADD NEW
         </div>
 
@@ -2025,7 +2200,14 @@ Kingdom → Plantae
           />
         </div>
         <div class="divider"></div>
-        <div style="margin: 16px 0; text-align: center; color: #64748b; font-size: 0.85rem">
+        <div
+          style="
+            margin: 16px 0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.85rem;
+          "
+        >
           OR
         </div>
         <div class="upload-zone" id="videoDropZone" style="margin: 0 0 16px 0">
@@ -2053,7 +2235,18 @@ Kingdom → Plantae
           <div class="progress-bar-bg">
             <div class="progress-bar-fill" id="videoProgressFill"></div>
           </div>
-          <button class="btn-ctrl btn-close-pres" onclick="cancelVideoUpload()" style="margin-top: 10px; width: 100%; justify-content: center; background: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.25);">
+          <button
+            class="btn-ctrl btn-close-pres"
+            onclick="cancelVideoUpload()"
+            style="
+              margin-top: 10px;
+              width: 100%;
+              justify-content: center;
+              background: rgba(239, 68, 68, 0.1);
+              color: #f87171;
+              border: 1px solid rgba(239, 68, 68, 0.25);
+            "
+          >
             ✕ Cancel Upload
           </button>
         </div>
@@ -2077,19 +2270,41 @@ Kingdom → Plantae
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">🌐 Share Webpage</div>
-          <div style="display: flex; gap: 8px;">
-            <button class="modal-close" onclick="minimizeShareModal('webpageModal', '🌐 Share Webpage')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('webpageModal')" title="Close">✕</button>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="modal-close"
+              onclick="minimizeShareModal('webpageModal', '🌐 Share Webpage')"
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('webpageModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
         <div class="hint-text">
-          Enter a website URL to display it live on the game screen. (Note: Some sites block iframes)
+          Enter a website URL to display it live on the game screen. (Note: Some
+          sites block iframes)
         </div>
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Website URL</label>
-          <input type="text" id="webpageUrlInput" class="form-input" placeholder="https://example.com" />
+          <input
+            type="text"
+            id="webpageUrlInput"
+            class="form-input"
+            placeholder="https://example.com"
+          />
         </div>
-        <button class="btn-share green" id="sendWebpageBtn" onclick="sendWebpage()">
+        <button
+          class="btn-share green"
+          id="sendWebpageBtn"
+          onclick="sendWebpage()"
+        >
           📡 Send to Game Screen
         </button>
       </div>
@@ -2100,12 +2315,24 @@ Kingdom → Plantae
       <div class="modal-box wide">
         <div class="modal-header">
           <div class="modal-title">📄 Share PDF Document</div>
-          <div style="display: flex; gap: 8px;">
-            <button class="modal-close" onclick="minimizeShareModal('pdfModal', '📄 Share PDF Document')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('pdfModal')" title="Close">✕</button>
+          <div style="display: flex; gap: 8px">
+            <button
+              class="modal-close"
+              onclick="minimizeShareModal('pdfModal', '📄 Share PDF Document')"
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('pdfModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
-        
+
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select PDF from Gallery</label>
           <select id="galleryPdfSelect" class="select-input">
@@ -2113,7 +2340,12 @@ Kingdom → Plantae
           </select>
         </div>
 
-        <button class="btn-share green" id="sendPdfBtn" onclick="sendPdf()" disabled>
+        <button
+          class="btn-share green"
+          id="sendPdfBtn"
+          onclick="sendPdf()"
+          disabled
+        >
           📡 Send PDF to Game Screen
         </button>
       </div>
@@ -2121,33 +2353,79 @@ Kingdom → Plantae
 
     <!-- Mobile Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar">
-      <button class="mobile-tab-btn" data-tab="control" onclick="switchMobileTab('control')">
+      <button
+        class="mobile-tab-btn"
+        data-tab="control"
+        onclick="switchMobileTab('control')"
+      >
         <span class="tab-icon">🎮</span>
         Control
       </button>
-      <button class="mobile-tab-btn" data-tab="upload" onclick="switchMobileTab('upload')">
+      <button
+        class="mobile-tab-btn"
+        data-tab="upload"
+        onclick="switchMobileTab('upload')"
+      >
         <span class="tab-icon">📤</span>
         Upload
       </button>
-      <button class="mobile-tab-btn active" data-tab="library" onclick="switchMobileTab('library')">
+      <button
+        class="mobile-tab-btn active"
+        data-tab="library"
+        onclick="switchMobileTab('library')"
+      >
         <span class="tab-icon">📚</span>
         Library
       </button>
-      <button class="mobile-tab-btn" data-tab="gallery" onclick="switchMobileTab('gallery')">
+      <button
+        class="mobile-tab-btn"
+        data-tab="gallery"
+        onclick="switchMobileTab('gallery')"
+      >
         <span class="tab-icon">🖼️</span>
         Gallery
       </button>
-      <button class="mobile-tab-btn" data-tab="videos" onclick="switchMobileTab('videos')">
+      <button
+        class="mobile-tab-btn"
+        data-tab="videos"
+        onclick="switchMobileTab('videos')"
+      >
         <span class="tab-icon">🎞️</span>
         Videos
       </button>
     </nav>
 
-    
     <!-- Minimized Modals Dock -->
-    <div id="minimizedDock" style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(5,7,20,0.95); border-top: 1px solid rgba(124, 58, 237, 0.4); padding: 12px 20px; display: none; gap: 12px; z-index: 2000; overflow-x: auto; align-items: center; backdrop-filter: blur(10px);">
-      <div style="color: #94a3b8; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; margin-right: 10px;">Minimized:</div>
-      <div id="dockItems" style="display: flex; gap: 10px; flex: 1;"></div>
+    <div
+      id="minimizedDock"
+      style="
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(5, 7, 20, 0.95);
+        border-top: 1px solid rgba(124, 58, 237, 0.4);
+        padding: 12px 20px;
+        display: none;
+        gap: 12px;
+        z-index: 2000;
+        overflow-x: auto;
+        align-items: center;
+        backdrop-filter: blur(10px);
+      "
+    >
+      <div
+        style="
+          color: #94a3b8;
+          font-size: 0.8rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          margin-right: 10px;
+        "
+      >
+        Minimized:
+      </div>
+      <div id="dockItems" style="display: flex; gap: 10px; flex: 1"></div>
     </div>
 
     <!-- Toast -->
@@ -2158,12 +2436,21 @@ Kingdom → Plantae
       <div class="modal-box">
         <div class="modal-header">
           <div class="modal-title">➕ Add to Gallery</div>
-          <button class="modal-close" onclick="closeModal('galleryUploadModal')">✕</button>
+          <button
+            class="modal-close"
+            onclick="closeModal('galleryUploadModal')"
+          >
+            ✕
+          </button>
         </div>
-        
+
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Type</label>
-          <select id="galleryTypeSelect" class="select-input" onchange="toggleGalleryUploadType()">
+          <select
+            id="galleryTypeSelect"
+            class="select-input"
+            onchange="toggleGalleryUploadType()"
+          >
             <option value="media">Image / PDF</option>
             <option value="video">Video (YouTube)</option>
           </select>
@@ -2171,46 +2458,93 @@ Kingdom → Plantae
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Chapter Name</label>
-          <input type="text" id="galleryChapterInput" class="form-input" placeholder="e.g. Chapter 1" />
+          <input
+            type="text"
+            id="galleryChapterInput"
+            class="form-input"
+            placeholder="e.g. Chapter 1"
+          />
         </div>
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Item Name</label>
-          <input type="text" id="galleryNameInput" class="form-input" placeholder="e.g. Intro Diagram" />
+          <input
+            type="text"
+            id="galleryNameInput"
+            class="form-input"
+            placeholder="e.g. Intro Diagram"
+          />
         </div>
 
         <!-- Image/PDF Upload Section -->
         <div id="galleryImageSection">
           <div class="form-row" style="margin-bottom: 16px">
             <label class="form-label">Image or PDF Link (Optional)</label>
-            <input type="text" id="galleryImageUrlInput" class="form-input" placeholder="https://drive.google.com/... or https://..." />
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">If you provide a link, you don't need to upload a file below.</div>
+            <input
+              type="text"
+              id="galleryImageUrlInput"
+              class="form-input"
+              placeholder="https://drive.google.com/... or https://..."
+            />
+            <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px">
+              If you provide a link, you don't need to upload a file below.
+            </div>
           </div>
-          
-          <div style="text-align: center; color: #64748b; font-size: 0.85rem; margin-bottom: 16px;">OR</div>
-          
+
+          <div
+            style="
+              text-align: center;
+              color: #64748b;
+              font-size: 0.85rem;
+              margin-bottom: 16px;
+            "
+          >
+            OR
+          </div>
+
           <div class="form-row" style="margin-bottom: 16px">
             <label class="form-label">Select File (Image/PDF)</label>
             <div class="file-input-wrapper">
-              <div class="file-input-label" id="galleryFileInputLabel">No file chosen...</div>
-              <input type="file" id="galleryFileInput" accept="image/*,application/pdf" onchange="handleGalleryFileSelect(this.files[0])" />
+              <div class="file-input-label" id="galleryFileInputLabel">
+                No file chosen...
+              </div>
+              <input
+                type="file"
+                id="galleryFileInput"
+                accept="image/*,application/pdf"
+                onchange="handleGalleryFileSelect(this.files[0])"
+              />
             </div>
           </div>
         </div>
 
         <!-- Video Upload Section -->
-        <div id="galleryVideoSection" style="display: none;">
+        <div id="galleryVideoSection" style="display: none">
           <div class="form-row" style="margin-bottom: 16px">
             <label class="form-label">YouTube Video URL</label>
-            <input type="text" id="galleryVideoUrlInput" class="form-input" placeholder="https://www.youtube.com/watch?v=..." />
+            <input
+              type="text"
+              id="galleryVideoUrlInput"
+              class="form-input"
+              placeholder="https://www.youtube.com/watch?v=..."
+            />
           </div>
           <div class="form-row" style="margin-bottom: 16px">
             <label class="form-label">Preview Image URL (Optional)</label>
-            <input type="text" id="galleryPreviewUrlInput" class="form-input" placeholder="https://..." />
+            <input
+              type="text"
+              id="galleryPreviewUrlInput"
+              class="form-input"
+              placeholder="https://..."
+            />
           </div>
         </div>
 
-        <button class="btn-share green" id="saveGalleryBtn" onclick="submitGalleryItem()">
+        <button
+          class="btn-share green"
+          id="saveGalleryBtn"
+          onclick="submitGalleryItem()"
+        >
           💾 Save to Gallery
         </button>
       </div>
@@ -2255,7 +2589,7 @@ Kingdom → Plantae
       }
 
       // ════════════════════════════════════════════
-      
+
       // --- STACKED MODAL CONTROLS ---
       let minimizedModals = {}; // id -> { title }
 
@@ -2263,7 +2597,7 @@ Kingdom → Plantae
         document.getElementById(modalId).classList.remove("open");
         minimizedModals[modalId] = { title };
         renderDock();
-        
+
         // Notify game screen to minimize
         socket.emit("pres-minimize-specific", { modalId });
       }
@@ -2291,23 +2625,26 @@ Kingdom → Plantae
         const dockItems = document.getElementById("dockItems");
         dockItems.innerHTML = "";
         const keys = Object.keys(minimizedModals);
-        
+
         if (keys.length === 0) {
           dock.style.display = "none";
           return;
         }
-        
+
         dock.style.display = "flex";
-        keys.forEach(id => {
+        keys.forEach((id) => {
           const item = minimizedModals[id];
           const btn = document.createElement("div");
-          btn.style.cssText = "padding: 8px 16px; background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(124, 58, 237, 0.5); border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap;";
+          btn.style.cssText =
+            "padding: 8px 16px; background: rgba(124, 58, 237, 0.2); border: 1px solid rgba(124, 58, 237, 0.5); border-radius: 8px; font-size: 0.85rem; font-weight: 600; color: #e2e8f0; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: all 0.2s; white-space: nowrap;";
           btn.innerHTML = `<span>${item.title}</span>`;
           btn.onclick = () => restoreShareModal(id);
-          
-          btn.onmouseover = () => btn.style.background = "rgba(124, 58, 237, 0.3)";
-          btn.onmouseout = () => btn.style.background = "rgba(124, 58, 237, 0.2)";
-          
+
+          btn.onmouseover = () =>
+            (btn.style.background = "rgba(124, 58, 237, 0.3)");
+          btn.onmouseout = () =>
+            (btn.style.background = "rgba(124, 58, 237, 0.2)");
+
           dockItems.appendChild(btn);
         });
       }
@@ -2341,19 +2678,16 @@ Kingdom → Plantae
       dropZone.addEventListener("dragleave", () =>
         dropZone.classList.remove("drag-over"),
       );
-dropZone.addEventListener("drop", (e) => {
-          e.preventDefault();
-          dropZone.classList.remove("drag-over");
-          const file = e.dataTransfer.files[0];
-          if (
-            file &&
-            (file.name.match(/\.(pptx|ppt|zip)$/i))
-          ) {
-            handleFileSelect(file);
-          } else {
-            showToast("Please drop a .pptx, .ppt, or .zip file", "error");
-          }
-        });
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+        const file = e.dataTransfer.files[0];
+        if (file && file.name.match(/\.(pptx|ppt|zip)$/i)) {
+          handleFileSelect(file);
+        } else {
+          showToast("Please drop a .pptx, .ppt, or .zip file", "error");
+        }
+      });
 
       ["subjectInput", "chapterInput"].forEach((id) =>
         document
@@ -2379,72 +2713,74 @@ dropZone.addEventListener("drop", (e) => {
         .getElementById("uploadBtn")
         .addEventListener("click", uploadPresentation);
 
-function uploadPresentation() {
-         if (!selectedFileObj) return;
-         const subject = document.getElementById("subjectInput").value.trim();
-         const chapter = document.getElementById("chapterInput").value.trim();
+      function uploadPresentation() {
+        if (!selectedFileObj) return;
+        const subject = document.getElementById("subjectInput").value.trim();
+        const chapter = document.getElementById("chapterInput").value.trim();
 
-         const formData = new FormData();
-         const fieldName = selectedFileObj.name.endsWith('.zip') ? "presentationZip" : "presentation";
-         formData.append(fieldName, selectedFileObj);
-         formData.append("subject", subject);
-         formData.append("chapter", chapter);
+        const formData = new FormData();
+        const fieldName = selectedFileObj.name.endsWith(".zip")
+          ? "presentationZip"
+          : "presentation";
+        formData.append(fieldName, selectedFileObj);
+        formData.append("subject", subject);
+        formData.append("chapter", chapter);
 
-         const progContainer = document.getElementById("progressContainer");
-         const progFill = document.getElementById("progressFill");
-         const progPct = document.getElementById("progressPct");
-         const progText = document.getElementById("progressText");
-         const uploadBtn = document.getElementById("uploadBtn");
+        const progContainer = document.getElementById("progressContainer");
+        const progFill = document.getElementById("progressFill");
+        const progPct = document.getElementById("progressPct");
+        const progText = document.getElementById("progressText");
+        const uploadBtn = document.getElementById("uploadBtn");
 
-         progContainer.classList.add("active");
-         uploadBtn.disabled = true;
+        progContainer.classList.add("active");
+        uploadBtn.disabled = true;
 
-         const xhr = new XMLHttpRequest();
+        const xhr = new XMLHttpRequest();
 
-         xhr.upload.addEventListener("progress", (e) => {
-           if (e.lengthComputable) {
-             const pct = Math.round((e.loaded / e.total) * 100);
-             progFill.style.width = pct + "%";
-             progPct.textContent = pct + "%";
-             progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
-           }
-         });
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progFill.style.width = pct + "%";
+            progPct.textContent = pct + "%";
+            progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
+          }
+        });
 
-         xhr.addEventListener("load", () => {
-           if (xhr.status === 200) {
-             const res = JSON.parse(xhr.responseText);
-             showToast("✅ " + res.filename + " uploaded!", "success");
-             progContainer.classList.remove("active");
-             progFill.style.width = "0%";
-             document.getElementById("subjectInput").value = "";
-             document.getElementById("chapterInput").value = "";
-             document.getElementById("fileInputLabel").textContent =
-               "No file chosen...";
-             document
-               .getElementById("fileInputLabel")
-               .classList.remove("has-file");
-             selectedFileObj = null;
-             uploadBtn.disabled = true;
-             loadFileList();
-           } else {
-             showToast("Upload failed: " + xhr.responseText, "error");
-             progContainer.classList.remove("active");
-             uploadBtn.disabled = false;
-           }
-         });
+        xhr.addEventListener("load", () => {
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            showToast("✅ " + res.filename + " uploaded!", "success");
+            progContainer.classList.remove("active");
+            progFill.style.width = "0%";
+            document.getElementById("subjectInput").value = "";
+            document.getElementById("chapterInput").value = "";
+            document.getElementById("fileInputLabel").textContent =
+              "No file chosen...";
+            document
+              .getElementById("fileInputLabel")
+              .classList.remove("has-file");
+            selectedFileObj = null;
+            uploadBtn.disabled = true;
+            loadFileList();
+          } else {
+            showToast("Upload failed: " + xhr.responseText, "error");
+            progContainer.classList.remove("active");
+            uploadBtn.disabled = false;
+          }
+        });
 
-         xhr.addEventListener("error", () => {
-           showToast("Network error during upload", "error");
-           progContainer.classList.remove("active");
-           uploadBtn.disabled = false;
-         });
+        xhr.addEventListener("error", () => {
+          showToast("Network error during upload", "error");
+          progContainer.classList.remove("active");
+          uploadBtn.disabled = false;
+        });
 
-         const endpoint = selectedFileObj.name.endsWith('.zip') 
-           ? "/api/presentation/upload-zip" 
-           : "/api/presentation/upload";
-         xhr.open("POST", endpoint);
-         xhr.send(formData);
-       }
+        const endpoint = selectedFileObj.name.endsWith(".zip")
+          ? "/api/presentation/upload-zip"
+          : "/api/presentation/upload";
+        xhr.open("POST", endpoint);
+        xhr.send(formData);
+      }
 
       // ════════════════════════════════════════════
       //  FILE LIST
@@ -2633,11 +2969,11 @@ function uploadPresentation() {
         showToast("Presentation closed", "info");
       });
 
-document.getElementById("btnCloseShare").addEventListener("click", () => {
-         socket.emit("pres-close-share");
-         closeModal("videoModal");
-         showToast("✕ Closed shared modals on game screen", "info");
-       });
+      document.getElementById("btnCloseShare").addEventListener("click", () => {
+        socket.emit("pres-close-share");
+        closeModal("videoModal");
+        showToast("✕ Closed shared modals on game screen", "info");
+      });
 
       // ════════════════════════════════════════════
       //  SHARE — IMAGE
@@ -2721,20 +3057,22 @@ document.getElementById("btnCloseShare").addEventListener("click", () => {
       document.getElementById("shareDrawBtn").addEventListener("click", () => {
         openModal("drawModal");
         if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock("landscape").catch(e => console.log("Orientation lock failed:", e));
+          screen.orientation
+            .lock("landscape")
+            .catch((e) => console.log("Orientation lock failed:", e));
         }
         setTimeout(initCanvas, 100);
       });
 
       function closeDrawModal() {
-        closeSpecificShareModal('drawModal');
+        closeSpecificShareModal("drawModal");
         if (screen.orientation && screen.orientation.unlock) {
           screen.orientation.unlock();
         }
       }
 
       function minimizeDrawModal() {
-        minimizeShareModal('drawModal', '✏️ Drawing Board');
+        minimizeShareModal("drawModal", "✏️ Drawing Board");
         if (screen.orientation && screen.orientation.unlock) {
           screen.orientation.unlock();
         }
@@ -2823,261 +3161,284 @@ document.getElementById("btnCloseShare").addEventListener("click", () => {
       });
 
       function sendDrawing() {
-         if (!canvas) return;
-         let dataUrl;
-         if (canvas.height > canvas.width) {
-           // Rotate -90 degrees for portrait mobile devices drawing landscape
-           const tempCanvas = document.createElement("canvas");
-           tempCanvas.width = canvas.height;
-           tempCanvas.height = canvas.width;
-           const tCtx = tempCanvas.getContext("2d");
-           
-           tCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
-           tCtx.rotate(-Math.PI / 2);
-           tCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
-           dataUrl = tempCanvas.toDataURL("image/png");
-         } else {
-           dataUrl = canvas.toDataURL("image/png");
-         }
-         socket.emit("pres-share-image", { src: dataUrl, isDrawing: true });
-         showToast("🎨 Drawing sent to game screen!", "success");
-       }
+        if (!canvas) return;
+        let dataUrl;
+        if (canvas.height > canvas.width) {
+          // Rotate -90 degrees for portrait mobile devices drawing landscape
+          const tempCanvas = document.createElement("canvas");
+          tempCanvas.width = canvas.height;
+          tempCanvas.height = canvas.width;
+          const tCtx = tempCanvas.getContext("2d");
 
-       // ════════════════════════════════════════════
-       //  SHARE — VIDEO
-       // ════════════════════════════════════════════
-       let videoFile = null;
-       let videoUploadType = "youtube"; // or "file"
+          tCtx.translate(tempCanvas.width / 2, tempCanvas.height / 2);
+          tCtx.rotate(-Math.PI / 2);
+          tCtx.drawImage(canvas, -canvas.width / 2, -canvas.height / 2);
+          dataUrl = tempCanvas.toDataURL("image/png");
+        } else {
+          dataUrl = canvas.toDataURL("image/png");
+        }
+        socket.emit("pres-share-image", { src: dataUrl, isDrawing: true });
+        showToast("🎨 Drawing sent to game screen!", "success");
+      }
 
-       document.getElementById("shareVideoBtn").addEventListener("click", () => {
-         openModal("videoModal");
-         resetVideoModal();
-         fetchUploadedVideos();
-       });
+      // ════════════════════════════════════════════
+      //  SHARE — VIDEO
+      // ════════════════════════════════════════════
+      let videoFile = null;
+      let videoUploadType = "youtube"; // or "file"
 
-       document.getElementById("shareWebpageBtn").addEventListener("click", () => {
-         document.getElementById("webpageUrlInput").value = "";
-         openModal("webpageModal");
-       });
+      document.getElementById("shareVideoBtn").addEventListener("click", () => {
+        openModal("videoModal");
+        resetVideoModal();
+        fetchUploadedVideos();
+      });
 
-       function sendWebpage() {
-         let url = document.getElementById("webpageUrlInput").value.trim();
-         if (!url) {
-           showToast("Please enter a URL", "error");
-           return;
-         }
-         if (!/^https?:\/\//i.test(url)) {
-           url = "https://" + url;
-         }
-         socket.emit("pres-share-webpage", { url });
-         showToast("🌐 Webpage sent to game screen!", "success");
-       }
+      document
+        .getElementById("shareWebpageBtn")
+        .addEventListener("click", () => {
+          document.getElementById("webpageUrlInput").value = "";
+          openModal("webpageModal");
+        });
 
-       document.getElementById("sharePdfBtn").addEventListener("click", () => {
-         // Populate the select with PDF files from the gallery
-         const select = document.getElementById("galleryPdfSelect");
-         select.innerHTML = '<option value="">-- Choose a PDF --</option>';
-         let hasPdf = false;
-         galleryItems.forEach(item => {
-           if (item.type === "pdf" || (item.url && item.url.toLowerCase().endsWith(".pdf"))) {
-             hasPdf = true;
-             const opt = document.createElement("option");
-             opt.value = item.url;
-             opt.textContent = `[${item.chapterName}] ${item.itemName}`;
-             select.appendChild(opt);
-           }
-         });
-         
-         if (!hasPdf) {
-           select.innerHTML = '<option value="">-- No PDFs available in Gallery --</option>';
-         }
-         
-         document.getElementById("sendPdfBtn").disabled = true;
-         openModal("pdfModal");
-       });
+      function sendWebpage() {
+        let url = document.getElementById("webpageUrlInput").value.trim();
+        if (!url) {
+          showToast("Please enter a URL", "error");
+          return;
+        }
+        if (!/^https?:\/\//i.test(url)) {
+          url = "https://" + url;
+        }
+        socket.emit("pres-share-webpage", { url });
+        showToast("🌐 Webpage sent to game screen!", "success");
+      }
 
-       document.getElementById("galleryPdfSelect").addEventListener("change", (e) => {
-         document.getElementById("sendPdfBtn").disabled = !e.target.value;
-       });
+      document.getElementById("sharePdfBtn").addEventListener("click", () => {
+        // Populate the select with PDF files from the gallery
+        const select = document.getElementById("galleryPdfSelect");
+        select.innerHTML = '<option value="">-- Choose a PDF --</option>';
+        let hasPdf = false;
+        galleryItems.forEach((item) => {
+          if (
+            item.type === "pdf" ||
+            (item.url && item.url.toLowerCase().endsWith(".pdf"))
+          ) {
+            hasPdf = true;
+            const opt = document.createElement("option");
+            opt.value = item.url;
+            opt.textContent = `[${item.chapterName}] ${item.itemName}`;
+            select.appendChild(opt);
+          }
+        });
 
-       function sendPdf() {
-         const url = document.getElementById("galleryPdfSelect").value;
-         if (!url) return;
-         socket.emit("pres-share-pdf", { url });
-         showToast("📄 PDF sent to game screen!", "success");
-       }
-
-       document.getElementById("youtubeUrlInput").addEventListener("input", (e) => {
-         const url = e.target.value.trim();
-         if (isValidYouTubeUrl(url)) {
-           videoUploadType = "youtube";
-           videoFile = null;
-           document.getElementById("sendVideoBtn").disabled = false;
-           extractYouTubeId(url);
-         } else {
-           document.getElementById("sendVideoBtn").disabled = true;
-         }
-       });
-
-       document.getElementById("videoUploadInput").addEventListener("change", (e) => {
-         const file = e.target.files[0];
-         if (!file) return;
-         if (!file.type.startsWith("video/")) {
-           showToast("Please upload a valid video file", "error");
-           return;
-         }
-         videoFile = file;
-         videoUploadType = "file";
-         document.getElementById("youtubeUrlInput").value = "";
-         
-         // Show preview
-         const url = URL.createObjectURL(file);
-         const preview = document.getElementById("videoPreview");
-         const source = document.getElementById("videoPreviewSource");
-         source.src = url;
-         preview.style.display = "block";
-         document.getElementById("sendVideoBtn").disabled = false;
-       });
-
-       function resetVideoModal() {
-         document.getElementById("youtubeUrlInput").value = "";
-         document.getElementById("videoUploadInput").value = "";
-         document.getElementById("videoPreview").style.display = "none";
-         document.getElementById("videoProgressContainer").classList.remove("active");
-         document.getElementById("sendVideoBtn").disabled = true;
-         videoFile = null;
-         videoUploadType = "youtube";
-       }
-
-function isValidYouTubeUrl(url) {
-          const patterns = [
-            /youtube\.com\/watch\?v=([^&\s]+)/,
-            /youtu\.be\/([^&\s]+)/,
-            /youtube\.com\/embed\/([^&\s]+)/,
-            /youtube\.com\/shorts\/([^&\s]+)/,
-          ];
-          return patterns.some((p) => p.test(url));
+        if (!hasPdf) {
+          select.innerHTML =
+            '<option value="">-- No PDFs available in Gallery --</option>';
         }
 
-        function extractYouTubeId(url) {
-          if (!url) return null;
-          let id = null;
-          // Try different URL formats
-          const match1 = url.match(/[?&]v=([^&\s]+)/);
-          const match2 = url.match(/youtu\.be\/([^?&]+)/);
-          const match3 = url.match(/\/embed\/([^?&]+)/);
-          const match4 = url.match(/\/shorts\/([^?&]+)/);
-          if (match1) id = match1[1];
-          else if (match2) id = match2[1];
-          else if (match3) id = match3[1];
-          else if (match4) id = match4[1];
-          return id ? id.split(/[#&]/)[0] : null; // Clean any extra params
+        document.getElementById("sendPdfBtn").disabled = true;
+        openModal("pdfModal");
+      });
+
+      document
+        .getElementById("galleryPdfSelect")
+        .addEventListener("change", (e) => {
+          document.getElementById("sendPdfBtn").disabled = !e.target.value;
+        });
+
+      function sendPdf() {
+        const url = document.getElementById("galleryPdfSelect").value;
+        if (!url) return;
+        socket.emit("pres-share-pdf", { url });
+        showToast("📄 PDF sent to game screen!", "success");
+      }
+
+      document
+        .getElementById("youtubeUrlInput")
+        .addEventListener("input", (e) => {
+          const url = e.target.value.trim();
+          if (isValidYouTubeUrl(url)) {
+            videoUploadType = "youtube";
+            videoFile = null;
+            document.getElementById("sendVideoBtn").disabled = false;
+            extractYouTubeId(url);
+          } else {
+            document.getElementById("sendVideoBtn").disabled = true;
+          }
+        });
+
+      document
+        .getElementById("videoUploadInput")
+        .addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          if (!file.type.startsWith("video/")) {
+            showToast("Please upload a valid video file", "error");
+            return;
+          }
+          videoFile = file;
+          videoUploadType = "file";
+          document.getElementById("youtubeUrlInput").value = "";
+
+          // Show preview
+          const url = URL.createObjectURL(file);
+          const preview = document.getElementById("videoPreview");
+          const source = document.getElementById("videoPreviewSource");
+          source.src = url;
+          preview.style.display = "block";
+          document.getElementById("sendVideoBtn").disabled = false;
+        });
+
+      function resetVideoModal() {
+        document.getElementById("youtubeUrlInput").value = "";
+        document.getElementById("videoUploadInput").value = "";
+        document.getElementById("videoPreview").style.display = "none";
+        document
+          .getElementById("videoProgressContainer")
+          .classList.remove("active");
+        document.getElementById("sendVideoBtn").disabled = true;
+        videoFile = null;
+        videoUploadType = "youtube";
+      }
+
+      function isValidYouTubeUrl(url) {
+        const patterns = [
+          /youtube\.com\/watch\?v=([^&\s]+)/,
+          /youtu\.be\/([^&\s]+)/,
+          /youtube\.com\/embed\/([^&\s]+)/,
+          /youtube\.com\/shorts\/([^&\s]+)/,
+        ];
+        return patterns.some((p) => p.test(url));
+      }
+
+      function extractYouTubeId(url) {
+        if (!url) return null;
+        let id = null;
+        // Try different URL formats
+        const match1 = url.match(/[?&]v=([^&\s]+)/);
+        const match2 = url.match(/youtu\.be\/([^?&]+)/);
+        const match3 = url.match(/\/embed\/([^?&]+)/);
+        const match4 = url.match(/\/shorts\/([^?&]+)/);
+        if (match1) id = match1[1];
+        else if (match2) id = match2[1];
+        else if (match3) id = match3[1];
+        else if (match4) id = match4[1];
+        return id ? id.split(/[#&]/)[0] : null; // Clean any extra params
+      }
+
+      document.getElementById("sendVideoBtn").addEventListener("click", () => {
+        console.log("Send video button clicked, type:", videoUploadType);
+        if (videoUploadType === "youtube") {
+          const url = document.getElementById("youtubeUrlInput").value.trim();
+          const videoId = extractYouTubeId(url);
+          console.log("YouTube URL:", url, "Video ID:", videoId);
+          if (!videoId) {
+            showToast("Invalid YouTube URL", "error");
+            return;
+          }
+          socket.emit("pres-share-video", { type: "youtube", videoId, url });
+          showToast("🎬 YouTube video sent to game screen!", "success");
+        } else if (videoUploadType === "file" && videoFile) {
+          uploadVideoFile();
         }
+      });
 
-document.getElementById("sendVideoBtn").addEventListener("click", () => {
-         console.log("Send video button clicked, type:", videoUploadType);
-         if (videoUploadType === "youtube") {
-           const url = document.getElementById("youtubeUrlInput").value.trim();
-             const videoId = extractYouTubeId(url);
-             console.log("YouTube URL:", url, "Video ID:", videoId);
-             if (!videoId) {
-               showToast("Invalid YouTube URL", "error");
-               return;
-             }
-             socket.emit("pres-share-video", { type: "youtube", videoId, url });
-             showToast("🎬 YouTube video sent to game screen!", "success");
-           } else if (videoUploadType === "file" && videoFile) {
-             uploadVideoFile();
-           }
-       });
+      let currentVideoXhr = null;
 
-       let currentVideoXhr = null;
+      function cancelVideoUpload() {
+        if (currentVideoXhr) {
+          currentVideoXhr.abort();
+          currentVideoXhr = null;
+        }
+        const progContainer = document.getElementById("videoProgressContainer");
+        progContainer.classList.remove("active");
+        document.getElementById("sendVideoBtn").disabled = false;
+        showToast("Upload cancelled", "info");
+      }
 
-       function cancelVideoUpload() {
-         if (currentVideoXhr) {
-           currentVideoXhr.abort();
-           currentVideoXhr = null;
-         }
-         const progContainer = document.getElementById("videoProgressContainer");
-         progContainer.classList.remove("active");
-         document.getElementById("sendVideoBtn").disabled = false;
-         showToast("Upload cancelled", "info");
-       }
+      function uploadVideoFile() {
+        if (!videoFile) return;
 
-       function uploadVideoFile() {
-         if (!videoFile) return;
+        const formData = new FormData();
+        formData.append("video", videoFile);
 
-         const formData = new FormData();
-         formData.append("video", videoFile);
+        const progContainer = document.getElementById("videoProgressContainer");
+        const progFill = document.getElementById("videoProgressFill");
+        const progPct = document.getElementById("videoProgressPct");
+        const progText = document.getElementById("videoProgressText");
+        const sendBtn = document.getElementById("sendVideoBtn");
 
-         const progContainer = document.getElementById("videoProgressContainer");
-         const progFill = document.getElementById("videoProgressFill");
-         const progPct = document.getElementById("videoProgressPct");
-         const progText = document.getElementById("videoProgressText");
-         const sendBtn = document.getElementById("sendVideoBtn");
+        progContainer.classList.add("active");
+        sendBtn.disabled = true;
 
-         progContainer.classList.add("active");
-         sendBtn.disabled = true;
+        const xhr = new XMLHttpRequest();
+        currentVideoXhr = xhr;
 
-         const xhr = new XMLHttpRequest();
-         currentVideoXhr = xhr;
+        xhr.upload.addEventListener("progress", (e) => {
+          if (e.lengthComputable) {
+            const pct = Math.round((e.loaded / e.total) * 100);
+            progFill.style.width = pct + "%";
+            progPct.textContent = pct + "%";
+            progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
+          }
+        });
 
-         xhr.upload.addEventListener("progress", (e) => {
-           if (e.lengthComputable) {
-             const pct = Math.round((e.loaded / e.total) * 100);
-             progFill.style.width = pct + "%";
-             progPct.textContent = pct + "%";
-             progText.textContent = pct < 100 ? "Uploading..." : "Processing...";
-           }
-         });
+        xhr.addEventListener("load", () => {
+          currentVideoXhr = null;
+          if (xhr.status === 200) {
+            const res = JSON.parse(xhr.responseText);
+            socket.emit("pres-share-video", {
+              type: "upload",
+              url: res.url,
+              filename: res.filename,
+            });
+            showToast("🎬 Video uploaded and sent to game screen!", "success");
+            progContainer.classList.remove("active");
+            progFill.style.width = "0%";
+            fetchUploadedVideos();
+          } else {
+            showToast("Upload failed: " + xhr.responseText, "error");
+            progContainer.classList.remove("active");
+            sendBtn.disabled = false;
+          }
+        });
 
-         xhr.addEventListener("load", () => {
-           currentVideoXhr = null;
-           if (xhr.status === 200) {
-             const res = JSON.parse(xhr.responseText);
-             socket.emit("pres-share-video", { type: "upload", url: res.url, filename: res.filename });
-             showToast("🎬 Video uploaded and sent to game screen!", "success");
-             progContainer.classList.remove("active");
-             progFill.style.width = "0%";
-             fetchUploadedVideos();
-           } else {
-             showToast("Upload failed: " + xhr.responseText, "error");
-             progContainer.classList.remove("active");
-             sendBtn.disabled = false;
-           }
-         });
+        xhr.addEventListener("error", () => {
+          currentVideoXhr = null;
+          showToast("Network error during upload", "error");
+          progContainer.classList.remove("active");
+          sendBtn.disabled = false;
+        });
 
-         xhr.addEventListener("error", () => {
-           currentVideoXhr = null;
-           showToast("Network error during upload", "error");
-           progContainer.classList.remove("active");
-           sendBtn.disabled = false;
-         });
+        xhr.addEventListener("abort", () => {
+          currentVideoXhr = null;
+        });
 
-         xhr.addEventListener("abort", () => {
-           currentVideoXhr = null;
-         });
+        xhr.open("POST", "/api/video/upload");
+        xhr.send(formData);
+      }
 
-         xhr.open("POST", "/api/video/upload");
-         xhr.send(formData);
-       }
+      async function fetchUploadedVideos() {
+        try {
+          const res = await fetch("/api/videos");
+          const videos = await res.json();
+          const container = document.getElementById("uploadedVideosList");
+          const countLabel = document.getElementById(
+            "uploadedVideosCountLabel",
+          );
 
-       async function fetchUploadedVideos() {
-         try {
-           const res = await fetch("/api/videos");
-           const videos = await res.json();
-           const container = document.getElementById("uploadedVideosList");
-           const countLabel = document.getElementById("uploadedVideosCountLabel");
-           
-           if (countLabel) {
-             countLabel.textContent = videos.length === 0 ? "No videos" : videos.length + " video(s)";
-           }
+          if (countLabel) {
+            countLabel.textContent =
+              videos.length === 0 ? "No videos" : videos.length + " video(s)";
+          }
 
-           if (videos.length === 0) {
-             container.innerHTML = `<div class="empty-state"><span class="empty-icon">🎞️</span><p>No uploaded videos yet.</p></div>`;
-             return;
-           }
-           container.innerHTML = videos.map(v => `
+          if (videos.length === 0) {
+            container.innerHTML = `<div class="empty-state"><span class="empty-icon">🎞️</span><p>No uploaded videos yet.</p></div>`;
+            return;
+          }
+          container.innerHTML = videos
+            .map(
+              (v) => `
              <div class="file-item" style="margin-bottom: 8px;">
                <div class="file-item-icon" style="font-size: 1.1rem; width: 36px; height: 36px;">🎬</div>
                <div class="file-item-info">
@@ -3091,53 +3452,58 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
                  <button class="icon-btn danger" onclick="deleteUploadedVideo('${v.filename}')" title="Delete">🗑️</button>
                </div>
              </div>
-           `).join("");
-         } catch (e) {
-           console.error("Failed to fetch uploaded videos", e);
-         }
-       }
+           `,
+            )
+            .join("");
+        } catch (e) {
+          console.error("Failed to fetch uploaded videos", e);
+        }
+      }
 
-       function shareUploadedVideo(url, filename) {
-         socket.emit("pres-share-video", { type: "upload", url, filename });
-         showToast("🎬 Shared uploaded video to screen!", "success");
-       }
+      function shareUploadedVideo(url, filename) {
+        socket.emit("pres-share-video", { type: "upload", url, filename });
+        showToast("🎬 Shared uploaded video to screen!", "success");
+      }
 
-       async function deleteUploadedVideo(filename) {
-         if (!confirm("Delete this uploaded video?")) return;
-         try {
-           const res = await fetch("/api/video/" + filename, { method: "DELETE" });
-           if (res.ok) {
-             showToast("Video deleted", "info");
-             fetchUploadedVideos();
-           } else {
-             showToast("Failed to delete video", "error");
-           }
-         } catch (e) {
-           showToast("Error deleting video", "error");
-         }
-       }
+      async function deleteUploadedVideo(filename) {
+        if (!confirm("Delete this uploaded video?")) return;
+        try {
+          const res = await fetch("/api/video/" + filename, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            showToast("Video deleted", "info");
+            fetchUploadedVideos();
+          } else {
+            showToast("Failed to delete video", "error");
+          }
+        } catch (e) {
+          showToast("Error deleting video", "error");
+        }
+      }
 
-// ════════════════════════════════════════════
-       //  MODAL HELPERS
-       // ════════════════════════════════════════════
-       function openModal(id) {
-         document.getElementById(id).classList.add("open");
-       }
-       function closeModal(id) {
-         document.getElementById(id).classList.remove("open");
-       }
-       
-       function insertTreeHelper(character) {
-         const textarea = document.getElementById("treeData");
-         const start = textarea.selectionStart;
-         const end = textarea.selectionEnd;
-         const text = textarea.value;
-         textarea.value = text.substring(0, start) + character + text.substring(end);
-         const newCursorPos = start + character.length;
-         textarea.selectionStart = newCursorPos;
-         textarea.selectionEnd = newCursorPos;
-         textarea.focus();
-       }
+      // ════════════════════════════════════════════
+      //  MODAL HELPERS
+      // ════════════════════════════════════════════
+      function openModal(id) {
+        document.getElementById(id).classList.add("open");
+      }
+      function closeModal(id) {
+        document.getElementById(id).classList.remove("open");
+      }
+
+      function insertTreeHelper(character) {
+        const textarea = document.getElementById("treeData");
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        textarea.value =
+          text.substring(0, start) + character + text.substring(end);
+        const newCursorPos = start + character.length;
+        textarea.selectionStart = newCursorPos;
+        textarea.selectionEnd = newCursorPos;
+        textarea.focus();
+      }
 
       document.querySelectorAll(".modal-overlay").forEach((el) => {
         el.addEventListener("click", (e) => {
@@ -3184,8 +3550,9 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
       function renderGallery(list) {
         const container = document.getElementById("galleryList");
         const countLabel = document.getElementById("galleryCountLabel");
-        
-        countLabel.textContent = list.length === 0 ? "No items" : list.length + " item(s)";
+
+        countLabel.textContent =
+          list.length === 0 ? "No items" : list.length + " item(s)";
 
         if (list.length === 0) {
           container.innerHTML = `<div class="empty-state">
@@ -3207,12 +3574,12 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
           html += `<div style="font-size: 0.85rem; font-weight: 800; color: #e2e8f0; text-transform: uppercase; margin: 16px 0 10px 4px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 6px; display: flex; align-items: center; gap: 8px;">
             <span style="background: rgba(124, 58, 237, 0.2); color: #c4b5fd; padding: 4px 8px; border-radius: 6px; font-size: 0.75rem;">📂</span> ${chapter}
           </div>`;
-          
+
           html += `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 12px; margin-bottom: 16px;">`;
 
           for (const item of items) {
             const icon = item.type === "video" ? "🎬" : "🖼️";
-            
+
             let bgImg = "none";
             if (item.type === "image") {
               bgImg = `url('${item.url}')`;
@@ -3220,15 +3587,21 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
               if (item.previewUrl) {
                 bgImg = `url('${item.previewUrl}')`;
               } else {
-                const ytId = typeof extractYouTubeId === "function" ? extractYouTubeId(item.url) : null;
+                const ytId =
+                  typeof extractYouTubeId === "function"
+                    ? extractYouTubeId(item.url)
+                    : null;
                 if (ytId) {
                   bgImg = `url('https://img.youtube.com/vi/${ytId}/hqdefault.jpg')`;
                 }
               }
             }
-            
-            const bgStyle = bgImg !== "none" ? `background-image: ${bgImg}; background-size: cover; background-position: center;` : `background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));`;
-            
+
+            const bgStyle =
+              bgImg !== "none"
+                ? `background-image: ${bgImg}; background-size: cover; background-position: center;`
+                : `background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));`;
+
             html += `
               <div style="position: relative; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); aspect-ratio: 1; display: flex; flex-direction: column; justify-content: flex-end; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.2);" onmouseover="this.style.transform='scale(1.05) translateY(-2px)'; this.style.borderColor='rgba(124, 58, 237, 0.5)';" onmouseout="this.style.transform='scale(1) translateY(0)'; this.style.borderColor='rgba(255,255,255,0.1)';">
                 <div style="position: absolute; inset: 0; ${bgStyle} z-index: 0; transition: transform 0.3s;" class="gallery-bg-hover"></div>
@@ -3251,22 +3624,28 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         container.innerHTML = html;
       }
 
-      document.getElementById("searchGallery").addEventListener("input", (e) => {
-        const q = e.target.value.toLowerCase();
-        renderGallery(galleryItems.filter(i => 
-          i.itemName.toLowerCase().includes(q) || 
-          i.chapterName.toLowerCase().includes(q)
-        ));
-      });
+      document
+        .getElementById("searchGallery")
+        .addEventListener("input", (e) => {
+          const q = e.target.value.toLowerCase();
+          renderGallery(
+            galleryItems.filter(
+              (i) =>
+                i.itemName.toLowerCase().includes(q) ||
+                i.chapterName.toLowerCase().includes(q),
+            ),
+          );
+        });
 
       function openGalleryUploadModal() {
         document.getElementById("galleryChapterInput").value = "";
         document.getElementById("galleryNameInput").value = "";
         document.getElementById("galleryTypeSelect").value = "image";
         document.getElementById("galleryFileInput").value = "";
-        document.getElementById("galleryFileInputLabel").textContent = "No file chosen...";
+        document.getElementById("galleryFileInputLabel").textContent =
+          "No file chosen...";
         if (document.getElementById("galleryImageUrlInput")) {
-           document.getElementById("galleryImageUrlInput").value = "";
+          document.getElementById("galleryImageUrlInput").value = "";
         }
         galleryUploadFile = null;
         document.getElementById("galleryVideoUrlInput").value = "";
@@ -3279,9 +3658,11 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         const type = document.getElementById("galleryTypeSelect").value;
         if (type === "video") {
           document.getElementById("galleryImageSection").style.display = "none";
-          document.getElementById("galleryVideoSection").style.display = "block";
+          document.getElementById("galleryVideoSection").style.display =
+            "block";
         } else {
-          document.getElementById("galleryImageSection").style.display = "block";
+          document.getElementById("galleryImageSection").style.display =
+            "block";
           document.getElementById("galleryVideoSection").style.display = "none";
         }
       }
@@ -3296,7 +3677,9 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
 
       function submitGalleryItem() {
         const type = document.getElementById("galleryTypeSelect").value;
-        const chapter = document.getElementById("galleryChapterInput").value.trim();
+        const chapter = document
+          .getElementById("galleryChapterInput")
+          .value.trim();
         const name = document.getElementById("galleryNameInput").value.trim();
 
         if (!chapter || !name) {
@@ -3305,22 +3688,31 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         }
 
         if (type === "media" || type === "image" || type === "pdf") {
-          const linkUrl = document.getElementById("galleryImageUrlInput") ? document.getElementById("galleryImageUrlInput").value.trim() : "";
-          
+          const linkUrl = document.getElementById("galleryImageUrlInput")
+            ? document.getElementById("galleryImageUrlInput").value.trim()
+            : "";
+
           if (!galleryUploadFile && !linkUrl) {
             showToast("Please select a file or provide a link", "error");
             return;
           }
-          
+
           let actualType = "image";
           if (linkUrl) {
-             if (linkUrl.toLowerCase().endsWith(".pdf") || linkUrl.includes("drive.google.com") || linkUrl.includes("docs.google.com")) {
-               actualType = "pdf";
-             }
-          } else if (galleryUploadFile && galleryUploadFile.name.toLowerCase().endsWith(".pdf")) {
+            if (
+              linkUrl.toLowerCase().endsWith(".pdf") ||
+              linkUrl.includes("drive.google.com") ||
+              linkUrl.includes("docs.google.com")
+            ) {
+              actualType = "pdf";
+            }
+          } else if (
+            galleryUploadFile &&
+            galleryUploadFile.name.toLowerCase().endsWith(".pdf")
+          ) {
             actualType = "pdf";
           }
-          
+
           const formData = new FormData();
           if (galleryUploadFile) {
             formData.append("image", galleryUploadFile); // Keeping 'image' as the field name since the backend uses upload.single('image')
@@ -3334,21 +3726,29 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
 
           fetch("/api/gallery/image", {
             method: "POST",
-            body: formData
+            body: formData,
           })
-          .then(res => res.json())
-          .then(data => {
-            if(data.status === "ok") {
-              showToast(actualType === "pdf" ? "PDF added to gallery" : "Image added to gallery", "success");
-              closeModal("galleryUploadModal");
-              fetchGallery();
-            } else showToast(data.error || "Error adding file", "error");
-          })
-          .catch(e => showToast("Network error", "error"));
-
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.status === "ok") {
+                showToast(
+                  actualType === "pdf"
+                    ? "PDF added to gallery"
+                    : "Image added to gallery",
+                  "success",
+                );
+                closeModal("galleryUploadModal");
+                fetchGallery();
+              } else showToast(data.error || "Error adding file", "error");
+            })
+            .catch((e) => showToast("Network error", "error"));
         } else if (type === "video") {
-          const videoUrl = document.getElementById("galleryVideoUrlInput").value.trim();
-          const previewUrl = document.getElementById("galleryPreviewUrlInput").value.trim();
+          const videoUrl = document
+            .getElementById("galleryVideoUrlInput")
+            .value.trim();
+          const previewUrl = document
+            .getElementById("galleryPreviewUrlInput")
+            .value.trim();
           if (!videoUrl) {
             showToast("Please enter YouTube URL", "error");
             return;
@@ -3356,18 +3756,23 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
 
           fetch("/api/gallery/video", {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
-            body: JSON.stringify({ chapterName: chapter, itemName: name, videoUrl, previewUrl })
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              chapterName: chapter,
+              itemName: name,
+              videoUrl,
+              previewUrl,
+            }),
           })
-          .then(res => res.json())
-          .then(data => {
-            if(data.status === "ok") {
-              showToast("Video added to gallery", "success");
-              closeModal("galleryUploadModal");
-              fetchGallery();
-            } else showToast(data.error || "Error adding video", "error");
-          })
-          .catch(e => showToast("Network error", "error"));
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.status === "ok") {
+                showToast("Video added to gallery", "success");
+                closeModal("galleryUploadModal");
+                fetchGallery();
+              } else showToast(data.error || "Error adding video", "error");
+            })
+            .catch((e) => showToast("Network error", "error"));
         }
       }
 
@@ -3387,10 +3792,12 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         let imgHtml = '<option value="">-- Choose an Image --</option>';
         let vidHtml = '<option value="">-- Choose a Video --</option>';
 
-        galleryItems.forEach(item => {
+        galleryItems.forEach((item) => {
           const text = `${item.chapterName} - ${item.itemName}`;
-          const isPdf = item.type === "pdf" || (item.url && item.url.toLowerCase().endsWith(".pdf"));
-          
+          const isPdf =
+            item.type === "pdf" ||
+            (item.url && item.url.toLowerCase().endsWith(".pdf"));
+
           if ((item.type === "image" || item.type === "media") && !isPdf) {
             imgHtml += `<option value="${item.url}">${text}</option>`;
           } else if (item.type === "video") {
@@ -3402,62 +3809,70 @@ document.getElementById("sendVideoBtn").addEventListener("click", () => {
         vidSelect.innerHTML = vidHtml;
       }
 
-      document.getElementById("galleryImageSelect").addEventListener("change", (e) => {
-        const val = e.target.value;
-        if (val) {
-          const prev = document.getElementById("img-preview");
-          prev.src = val;
-          prev.style.display = "block";
-          document.getElementById("sendImageBtn").disabled = false;
-          document.getElementById("sendImageBtn")._dataUrl = val; 
-        } else {
-          if (!document.getElementById("imgShareInput").files[0]) {
-             document.getElementById("sendImageBtn").disabled = true;
-             document.getElementById("img-preview").style.display = "none";
+      document
+        .getElementById("galleryImageSelect")
+        .addEventListener("change", (e) => {
+          const val = e.target.value;
+          if (val) {
+            const prev = document.getElementById("img-preview");
+            prev.src = val;
+            prev.style.display = "block";
+            document.getElementById("sendImageBtn").disabled = false;
+            document.getElementById("sendImageBtn")._dataUrl = val;
+          } else {
+            if (!document.getElementById("imgShareInput").files[0]) {
+              document.getElementById("sendImageBtn").disabled = true;
+              document.getElementById("img-preview").style.display = "none";
+            }
           }
-        }
-      });
+        });
 
-      document.getElementById("galleryVideoSelect").addEventListener("change", (e) => {
-        const val = e.target.value;
-        if (val) {
-          document.getElementById("youtubeUrlInput").value = val;
-          document.getElementById("youtubeUrlInput").dispatchEvent(new Event('input'));
-        }
-      });
+      document
+        .getElementById("galleryVideoSelect")
+        .addEventListener("change", (e) => {
+          const val = e.target.value;
+          if (val) {
+            document.getElementById("youtubeUrlInput").value = val;
+            document
+              .getElementById("youtubeUrlInput")
+              .dispatchEvent(new Event("input"));
+          }
+        });
       // ════════════════════════════════════════════
       //  MOBILE TAB SWITCHING (UI ONLY)
       // ════════════════════════════════════════════
       function switchMobileTab(tabName) {
         // Hide all tab content sections
-        document.querySelectorAll('[data-mobile-tab]').forEach(el => {
-          el.classList.remove('mob-active');
+        document.querySelectorAll("[data-mobile-tab]").forEach((el) => {
+          el.classList.remove("mob-active");
         });
         // Deactivate all tab buttons
-        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
-          btn.classList.remove('active');
+        document.querySelectorAll(".mobile-tab-btn").forEach((btn) => {
+          btn.classList.remove("active");
         });
         // Activate the selected tab content
-        document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
-          el.classList.add('mob-active');
-        });
+        document
+          .querySelectorAll(`[data-mobile-tab="${tabName}"]`)
+          .forEach((el) => {
+            el.classList.add("mob-active");
+          });
         // Activate the selected tab button
-        const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
+        const activeBtn = document.querySelector(
+          `.mobile-tab-btn[data-tab="${tabName}"]`,
+        );
+        if (activeBtn) activeBtn.classList.add("active");
         // Scroll to top when switching tabs
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
       // Initialize: activate the library tab on mobile by default
-      (function() {
+      (function () {
         if (window.innerWidth <= 768) {
-          switchMobileTab('library');
+          switchMobileTab("library");
         }
       })();
-
     </script>
     <script src="js/wake-lock.js"></script>
-  <script src="js/whiteboard.js"></script>
+    <script src="js/whiteboard.js"></script>
   </body>
 </html>
-

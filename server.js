@@ -687,6 +687,10 @@ io.on("connection", (socket) => {
   socket.on("wb-modify", (data) => socket.broadcast.emit("wb-modify", data));
   socket.on("wb-remove", (data) => socket.broadcast.emit("wb-remove", data));
   socket.on("wb-clear", () => socket.broadcast.emit("wb-clear"));
+  socket.on("wb-modify-batch", (data) => socket.broadcast.emit("wb-modify-batch", data));
+  socket.on("wb-grid", (data) => socket.broadcast.emit("wb-grid", data));
+  socket.on("wb-capture-request", () => socket.broadcast.emit("wb-capture-request"));
+  socket.on("wb-capture-response", (data) => socket.broadcast.emit("wb-capture-response", data));
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
