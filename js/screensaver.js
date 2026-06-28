@@ -16,6 +16,8 @@ const waterFoam = [];
 const windObjects = [];
 const titleSurfaces = [];
 
+const WELCOME_MARKER = { x: -36, z: 42 };
+
 let currentPaperTitle = "Agriculture 1st Paper";
 let currentChapterTitle = "Chapter 01: বাংলাদেশের কৃষি";
 
@@ -543,6 +545,7 @@ function createForest(count) {
   while (placed < count) {
     const x = (Math.random() - 0.5) * 410;
     const z = (Math.random() - 0.5) * 410;
+    if (isInsideWelcomeMarkerClearance(x, z)) continue;
     if (
       Math.abs(x - riverCenterX(z)) <
       CONFIG.riverHalfWidth + 10 + Math.random() * 16
@@ -604,6 +607,12 @@ function createForest(count) {
     scene.add(tree);
     placed += 1;
   }
+}
+
+function isInsideWelcomeMarkerClearance(x, z) {
+  const dx = (x - WELCOME_MARKER.x) / 52;
+  const dz = (z - WELCOME_MARKER.z) / 42;
+  return dx * dx + dz * dz < 1;
 }
 
 function addTreeBlossoms(tree, scale) {
@@ -1088,7 +1097,11 @@ function createLandMarkers() {
     postDepth: 2.8,
     lineGap: 0.32,
   });
-  welcome.position.set(-36, terrainHeight(-36, 42), 42);
+  welcome.position.set(
+    WELCOME_MARKER.x,
+    terrainHeight(WELCOME_MARKER.x, WELCOME_MARKER.z),
+    WELCOME_MARKER.z,
+  );
   welcome.rotation.y = -0.18;
   scene.add(welcome);
 
