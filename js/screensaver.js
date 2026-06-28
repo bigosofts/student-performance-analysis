@@ -1,7 +1,7 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
 
 let scene, camera, renderer, clock;
-let terrain, river, riverMaterial, sun, moon, skyDome;
+let terrain, river, riverMaterial, sun, moon, skyDome, cinematicTitle, sunVeilCloud;
 let animationFrameId;
 let isActive = false;
 let screensaverContainerId = null;
@@ -16,7 +16,7 @@ const waterFoam = [];
 const windObjects = [];
 const titleSurfaces = [];
 
-let currentPaperTitle = "Agriculture - 1st Paper";
+let currentPaperTitle = "Agriculture 1st Paper";
 let currentChapterTitle = "Chapter 01: বাংলাদেশের কৃষি";
 
 const CONFIG = {
@@ -91,6 +91,7 @@ export function initScreensaver(containerId) {
   createFarmProps();
   createLandMarkers();
   createClouds(16);
+  createSunVeilCloud();
   createBirds(12);
   createButterflies(14);
   createDriftingLeaves(50);
@@ -117,6 +118,8 @@ function disposeScene() {
   waterFoam.length = 0;
   windObjects.length = 0;
   titleSurfaces.length = 0;
+  cinematicTitle = null;
+  sunVeilCloud = null;
 }
 
 function createSky() {
@@ -157,7 +160,11 @@ function createSky() {
 
   sun = new THREE.Mesh(
     new THREE.SphereGeometry(8, 32, 16),
-    new THREE.MeshBasicMaterial({ color: 0xfff0b0 }),
+    new THREE.MeshBasicMaterial({
+      color: 0xffedb6,
+      transparent: true,
+      opacity: 0.48,
+    }),
   );
   sun.position.set(-90, 115, -120);
   scene.add(sun);
@@ -258,6 +265,7 @@ function createRiver() {
     positions[i] = localX + bend;
     positions[i + 1] = -1.15 + Math.abs(localX / width) * 0.18;
   }
+  geometry.userData.basePositions = Float32Array.from(positions);
   geometry.computeVertexNormals();
 
   riverMaterial = new THREE.MeshPhysicalMaterial({
@@ -1085,58 +1093,56 @@ function createLandMarkers() {
   scene.add(welcome);
 
   const title = createHillsideTitle();
-  title.position.set(-12, terrainHeight(-12, -122) + 36, -122);
-  title.rotation.set(THREE.MathUtils.degToRad(-5), 0.03, 0);
+  title.position.set(-8, terrainHeight(-8, -154) + 58, -154);
+  title.rotation.set(THREE.MathUtils.degToRad(-3), 0.02, 0);
+  title.userData.baseY = title.position.y;
+  cinematicTitle = title;
   scene.add(title);
 }
 
 function createHillsideTitle() {
   const group = new THREE.Group();
   const paper = createTextPlane([""], {
-    width: 190,
-    height: 24,
-    fontSizes: [170],
+    width: 244,
+    height: 61,
+    fontSizes: [300],
     textureWidth: 4096,
-    textureHeight: 768,
-    textColor: "#f8fbff",
-    strokeColor: "#18324d",
+    textureHeight: 1024,
+    textGradient: ["#fffdf5", "#d8f0ff", "#8fc7ff"],
+    strokeColor: "rgba(12, 38, 58, 0.92)",
+    shadowColor: "rgba(3, 18, 31, 0.62)",
+    shadowBlur: 34,
+    maxTextWidth: 3740,
     transparent: true,
-    depthTest: false,
+    depthTest: true,
+    depthWrite: false,
+    fog: false,
   });
-  paper.position.y = 16;
+  paper.position.y = 13;
   paper.userData.titleRole = "paper";
   titleSurfaces.push(paper);
   group.add(paper);
 
   const chapter = createTextPlane([""], {
-    width: 218,
-    height: 31,
-    fontSizes: [190],
-    textureWidth: 4096,
-    textureHeight: 900,
-    textColor: "#ffffff",
-    strokeColor: "#18324d",
+    width: 244,
+    height: 55,
+    fontSizes: [330],
+    textureWidth: 5120,
+    textureHeight: 1152,
+    textGradient: ["#ffffff", "#f5e587", "#79dfb6"],
+    strokeColor: "rgba(10, 41, 49, 0.94)",
+    shadowColor: "rgba(0, 16, 24, 0.68)",
+    shadowBlur: 38,
+    maxTextWidth: 4580,
     transparent: true,
-    depthTest: false,
+    depthTest: true,
+    depthWrite: false,
+    fog: false,
   });
-  chapter.position.y = -13;
+  chapter.position.y = -15;
   chapter.userData.titleRole = "chapter";
   titleSurfaces.push(chapter);
   group.add(chapter);
-
-  const supportMat = new THREE.MeshStandardMaterial({
-    color: 0x31506b,
-    roughness: 0.8,
-  });
-  for (const x of [-92, -46, 0, 46, 92]) {
-    const post = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.38, 0.52, 42, 8),
-      supportMat,
-    );
-    post.position.set(x, -5, -0.9);
-    post.castShadow = true;
-    group.add(post);
-  }
 
   return group;
 }
@@ -1173,6 +1179,7 @@ function createTextPlane(lines, options) {
     transparent: true,
     side: THREE.DoubleSide,
     depthTest: options.depthTest !== false,
+    depthWrite: options.depthWrite !== false,
     fog: options.fog !== false,
   });
   const mesh = new THREE.Mesh(
@@ -1208,13 +1215,31 @@ function createTextTexture(lines, options) {
 
   const total = lines.length;
   lines.forEach((line, index) => {
-    const size = options.fontSizes[index] || options.fontSizes[0] || 64;
+    let size = options.fontSizes[index] || options.fontSizes[0] || 64;
     ctx.font = `900 ${size}px "Noto Sans Bengali", "Segoe UI", Arial, sans-serif`;
-    ctx.fillStyle = options.textColor || "#ffffff";
+    const maxTextWidth = options.maxTextWidth || canvas.width * 0.9;
+    const measuredWidth = ctx.measureText(line).width;
+    if (measuredWidth > maxTextWidth) {
+      size *= maxTextWidth / measuredWidth;
+      ctx.font = `900 ${size}px "Noto Sans Bengali", "Segoe UI", Arial, sans-serif`;
+    }
+    const fillGradient = options.textGradient
+      ? ctx.createLinearGradient(0, canvas.height * 0.18, 0, canvas.height * 0.84)
+      : null;
+    if (fillGradient) {
+      const stops = options.textGradient;
+      stops.forEach((color, stopIndex) => {
+        fillGradient.addColorStop(
+          stops.length === 1 ? 0 : stopIndex / (stops.length - 1),
+          color,
+        );
+      });
+    }
+    ctx.fillStyle = fillGradient || options.textColor || "#ffffff";
     ctx.strokeStyle = options.strokeColor || "rgba(0,0,0,0.65)";
     ctx.lineWidth = Math.max(7, size * 0.12);
-    ctx.shadowColor = "rgba(0,0,0,0.35)";
-    ctx.shadowBlur = Math.max(6, size * 0.08);
+    ctx.shadowColor = options.shadowColor || "rgba(0,0,0,0.35)";
+    ctx.shadowBlur = options.shadowBlur || Math.max(6, size * 0.08);
     ctx.shadowOffsetY = Math.max(3, size * 0.035);
     const gap = options.lineGap || 0.26;
     const y = canvas.height * (0.5 + (index - (total - 1) / 2) * gap);
@@ -1286,6 +1311,41 @@ function createClouds(count) {
     clouds.push(group);
     scene.add(group);
   }
+}
+
+function createSunVeilCloud() {
+  const cloudTexture = createCloudTexture();
+  const group = new THREE.Group();
+  const placements = [
+    { x: -12, y: 1.5, scaleX: 64, scaleY: 15, opacity: 0.58 },
+    { x: 14, y: 3.2, scaleX: 52, scaleY: 12, opacity: 0.5 },
+    { x: 1, y: -3.2, scaleX: 74, scaleY: 12, opacity: 0.38 },
+    { x: 28, y: -1.2, scaleX: 42, scaleY: 10, opacity: 0.42 },
+  ];
+
+  placements.forEach((placement) => {
+    const sprite = new THREE.Sprite(
+      new THREE.SpriteMaterial({
+        map: cloudTexture,
+        color: 0xfffbef,
+        transparent: true,
+        opacity: placement.opacity,
+        depthWrite: false,
+        depthTest: true,
+      }),
+    );
+    sprite.position.set(placement.x, placement.y, 0);
+    sprite.scale.set(placement.scaleX, placement.scaleY, 1);
+    group.add(sprite);
+  });
+
+  group.userData = {
+    phase: Math.random() * 20,
+    sunOffset: new THREE.Vector3(6, -1, 4),
+  };
+  sunVeilCloud = group;
+  clouds.push(group);
+  scene.add(group);
 }
 
 function createBirds(count) {
@@ -1641,6 +1701,7 @@ function animate() {
   animateButterflies(elapsedTime);
   animateLeaves(delta);
   animateFireflies(elapsedTime);
+  animateTitle(elapsedTime);
   animateCamera(elapsedTime);
 
   renderer.render(scene, camera);
@@ -1652,6 +1713,23 @@ function animateWater(elapsedTime) {
   if (riverMaterial.normalMap) {
     riverMaterial.normalMap.offset.y = elapsedTime * 0.032;
     riverMaterial.normalMap.offset.x = Math.sin(elapsedTime * 0.12) * 0.012;
+  }
+
+  const positions = river.geometry.attributes.position;
+  const basePositions = river.geometry.userData.basePositions;
+  if (basePositions) {
+    for (let i = 0; i < positions.count; i++) {
+      const vertexIndex = i * 3;
+      const x = basePositions[vertexIndex];
+      const z = basePositions[vertexIndex + 2];
+      const side = Math.abs(x - riverCenterX(z)) / CONFIG.riverHalfWidth;
+      const edgeWave = Math.pow(THREE.MathUtils.clamp(side, 0, 1), 1.65);
+      positions.array[vertexIndex + 1] =
+        basePositions[vertexIndex + 1] +
+        Math.sin(z * 0.18 + elapsedTime * 2.2) * 0.1 +
+        Math.sin(z * 0.34 + elapsedTime * 3.1 + side * 2.4) * 0.22 * edgeWave;
+    }
+    positions.needsUpdate = true;
   }
 
   waterFoam.forEach((foam) => {
@@ -1670,11 +1748,25 @@ function animateWater(elapsedTime) {
 
 function animateClouds(elapsedTime) {
   clouds.forEach((cloud) => {
+    if (cloud === sunVeilCloud) {
+      cloud.position.y +=
+        Math.sin(elapsedTime * 0.22 + cloud.userData.phase) * 0.003;
+      return;
+    }
     cloud.position.x -= cloud.userData.speed;
     cloud.position.y +=
       Math.sin(elapsedTime * 0.18 + cloud.userData.phase) * 0.004;
     if (cloud.position.x < -260) cloud.position.x = 260;
   });
+}
+
+function animateTitle(elapsedTime) {
+  if (!cinematicTitle) return;
+  cinematicTitle.position.y =
+    cinematicTitle.userData.baseY +
+    Math.sin(elapsedTime * 0.55) * 1.15;
+  cinematicTitle.rotation.z = Math.sin(elapsedTime * 0.38) * 0.006;
+  cinematicTitle.scale.setScalar(1 + Math.sin(elapsedTime * 0.45) * 0.008);
 }
 
 function animateWind(elapsedTime, wind) {
@@ -1776,5 +1868,13 @@ function animateCamera(elapsedTime) {
   if (sun) {
     sun.position.x = -95 + Math.sin(elapsedTime * 0.025) * 18;
     sun.position.y = 112 + Math.cos(elapsedTime * 0.018) * 8;
+  }
+  if (sun && sunVeilCloud) {
+    const offset = sunVeilCloud.userData.sunOffset;
+    sunVeilCloud.position.set(
+      sun.position.x + offset.x + Math.sin(elapsedTime * 0.08) * 4,
+      sun.position.y + offset.y + Math.cos(elapsedTime * 0.11) * 1.2,
+      sun.position.z + offset.z,
+    );
   }
 }
