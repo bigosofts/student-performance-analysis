@@ -260,6 +260,10 @@
 
 #wb-trigger-btn.active {
   background: linear-gradient(135deg, #ef4444, #f43f5e);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: scale(0.9);
 }
 
 /* ── Mobile status bar ── */
