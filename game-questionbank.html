@@ -286,9 +286,47 @@
       .qb-quiz-end-text { color: #1e293b; }
       #studentResultScore { color: #0f172a !important; }
       #studentResultMessage { color: #475569 !important; }
+
+      #qbankSceneBackdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 600ms ease;
+      }
+
+      #qbankSceneBackdrop.active {
+        opacity: 0.38;
+      }
+
+      #qbankSceneBackdrop canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+
+      .projector-view {
+        position: relative;
+        z-index: 1;
+      }
+
+      #mcqView,
+      #studentMcqView {
+        background: transparent;
+      }
+
+      #mcqView .header-bar,
+      #studentMcqView .header-bar,
+      #mcqView .content-area,
+      #studentMcqView .content-area {
+        position: relative;
+        z-index: 2;
+      }
     </style>
   </head>
   <body class="qb-font-bn">
+    <div id="qbankSceneBackdrop" aria-hidden="true"></div>
     <div id="app" class="projector-view">
 
       <!-- ═══════════════ WAITING SCREEN ═══════════════ -->
@@ -506,6 +544,14 @@
         }
         
         if (view) view.style.display = 'flex';
+
+        if (window.qbankScene) {
+          if (view === mcqView || view === studentMcqView) {
+            window.qbankScene.start();
+          } else {
+            window.qbankScene.stop();
+          }
+        }
       }
 
       function toggleStudentQType() {
@@ -943,6 +989,20 @@
         document.getElementById('readingModal').style.display = 'none';
         document.getElementById('readingContent').innerHTML = '';
       }
+    </script>
+    <script type="module">
+      import {
+        initQbankScene,
+        startQbankScene,
+        stopQbankScene,
+      } from './js/qbank-scene.js?v=20260628';
+
+      initQbankScene('qbankSceneBackdrop');
+
+      window.qbankScene = {
+        start: startQbankScene,
+        stop: stopQbankScene,
+      };
     </script>
     <script src="js/wake-lock.js"></script>
   <script src="js/whiteboard.js"></script>
