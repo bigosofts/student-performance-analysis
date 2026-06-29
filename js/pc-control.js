@@ -203,21 +203,29 @@
     emitCommand('mouse:rightClick');
   });
 
-  // Keyboard text input
-  kbInput.addEventListener('input', (e) => {
-    const char = e.data;
-    if (char) {
-      emitCommand('keyboard:type', { text: char });
+  // Keyboard text input - track delta to avoid duplicate emits on mobile IME
+  let lastKbValue = '';
+  kbInput.addEventListener('input', () => {
+    const newValue = kbInput.value;
+    if (newValue.length > lastKbValue.length) {
+      // Characters were added — only send the truly new ones
+      const newChars = newValue.slice(lastKbValue.length);
+      if (newChars) {
+        emitCommand('keyboard:type', { text: newChars });
+      }
     }
+    lastKbValue = newValue;
   });
 
-  // Because 'input' might not capture backspace well if it's empty, we listen to keydown
+  // keydown: only handle special keys that don't go through the input event
   kbInput.addEventListener('keydown', (e) => {
     if (e.key === 'Backspace') {
       emitCommand('keyboard:keyTap', { key: 'backspace' });
+      lastKbValue = kbInput.value.slice(0, -1); // keep lastKbValue in sync
     } else if (e.key === 'Enter') {
       emitCommand('keyboard:keyTap', { key: 'enter' });
-      kbInput.value = ''; // clear on enter
+      kbInput.value = '';
+      lastKbValue = '';
     }
   });
 
