@@ -1180,20 +1180,62 @@
       }
       .agent-download-links {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
-        margin-top: 8px;
+        margin-top: 10px;
+        justify-content: center;
       }
-      .agent-download-links button {
-        flex: 1;
-        padding: 8px;
-        background: rgba(255,255,255,0.1);
-        border: none;
-        border-radius: 6px;
+      .agent-download-links a {
+        flex: 1 1 calc(33% - 8px);
+        min-width: 80px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        padding: 10px 8px;
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 10px;
         color: white;
         cursor: pointer;
+        text-decoration: none;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        transition: background 0.2s, transform 0.15s, border-color 0.2s;
+        text-align: center;
       }
-      .agent-download-links button:hover {
-        background: rgba(255,255,255,0.2);
+      .agent-download-links a:hover {
+        background: rgba(255,255,255,0.18);
+        border-color: rgba(255,255,255,0.28);
+        transform: translateY(-2px);
+      }
+      .agent-download-links a .dl-icon {
+        font-size: 1.3rem;
+        line-height: 1;
+      }
+      .agent-download-links a.win { border-top: 2px solid #0078d4; }
+      .agent-download-links a.win:hover { background: rgba(0,120,212,0.18); }
+      .agent-download-links a.linux { border-top: 2px solid #f5a623; }
+      .agent-download-links a.linux:hover { background: rgba(245,166,35,0.18); }
+      .agent-download-links a.mac { border-top: 2px solid #a0a0a0; }
+      .agent-download-links a.mac:hover { background: rgba(160,160,160,0.18); }
+      @media (max-width: 600px) {
+        .agent-discovery-modal {
+          left: 50%;
+          transform: translateX(-50%);
+          bottom: 16px;
+          max-width: 90vw;
+          width: 90vw;
+        }
+        @keyframes slideUp {
+          from { transform: translateX(-50%) translateY(50px); opacity: 0; }
+          to { transform: translateX(-50%) translateY(0); opacity: 1; }
+        }
+        .agent-download-links a {
+          flex: 1 1 calc(33% - 8px);
+        }
       }
     </style>
     
@@ -1230,8 +1272,18 @@
           content.innerHTML = `
             <p style="margin:0; font-size: 0.9rem; color: #cbd5e1;">PC Control Agent is not running on this machine. Download to control this PC remotely.</p>
             <div class="agent-download-links">
-              <button onclick="alert('Download for Windows coming soon!')">Windows .exe</button>
-              <button onclick="alert('Download for Mac coming soon!')">Mac</button>
+              <a class="win" href="https://drive.google.com/uc?export=download&id=1HGv9M0qQZU02BcshFYkIBFkD9io4X6AY" download>
+                <span class="dl-icon">🪟</span>
+                Windows
+              </a>
+              <a class="linux" href="https://drive.google.com/uc?export=download&id=1A3r2ACGw5fyz6_B6XoZZ8HjTD5rVHZMA" download>
+                <span class="dl-icon">🐧</span>
+                Linux
+              </a>
+              <a class="mac" href="https://drive.google.com/uc?export=download&id=1Jr2LdtwTSBor0IdZPlmhdWZ0D8GwKdWQ" download>
+                <span class="dl-icon">🍎</span>
+                Mac
+              </a>
             </div>
           `;
         }
