@@ -213,10 +213,6 @@
 
 /* ── Trigger Button ── */
 #wb-trigger-btn {
-  position: fixed;
-  bottom: 70px;
-  right: 20px;
-  z-index: 100002;
   min-width: 56px;
   min-height: 56px;
   padding: 0 16px;
@@ -698,8 +694,6 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
   }
 
   #wb-trigger-btn {
-    bottom: 70px;
-    right: 16px;
     min-height: 52px;
     min-width: 52px;
     padding: 0 12px;

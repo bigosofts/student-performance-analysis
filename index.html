@@ -1117,5 +1117,125 @@
     </script>
     <script src="js/wake-lock.js"></script>
     <script src="js/whiteboard.js"></script>
+    
+    <!-- Auto Discovery for PC Control Agent -->
+    <style>
+      .agent-discovery-modal {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 100000;
+        background: rgba(15, 23, 42, 0.95);
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 16px;
+        padding: 20px 24px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        color: white;
+        display: none;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 340px;
+        animation: slideUp 0.4s ease-out;
+      }
+      @keyframes slideUp {
+        from { transform: translateY(50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      .agent-discovery-modal.success {
+        border-left: 4px solid #10b981;
+      }
+      .agent-discovery-modal.error {
+        border-left: 4px solid #ef4444;
+      }
+      .agent-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .agent-modal-header h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .agent-modal-close {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        cursor: pointer;
+        font-size: 1.2rem;
+      }
+      .agent-device-id {
+        font-size: 2rem;
+        font-weight: 900;
+        letter-spacing: 4px;
+        color: #10b981;
+        text-align: center;
+        background: rgba(16, 185, 129, 0.1);
+        padding: 10px;
+        border-radius: 8px;
+        margin: 8px 0;
+      }
+      .agent-download-links {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .agent-download-links button {
+        flex: 1;
+        padding: 8px;
+        background: rgba(255,255,255,0.1);
+        border: none;
+        border-radius: 6px;
+        color: white;
+        cursor: pointer;
+      }
+      .agent-download-links button:hover {
+        background: rgba(255,255,255,0.2);
+      }
+    </style>
+    
+    <div id="agent-modal" class="agent-discovery-modal">
+      <div class="agent-modal-header">
+        <h4 id="agent-modal-title">Checking Agent...</h4>
+        <button class="agent-modal-close" onclick="document.getElementById('agent-modal').style.display='none'">✕</button>
+      </div>
+      <div id="agent-modal-content"></div>
+    </div>
+
+    <script>
+      (async function checkAgent() {
+        const modal = document.getElementById('agent-modal');
+        const title = document.getElementById('agent-modal-title');
+        const content = document.getElementById('agent-modal-content');
+        
+        try {
+          const res = await fetch('http://localhost:4000/info', { method: 'GET', mode: 'cors' });
+          if (res.ok) {
+            const data = await res.json();
+            modal.style.display = 'flex';
+            modal.classList.add('success');
+            title.innerHTML = '✅ Agent Active';
+            content.innerHTML = `
+              <p style="margin:0; font-size: 0.9rem; color: #cbd5e1;">Connect your Dashboard with this Client PC ID:</p>
+              <div class="agent-device-id">${data.deviceId || 'UNKNOWN'}</div>
+            `;
+          }
+        } catch (e) {
+          modal.style.display = 'flex';
+          modal.classList.add('error');
+          title.innerHTML = '⚠️ Agent Not Found';
+          content.innerHTML = `
+            <p style="margin:0; font-size: 0.9rem; color: #cbd5e1;">PC Control Agent is not running on this machine. Download to control this PC remotely.</p>
+            <div class="agent-download-links">
+              <button onclick="alert('Download for Windows coming soon!')">Windows .exe</button>
+              <button onclick="alert('Download for Mac coming soon!')">Mac</button>
+            </div>
+          `;
+        }
+      })();
+    </script>
   </body>
 </html>

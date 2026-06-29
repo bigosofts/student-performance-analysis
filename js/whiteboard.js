@@ -903,7 +903,15 @@
         btn.className = 'wb-ready';
         btn.title = 'Open Interactive Board';
         btn.innerHTML = '<span class="wb-trigger-icon">🖌️</span><span class="wb-trigger-label">Board</span>';
-        document.body.appendChild(btn);
+        
+        let container = document.getElementById('floating-buttons-container');
+        if (!container) {
+          container = document.createElement('div');
+          container.id = 'floating-buttons-container';
+          document.body.appendChild(container);
+        }
+        container.appendChild(btn);
+        
         triggerBtnRef = btn;
         btn.addEventListener('click', () => {
           const isOpen = overlay.classList.contains('active');

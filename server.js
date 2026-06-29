@@ -540,6 +540,23 @@ app.post("/clear-uploads", (req, res) => {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  // PC Control Agent Registration
+  socket.on("agent:register", (data) => {
+    if (data && data.deviceId) {
+      const roomName = `agent_${data.deviceId}`;
+      socket.join(roomName);
+      console.log(`Agent ${data.deviceId} registered and joined room ${roomName}`);
+    }
+  });
+
+  // PC Control Command Relay
+  socket.on("pc-control", (payload) => {
+    if (payload && payload.targetUuid && payload.command) {
+      const roomName = `agent_${payload.targetUuid}`;
+      io.to(roomName).emit(payload.command, payload.data);
+    }
+  });
+
   // When teacher sends a game update
   socket.on("update-game", (gameState) => {
     socket.broadcast.emit("game-updated", gameState);
