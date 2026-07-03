@@ -19,9 +19,7 @@
       }
       body {
         /* Clean projector output: keep atmosphere, remove the grid texture. */
-        background-image:
-          radial-gradient(circle at 20% 20%, rgba(99,102,241,.25) 0%, transparent 40%),
-          radial-gradient(circle at 80% 80%, rgba(236,72,153,.25) 0%, transparent 40%);
+        background-color: #ffffff;
       }
       /* Remove the scanline pseudo-element from style.css */
       body::after { display: none; }
@@ -112,10 +110,7 @@
          LIGHT MODE FOR PRESENTER VIEW (PROJECTOR)
          ============================================================ */
       body {
-        background-color: #f8fafc;
-        background-image:
-          radial-gradient(circle at 20% 20%, rgba(99,102,241,.15) 0%, transparent 40%),
-          radial-gradient(circle at 80% 80%, rgba(236,72,153,.15) 0%, transparent 40%);
+        background-color: #ffffff;
       }
 
       .projector-view::before {
@@ -292,24 +287,6 @@
       #studentResultScore { color: #0f172a !important; }
       #studentResultMessage { color: #475569 !important; }
 
-      #qbankSceneBackdrop {
-        position: fixed;
-        inset: 0;
-        z-index: 0;
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 600ms ease;
-      }
-
-      #qbankSceneBackdrop.active {
-        opacity: 0.38;
-      }
-
-      #qbankSceneBackdrop canvas {
-        display: block;
-        width: 100%;
-        height: 100%;
-      }
 
       .projector-view {
         position: relative;
@@ -550,7 +527,6 @@
     </style>
   </head>
   <body class="qb-font-bn">
-    <div id="qbankSceneBackdrop" aria-hidden="true"></div>
     <div id="app" class="projector-view">
 
       <!-- ═══════════════ WAITING SCREEN ═══════════════ -->
@@ -768,14 +744,6 @@
         }
         
         if (view) view.style.display = 'flex';
-
-        if (window.qbankScene) {
-          if (view === mcqView || view === studentMcqView) {
-            window.qbankScene.start();
-          } else {
-            window.qbankScene.stop();
-          }
-        }
       }
 
       function toggleStudentQType() {
@@ -1214,20 +1182,7 @@
         document.getElementById('readingContent').innerHTML = '';
       }
     </script>
-    <script type="module">
-      import {
-        initQbankScene,
-        startQbankScene,
-        stopQbankScene,
-      } from './js/qbank-scene.js?v=20260628';
 
-      initQbankScene('qbankSceneBackdrop');
-
-      window.qbankScene = {
-        start: startQbankScene,
-        stop: stopQbankScene,
-      };
-    </script>
     <script src="js/wake-lock.js"></script>
   <script src="js/whiteboard.js"></script>
   </body>
