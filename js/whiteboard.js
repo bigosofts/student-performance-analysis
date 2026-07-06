@@ -83,6 +83,13 @@
               <button class="wb-tool-btn active" id="wb-tool-grid" title="Toggle alignment grid">⊞</button>
               <button class="wb-tool-btn" id="wb-tool-theme" title="Toggle Dark/Light Board">🌓</button>
             <div class="wb-separator"></div>
+              <div class="wb-paging-controls" style="display:flex; align-items:center; gap: 4px;">
+                <button class="wb-tool-btn" id="wb-tool-prev-board" title="Previous Board">◀</button>
+                <span id="wb-board-label" style="font-size: 0.85rem; font-weight: bold; color: #fff; min-width: 60px; text-align: center;">1 / 1</span>
+                <button class="wb-tool-btn" id="wb-tool-next-board" title="Next Board">▶</button>
+                <button class="wb-tool-btn" id="wb-tool-new-board" title="New Board">➕</button>
+              </div>
+            <div class="wb-separator"></div>
               <button class="wb-tool-btn" id="wb-tool-clear" title="Clear">🗑️</button>
               <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
               <button class="wb-tool-btn wb-tool-close-main" id="wb-tool-close" title="Close">❌</button>
@@ -189,6 +196,46 @@
     const undoHistory = [];
     let undoIndex = -1;
     const WB_JSON_PROPS = ['id', 'wbBackground'];
+
+    let boards = [{ json: null, undoHistory: [], undoIndex: -1 }];
+    let currentBoardIndex = 0;
+
+    function saveCurrentBoard() {
+      boards[currentBoardIndex] = {
+        json: captureCanvasState(),
+        undoHistory: [...undoHistory],
+        undoIndex: undoIndex
+      };
+    }
+
+    function loadBoard(index) {
+      if (index < 0 || index >= boards.length) return;
+      saveCurrentBoard();
+      currentBoardIndex = index;
+      
+      const b = boards[currentBoardIndex];
+      undoHistory.length = 0;
+      if (b.undoHistory) {
+        undoHistory.push(...b.undoHistory);
+      }
+      undoIndex = b.undoIndex !== undefined ? b.undoIndex : -1;
+      
+      const label = document.getElementById('wb-board-label');
+      if (label) label.innerText = `${currentBoardIndex + 1} / ${boards.length}`;
+      
+      if (b.json) {
+        restoreCanvasState(b.json, true);
+      } else {
+        canvas.clear();
+        if (socket && !isPresenter) socket.emit('wb-clear');
+      }
+    }
+
+    function newBoard() {
+      saveCurrentBoard();
+      boards.push({ json: null, undoHistory: [], undoIndex: -1 });
+      loadBoard(boards.length - 1);
+    }
 
     // Disable offscreen caching for every path (massive memory/CPU saver for freehand drawing)
     fabric.Object.prototype.objectCaching = false;
@@ -790,9 +837,25 @@
       }
       const evt = opt.e;
       if (suppressDraw || (evt.touches && evt.touches.length >= 2)) return;
-      if (currentTool === 'erase' && opt.target && !opt.target.wbBackground) {
-        syncRemove(opt.target);
-        canvas.remove(opt.target);
+      if (currentTool === 'erase') {
+        const pointer = canvas.getPointer(opt.e);
+        this.eraserCircle = new fabric.Circle({
+          left: pointer.x,
+          top: pointer.y,
+          originX: 'center',
+          originY: 'center',
+          radius: 1,
+          fill: 'rgba(239, 68, 68, 0.2)',
+          stroke: '#ef4444',
+          strokeWidth: 2,
+          strokeDashArray: [5, 5],
+          selectable: false,
+          evented: false,
+          wbBackground: true
+        });
+        canvas.add(this.eraserCircle);
+        this.eraserStart = pointer;
+        this.isErasing = true;
         return;
       }
       // Pan via scrollbars / touch scroll on editor (not fabric viewport)
@@ -801,6 +864,13 @@
     canvas.on('mouse:move', function(opt) {
       if (!isPresenter) {
         scheduleMobileUIHide();
+      }
+      if (this.isErasing && this.eraserCircle) {
+        const pointer = canvas.getPointer(opt.e);
+        const radius = Math.hypot(pointer.x - this.eraserStart.x, pointer.y - this.eraserStart.y);
+        this.eraserCircle.set({ radius: Math.max(1, radius) });
+        this.requestRenderAll();
+        return;
       }
       if (this.isDragging) {
         const e = opt.e;
@@ -816,6 +886,39 @@
 
     canvas.on('mouse:up', function() {
       if (!isPresenter) scheduleMobileUIHide();
+      if (this.isErasing && this.eraserCircle) {
+        const radius = this.eraserCircle.radius;
+        const center = { x: this.eraserCircle.left, y: this.eraserCircle.top };
+        
+        const objectsToRemove = [];
+        canvas.getObjects().forEach(obj => {
+          if (obj === this.eraserCircle || obj.wbBackground) return;
+          
+          const bounds = obj.getBoundingRect();
+          const closestX = Math.max(bounds.left, Math.min(center.x, bounds.left + bounds.width));
+          const closestY = Math.max(bounds.top, Math.min(center.y, bounds.top + bounds.height));
+          const distance = Math.hypot(center.x - closestX, center.y - closestY);
+          
+          if (distance <= radius) {
+             objectsToRemove.push(obj);
+          }
+        });
+        
+        canvas.remove(this.eraserCircle);
+        this.eraserCircle = null;
+        this.isErasing = false;
+        
+        if (objectsToRemove.length > 0) {
+          objectsToRemove.forEach(obj => {
+             if (obj.id && socket && !isPresenter) socket.emit('wb-remove', obj.id);
+             canvas.remove(obj);
+          });
+          recordUndoState();
+        }
+        
+        canvas.requestRenderAll();
+        return;
+      }
       this.isDragging = false;
       this.selection = (currentTool === 'select');
     });
@@ -962,6 +1065,10 @@
         a.download = 'whiteboard.png';
         a.click();
       };
+
+      document.getElementById('wb-tool-prev-board').onclick = () => loadBoard(currentBoardIndex - 1);
+      document.getElementById('wb-tool-next-board').onclick = () => loadBoard(currentBoardIndex + 1);
+      document.getElementById('wb-tool-new-board').onclick = newBoard;
 
       document.getElementById('wb-tool-close').onclick = closeWhiteboard;
 
