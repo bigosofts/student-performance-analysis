@@ -709,6 +709,8 @@ io.on("connection", (socket) => {
   socket.on("wb-capture-request", () => socket.broadcast.emit("wb-capture-request"));
   socket.on("wb-capture-response", (data) => socket.broadcast.emit("wb-capture-response", data));
 
+  socket.on("leaderboard-show", (data) => socket.broadcast.emit("leaderboard-show", data));
+
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });

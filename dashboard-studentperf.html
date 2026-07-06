@@ -738,7 +738,7 @@
             <td class="sticky-col sticky-name">${p.name}</td>`;
         cols.forEach(c => {
           const val = (p.mark && p.mark[c]) ? p.mark[c] : '';
-          html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-id="${p.id}" data-col="${c}" value="${val}" /></td>`;
+          html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-id="${p.id}" data-col="${c}" value="${val}" oninput="updateLiveMarks(this)" /></td>`;
         });
         html += `</tr>`;
         finalHtml += html;
@@ -802,11 +802,9 @@
       window.location.href = `/api/performance/attendance/demo-xlsx?${buildFilterParams()}&date=${date}`;
     }
 
-    async function launchProjector(type) {
-      if (currentStudents.length === 0) return alert('No students in memory! Please search first.');
+    let lastLaunchedProjectorType = null;
 
-      await loadPerfData();
-
+    function emitProjectorData(type) {
       const filters = {
         className: document.getElementById('fClass').value,
         section: document.getElementById('fSection').value,
@@ -834,6 +832,32 @@
       } else if (type === 'marks') {
         socket.emit('leaderboard-show', { type: 'marks', data: perfData, filters });
       }
+    }
+
+    function updateLiveMarks(inp) {
+      const roll = inp.dataset.roll;
+      const id = inp.dataset.id;
+      const col = inp.dataset.col;
+      const val = inp.value;
+      
+      const student = perfData.find(p => String(p.roll) === String(roll) && String(p.id) === String(id));
+      if (student) {
+        if (!student.mark) student.mark = {};
+        student.mark[col] = val;
+        
+        if (lastLaunchedProjectorType) {
+          emitProjectorData(lastLaunchedProjectorType);
+        }
+      }
+    }
+
+    async function launchProjector(type) {
+      if (currentStudents.length === 0) return alert('No students in memory! Please search first.');
+
+      await loadPerfData();
+      
+      lastLaunchedProjectorType = type;
+      emitProjectorData(type);
 
       alert('Pushed to projector!');
     }
