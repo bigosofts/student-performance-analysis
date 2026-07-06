@@ -80,6 +80,7 @@
               <button class="wb-tool-btn" id="wb-tool-bullets" title="Bullets & Markers">●</button>
               <button class="wb-tool-btn" id="wb-tool-emoji" title="Emoji">😄</button>
               <button class="wb-tool-btn" id="wb-tool-image" title="Gallery Image">🖼️</button>
+              <button class="wb-tool-btn" id="wb-tool-table" title="Insert Table">🗄️</button>
               <button class="wb-tool-btn active" id="wb-tool-grid" title="Toggle alignment grid">⊞</button>
               <button class="wb-tool-btn" id="wb-tool-theme" title="Toggle Dark/Light Board">🌓</button>
             <div class="wb-separator"></div>
@@ -157,6 +158,24 @@
               <button type="button" class="wb-panel-close" data-panel="wb-panel-emoji">✕</button>
             </div>
             <div class="wb-panel-grid wb-emoji-grid" id="wb-emoji-grid"></div>
+          </div>
+
+          <div id="wb-panel-table" class="wb-panel" hidden>
+            <div class="wb-panel-header">
+              <span>Insert Table</span>
+              <button type="button" class="wb-panel-close" data-panel="wb-panel-table">✕</button>
+            </div>
+            <div style="padding: 16px; display: flex; flex-direction: column; gap: 12px; color: #fff;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="wb-table-rows" style="font-size: 0.9rem;">Rows:</label>
+                <input type="number" id="wb-table-rows" value="3" min="1" max="20" style="width: 60px; padding: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px;">
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <label for="wb-table-cols" style="font-size: 0.9rem;">Columns:</label>
+                <input type="number" id="wb-table-cols" value="3" min="1" max="20" style="width: 60px; padding: 4px; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2); color: #fff; border-radius: 4px;">
+              </div>
+              <button type="button" id="wb-btn-insert-table" style="margin-top: 8px; padding: 8px; background: #3b82f6; border: none; color: white; border-radius: 6px; cursor: pointer; font-weight: bold;">Insert Table</button>
+            </div>
           </div>
 
           <div id="wb-panel-gallery" class="wb-panel wb-panel-wide" hidden>
@@ -1046,6 +1065,49 @@
         togglePanel('wb-panel-gallery');
         if (!galleryCache) loadGalleryImages();
       };
+      
+      document.getElementById('wb-tool-table').onclick = () => togglePanel('wb-panel-table');
+      document.getElementById('wb-btn-insert-table').onclick = () => {
+        const rows = Math.max(1, parseInt(document.getElementById('wb-table-rows').value, 10) || 3);
+        const cols = Math.max(1, parseInt(document.getElementById('wb-table-cols').value, 10) || 3);
+        
+        const cellW = 160;
+        const cellH = 100;
+        const totalW = cols * cellW;
+        const totalH = rows * cellH;
+        
+        const lines = [];
+        const strokeW = getStrokeWidth();
+        const color = hexToRgba(getColor(), getInkOpacity());
+        
+        // Horizontal lines
+        for (let i = 0; i <= rows; i++) {
+          const y = i * cellH;
+          lines.push(new fabric.Line([0, y, totalW, y], {
+            stroke: color, strokeWidth: strokeW, strokeUniform: true
+          }));
+        }
+        
+        // Vertical lines
+        for (let j = 0; j <= cols; j++) {
+          const x = j * cellW;
+          lines.push(new fabric.Line([x, 0, x, totalH], {
+             stroke: color, strokeWidth: strokeW, strokeUniform: true
+          }));
+        }
+        
+        const tableGroup = new fabric.Group(lines, {
+          ...centerPos(totalW, totalH),
+          id: newId()
+        });
+        
+        canvas.add(tableGroup);
+        closeAllPanels();
+        setActiveTool('select');
+        syncAdd(tableGroup);
+        recordUndoState();
+      };
+      
       document.getElementById('wb-tool-grid').onclick = () => toggleGrid(true);
       document.getElementById('wb-grid-opacity').oninput = (e) => setGridOpacity(e.target.value, true);
 
