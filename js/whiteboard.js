@@ -873,7 +873,10 @@
       function updateBoardBackground(sync = true) {
         const alpha = document.getElementById('wb-bg-alpha').value;
         const rgb = isDarkBoard ? '20,20,20' : '255,255,255';
-        bg.style.background = `rgba(${rgb},${alpha})`;
+        const rgbaStr = `rgba(${rgb},${alpha})`;
+        bg.style.background = rgbaStr;
+        canvas.backgroundColor = rgbaStr;
+        canvas.renderAll();
         if (sync && socket) socket.emit('wb-bg', { alpha, dark: isDarkBoard });
       }
 
@@ -1037,11 +1040,24 @@
       socket.on('wb-zoom', () => { /* fit-viewport mode: zoom not used */ });
       
       socket.on('wb-bg', (data) => {
-        if (typeof data === 'object') {
+        let rgbaStr;
+        try {
+          if (typeof data === 'string' && data.startsWith('{')) {
+            data = JSON.parse(data);
+          }
+        } catch(e) {}
+        
+        if (data && typeof data === 'object') {
           const rgb = data.dark ? '20,20,20' : '255,255,255';
-          bg.style.background = `rgba(${rgb},${data.alpha})`;
+          rgbaStr = `rgba(${rgb},${data.alpha !== undefined ? data.alpha : 1})`;
         } else {
-          bg.style.background = `rgba(255,255,255,${data})`;
+          rgbaStr = `rgba(255,255,255,${data || 1})`;
+        }
+        
+        if (bg) bg.style.background = rgbaStr;
+        if (canvas) {
+          canvas.backgroundColor = rgbaStr;
+          canvas.renderAll();
         }
       });
       
@@ -1096,6 +1112,7 @@
     }
 
     applyGridStyle();
+    if (!isPresenter) updateBoardBackground(false);
     resizeCanvas();
   }
 })();
