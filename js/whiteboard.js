@@ -21,7 +21,13 @@
   document.head.appendChild(script);
 
   const isPresenter = !window.location.href.includes('dashboard');
-  const isMobile = () => window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+  let _isMobileCached = null;
+  const isMobile = () => {
+    if (_isMobileCached === null) {
+      _isMobileCached = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+    }
+    return _isMobileCached;
+  };
 
   const CANVAS_WIDTH = 1920;
   const CANVAS_HEIGHT = 1080;
@@ -184,13 +190,17 @@
     let undoIndex = -1;
     const WB_JSON_PROPS = ['id', 'wbBackground'];
 
+    // Disable offscreen caching for every path (massive memory/CPU saver for freehand drawing)
+    fabric.Object.prototype.objectCaching = false;
+
     const canvas = new fabric.Canvas('wb-canvas', {
       isDrawingMode: true,
       selection: false,
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
       allowTouchScrolling: false,
-      preserveObjectStacking: true
+      preserveObjectStacking: true,
+      enableRetinaScaling: false // Prevents 18-megapixel backing stores on mobile
     });
 
     let currentTool = 'draw';
@@ -201,6 +211,7 @@
 
     canvas.freeDrawingBrush.color = '#000000';
     canvas.freeDrawingBrush.width = 5;
+    canvas.freeDrawingBrush.decimate = 2; // Simplifies paths, reducing points and speeding up render
 
     if (canvasStack) {
       canvasStack.style.width = CANVAS_WIDTH + 'px';
@@ -389,9 +400,15 @@
       scheduleMobileUIHide();
     }
 
+    let lastMobileUIHideSchedule = 0;
     function scheduleMobileUIHide() {
       if (!isMobile() || isPresenter) return;
+      const now = Date.now();
+      if (now - lastMobileUIHideSchedule < 500) return;
+      lastMobileUIHideSchedule = now;
+      
       clearTimeout(mobileUiHideTimer);
+      clearTimeout(centerCanvasTimer);
       mobileUiHideTimer = setTimeout(() => {
         if (!overlay.classList.contains('active')) return;
         overlay.classList.add('wb-mobile-ui-hidden');
@@ -430,17 +447,23 @@
       return JSON.stringify(canvas.toJSON(WB_JSON_PROPS));
     }
 
-    function recordUndoState() {
+    function recordUndoStateSync() {
       if (isPresenter) return;
       const snap = captureCanvasState();
       if (undoIndex >= 0 && undoHistory[undoIndex] === snap) return;
       undoHistory.splice(undoIndex + 1);
       undoHistory.push(snap);
-      if (undoHistory.length > 50) {
+      if (undoHistory.length > 20) {
         undoHistory.shift();
       } else {
         undoIndex++;
       }
+    }
+
+    let pendingUndoTimer = null;
+    function recordUndoState() {
+      clearTimeout(pendingUndoTimer);
+      pendingUndoTimer = setTimeout(recordUndoStateSync, 500);
     }
 
     function restoreCanvasState(jsonStr, syncPresenter) {
@@ -456,6 +479,7 @@
     }
 
     function undoAction() {
+      clearTimeout(pendingUndoTimer);
       if (undoIndex <= 0) return;
       undoIndex--;
       restoreCanvasState(undoHistory[undoIndex], true);
@@ -463,6 +487,7 @@
     }
 
     function redoAction() {
+      clearTimeout(pendingUndoTimer);
       if (undoIndex >= undoHistory.length - 1) return;
       undoIndex++;
       restoreCanvasState(undoHistory[undoIndex], true);
@@ -634,6 +659,7 @@
     }
 
     function resizeCanvas() {
+      _isMobileCached = null;
       updateMobileViewportHeight();
       applyCanvasLayout();
       if (isMobile() && !isPresenter) {
@@ -641,10 +667,15 @@
       }
     }
 
-    window.addEventListener('resize', resizeCanvas);
+    let resizeTimer = null;
+    function debouncedResizeCanvas() {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resizeCanvas, 200);
+    }
+
+    window.addEventListener('resize', debouncedResizeCanvas);
     if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', resizeCanvas);
-      window.visualViewport.addEventListener('scroll', resizeCanvas);
+      window.visualViewport.addEventListener('resize', debouncedResizeCanvas);
     }
     setTimeout(resizeCanvas, 100);
 
@@ -754,8 +785,8 @@
     // ── Pointer / pan (desktop: alt+drag) ──
     canvas.on('mouse:down', function(opt) {
       if (!isPresenter) {
-        scheduleMobileUIHide();
         clearTimeout(centerCanvasTimer);
+        scheduleMobileUIHide();
       }
       const evt = opt.e;
       if (suppressDraw || (evt.touches && evt.touches.length >= 2)) return;
@@ -770,7 +801,6 @@
     canvas.on('mouse:move', function(opt) {
       if (!isPresenter) {
         scheduleMobileUIHide();
-        clearTimeout(centerCanvasTimer);
       }
       if (this.isDragging) {
         const e = opt.e;
@@ -800,8 +830,8 @@
     // ── Mobile: two-finger pinch zoom only (no pan, no accidental dots) ──
     if (!isPresenter) {
       const onMobileTouchStart = (e) => {
-        scheduleMobileUIHide();
         clearTimeout(centerCanvasTimer);
+        scheduleMobileUIHide();
         if (!isMobile() || useFitViewport() || !overlay.classList.contains('active')) return;
         if (e.touches.length >= 2) {
           suppressDraw = true;
@@ -818,7 +848,6 @@
 
       const onMobileTouchMove = (e) => {
         scheduleMobileUIHide();
-        clearTimeout(centerCanvasTimer);
         if (!isMobile() || useFitViewport() || !overlay.classList.contains('active')) return;
         if (e.touches.length === 2 && touchStartDist > 0) {
           const dist = Math.hypot(
@@ -919,10 +948,10 @@
 
       document.getElementById('wb-tool-clear').onclick = () => {
         if (confirm('Clear entire board?')) {
-          recordUndoState();
+          recordUndoStateSync();
           canvas.getObjects().slice().forEach(o => canvas.remove(o));
           canvas.renderAll();
-          recordUndoState();
+          recordUndoStateSync();
           if (socket) socket.emit('wb-clear');
         }
       };
@@ -1007,10 +1036,10 @@
           clearTimeout(centerCanvasTimer);
           centerCanvasTimer = setTimeout(() => {
             const pathBounds = opt.path.getBoundingRect();
-            const pathCenter = pathBounds.left + pathBounds.width / 2;
             const scale = getMobileScale();
-            const scaledCenter = pathCenter * scale;
-            const targetScrollLeft = scaledCenter - (scrollEl.clientWidth / 2);
+            const scaledLeftEdge = pathBounds.left * scale;
+            // Place the last stroke 10% from the left edge, leaving 90% of screen to the right for more writing
+            const targetScrollLeft = scaledLeftEdge - (scrollEl.clientWidth * 0.10);
             scrollEl.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
           }, 1000);
         }
