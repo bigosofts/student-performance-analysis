@@ -75,6 +75,7 @@
               <button class="wb-tool-btn" id="wb-tool-emoji" title="Emoji">😄</button>
               <button class="wb-tool-btn" id="wb-tool-image" title="Gallery Image">🖼️</button>
               <button class="wb-tool-btn active" id="wb-tool-grid" title="Toggle alignment grid">⊞</button>
+              <button class="wb-tool-btn" id="wb-tool-theme" title="Toggle Dark/Light Board">🌓</button>
             <div class="wb-separator"></div>
               <button class="wb-tool-btn" id="wb-tool-clear" title="Clear">🗑️</button>
               <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
@@ -171,6 +172,7 @@
     const mobileUiReveal = document.getElementById('wb-mobile-ui-reveal');
     let gridVisible = true;
     let gridOpacity = 0.25;
+    let isDarkBoard = false;
     let mobileUiHideTimer = null;
     let centerCanvasTimer = null;
     const MOBILE_UI_HIDE_MS = 3000;
@@ -868,9 +870,29 @@
       document.getElementById('wb-ink-depth').oninput = () => {
         canvas.freeDrawingBrush.color = hexToRgba(getColor(), getInkOpacity());
       };
+      function updateBoardBackground(sync = true) {
+        const alpha = document.getElementById('wb-bg-alpha').value;
+        const rgb = isDarkBoard ? '20,20,20' : '255,255,255';
+        bg.style.background = `rgba(${rgb},${alpha})`;
+        if (sync && socket) socket.emit('wb-bg', { alpha, dark: isDarkBoard });
+      }
+
       document.getElementById('wb-bg-alpha').oninput = (e) => {
-        bg.style.background = `rgba(255,255,255,${e.target.value})`;
-        if (socket) socket.emit('wb-bg', e.target.value);
+        updateBoardBackground();
+      };
+
+      document.getElementById('wb-tool-theme').onclick = () => {
+        isDarkBoard = !isDarkBoard;
+        updateBoardBackground();
+        
+        const colorInput = document.getElementById('wb-color');
+        if (isDarkBoard && colorInput.value === '#000000') {
+           colorInput.value = '#ffffff';
+           canvas.freeDrawingBrush.color = hexToRgba('#ffffff', getInkOpacity());
+        } else if (!isDarkBoard && colorInput.value === '#ffffff') {
+           colorInput.value = '#000000';
+           canvas.freeDrawingBrush.color = hexToRgba('#000000', getInkOpacity());
+        }
       };
 
       document.querySelectorAll('.wb-qc-btn').forEach(btn => {
@@ -966,6 +988,7 @@
             if (socket) {
               socket.emit('wb-state', canvas.toJSON(['id', 'wbBackground']));
               socket.emit('wb-grid', { visible: gridVisible, opacity: gridOpacity });
+              socket.emit('wb-bg', { alpha: document.getElementById('wb-bg-alpha').value, dark: isDarkBoard });
             }
           }
         });
@@ -1013,8 +1036,13 @@
 
       socket.on('wb-zoom', () => { /* fit-viewport mode: zoom not used */ });
       
-      socket.on('wb-bg', (alpha) => {
-        bg.style.background = `rgba(255,255,255,${alpha})`;
+      socket.on('wb-bg', (data) => {
+        if (typeof data === 'object') {
+          const rgb = data.dark ? '20,20,20' : '255,255,255';
+          bg.style.background = `rgba(${rgb},${data.alpha})`;
+        } else {
+          bg.style.background = `rgba(255,255,255,${data})`;
+        }
       });
       
       socket.on('wb-add', (objData) => {
