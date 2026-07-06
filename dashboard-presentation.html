@@ -1887,9 +1887,10 @@
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select from Gallery</label>
-          <select id="galleryImageSelect" class="select-input">
+          <input list="galleryImageDatalist" id="galleryImageSelect" class="select-input" placeholder="-- Search and Choose an Image --" />
+          <datalist id="galleryImageDatalist">
             <option value="">-- Choose an Image --</option>
-          </select>
+          </datalist>
         </div>
 
         <div class="divider"></div>
@@ -2183,9 +2184,10 @@ Kingdom → Plantae
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select from Gallery</label>
-          <select id="galleryVideoSelect" class="select-input">
+          <input list="galleryVideoDatalist" id="galleryVideoSelect" class="select-input" placeholder="-- Search and Choose a Video --" />
+          <datalist id="galleryVideoDatalist">
             <option value="">-- Choose a Video --</option>
-          </select>
+          </datalist>
         </div>
 
         <div class="divider"></div>
@@ -2345,9 +2347,10 @@ Kingdom → Plantae
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select PDF from Gallery</label>
-          <select id="galleryPdfSelect" class="select-input">
+          <input list="galleryPdfDatalist" id="galleryPdfSelect" class="select-input" placeholder="-- Search and Choose a PDF --" />
+          <datalist id="galleryPdfDatalist">
             <option value="">-- Choose a PDF --</option>
-          </select>
+          </datalist>
         </div>
 
         <button
@@ -3224,27 +3227,20 @@ Kingdom → Plantae
       }
 
       document.getElementById("sharePdfBtn").addEventListener("click", () => {
-        // Populate the select with PDF files from the gallery
-        const select = document.getElementById("galleryPdfSelect");
-        select.innerHTML = '<option value="">-- Choose a PDF --</option>';
-        let hasPdf = false;
+        // Populate the datalist with PDF files from the gallery
+        const datalist = document.getElementById("galleryPdfDatalist");
+        datalist.innerHTML = '<option value="">-- Choose a PDF --</option>';
         galleryItems.forEach((item) => {
           if (
             item.type === "pdf" ||
             (item.url && item.url.toLowerCase().endsWith(".pdf"))
           ) {
-            hasPdf = true;
             const opt = document.createElement("option");
             opt.value = item.url;
             opt.textContent = `[${item.chapterName}] ${item.itemName}`;
-            select.appendChild(opt);
+            datalist.appendChild(opt);
           }
         });
-
-        if (!hasPdf) {
-          select.innerHTML =
-            '<option value="">-- No PDFs available in Gallery --</option>';
-        }
 
         document.getElementById("sendPdfBtn").disabled = true;
         openModal("pdfModal");
@@ -3252,7 +3248,7 @@ Kingdom → Plantae
 
       document
         .getElementById("galleryPdfSelect")
-        .addEventListener("change", (e) => {
+        .addEventListener("input", (e) => {
           document.getElementById("sendPdfBtn").disabled = !e.target.value;
         });
 
@@ -3796,8 +3792,10 @@ Kingdom → Plantae
       }
 
       function updateGalleryDropdowns() {
-        const imgSelect = document.getElementById("galleryImageSelect");
-        const vidSelect = document.getElementById("galleryVideoSelect");
+        const imgDatalist = document.getElementById("galleryImageDatalist");
+        const vidDatalist = document.getElementById("galleryVideoDatalist");
+
+        if (!imgDatalist || !vidDatalist) return;
 
         let imgHtml = '<option value="">-- Choose an Image --</option>';
         let vidHtml = '<option value="">-- Choose a Video --</option>';
@@ -3815,13 +3813,13 @@ Kingdom → Plantae
           }
         });
 
-        imgSelect.innerHTML = imgHtml;
-        vidSelect.innerHTML = vidHtml;
+        imgDatalist.innerHTML = imgHtml;
+        vidDatalist.innerHTML = vidHtml;
       }
 
       document
         .getElementById("galleryImageSelect")
-        .addEventListener("change", (e) => {
+        .addEventListener("input", (e) => {
           const val = e.target.value;
           if (val) {
             const prev = document.getElementById("img-preview");
@@ -3839,7 +3837,7 @@ Kingdom → Plantae
 
       document
         .getElementById("galleryVideoSelect")
-        .addEventListener("change", (e) => {
+        .addEventListener("input", (e) => {
           const val = e.target.value;
           if (val) {
             document.getElementById("youtubeUrlInput").value = val;

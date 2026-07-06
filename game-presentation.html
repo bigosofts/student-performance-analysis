@@ -159,6 +159,58 @@
         background: rgba(124, 58, 237, 0.4);
         border-radius: 3px;
       }
+      
+      .tab-controls {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 20px;
+        padding: 0 20px;
+      }
+      .tab-controls input {
+        padding: 12px 20px;
+        border-radius: 50px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+        width: 100%;
+        max-width: 400px;
+        font-family: "Outfit", sans-serif;
+        outline: none;
+        transition: all 0.3s;
+      }
+      .tab-controls input:focus {
+        border-color: #7c3aed;
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .tab-pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 30px;
+        margin-bottom: 20px;
+      }
+      .tab-pagination button {
+        padding: 8px 16px;
+        background: rgba(124, 58, 237, 0.2);
+        border: 1px solid rgba(124, 58, 237, 0.4);
+        color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        font-family: "Outfit", sans-serif;
+        transition: all 0.3s;
+      }
+      .tab-pagination button:hover:not(:disabled) {
+        background: rgba(124, 58, 237, 0.4);
+      }
+      .tab-pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .tab-pagination span {
+        font-size: 0.9rem;
+        color: #94a3b8;
+      }
 
       .gallery-header {
         text-align: center;
@@ -1091,49 +1143,76 @@
         <button class="gallery-tab" onclick="switchPresTab('imageTab')">Images</button>
         <button class="gallery-tab" onclick="switchPresTab('videoTab')">Videos</button>
         <button class="gallery-tab" onclick="switchPresTab('pdfTab')">PDFs</button>
+        <button class="gallery-tab" onclick="switchPresTab('classboardTab')">Class Board</button>
       </div>
 
       <div id="presTab" class="tab-content active">
-        <div class="pres-grid" id="presGrid">
-
-        <div class="empty-gallery" style="grid-column: 1/-1">
-          <span class="eg-icon">📂</span>
-          <h2>No Presentations Yet</h2>
-          <p>
-            The teacher hasn't uploaded any presentations.<br />Files will
-            appear here once uploaded.
-          </p>
+        <div class="tab-controls">
+          <input type="text" id="presSearch" placeholder="Search presentations..." oninput="handleTabSearch('presTab')">
         </div>
-      </div>
+        <div class="pres-grid" id="presGrid">
+          <!-- Loaded via JS -->
+        </div>
+        <div class="tab-pagination">
+          <button id="presPrev" onclick="changeTabPage('presTab', -1)">Prev</button>
+          <span id="presPageInfo">Page 1 of 1</span>
+          <button id="presNext" onclick="changeTabPage('presTab', 1)">Next</button>
+        </div>
       </div>
 
       <div id="imageTab" class="tab-content">
+        <div class="tab-controls">
+          <input type="text" id="imageSearch" placeholder="Search images..." oninput="handleTabSearch('imageTab')">
+        </div>
         <div class="pres-grid" id="imageGrid">
-           <div class="empty-gallery" style="grid-column: 1/-1">
-            <span class="eg-icon">🖼️</span>
-            <h2>No Images</h2>
-            <p>Images will appear here once uploaded.</p>
-          </div>
+          <!-- Loaded via JS -->
+        </div>
+        <div class="tab-pagination">
+          <button id="imagePrev" onclick="changeTabPage('imageTab', -1)">Prev</button>
+          <span id="imagePageInfo">Page 1 of 1</span>
+          <button id="imageNext" onclick="changeTabPage('imageTab', 1)">Next</button>
         </div>
       </div>
 
       <div id="videoTab" class="tab-content">
+        <div class="tab-controls">
+          <input type="text" id="videoSearch" placeholder="Search videos..." oninput="handleTabSearch('videoTab')">
+        </div>
         <div class="pres-grid" id="videoGrid">
-          <div class="empty-gallery" style="grid-column: 1/-1">
-            <span class="eg-icon">🎬</span>
-            <h2>No Videos</h2>
-            <p>Videos will appear here once uploaded.</p>
-          </div>
+          <!-- Loaded via JS -->
+        </div>
+        <div class="tab-pagination">
+          <button id="videoPrev" onclick="changeTabPage('videoTab', -1)">Prev</button>
+          <span id="videoPageInfo">Page 1 of 1</span>
+          <button id="videoNext" onclick="changeTabPage('videoTab', 1)">Next</button>
         </div>
       </div>
 
       <div id="pdfTab" class="tab-content">
+        <div class="tab-controls">
+          <input type="text" id="pdfSearch" placeholder="Search PDFs..." oninput="handleTabSearch('pdfTab')">
+        </div>
         <div class="pres-grid" id="pdfGrid">
-          <div class="empty-gallery" style="grid-column: 1/-1">
-            <span class="eg-icon">📄</span>
-            <h2>No PDFs</h2>
-            <p>PDFs will appear here once uploaded.</p>
-          </div>
+          <!-- Loaded via JS -->
+        </div>
+        <div class="tab-pagination">
+          <button id="pdfPrev" onclick="changeTabPage('pdfTab', -1)">Prev</button>
+          <span id="pdfPageInfo">Page 1 of 1</span>
+          <button id="pdfNext" onclick="changeTabPage('pdfTab', 1)">Next</button>
+        </div>
+      </div>
+
+      <div id="classboardTab" class="tab-content">
+        <div class="tab-controls">
+          <input type="text" id="classboardSearch" placeholder="Search class board..." oninput="handleTabSearch('classboardTab')">
+        </div>
+        <div class="pres-grid" id="classboardGrid">
+          <!-- Loaded via JS -->
+        </div>
+        <div class="tab-pagination">
+          <button id="classboardPrev" onclick="changeTabPage('classboardTab', -1)">Prev</button>
+          <span id="classboardPageInfo">Page 1 of 1</span>
+          <button id="classboardNext" onclick="changeTabPage('classboardTab', 1)">Next</button>
         </div>
       </div>
 
@@ -1413,37 +1492,86 @@
       </div>
     </div>
 
-    <script src="/socket.io/socket.io.js">
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
       // ════════════════════════════════════════════
       //  TABS AND GALLERY FETCH
       // ════════════════════════════════════════════
+      const tabState = {
+        presTab: { page: 1, search: '', type: 'presentation' },
+        imageTab: { page: 1, search: '', type: 'image' },
+        videoTab: { page: 1, search: '', type: 'video' },
+        pdfTab: { page: 1, search: '', type: 'pdf' },
+        classboardTab: { page: 1, search: '', type: 'classboard' }
+      };
+
       function switchPresTab(tabId) {
-        document.querySelectorAll('.gallery-tab').forEach(btn => {
-           btn.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-content').forEach(content => {
-           content.classList.remove('active');
-        });
+        document.querySelectorAll('.gallery-tab').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
         
         event.currentTarget.classList.add('active');
         document.getElementById(tabId).classList.add('active');
+
+        fetchPaginatedTab(tabId);
       }
 
-      async function loadGalleryItems() {
+      function handleTabSearch(tabId) {
+        const searchInput = document.getElementById(tabId.replace('Tab', 'Search'));
+        if (searchInput) {
+          tabState[tabId].search = searchInput.value;
+          tabState[tabId].page = 1;
+          fetchPaginatedTab(tabId);
+        }
+      }
+
+      function changeTabPage(tabId, delta) {
+        tabState[tabId].page += delta;
+        fetchPaginatedTab(tabId);
+      }
+
+      async function fetchPaginatedTab(tabId) {
         try {
-          const res = await fetch("/api/gallery");
-          const gallery = await res.json();
+          const state = tabState[tabId];
+          const query = `?paginated=true&page=${state.page}&limit=8&search=${encodeURIComponent(state.search)}`;
           
-          const images = gallery.filter(item => item.type === "image");
-          const videos = gallery.filter(item => item.type === "video");
-          const pdfs = gallery.filter(item => item.type === "pdf");
+          let res, data;
+          if (state.type === 'presentation') {
+            res = await fetch("/api/presentations" + query);
+          } else {
+            res = await fetch("/api/gallery" + query + `&type=${state.type}`);
+          }
+          data = await res.json();
           
-          renderGalleryGrid("imageGrid", images, "🖼️", "No Images", "image");
-          renderGalleryGrid("videoGrid", videos, "🎬", "No Videos", "video");
-          renderGalleryGrid("pdfGrid", pdfs, "📄", "No PDFs", "pdf");
-          
+          if (data && data.items) {
+             const items = data.items;
+             const pagination = data.pagination;
+             
+             const prefix = tabId.replace('Tab', '');
+             const prevBtn = document.getElementById(prefix + 'Prev');
+             const nextBtn = document.getElementById(prefix + 'Next');
+             const pageInfo = document.getElementById(prefix + 'PageInfo');
+             
+             if (prevBtn && nextBtn && pageInfo) {
+                prevBtn.disabled = pagination.currentPage <= 1;
+                nextBtn.disabled = pagination.currentPage >= pagination.totalPages;
+                pageInfo.textContent = `Page ${pagination.currentPage} of ${pagination.totalPages}`;
+             }
+
+             if (state.type === 'presentation') {
+                renderPresGrid(prefix + 'Grid', items);
+             } else {
+                let icon = '🖼️';
+                let emptyText = 'No items';
+                if (state.type === 'image') { emptyText = 'No Images'; }
+                else if (state.type === 'video') { icon = '🎬'; emptyText = 'No Videos'; }
+                else if (state.type === 'pdf') { icon = '📄'; emptyText = 'No PDFs'; }
+                else if (state.type === 'classboard') { icon = '📝'; emptyText = 'No Class Boards'; }
+                
+                renderGalleryGrid(prefix + 'Grid', items, icon, emptyText, state.type === 'classboard' ? 'image' : state.type);
+             }
+          }
         } catch (e) {
-          console.error("Failed to load gallery items:", e);
+          console.error("Failed to load tab data:", e);
         }
       }
 
@@ -1608,14 +1736,60 @@
       //  LOAD GALLERY
       // ════════════════════════════════════════════
       async function loadPresentations() {
-        try {
-          const res = await fetch("/api/presentations");
-          const files = await res.json();
-          renderGallery(files);
-          loadGalleryItems();
-        } catch (e) {
-          console.error("Failed to load presentations:", e);
+        // Initialize fetch for all tabs
+        fetchPaginatedTab('presTab');
+        fetchPaginatedTab('imageTab');
+        fetchPaginatedTab('videoTab');
+        fetchPaginatedTab('pdfTab');
+        fetchPaginatedTab('classboardTab');
+      }
+
+      function renderPresGrid(gridId, files) {
+        const grid = document.getElementById(gridId);
+        if (!grid) return;
+        if (files.length === 0) {
+          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
+      <span class="eg-icon">📂</span>
+      <h2>No Presentations Yet</h2>
+      <p>The teacher hasn't uploaded any presentations.<br>Files will appear here once uploaded.</p>
+    </div>`;
+          return;
         }
+
+        grid.innerHTML = files
+          .map(
+            (f) => `
+    <div class="pres-card ${currentFile && currentFile.filename === f.filename ? "active-card" : ""}"
+         id="card-${f.filename.replace(/[^a-z0-9]/gi, "_")}"
+         onclick="openPresFromGallery(${JSON.stringify(f).replace(/"/g, "&quot;")})">
+
+      <div class="card-thumb">
+        ${
+          f.slideCount > 0
+            ? `<img src="/uploads/slides-${f.filename.replace(/\.[^.]+$/, "")}/slide_1.png" 
+                  onerror="this.style.display='none'" alt="thumb">`
+            : ""
+        }
+        <span style="position:relative;z-index:1">📊</span>
+        <div class="card-thumb-overlay"></div>
+        <div class="card-status-dot"></div>
+        ${f.slideCount > 0 ? `<div class="card-slide-count">📄 ${f.slideCount} slides</div>` : ""}
+      </div>
+
+      <div class="card-body">
+        <div class="card-subject">📚 ${f.subject}</div>
+        <div class="card-name">${f.originalname.replace(/\.[^.]+$/, "")}</div>
+        <div class="card-chapter">📖 ${f.chapter}</div>
+      </div>
+
+      <div class="card-footer">
+        <div class="card-date">⏱ ${f.uploadedAt}</div>
+        <button class="card-open-btn">Open ▶</button>
+      </div>
+    </div>
+  `,
+          )
+          .join("");
       }
 
       function renderGallery(files) {
@@ -2242,253 +2416,10 @@
       // Initial load
       setTimeout(loadPresentations, 300);
     
-      // ════════════════════════════════════════════
-      //  TABS AND GALLERY FETCH
-      // ════════════════════════════════════════════
-      function switchPresTab(tabId) {
-        document.querySelectorAll('.gallery-tab').forEach(btn => {
-           btn.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-content').forEach(content => {
-           content.classList.remove('active');
-        });
-        
-        event.currentTarget.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-      }
 
-      async function loadGalleryItems() {
-        try {
-          const res = await fetch("/api/gallery");
-          const gallery = await res.json();
-          
-          const images = gallery.filter(item => item.type === "image");
-          const videos = gallery.filter(item => item.type === "video");
-          const pdfs = gallery.filter(item => item.type === "pdf");
-          
-          renderGalleryGrid("imageGrid", images, "🖼️", "No Images", "image");
-          renderGalleryGrid("videoGrid", videos, "🎬", "No Videos", "video");
-          renderGalleryGrid("pdfGrid", pdfs, "📄", "No PDFs", "pdf");
-          
-        } catch (e) {
-          console.error("Failed to load gallery items:", e);
-        }
-      }
-
-      function renderGalleryGrid(gridId, items, icon, emptyText, type) {
-        const grid = document.getElementById(gridId);
-        if (items.length === 0) {
-          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
-            <span class="eg-icon">${icon}</span>
-            <h2>${emptyText}</h2>
-            <p>Files will appear here once uploaded.</p>
-          </div>`;
-          return;
-        }
-
-        grid.innerHTML = items.map(f => {
-          let thumbHtml = '';
-          if (type === 'image') {
-            thumbHtml = `<img src="${f.url}" onerror="this.style.display='none'" alt="thumb">`;
-          } else if (type === 'video') {
-             if (f.url.includes("youtube.com") || f.url.includes("youtu.be")) {
-                let yid = "";
-                if(f.url.includes("v=")){ yid = f.url.split("v=")[1].split("&")[0]; }
-                else if (f.url.includes("youtu.be/")) { yid = f.url.split("youtu.be/")[1].split("?")[0]; }
-                if(yid) thumbHtml = `<img src="https://img.youtube.com/vi/${yid}/0.jpg" onerror="this.style.display='none'" alt="thumb">`;
-             } else {
-                thumbHtml = `<video src="${f.url}" style="width:100%;height:100%;object-fit:cover;" muted></video>`;
-             }
-          } else if (type === 'pdf') {
-             thumbHtml = `<span style="position:relative;z-index:1;font-size:4rem;">📄</span>`;
-          }
-
-          const onClickAttr = `onclick="openGalleryItem('${type}', '${f.url}', '${f.itemName}')"`;
-
-          return `
-            <div class="pres-card" id="card-${f.id}" ${onClickAttr}>
-              <div class="card-thumb">
-                ${thumbHtml}
-                <div class="card-thumb-overlay"></div>
-                <div class="card-status-dot"></div>
-              </div>
-              <div class="card-body">
-                <div class="card-subject">📚 ${f.chapterName || 'General'}</div>
-                <div class="card-name">${f.itemName}</div>
-              </div>
-              <div class="card-footer">
-                <div class="card-date">⏱ ${new Date(f.createdAt).toLocaleDateString()}</div>
-                <button class="card-open-btn">Open ▶</button>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      function openGalleryItem(type, url, title) {
-        if (type === 'image') {
-           const modal = document.getElementById("imgModal");
-           const img = document.getElementById("sharedImg");
-           document.getElementById("imgModalTitle").textContent = "🖼️ " + title;
-           document.getElementById("imgModalSub").textContent = "Fullscreen View";
-           img.src = url;
-           pushShareModal(modal.id);
-        } else if (type === 'video') {
-           const modal = document.getElementById("videoModal");
-           const youTubePlayer = document.getElementById("youtubePlayer");
-           const youTubeIframe = document.getElementById("youtubeIframe");
-           const uploadedVideo = document.getElementById("uploadedVideo");
-           document.getElementById("videoModalSub").textContent = title;
-           
-           if (url.includes("youtube.com") || url.includes("youtu.be")) {
-              let videoId = "";
-              if(url.includes("v=")){ videoId = url.split("v=")[1].split("&")[0]; }
-              else if (url.includes("youtu.be/")) { videoId = url.split("youtu.be/")[1].split("?")[0]; }
-              
-              youTubePlayer.style.display = "block";
-              uploadedVideo.style.display = "none";
-              youTubeIframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
-           } else {
-              youTubePlayer.style.display = "none";
-              uploadedVideo.style.display = "block";
-              uploadedVideo.src = url;
-              uploadedVideo.play().catch(e=>console.log(e));
-           }
-           pushShareModal(modal.id);
-        } else if (type === 'pdf') {
-           loadPdfNative(url, title);
-        }
-      }
 
     </script>
     <script src="js/wake-lock.js">
-      // ════════════════════════════════════════════
-      //  TABS AND GALLERY FETCH
-      // ════════════════════════════════════════════
-      function switchPresTab(tabId) {
-        document.querySelectorAll('.gallery-tab').forEach(btn => {
-           btn.classList.remove('active');
-        });
-        document.querySelectorAll('.tab-content').forEach(content => {
-           content.classList.remove('active');
-        });
-        
-        event.currentTarget.classList.add('active');
-        document.getElementById(tabId).classList.add('active');
-      }
-
-      async function loadGalleryItems() {
-        try {
-          const res = await fetch("/api/gallery");
-          const gallery = await res.json();
-          
-          const images = gallery.filter(item => item.type === "image");
-          const videos = gallery.filter(item => item.type === "video");
-          const pdfs = gallery.filter(item => item.type === "pdf");
-          
-          renderGalleryGrid("imageGrid", images, "🖼️", "No Images", "image");
-          renderGalleryGrid("videoGrid", videos, "🎬", "No Videos", "video");
-          renderGalleryGrid("pdfGrid", pdfs, "📄", "No PDFs", "pdf");
-          
-        } catch (e) {
-          console.error("Failed to load gallery items:", e);
-        }
-      }
-
-      function renderGalleryGrid(gridId, items, icon, emptyText, type) {
-        const grid = document.getElementById(gridId);
-        if (items.length === 0) {
-          grid.innerHTML = `<div class="empty-gallery" style="grid-column:1/-1">
-            <span class="eg-icon">${icon}</span>
-            <h2>${emptyText}</h2>
-            <p>Files will appear here once uploaded.</p>
-          </div>`;
-          return;
-        }
-
-        grid.innerHTML = items.map(f => {
-          let thumbHtml = '';
-          if (type === 'image') {
-            thumbHtml = `<img src="${f.url}" onerror="this.style.display='none'" alt="thumb">`;
-          } else if (type === 'video') {
-             if (f.url.includes("youtube.com") || f.url.includes("youtu.be")) {
-                let yid = "";
-                if(f.url.includes("v=")){ yid = f.url.split("v=")[1].split("&")[0]; }
-                else if (f.url.includes("youtu.be/")) { yid = f.url.split("youtu.be/")[1].split("?")[0]; }
-                if(yid) thumbHtml = `<img src="https://img.youtube.com/vi/${yid}/0.jpg" onerror="this.style.display='none'" alt="thumb">`;
-             } else {
-                thumbHtml = `<video src="${f.url}" style="width:100%;height:100%;object-fit:cover;" muted></video>`;
-             }
-          } else if (type === 'pdf') {
-             thumbHtml = `<span style="position:relative;z-index:1;font-size:4rem;">📄</span>`;
-          }
-
-          const onClickAttr = `onclick="openGalleryItem('${type}', '${f.url}', '${f.itemName}')"`;
-
-          return `
-            <div class="pres-card" id="card-${f.id}" ${onClickAttr}>
-              <div class="card-thumb">
-                ${thumbHtml}
-                <div class="card-thumb-overlay"></div>
-                <div class="card-status-dot"></div>
-              </div>
-              <div class="card-body">
-                <div class="card-subject">📚 ${f.chapterName || 'General'}</div>
-                <div class="card-name">${f.itemName}</div>
-              </div>
-              <div class="card-footer">
-                <div class="card-date">⏱ ${new Date(f.createdAt).toLocaleDateString()}</div>
-                <button class="card-open-btn">Open ▶</button>
-              </div>
-            </div>
-          `;
-        }).join("");
-      }
-
-      function openGalleryItem(type, url, title) {
-        if (type === 'image') {
-           const modal = document.getElementById("imgModal");
-           const img = document.getElementById("sharedImg");
-           document.getElementById("imgModalTitle").textContent = "🖼️ " + title;
-           document.getElementById("imgModalSub").textContent = "Fullscreen View";
-           img.src = url;
-           pushShareModal(modal.id);
-        } else if (type === 'video') {
-           const modal = document.getElementById("videoModal");
-           const youTubePlayer = document.getElementById("youtubePlayer");
-           const youTubeIframe = document.getElementById("youtubeIframe");
-           const uploadedVideo = document.getElementById("uploadedVideo");
-           document.getElementById("videoModalSub").textContent = title;
-           
-           if (url.includes("youtube.com") || url.includes("youtu.be")) {
-              let videoId = "";
-              if(url.includes("v=")){ videoId = url.split("v=")[1].split("&")[0]; }
-              else if (url.includes("youtu.be/")) { videoId = url.split("youtu.be/")[1].split("?")[0]; }
-              
-              youTubePlayer.style.display = "block";
-              uploadedVideo.style.display = "none";
-              youTubeIframe.src = "https://www.youtube.com/embed/" + videoId + "?autoplay=1";
-           } else {
-              youTubePlayer.style.display = "none";
-              uploadedVideo.style.display = "block";
-              uploadedVideo.src = url;
-              uploadedVideo.play().catch(e=>console.log(e));
-           }
-           pushShareModal(modal.id);
-        } else if (type === 'pdf') {
-           const iframe = document.getElementById("pdfIframe");
-           pushShareModal("pdfModal");
-           document.getElementById("pdfModalSub").textContent = title;
-           iframe.src = ""; // Clear existing
-           fetch("/api/view-pdf?url=" + encodeURIComponent(url))
-             .then(res => res.blob())
-             .then(blob => {
-                 const blobUrl = URL.createObjectURL(blob);
-                 iframe.src = blobUrl;
-             }).catch(e => console.error(e));
-        }
-      }
-
     </script>
   <script src="js/whiteboard.js"></script>
   </body>

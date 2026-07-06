@@ -718,8 +718,35 @@ io.on("connection", (socket) => {
 
 // List all presentations
 app.get("/api/presentations", (req, res) => {
-  const meta = loadPresMeta();
-  res.json(meta);
+  let meta = loadPresMeta();
+  const { page, limit = 8, search, paginated } = req.query;
+
+  if (search) {
+    const q = search.toLowerCase();
+    meta = meta.filter((m) => {
+      return (
+        (m.originalname && m.originalname.toLowerCase().includes(q)) ||
+        (m.subject && m.subject.toLowerCase().includes(q)) ||
+        (m.chapter && m.chapter.toLowerCase().includes(q))
+      );
+    });
+  }
+
+  if (paginated === "true") {
+    const totalItems = meta.length;
+    const limitNum = parseInt(limit, 10) || 8;
+    const totalPages = Math.ceil(totalItems / limitNum) || 1;
+    const currentPage = Math.max(1, parseInt(page, 10) || 1);
+    const startIndex = (currentPage - 1) * limitNum;
+    const paginatedItems = meta.slice(startIndex, startIndex + limitNum);
+
+    res.json({
+      items: paginatedItems,
+      pagination: { totalItems, totalPages, currentPage, limit: limitNum }
+    });
+  } else {
+    res.json(meta);
+  }
 });
 
 // Upload a presentation
@@ -1063,7 +1090,45 @@ const galleryUpload = multer({ storage: galleryStorage });
 
 // Get all gallery items
 app.get("/api/gallery", (req, res) => {
-  res.json(loadGallery());
+  let gallery = loadGallery();
+  const { type, page, limit = 8, search, paginated } = req.query;
+
+  if (search) {
+    const q = search.toLowerCase();
+    gallery = gallery.filter((item) => {
+      const nameMatch = item.itemName && item.itemName.toLowerCase().includes(q);
+      const chapterMatch = item.chapterName && item.chapterName.toLowerCase().includes(q);
+      return nameMatch || chapterMatch;
+    });
+  }
+
+  if (type === "classboard") {
+    gallery = gallery.filter(
+      (item) => item.type === "image" && item.itemName && item.itemName.toLowerCase().startsWith("class")
+    );
+  } else if (type === "image") {
+    gallery = gallery.filter(
+      (item) => item.type === "image" && !(item.itemName && item.itemName.toLowerCase().startsWith("class"))
+    );
+  } else if (type) {
+    gallery = gallery.filter((item) => item.type === type);
+  }
+
+  if (paginated === "true") {
+    const totalItems = gallery.length;
+    const limitNum = parseInt(limit, 10) || 8;
+    const totalPages = Math.ceil(totalItems / limitNum) || 1;
+    const currentPage = Math.max(1, parseInt(page, 10) || 1);
+    const startIndex = (currentPage - 1) * limitNum;
+    const paginatedItems = gallery.slice(startIndex, startIndex + limitNum);
+
+    res.json({
+      items: paginatedItems,
+      pagination: { totalItems, totalPages, currentPage, limit: limitNum }
+    });
+  } else {
+    res.json(gallery);
+  }
 });
 
 // Upload a new gallery image
