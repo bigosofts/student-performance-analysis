@@ -81,6 +81,17 @@
               <button class="wb-tool-btn wb-tool-close-main" id="wb-tool-close" title="Close">❌</button>
             </div>
 
+            <div class="wb-toolbar-row wb-quick-colors" style="display: flex; gap: 12px; justify-content: center; padding: 8px 4px; flex-wrap: wrap;">
+              <button type="button" class="wb-qc-btn" style="background:#ef4444; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(239,68,68,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#ef4444" title="Red"></button>
+              <button type="button" class="wb-qc-btn" style="background:#f97316; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(249,115,22,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#f97316" title="Orange"></button>
+              <button type="button" class="wb-qc-btn" style="background:#f59e0b; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(245,158,11,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#f59e0b" title="Yellow"></button>
+              <button type="button" class="wb-qc-btn" style="background:#10b981; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(16,185,129,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#10b981" title="Green"></button>
+              <button type="button" class="wb-qc-btn" style="background:#3b82f6; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(59,130,246,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#3b82f6" title="Blue"></button>
+              <button type="button" class="wb-qc-btn" style="background:#a855f7; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(168,85,247,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#a855f7" title="Purple"></button>
+              <button type="button" class="wb-qc-btn" style="background:#000000; width:28px; height:28px; border-radius:50%; border:2px solid rgba(255,255,255,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#000000" title="Black"></button>
+              <button type="button" class="wb-qc-btn" style="background:#ffffff; width:28px; height:28px; border-radius:50%; border:2px solid rgba(200,200,200,0.8); cursor:pointer; box-shadow:0 2px 6px rgba(255,255,255,0.5); transition:transform 0.1s;" onmousedown="this.style.transform='scale(0.9)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'" data-color="#ffffff" title="White"></button>
+            </div>
+
             <div class="wb-toolbar-row wb-toolbar-controls">
               <div class="wb-control-group">
                 <span>Color</span>
@@ -161,7 +172,8 @@
     let gridVisible = true;
     let gridOpacity = 0.25;
     let mobileUiHideTimer = null;
-    const MOBILE_UI_HIDE_MS = 4500;
+    let centerCanvasTimer = null;
+    const MOBILE_UI_HIDE_MS = 3000;
     let touchStartDist = 0;
     let suppressDraw = false;
     let lastPathTime = 0;
@@ -717,7 +729,11 @@
             recordUndoState();
           }, 350);
         }
-        setTimeout(() => { canvas.calcOffset(); resizeCanvas(); }, 300);
+        setTimeout(() => {
+          canvas.calcOffset();
+          resizeCanvas();
+          if (scrollEl) scrollEl.scrollLeft = 0;
+        }, 300);
       } else {
         overlay.classList.remove('active');
         overlay.classList.remove('wb-mobile-ui-hidden');
@@ -735,6 +751,10 @@
 
     // ── Pointer / pan (desktop: alt+drag) ──
     canvas.on('mouse:down', function(opt) {
+      if (!isPresenter) {
+        scheduleMobileUIHide();
+        clearTimeout(centerCanvasTimer);
+      }
       const evt = opt.e;
       if (suppressDraw || (evt.touches && evt.touches.length >= 2)) return;
       if (currentTool === 'erase' && opt.target && !opt.target.wbBackground) {
@@ -746,6 +766,10 @@
     });
 
     canvas.on('mouse:move', function(opt) {
+      if (!isPresenter) {
+        scheduleMobileUIHide();
+        clearTimeout(centerCanvasTimer);
+      }
       if (this.isDragging) {
         const e = opt.e;
         const vpt = this.viewportTransform;
@@ -759,6 +783,7 @@
     });
 
     canvas.on('mouse:up', function() {
+      if (!isPresenter) scheduleMobileUIHide();
       this.isDragging = false;
       this.selection = (currentTool === 'select');
     });
@@ -773,6 +798,8 @@
     // ── Mobile: two-finger pinch zoom only (no pan, no accidental dots) ──
     if (!isPresenter) {
       const onMobileTouchStart = (e) => {
+        scheduleMobileUIHide();
+        clearTimeout(centerCanvasTimer);
         if (!isMobile() || useFitViewport() || !overlay.classList.contains('active')) return;
         if (e.touches.length >= 2) {
           suppressDraw = true;
@@ -788,6 +815,8 @@
       };
 
       const onMobileTouchMove = (e) => {
+        scheduleMobileUIHide();
+        clearTimeout(centerCanvasTimer);
         if (!isMobile() || useFitViewport() || !overlay.classList.contains('active')) return;
         if (e.touches.length === 2 && touchStartDist > 0) {
           const dist = Math.hypot(
@@ -844,6 +873,15 @@
         if (socket) socket.emit('wb-bg', e.target.value);
       };
 
+      document.querySelectorAll('.wb-qc-btn').forEach(btn => {
+        btn.onclick = () => {
+          const c = btn.dataset.color;
+          const colorInput = document.getElementById('wb-color');
+          colorInput.value = c;
+          canvas.freeDrawingBrush.color = hexToRgba(c, getInkOpacity());
+        };
+      });
+
       document.getElementById('wb-tool-shapes').onclick = () => togglePanel('wb-panel-shapes');
       document.getElementById('wb-tool-bullets').onclick = () => togglePanel('wb-panel-bullets');
       document.getElementById('wb-tool-emoji').onclick = () => togglePanel('wb-panel-emoji');
@@ -894,7 +932,14 @@
           toolbar?.classList.add('wb-toolbar-expanded');
         });
       }
-      toolbar?.addEventListener('click', () => showMobileUI());
+      
+      ['touchstart', 'touchmove', 'mousedown', 'mousemove', 'click'].forEach(evt => {
+        toolbar?.addEventListener(evt, () => showMobileUI(), { passive: true });
+      });
+
+      overlay.addEventListener('click', () => {
+        if (!isPresenter) scheduleMobileUIHide();
+      });
 
       if (!isPresenter) {
         const btn = document.createElement('button');
@@ -931,6 +976,18 @@
         lastPathTime = Date.now();
         if (socket) socket.emit('wb-add', opt.path.toJSON(['id']));
         recordUndoState();
+
+        if (!isPresenter && isMobile() && scrollEl && !useFitViewport()) {
+          clearTimeout(centerCanvasTimer);
+          centerCanvasTimer = setTimeout(() => {
+            const pathBounds = opt.path.getBoundingRect();
+            const pathCenter = pathBounds.left + pathBounds.width / 2;
+            const scale = getMobileScale();
+            const scaledCenter = pathCenter * scale;
+            const targetScrollLeft = scaledCenter - (scrollEl.clientWidth / 2);
+            scrollEl.scrollTo({ left: targetScrollLeft, behavior: 'smooth' });
+          }, 1000);
+        }
       });
 
       canvas.on('object:modified', function(opt) {
