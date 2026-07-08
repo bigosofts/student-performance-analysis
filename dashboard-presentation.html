@@ -4316,6 +4316,7 @@ Kingdom → Plantae
 
       } catch(err) {
         console.warn('[SS] getDisplayMedia error:', err);
+        alert('Screen share failed: ' + err.name + ' - ' + err.message);
         setStatus('idle', err.name === 'NotAllowedError'
           ? 'Permission denied — please allow screen capture'
           : 'Could not start screen share');
