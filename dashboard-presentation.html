@@ -2027,6 +2027,12 @@
                   <div class="share-name">Screen Share</div>
                   <div class="share-desc">Mirror your screen live</div>
                 </div>
+                <div class="share-card live-camera" id="shareCameraBtn" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
+                  <span class="live-badge-card" style="background: #10b981;">LIVE</span>
+                  <span class="share-icon">📷</span>
+                  <div class="share-name">Live Camera</div>
+                  <div class="share-desc">Broadcast phone camera</div>
+                </div>
               </div>
             </div>
           </div>
@@ -4151,9 +4157,195 @@ Kingdom → Plantae
       </div>
     </div>
   </div>
+  <!-- ══════════════════════════════════════════
+       CAMERA SHARE MODAL
+  ══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="cameraShareModal">
+    <div class="ss-modal-box">
+      <div class="ss-header">
+        <div class="ss-title">
+          <div class="ss-title-icon">📷</div>
+          <div>
+            <div>Live Camera</div>
+            <div style="font-size:0.72rem;font-weight:500;color:#64748b;margin-top:2px">Broadcast your camera to the game page</div>
+          </div>
+        </div>
+        <button class="modal-close" id="camCloseBtn" title="Close">✕</button>
+      </div>
+
+      <div class="ss-status-bar">
+        <div class="ss-status-dot idle" id="camStatusDot"></div>
+        <span class="ss-status-text" id="camStatusText">Ready to share camera</span>
+        <span class="ss-viewer-badge" id="camViewerBadge">👁 LIVE</span>
+      </div>
+
+      <div class="ss-preview-wrap">
+        <video id="camPreviewVideo" autoplay muted playsinline></video>
+        <div class="ss-preview-placeholder" id="camPlaceholder">
+          <span class="ph-icon">📷</span>
+          <p>Camera preview will appear here<br/>when sharing starts</p>
+        </div>
+        <div class="ss-live-overlay" id="camLiveOverlay">🔴 LIVE</div>
+      </div>
+
+      <div style="margin-bottom: 15px;">
+        <select id="camFacingSelect" class="form-input" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">
+          <option value="environment" style="color: black;">Rear Camera (Environment)</option>
+          <option value="user" style="color: black;">Front Camera (Selfie)</option>
+        </select>
+      </div>
+
+      <div class="ss-controls">
+        <button class="btn-ss-start" id="camStartBtn" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 6px 24px rgba(16,185,129,0.4);">📡 Start Camera</button>
+      </div>
+
+      <div class="ss-tips">
+        <b>📌 Tips:</b><br/>
+        • Use the <b>Rear Camera</b> as a document camera to show physical books or worksheets<br/>
+        • The game page will automatically switch to a full-screen view of this camera
+      </div>
+    </div>
+  </div>
+
+  <!-- Live Camera: native WebRTC broadcaster -->
+  <script>
+  (function() {
+    const camModal      = document.getElementById('cameraShareModal');
+    const camStartBtn   = document.getElementById('camStartBtn');
+    const camCloseBtn   = document.getElementById('camCloseBtn');
+    const camStatusDot  = document.getElementById('camStatusDot');
+    const camStatusText = document.getElementById('camStatusText');
+    const camViewerBadge= document.getElementById('camViewerBadge');
+    const camPreview    = document.getElementById('camPreviewVideo');
+    const camPlaceholder= document.getElementById('camPlaceholder');
+    const camLiveOverlay= document.getElementById('camLiveOverlay');
+    const camCard       = document.getElementById('shareCameraBtn');
+    const camFacingSel  = document.getElementById('camFacingSelect');
+
+    const ICE_CFG = { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]};
+
+    let pc = null;
+    let localStream = null;
+    let isSharing = false;
+    let sock = null;
+
+    function getSocket() {
+      if (sock) return sock;
+      if (window.presSocket) { sock = window.presSocket; return sock; }
+      try { sock = io(); } catch(e) {}
+      return sock;
+    }
+
+    function bindSignaling() {
+      const s = getSocket();
+      if (!s) return;
+      s.on('screenshare-answer', async (data) => {
+        if (!pc || !isSharing) return;
+        try { await pc.setRemoteDescription(new RTCSessionDescription(data.sdp)); setStatus('live', 'Live — classroom connected ✓'); } catch(e) {}
+      });
+      s.on('screenshare-ice', async (data) => {
+        if (!pc || !isSharing || data.from === 'broadcaster') return;
+        try { if (data.candidate) await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e) {}
+      });
+      s.on('screenshare-ready', async () => {
+        if (!localStream || !isSharing) return;
+        await createAndSendOffer();
+      });
+    }
+
+    async function createAndSendOffer() {
+      const s = getSocket();
+      if (pc) { try { pc.close(); } catch(e) {} }
+      pc = new RTCPeerConnection(ICE_CFG);
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+      pc.onicecandidate = (e) => {
+        if (e.candidate && s) s.emit('screenshare-ice', { candidate: e.candidate, from: 'broadcaster' });
+      };
+      pc.onconnectionstatechange = () => {
+        if (pc && pc.connectionState === 'connected') setStatus('live', 'Live — classroom connected ✓');
+        else if (pc && (pc.connectionState === 'disconnected' || pc.connectionState === 'failed')) setStatus('live', 'Broadcasting… (viewer disconnected)');
+      };
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        if (s) s.emit('screenshare-offer', { sdp: pc.localDescription });
+        setStatus('live', 'Offer sent — waiting for game page…');
+      } catch(e) {
+        setStatus('idle', 'Failed to create connection');
+      }
+    }
+
+    if(camCard) camCard.addEventListener('click', () => camModal.classList.add('open'));
+    camCloseBtn.addEventListener('click', () => camModal.classList.remove('open'));
+    camModal.addEventListener('click', (e) => { if (e.target === camModal) camModal.classList.remove('open'); });
+
+    function setStatus(state, text) {
+      camStatusDot.className = 'ss-status-dot ' + state;
+      camStatusText.textContent = text;
+      const isLive = state === 'live';
+      camViewerBadge.classList.toggle('visible', isLive);
+      camLiveOverlay.style.display = isLive ? 'block' : 'none';
+      if(camCard) camCard.classList.toggle('is-live', isLive);
+    }
+
+    function stopSharing() {
+      isSharing = false;
+      if (pc) { try { pc.close(); } catch(e) {} pc = null; }
+      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+      camPreview.srcObject = null;
+      camPreview.style.display = 'none';
+      camPlaceholder.style.display = 'flex';
+      setStatus('idle', 'Ready to share camera');
+      camStartBtn.innerHTML = '📡 Start Camera';
+      camStartBtn.classList.remove('btn-ss-stop');
+      const s = getSocket();
+      if (s) s.emit('screenshare-stop'); // Reuse the same receiver off event
+    }
+
+    async function startSharing() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Camera access requires a Secure Context (HTTPS).');
+        return;
+      }
+      setStatus('idle', 'Requesting camera access…');
+      try {
+        const facing = camFacingSel.value;
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
+          audio: false
+        });
+        localStream = stream;
+        isSharing = true;
+        camPreview.srcObject = stream;
+        camPreview.style.display = 'block';
+        camPlaceholder.style.display = 'none';
+        camStartBtn.innerHTML = '⏹ Stop Camera';
+        camStartBtn.classList.add('btn-ss-stop');
+        setStatus('live', 'Broadcasting… waiting for game page');
+
+        bindSignaling();
+        const s = getSocket();
+        if (s) s.emit('screenshare-start', {}); // Reuse the same receiver on event
+
+        stream.getVideoTracks()[0].addEventListener('ended', stopSharing);
+      } catch(err) {
+        alert('Camera share failed: ' + err.name + ' - ' + err.message);
+        setStatus('idle', 'Could not start camera share');
+      }
+    }
+
+    camStartBtn.addEventListener('click', () => isSharing ? stopSharing() : startSharing());
+    
+    // Auto-stop if user closes modal? No, let them keep broadcasting while navigating.
+  })();
+  </script>
 
   <!-- Screen Share: native WebRTC broadcaster (no external services) -->
   <script>
+
   // ════════════════════════════════════════════════════
   //  SCREEN SHARE MODULE — Dashboard (Broadcaster side)
   //  Uses native RTCPeerConnection + Socket.IO signaling
