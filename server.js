@@ -728,8 +728,28 @@ io.on("connection", (socket) => {
   socket.on("screenshare-ice", (data) => {
     socket.broadcast.emit("screenshare-ice", data);
   });
-  socket.on("screenshare-stop", () => {
-    socket.broadcast.emit("screenshare-stop");
+  socket.on('screenshare-stop', () => {
+    socket.broadcast.emit('screenshare-stop');
+  });
+
+  // ── Audio Share WebRTC Signaling ─────────────────────────
+  socket.on('audioshare-start', (data) => {
+    socket.broadcast.emit('audioshare-start', data);
+  });
+  socket.on('audioshare-ready', () => {
+    socket.broadcast.emit('audioshare-ready');
+  });
+  socket.on('audioshare-offer', (data) => {
+    socket.broadcast.emit('audioshare-offer', data);
+  });
+  socket.on('audioshare-answer', (data) => {
+    socket.broadcast.emit('audioshare-answer', data);
+  });
+  socket.on('audioshare-ice', (data) => {
+    socket.broadcast.emit('audioshare-ice', data);
+  });
+  socket.on('audioshare-stop', () => {
+    socket.broadcast.emit('audioshare-stop');
   });
 
   socket.on("disconnect", () => {

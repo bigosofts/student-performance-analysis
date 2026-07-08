@@ -2033,6 +2033,12 @@
                   <div class="share-name">Live Camera</div>
                   <div class="share-desc">Broadcast phone camera</div>
                 </div>
+                <div class="share-card" id="shareAudioBtn" style="background: rgba(168, 85, 247, 0.05); border-color: rgba(168, 85, 247, 0.2);">
+                  <span class="live-badge-card" style="background: #a855f7;">LIVE</span>
+                  <span class="share-icon">🎙️</span>
+                  <div class="share-name">Share Audio</div>
+                  <div class="share-desc">Stream mic to classroom</div>
+                </div>
               </div>
             </div>
           </div>
@@ -2590,6 +2596,52 @@ Kingdom → Plantae
           disabled
         >
           📡 Send PDF to Game Screen
+        </button>
+      </div>
+    </div>
+
+    <!-- Audio Share Modal -->
+    <div class="modal-overlay" id="audioModal">
+      <div class="modal-box">
+        <div class="modal-header">
+          <div class="modal-title">🎙️ Share Audio (Live)</div>
+          <div style="display: flex; gap: 8px">
+            <button class="modal-close" onclick="minimizeShareModal('audioModal', '🎙️ Share Audio')" title="Minimize">_</button>
+            <button class="modal-close" onclick="closeSpecificShareModal('audioModal')" title="Close">✕</button>
+          </div>
+        </div>
+
+        <!-- Status row -->
+        <div style="display:flex; align-items:center; gap:12px; padding:14px 0 10px;">
+          <div id="asStatusDot" style="width:12px;height:12px;border-radius:50%;background:#475569;transition:background 0.3s;flex-shrink:0;"></div>
+          <div id="asStatusText" style="font-size:0.9rem;color:#94a3b8;">Ready to stream</div>
+        </div>
+
+        <!-- Visualiser bar -->
+        <div id="audioVisualiser" style="height:48px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
+          <canvas id="audioCanvas" style="width:100%;height:100%;"></canvas>
+        </div>
+
+        <!-- Microphone selector -->
+        <div class="form-row" style="margin-bottom:16px;">
+          <label class="form-label">Microphone</label>
+          <select id="audioDeviceSelect" class="select-input">
+            <option value="">Default Microphone</option>
+          </select>
+        </div>
+
+        <!-- Volume indicator -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#64748b;margin-bottom:4px;">
+            <span>Level</span><span id="audioLevelPct">0%</span>
+          </div>
+          <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;">
+            <div id="audioLevelBar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:3px;transition:width 0.05s;"></div>
+          </div>
+        </div>
+
+        <button class="btn-share" id="asStartBtn" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+          🎙️ Start Streaming
         </button>
       </div>
     </div>
@@ -4315,7 +4367,7 @@ Kingdom → Plantae
         const facing = camFacingSel.value;
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: false
+          audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
         });
         localStream = stream;
         isSharing = true;
@@ -4475,6 +4527,19 @@ Kingdom → Plantae
     }
 
     async function startSharing() {
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = 'gamecaster://start';
+        setStatus('idle', 'Opening Broadcaster App...');
+        setTimeout(() => {
+          if (!document.hidden) {
+             alert("The companion app is not installed! You must install the Native Screen Share APK to cast your entire screen from a mobile device.");
+             setStatus('idle', 'Ready to share your screen');
+          }
+        }, 2000);
+        return;
+      }
+
       if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
         alert('Screen sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://' + window.location.host + '\n3. Relaunch Chrome and try again.');
         return;
@@ -4483,7 +4548,7 @@ Kingdom → Plantae
       try {
         const stream = await navigator.mediaDevices.getDisplayMedia({
           video: { frameRate: { ideal: 30, max: 30 } },
-          audio: false
+          audio: { echoCancellation: false, noiseSuppression: false, sampleRate: 44100 }
         });
         localStream = stream;
         isSharing = true;
@@ -4518,8 +4583,178 @@ Kingdom → Plantae
     ssStartBtn.addEventListener('click', () => isSharing ? stopSharing() : startSharing());
     window.stopScreenShare = stopSharing;
   })();
+
+  // ════════════════════════════════════════════════════
+  //  AUDIO SHARE MODULE — Dashboard (Broadcaster side)
+  //  Streams microphone live via WebRTC to game-presentation
+  // ════════════════════════════════════════════════════
+  (function() {
+    const ICE_CFG = { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]};
+
+    const asStartBtn     = document.getElementById('asStartBtn');
+    const asStatusDot    = document.getElementById('asStatusDot');
+    const asStatusText   = document.getElementById('asStatusText');
+    const asLevelBar     = document.getElementById('audioLevelBar');
+    const asLevelPct     = document.getElementById('audioLevelPct');
+    const asCanvas       = document.getElementById('audioCanvas');
+    const asDevSelect    = document.getElementById('audioDeviceSelect');
+    const audioModal     = document.getElementById('audioModal');
+    const shareAudioBtn  = document.getElementById('shareAudioBtn');
+
+    let asStream    = null;
+    let asPc        = null;
+    let asIsLive    = false;
+    let asCtx       = null;  // AudioContext
+    let asAnalyser  = null;
+    let asAnimFrame = null;
+    let asCtx2d     = null;  // Canvas 2D
+
+    function getSocket() { return window.presSocket || (typeof io !== 'undefined' ? io() : null); }
+
+    // ── Open modal + populate mic list ─────────────────────────
+    shareAudioBtn.addEventListener('click', async () => {
+      openModal('audioModal');
+      try {
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        asDevSelect.innerHTML = '';
+        devices.filter(d => d.kind === 'audioinput').forEach(d => {
+          const opt = document.createElement('option');
+          opt.value = d.deviceId;
+          opt.textContent = d.label || 'Microphone ' + (asDevSelect.options.length + 1);
+          asDevSelect.appendChild(opt);
+        });
+      } catch(e) { console.warn('[AS] Could not enumerate devices:', e); }
+    });
+
+    // ── Status helper ────────────────────────────────────────
+    function asSetStatus(state, text) {
+      asStatusText.textContent = text;
+      const colors = { idle: '#475569', connecting: '#f59e0b', live: '#10b981', error: '#ef4444' };
+      asStatusDot.style.background = colors[state] || '#475569';
+    }
+
+    // ── Canvas visualiser ─────────────────────────────────────
+    function startVisualiser(stream) {
+      asCtx = new (window.AudioContext || window.webkitAudioContext)();
+      asAnalyser = asCtx.createAnalyser();
+      asAnalyser.fftSize = 256;
+      asCtx.createMediaStreamSource(stream).connect(asAnalyser);
+      asCtx2d = asCanvas.getContext('2d');
+
+      const bufLen = asAnalyser.frequencyBinCount;
+      const dataArr = new Uint8Array(bufLen);
+
+      function draw() {
+        asAnimFrame = requestAnimationFrame(draw);
+        const W = asCanvas.offsetWidth; const H = asCanvas.offsetHeight;
+        asCanvas.width = W; asCanvas.height = H;
+        asAnalyser.getByteFrequencyData(dataArr);
+
+        asCtx2d.clearRect(0, 0, W, H);
+        const bw = W / bufLen * 2.5;
+        let peak = 0;
+        for (let i = 0; i < bufLen; i++) {
+          const v = dataArr[i];
+          if (v > peak) peak = v;
+          const bh = (v / 255) * H;
+          const hue = 270 + (v / 255) * 30;
+          asCtx2d.fillStyle = `hsla(${hue},80%,60%,0.85)`;
+          asCtx2d.fillRect(i * (bw + 1), H - bh, bw, bh);
+        }
+        const pct = Math.round((peak / 255) * 100);
+        asLevelBar.style.width = pct + '%';
+        asLevelPct.textContent = pct + '%';
+      }
+      draw();
+    }
+
+    function stopVisualiser() {
+      if (asAnimFrame) { cancelAnimationFrame(asAnimFrame); asAnimFrame = null; }
+      if (asCtx) { try { asCtx.close(); } catch(e) {} asCtx = null; }
+      asLevelBar.style.width = '0%';
+      asLevelPct.textContent = '0%';
+      if (asCtx2d && asCanvas) asCtx2d.clearRect(0, 0, asCanvas.width, asCanvas.height);
+    }
+
+    // ── WebRTC offer creation ──────────────────────────────────
+    async function asCreateOffer() {
+      const s = getSocket(); if (!s) return;
+      if (asPc) { try { asPc.close(); } catch(e) {} }
+      asPc = new RTCPeerConnection(ICE_CFG);
+
+      asStream.getTracks().forEach(t => asPc.addTrack(t, asStream));
+
+      asPc.onicecandidate = e => {
+        if (e.candidate) s.emit('audioshare-ice', { candidate: e.candidate, from: 'broadcaster' });
+      };
+      asPc.onconnectionstatechange = () => {
+        if (asPc.connectionState === 'connected') asSetStatus('live', 'Live — streaming to classroom ✓');
+        if (asPc.connectionState === 'disconnected' || asPc.connectionState === 'failed') asSetStatus('connecting', 'Reconnecting…');
+      };
+
+      const offer = await asPc.createOffer();
+      await asPc.setLocalDescription(offer);
+      s.emit('audioshare-offer', { sdp: asPc.localDescription });
+      asSetStatus('connecting', 'Offer sent — waiting for game page…');
+    }
+
+    // ── Socket signaling listeners ─────────────────────────────
+    function asBindSignaling() {
+      const s = getSocket(); if (!s) return;
+      s.on('audioshare-answer', async data => {
+        if (!asPc) return;
+        try { await asPc.setRemoteDescription(new RTCSessionDescription(data.sdp)); } catch(e) {}
+      });
+      s.on('audioshare-ice', async data => {
+        if (!asPc || data.from === 'broadcaster') return;
+        try { if (data.candidate) await asPc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e) {}
+      });
+      s.on('audioshare-ready', () => { if (asStream && asIsLive) asCreateOffer(); });
+    }
+
+    // ── Start / Stop ───────────────────────────────────────────
+    async function asStart() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Audio sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://' + window.location.host + '\n3. Relaunch Chrome and try again.');
+        return;
+      }
+      const deviceId = asDevSelect.value;
+      const constraints = { audio: deviceId ? { deviceId: { exact: deviceId } } : true };
+      asSetStatus('connecting', 'Requesting microphone…');
+      try {
+        asStream = await navigator.mediaDevices.getUserMedia(constraints);
+        asIsLive = true;
+        startVisualiser(asStream);
+        asStartBtn.textContent = '⏹ Stop Streaming';
+        asStartBtn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+        asBindSignaling();
+        const s = getSocket();
+        if (s) s.emit('audioshare-start', {});
+        asSetStatus('connecting', 'Broadcasting… waiting for game page');
+      } catch(err) {
+        asSetStatus('error', 'Microphone access denied');
+        console.warn('[AS] getUserMedia error:', err);
+      }
+    }
+
+    function asStop() {
+      asIsLive = false;
+      if (asPc) { try { asPc.close(); } catch(e) {} asPc = null; }
+      if (asStream) { asStream.getTracks().forEach(t => t.stop()); asStream = null; }
+      stopVisualiser();
+      asStartBtn.textContent = '🎙️ Start Streaming';
+      asStartBtn.style.background = 'linear-gradient(135deg,#7c3aed,#a855f7)';
+      asSetStatus('idle', 'Ready to stream');
+      const s = getSocket();
+      if (s) s.emit('audioshare-stop');
+    }
+
+    asStartBtn.addEventListener('click', () => asIsLive ? asStop() : asStart());
+  })();
   </script>
 
   </body>
 </html>
-
