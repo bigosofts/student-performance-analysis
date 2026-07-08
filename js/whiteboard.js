@@ -277,7 +277,7 @@
 
     canvas.freeDrawingBrush.color = '#000000';
     canvas.freeDrawingBrush.width = 5;
-    canvas.freeDrawingBrush.decimate = 2; // Simplifies paths, reducing points and speeding up render
+    canvas.freeDrawingBrush.decimate = 0; // Set to 0 to disable simplification completely for maximum touch sensitivity
 
     if (canvasStack) {
       canvasStack.style.width = CANVAS_WIDTH + 'px';
