@@ -711,6 +711,27 @@ io.on("connection", (socket) => {
 
   socket.on("leaderboard-show", (data) => socket.broadcast.emit("leaderboard-show", data));
 
+  // ── Screen Share WebRTC Signaling (native WebRTC, no PeerJS) ─
+  socket.on("screenshare-start", (data) => {
+    socket.broadcast.emit("screenshare-start", data);
+  });
+  socket.on("screenshare-ready", () => {
+    // Game page is ready — tell dashboard to create the offer
+    socket.broadcast.emit("screenshare-ready");
+  });
+  socket.on("screenshare-offer", (data) => {
+    socket.broadcast.emit("screenshare-offer", data);
+  });
+  socket.on("screenshare-answer", (data) => {
+    socket.broadcast.emit("screenshare-answer", data);
+  });
+  socket.on("screenshare-ice", (data) => {
+    socket.broadcast.emit("screenshare-ice", data);
+  });
+  socket.on("screenshare-stop", () => {
+    socket.broadcast.emit("screenshare-stop");
+  });
+
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });

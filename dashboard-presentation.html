@@ -831,6 +831,224 @@
         border-color: rgba(239, 68, 68, 0.5);
       }
 
+      /* ── Screen Share card ── */
+      .share-card.screen-share {
+        border-color: rgba(251, 146, 60, 0.35);
+        background: rgba(251, 146, 60, 0.04);
+        position: relative;
+        overflow: hidden;
+      }
+      .share-card.screen-share:hover {
+        background: rgba(251, 146, 60, 0.1);
+        border-color: rgba(251, 146, 60, 0.6);
+        box-shadow: 0 0 24px rgba(251, 146, 60, 0.2);
+      }
+      .share-card.screen-share.is-live {
+        border-color: #ef4444;
+        background: rgba(239, 68, 68, 0.1);
+        animation: liveCardPulse 2s ease-in-out infinite;
+      }
+      @keyframes liveCardPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+        50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+      }
+      .live-badge-card {
+        display: none;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background: #ef4444;
+        color: white;
+        font-size: 0.6rem;
+        font-weight: 800;
+        padding: 2px 7px;
+        border-radius: 50px;
+        letter-spacing: 1px;
+        animation: blink 1s ease-in-out infinite;
+      }
+      .screen-share.is-live .live-badge-card { display: block; }
+
+      /* ── Screen Share Modal ── */
+      #screenShareModal {
+        z-index: 100010;
+      }
+      .ss-modal-box {
+        background: linear-gradient(160deg, rgba(10,12,35,0.98) 0%, rgba(20,10,40,0.98) 100%);
+        border: 1px solid rgba(251, 146, 60, 0.2);
+        border-radius: 28px;
+        padding: 32px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 60px rgba(251,146,60,0.08);
+        animation: modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        position: relative;
+        overflow: hidden;
+      }
+      .ss-modal-box::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 200px; height: 200px;
+        background: radial-gradient(circle, rgba(251,146,60,0.15), transparent 70%);
+        pointer-events: none;
+      }
+      .ss-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 28px;
+      }
+      .ss-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: #f8fafc;
+      }
+      .ss-title-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        box-shadow: 0 6px 20px rgba(249,115,22,0.4);
+      }
+      .ss-status-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        margin-bottom: 22px;
+      }
+      .ss-status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #64748b;
+        transition: background 0.3s;
+        flex-shrink: 0;
+      }
+      .ss-status-dot.idle { background: #64748b; }
+      .ss-status-dot.live {
+        background: #ef4444;
+        box-shadow: 0 0 0 3px rgba(239,68,68,0.25);
+        animation: blink 1s ease-in-out infinite;
+      }
+      .ss-status-text {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #94a3b8;
+        flex: 1;
+      }
+      .ss-viewer-badge {
+        display: none;
+        padding: 4px 10px;
+        border-radius: 50px;
+        background: rgba(239,68,68,0.15);
+        border: 1px solid rgba(239,68,68,0.3);
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #f87171;
+      }
+      .ss-viewer-badge.visible { display: block; }
+      .ss-preview-wrap {
+        position: relative;
+        border-radius: 16px;
+        overflow: hidden;
+        background: #000;
+        aspect-ratio: 16/9;
+        margin-bottom: 22px;
+        border: 1px solid rgba(255,255,255,0.07);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #ssPreviewVideo {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        display: none;
+      }
+      .ss-preview-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        color: #475569;
+      }
+      .ss-preview-placeholder .ph-icon { font-size: 2.5rem; }
+      .ss-preview-placeholder p { font-size: 0.82rem; text-align: center; line-height: 1.5; }
+      .ss-live-overlay {
+        position: absolute;
+        top: 10px; left: 10px;
+        display: none;
+        background: #ef4444;
+        color: white;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 50px;
+        letter-spacing: 1.5px;
+        animation: blink 1s ease-in-out infinite;
+      }
+      .ss-controls {
+        display: flex;
+        gap: 12px;
+      }
+      .btn-ss-start {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #ea580c, #f97316);
+        color: white;
+        font-family: 'Outfit', sans-serif;
+        font-size: 1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        box-shadow: 0 6px 24px rgba(249,115,22,0.4);
+        letter-spacing: 0.3px;
+      }
+      .btn-ss-start:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 32px rgba(249,115,22,0.6);
+      }
+      .btn-ss-start:active { transform: scale(0.97); }
+      .btn-ss-start.btn-ss-stop {
+        background: linear-gradient(135deg, #b91c1c, #ef4444);
+        box-shadow: 0 6px 24px rgba(239,68,68,0.4);
+      }
+      .btn-ss-stop:hover {
+        box-shadow: 0 10px 32px rgba(239,68,68,0.6) !important;
+      }
+      .ss-tips {
+        margin-top: 18px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        background: rgba(251,146,60,0.06);
+        border: 1px solid rgba(251,146,60,0.15);
+        font-size: 0.78rem;
+        color: #94a3b8;
+        line-height: 1.7;
+      }
+      .ss-tips b { color: #fb923c; }
+      @media (max-width: 768px) {
+        .ss-modal-box { padding: 22px 18px; }
+        .btn-ctrl.btn-screenshare { grid-column: 1 / -1; }
+      }
+
       /* ─── MODALS ─── */
       .modal-overlay {
         position: fixed;
@@ -1802,6 +2020,12 @@
                   <span class="share-icon">📄</span>
                   <div class="share-name">Share PDF</div>
                   <div class="share-desc">Show PDF from gallery</div>
+                </div>
+                <div class="share-card screen-share" id="shareScreenBtn">
+                  <span class="live-badge-card">LIVE</span>
+                  <span class="share-icon">📱</span>
+                  <div class="share-name">Screen Share</div>
+                  <div class="share-desc">Mirror your screen live</div>
                 </div>
               </div>
             </div>
@@ -3883,5 +4107,226 @@ Kingdom → Plantae
     <script src="js/wake-lock.js"></script>
     <script src="js/pc-control.js"></script>
   <script src="js/whiteboard.js"></script>
+
+  <!-- ══════════════════════════════════════════
+       SCREEN SHARE MODAL
+  ══════════════════════════════════════════ -->
+  <div class="modal-overlay" id="screenShareModal">
+    <div class="ss-modal-box">
+      <div class="ss-header">
+        <div class="ss-title">
+          <div class="ss-title-icon">📱</div>
+          <div>
+            <div>Screen Share</div>
+            <div style="font-size:0.72rem;font-weight:500;color:#64748b;margin-top:2px">Broadcast your screen live to the game page</div>
+          </div>
+        </div>
+        <button class="modal-close" id="ssCloseBtn" title="Close">✕</button>
+      </div>
+
+      <div class="ss-status-bar">
+        <div class="ss-status-dot idle" id="ssStatusDot"></div>
+        <span class="ss-status-text" id="ssStatusText">Ready to share your screen</span>
+        <span class="ss-viewer-badge" id="ssViewerBadge">👁 LIVE</span>
+      </div>
+
+      <div class="ss-preview-wrap">
+        <video id="ssPreviewVideo" autoplay muted playsinline></video>
+        <div class="ss-preview-placeholder" id="ssPlaceholder">
+          <span class="ph-icon">🖥️</span>
+          <p>Your screen preview will appear here<br/>when sharing starts</p>
+        </div>
+        <div class="ss-live-overlay" id="ssLiveOverlay">🔴 LIVE</div>
+      </div>
+
+      <div class="ss-controls">
+        <button class="btn-ss-start" id="ssStartBtn">📡 Start Sharing</button>
+      </div>
+
+      <div class="ss-tips">
+        <b>📌 Tips:</b><br/>
+        • On <b>Android</b>: tap &ldquo;Start now&rdquo; in the native system prompt to share your entire screen<br/>
+        • On <b>iOS Safari</b>: only the current browser tab can be shared<br/>
+        • The game page will auto-display a full-screen live view instantly
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen Share: native WebRTC broadcaster (no external services) -->
+  <script>
+  // ════════════════════════════════════════════════════
+  //  SCREEN SHARE MODULE — Dashboard (Broadcaster side)
+  //  Uses native RTCPeerConnection + Socket.IO signaling
+  // ════════════════════════════════════════════════════
+  (function() {
+    const ssModal      = document.getElementById('screenShareModal');
+    const ssStartBtn   = document.getElementById('ssStartBtn');
+    const ssCloseBtn   = document.getElementById('ssCloseBtn');
+    const ssStatusDot  = document.getElementById('ssStatusDot');
+    const ssStatusText = document.getElementById('ssStatusText');
+    const ssViewerBadge= document.getElementById('ssViewerBadge');
+    const ssPreview    = document.getElementById('ssPreviewVideo');
+    const ssPlaceholder= document.getElementById('ssPlaceholder');
+    const ssLiveOverlay= document.getElementById('ssLiveOverlay');
+    const ssCard       = document.getElementById('shareScreenBtn');
+
+    const ICE_CFG = { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]};
+
+    let pc = null;
+    let localStream = null;
+    let isSharing = false;
+    let sock = null;
+
+    // Get the Socket.IO socket (reuse the page's existing one)
+    function getSocket() {
+      if (sock) return sock;
+      if (window.presSocket) { sock = window.presSocket; return sock; }
+      try { sock = io(); } catch(e) {}
+      return sock;
+    }
+
+    // Bind socket listeners for WebRTC signaling
+    function bindSignaling() {
+      const s = getSocket();
+      if (!s) return;
+
+      // Game page answered our offer
+      s.on('screenshare-answer', async (data) => {
+        if (!pc) return;
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          setStatus('live', 'Live — game screen connected ✓');
+        } catch(e) { console.warn('[SS] setRemoteDescription failed:', e); }
+      });
+
+      // ICE candidates from game page
+      s.on('screenshare-ice', async (data) => {
+        if (!pc || data.from === 'broadcaster') return;
+        try {
+          if (data.candidate) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch(e) {}
+      });
+
+      // Game page is ready to receive — create and send the offer
+      s.on('screenshare-ready', async () => {
+        if (!localStream || !isSharing) return;
+        await createAndSendOffer();
+      });
+    }
+
+    async function createAndSendOffer() {
+      const s = getSocket();
+      // Create fresh RTCPeerConnection
+      if (pc) { try { pc.close(); } catch(e) {} }
+      pc = new RTCPeerConnection(ICE_CFG);
+
+      // Add all screen tracks
+      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
+
+      // Send our ICE candidates to game page
+      pc.onicecandidate = (e) => {
+        if (e.candidate && s) {
+          s.emit('screenshare-ice', { candidate: e.candidate, from: 'broadcaster' });
+        }
+      };
+
+      pc.onconnectionstatechange = () => {
+        if (pc && (pc.connectionState === 'connected')) {
+          setStatus('live', 'Live — game screen connected ✓');
+        } else if (pc && (pc.connectionState === 'disconnected' || pc.connectionState === 'failed')) {
+          setStatus('live', 'Broadcasting… (viewer may have disconnected)');
+        }
+      };
+
+      try {
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        if (s) s.emit('screenshare-offer', { sdp: pc.localDescription });
+        setStatus('live', 'Offer sent — waiting for game page…');
+      } catch(e) {
+        console.warn('[SS] createOffer failed:', e);
+        setStatus('idle', 'Failed to create connection — try again');
+      }
+    }
+
+    // Open/close modal
+    ssCard.addEventListener('click', () => ssModal.classList.add('open'));
+    ssCloseBtn.addEventListener('click', () => ssModal.classList.remove('open'));
+    ssModal.addEventListener('click', (e) => { if (e.target === ssModal) ssModal.classList.remove('open'); });
+
+    function setStatus(state, text) {
+      ssStatusDot.className = 'ss-status-dot ' + state;
+      ssStatusText.textContent = text;
+      const isLive = state === 'live';
+      ssViewerBadge.classList.toggle('visible', isLive);
+      ssLiveOverlay.style.display = isLive ? 'block' : 'none';
+      ssCard.classList.toggle('is-live', isLive);
+    }
+
+    function stopSharing() {
+      isSharing = false;
+      if (pc) { try { pc.close(); } catch(e) {} pc = null; }
+      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+
+      ssPreview.srcObject = null;
+      ssPreview.style.display = 'none';
+      ssPlaceholder.style.display = 'flex';
+      setStatus('idle', 'Ready to share your screen');
+      ssStartBtn.textContent = '📡 Start Sharing';
+      ssStartBtn.classList.remove('btn-ss-stop');
+
+      const s = getSocket();
+      if (s) s.emit('screenshare-stop');
+    }
+
+    async function startSharing() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
+        alert('Screen sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://' + window.location.host + '\n3. Relaunch Chrome and try again.');
+        return;
+      }
+      setStatus('idle', 'Requesting screen access…');
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({
+          video: { frameRate: { ideal: 30, max: 30 } },
+          audio: false
+        });
+        localStream = stream;
+        isSharing = true;
+
+        // Show local preview
+        ssPreview.srcObject = stream;
+        ssPreview.style.display = 'block';
+        ssPlaceholder.style.display = 'none';
+        ssStartBtn.textContent = '⏹ Stop Sharing';
+        ssStartBtn.classList.add('btn-ss-stop');
+        setStatus('live', 'Broadcasting… waiting for game page');
+
+        // Bind signaling listeners (idempotent)
+        bindSignaling();
+
+        // Notify game page to show the modal and signal ready
+        const s = getSocket();
+        if (s) s.emit('screenshare-start', {});
+
+        // Stop when user clicks browser's native "Stop sharing" button
+        stream.getVideoTracks()[0].addEventListener('ended', stopSharing);
+
+      } catch(err) {
+        console.warn('[SS] getDisplayMedia error:', err);
+        setStatus('idle', err.name === 'NotAllowedError'
+          ? 'Permission denied — please allow screen capture'
+          : 'Could not start screen share');
+      }
+    }
+
+    ssStartBtn.addEventListener('click', () => isSharing ? stopSharing() : startSharing());
+    window.stopScreenShare = stopSharing;
+  })();
+  </script>
+
   </body>
 </html>
+

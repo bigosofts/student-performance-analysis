@@ -1672,6 +1672,8 @@
       //  STATE
       // ════════════════════════════════════════════
       const socket = io();
+      window.socket = socket; // expose for screen share receiver module
+
 
       // ════════════════════════════════════════════
       //  SHARE MODAL STACK MANAGEMENT
@@ -2413,15 +2415,354 @@
         }
       });
 
+
       // Initial load
       setTimeout(loadPresentations, 300);
-    
 
 
     </script>
     <script src="js/wake-lock.js">
     </script>
   <script src="js/whiteboard.js"></script>
+
+  <!-- ════════════════════════════════════════
+     FULL-SCREEN SCREEN SHARE RECEIVER MODAL
+  ════════════════════════════════════════ -->
+  <style>
+    /* ── Screenshare fullscreen receiver ── */
+    #ssReceiverModal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    #ssReceiverModal.open {
+      display: flex;
+    }
+    #ssReceiverVideo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+      background: #000;
+    }
+    .ss-receiver-hud {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 2;
+    }
+    .ss-live-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(239,68,68,0.9);
+      backdrop-filter: blur(8px);
+      border-radius: 50px;
+      padding: 6px 16px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: white;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 20px rgba(239,68,68,0.5);
+      pointer-events: auto;
+    }
+    .ss-live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: white;
+      animation: blink 1s ease-in-out infinite;
+    }
+    .ss-hud-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      pointer-events: auto;
+    }
+    .ss-hud-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(8px);
+      color: white;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .ss-hud-btn:hover {
+      background: rgba(255,255,255,0.15);
+      transform: scale(1.1);
+    }
+    .ss-connecting-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      z-index: 3;
+    }
+    .ss-connecting-overlay.hidden { display: none; }
+    .ss-spinner {
+      width: 52px;
+      height: 52px;
+      border: 4px solid rgba(251,146,60,0.2);
+      border-top: 4px solid #f97316;
+      border-radius: 50%;
+      animation: spin 0.9s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .ss-conn-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .ss-conn-sub {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.82rem;
+      color: #94a3b8;
+      margin-top: -10px;
+    }
+    /* orientation rotate hint */
+    .ss-rotate-hint {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 50px;
+      padding: 8px 18px;
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 1s ease;
+      z-index: 2;
+    }
+    .ss-rotate-hint.fade { opacity: 0; }
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+  </style>
+
+  <div id="ssReceiverModal">
+    <!-- HUD overlay -->
+    <div class="ss-receiver-hud">
+      <div class="ss-live-pill">
+        <div class="ss-live-dot"></div>
+        LIVE SCREEN
+      </div>
+      <div class="ss-hud-right">
+        <button class="ss-hud-btn" id="ssRotateBtn" title="Rotate layout">🔄</button>
+        <button class="ss-hud-btn" id="ssReceiverCloseBtn" title="Close">✕</button>
+      </div>
+    </div>
+
+    <!-- Connecting overlay (shown while P2P is connecting) -->
+    <div class="ss-connecting-overlay" id="ssConnectingOverlay">
+      <div class="ss-spinner"></div>
+      <div class="ss-conn-text">📡 Connecting to live screen…</div>
+      <div class="ss-conn-sub">Setting up peer-to-peer stream</div>
+    </div>
+
+    <!-- The live video feed -->
+    <video id="ssReceiverVideo" autoplay playsinline muted="false"></video>
+
+    <!-- Rotate device hint (fades after a few seconds) -->
+    <div class="ss-rotate-hint" id="ssRotateHint">
+      🔄 Rotate your device for the best view
+    </div>
+  </div>
+
+
+  <script>
+  // ═════════════════════════════════════════════════════════
+  //  SCREEN SHARE RECEIVER — Game Page
+  //  Uses native RTCPeerConnection + Socket.IO signaling
+  //  No PeerJS or external dependencies required
+  // ═════════════════════════════════════════════════════════
+  (function() {
+    const modal          = document.getElementById('ssReceiverModal');
+    const video          = document.getElementById('ssReceiverVideo');
+    const closeBtn       = document.getElementById('ssReceiverCloseBtn');
+    const rotateBtn      = document.getElementById('ssRotateBtn');
+    const connectOverlay = document.getElementById('ssConnectingOverlay');
+    const rotateHint     = document.getElementById('ssRotateHint');
+
+    const ICE_CFG = { iceServers: [
+      { urls: 'stun:stun.l.google.com:19302' },
+      { urls: 'stun:stun1.l.google.com:19302' }
+    ]};
+
+    let pc = null;
+    let rotated = false;
+    let hintTimer = null;
+    let signalingBound = false;
+
+    // ── Bind socket listeners once ──────────────────────────────
+    function bindSignaling(sock) {
+      if (signalingBound) return;
+      signalingBound = true;
+
+      sock.on('screenshare-start', () => {
+        openModal();
+        // Tell dashboard we're ready to receive
+        sock.emit('screenshare-ready');
+        // Create RTCPeerConnection and wait for offer
+        setupPeerConnection(sock);
+      });
+
+      sock.on('screenshare-offer', async (data) => {
+        if (!pc) setupPeerConnection(sock);
+        try {
+          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
+          const answer = await pc.createAnswer();
+          await pc.setLocalDescription(answer);
+          sock.emit('screenshare-answer', { sdp: pc.localDescription });
+        } catch(e) {
+          console.warn('[SS Receiver] offer/answer error:', e);
+          setConnError('SDP negotiation failed');
+        }
+      });
+
+      sock.on('screenshare-ice', async (data) => {
+        if (!pc || data.from !== 'broadcaster') return;
+        try {
+          if (data.candidate) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+        } catch(e) {}
+      });
+
+      sock.on('screenshare-stop', () => closeReceiver());
+    }
+
+    function setupPeerConnection(sock) {
+      if (pc) { try { pc.close(); } catch(e) {} }
+      pc = new RTCPeerConnection(ICE_CFG);
+
+      // When we get video tracks, show the stream
+      pc.ontrack = (e) => {
+        if (e.streams && e.streams[0]) {
+          video.srcObject = e.streams[0];
+          video.play().catch(() => {
+            video.muted = true;
+            video.play().catch(() => {});
+          });
+          connectOverlay.classList.add('hidden');
+        }
+      };
+
+      // Send our ICE candidates to dashboard
+      pc.onicecandidate = (e) => {
+        if (e.candidate && sock) {
+          sock.emit('screenshare-ice', { candidate: e.candidate, from: 'receiver' });
+        }
+      };
+
+      pc.onconnectionstatechange = () => {
+        if (pc && pc.connectionState === 'disconnected') {
+          setConnError('Connection dropped — ask teacher to restart');
+        }
+      };
+    }
+
+    function openModal() {
+      modal.classList.add('open');
+      connectOverlay.classList.remove('hidden');
+      connectOverlay.querySelector('.ss-conn-text').textContent = '📡 Connecting to live screen…';
+      connectOverlay.querySelector('.ss-conn-sub').textContent = 'Setting up peer-to-peer stream';
+      video.srcObject = null;
+
+      rotateHint.classList.remove('fade');
+      clearTimeout(hintTimer);
+      hintTimer = setTimeout(() => rotateHint.classList.add('fade'), 4000);
+
+      try {
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      } catch(e) {}
+    }
+
+    function setConnError(msg) {
+      connectOverlay.classList.remove('hidden');
+      connectOverlay.querySelector('.ss-conn-text').textContent = '⚠️ ' + msg;
+      connectOverlay.querySelector('.ss-conn-sub').textContent = '';
+    }
+
+    function closeReceiver() {
+      modal.classList.remove('open');
+      video.srcObject = null;
+      rotated = false;
+      video.style.transform = '';
+      if (pc) { try { pc.close(); } catch(e) {} pc = null; }
+      try {
+        if (screen.orientation && screen.orientation.unlock) screen.orientation.unlock();
+      } catch(e) {}
+    }
+
+    window.receiveScreenShare = openModal; // backwards compat
+    window.closeScreenShareReceiver = closeReceiver;
+
+    closeBtn.addEventListener('click', closeReceiver);
+
+    // Rotate toggle
+    rotateBtn.addEventListener('click', () => {
+      rotated = !rotated;
+      video.style.transition = 'transform 0.4s ease';
+      video.style.transform = rotated ? 'rotate(90deg) scale(1.78)' : '';
+    });
+
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        if (rotated) { rotated = false; video.style.transform = ''; }
+      }, 300);
+    });
+
+    // Hook into the socket that the main page script creates
+    // Use a small poll since socket may not be ready immediately
+    let pollCount = 0;
+    const pollSocket = setInterval(() => {
+      const s = window.socket || window.presSocket;
+      if (s) {
+        clearInterval(pollSocket);
+        bindSignaling(s);
+      } else if (++pollCount > 50) {
+        clearInterval(pollSocket);
+        console.warn('[SS Receiver] Could not find socket after 5s');
+      }
+    }, 100);
+  })();
+
+  </script>
+
   </body>
 </html>
 
