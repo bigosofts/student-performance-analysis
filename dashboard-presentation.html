@@ -4529,14 +4529,15 @@ Kingdom → Plantae
     async function startSharing() {
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       if (isMobile) {
-        window.location.href = 'gamecaster://start';
-        setStatus('idle', 'Opening Broadcaster App...');
-        setTimeout(() => {
-          if (!document.hidden) {
-             alert("The companion app is not installed! You must install the Native Screen Share APK to cast your entire screen from a mobile device.");
-             setStatus('idle', 'Ready to share your screen');
+        let url = prompt("Please enter the web address to share:");
+        if (url) {
+          if (!/^https?:\/\//i.test(url)) {
+            url = "https://" + url;
           }
-        }, 2000);
+          const s = getSocket();
+          if (s) s.emit('pres-share-webpage', { url });
+          showToast("🌐 Webpage sent to game screen!", "success");
+        }
         return;
       }
 
