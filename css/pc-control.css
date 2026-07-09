@@ -168,6 +168,12 @@
   height: 250px;
 }
 
+@media (max-width: 768px), (pointer: coarse) {
+  .pcc-trackpad-area {
+    height: 380px;
+  }
+}
+
 .pcc-trackpad {
   flex: 1;
   background: rgba(255, 255, 255, 0.05);

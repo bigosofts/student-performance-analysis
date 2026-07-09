@@ -52,11 +52,6 @@
           <div class="pcc-scroll" id="pcc-scroll"></div>
         </div>
 
-        <div class="pcc-mouse-buttons">
-          <button type="button" class="pcc-mouse-btn" id="pcc-left-click">Left Click</button>
-          <button type="button" class="pcc-mouse-btn" id="pcc-right-click">Right Click</button>
-        </div>
-
         <div class="pcc-keyboard">
           <input type="text" id="pcc-keyboard-input" placeholder="Type text here to send..." autocomplete="off">
           <div class="pcc-keyboard-actions">
@@ -64,6 +59,8 @@
             <button class="pcc-key-btn" data-key="backspace">Backspace</button>
             <button class="pcc-key-btn" data-key="space">Space</button>
             <button class="pcc-key-btn" data-key="escape">Esc</button>
+            <button class="pcc-key-btn" data-key="f5">F5</button>
+            <button class="pcc-key-btn" data-key="f11">F11</button>
             <button class="pcc-key-btn" data-key="up">↑</button>
             <button class="pcc-key-btn" data-key="down">↓</button>
             <button class="pcc-key-btn" data-key="left">←</button>
@@ -97,8 +94,6 @@
   const closeBtn = document.getElementById('pcc-close-btn');
   const trackpad = document.getElementById('pcc-trackpad');
   const scrollArea = document.getElementById('pcc-scroll');
-  const leftClickBtn = document.getElementById('pcc-left-click');
-  const rightClickBtn = document.getElementById('pcc-right-click');
   const kbInput = document.getElementById('pcc-keyboard-input');
   const deviceIdInput = document.getElementById('pcc-device-id');
   
@@ -117,9 +112,13 @@
   // Trackpad Logic
   let lastX = 0, lastY = 0;
   let isTracking = false;
+  let trackMoved = false;
+  let maxTouches = 0;
 
   const startTrack = (e) => {
     isTracking = true;
+    trackMoved = false;
+    maxTouches = e.touches ? e.touches.length : 1;
     const pt = e.touches ? e.touches[0] : e;
     lastX = pt.clientX;
     lastY = pt.clientY;
@@ -128,12 +127,16 @@
 
   const moveTrack = (e) => {
     if (!isTracking) return;
+    if (e.touches && e.touches.length > maxTouches) {
+        maxTouches = e.touches.length;
+    }
     const pt = e.touches ? e.touches[0] : e;
     const dx = pt.clientX - lastX;
     const dy = pt.clientY - lastY;
     
     // Send movement if significant
-    if (Math.abs(dx) > 0 || Math.abs(dy) > 0) {
+    if (Math.abs(dx) > 2 || Math.abs(dy) > 2) {
+      trackMoved = true;
       // Multiply by a sensitivity factor if desired
       emitCommand('mouse:move', { dx: dx * 1.5, dy: dy * 1.5 });
       lastX = pt.clientX;
@@ -143,7 +146,15 @@
   };
 
   const endTrack = (e) => {
+    if (isTracking && !trackMoved) {
+      if (maxTouches === 1) {
+        emitCommand('mouse:leftClick');
+      } else if (maxTouches >= 2) {
+        emitCommand('mouse:rightClick');
+      }
+    }
     isTracking = false;
+    maxTouches = 0;
   };
 
   trackpad.addEventListener('touchstart', startTrack, { passive: false });
@@ -194,20 +205,17 @@
   window.addEventListener('mouseup', scrollMouseUp);
 
 
-  // Clicks
-  leftClickBtn.addEventListener('click', () => {
-    emitCommand('mouse:leftClick');
-  });
-
-  rightClickBtn.addEventListener('click', () => {
-    emitCommand('mouse:rightClick');
-  });
-
   // Keyboard text input - track delta to avoid duplicate emits on mobile IME
   let lastKbValue = '';
   kbInput.addEventListener('input', () => {
     const newValue = kbInput.value;
-    if (newValue.length > lastKbValue.length) {
+    if (newValue.length < lastKbValue.length) {
+      // Deletion occurred (e.g., via mobile keyboard backspace)
+      const diff = lastKbValue.length - newValue.length;
+      for (let i = 0; i < diff; i++) {
+        emitCommand('keyboard:keyTap', { key: 'backspace' });
+      }
+    } else if (newValue.length > lastKbValue.length) {
       // Characters were added — only send the truly new ones
       const newChars = newValue.slice(lastKbValue.length);
       if (newChars) {
