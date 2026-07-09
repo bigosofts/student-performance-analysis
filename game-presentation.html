@@ -2641,6 +2641,36 @@
 
 
   <script>
+    // ══════════════════════════════════════════════════════════
+    //  SMART ICE CONFIG HELPER (same logic as dashboard)
+    //  Local/hotspot: empty iceServers — host candidates work instantly
+    //  Internet: use Google STUN servers
+    // ══════════════════════════════════════════════════════════
+    window.getIceCfg = function() {
+      const h = window.location.hostname;
+      const isLocal =
+        h === 'localhost' ||
+        h === '127.0.0.1' ||
+        /^10\./.test(h) ||
+        /^192\.168\./.test(h) ||
+        /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h) ||
+        h.endsWith('.local');
+      if (isLocal) {
+        // Pure LAN — no STUN needed, host candidates resolve instantly
+        return { iceServers: [], iceCandidatePoolSize: 4 };
+      }
+      // Public internet — include STUN to discover public IP
+      return {
+        iceServers: [
+          { urls: 'stun:stun.l.google.com:19302' },
+          { urls: 'stun:stun1.l.google.com:19302' }
+        ],
+        iceCandidatePoolSize: 4
+      };
+    };
+  </script>
+
+  <script>
     // ═════════════════════════════════════════════════════════
     //  SCREEN SHARE RECEIVER — Game Page
     //  Uses native RTCPeerConnection + Socket.IO signaling
@@ -2654,12 +2684,8 @@
       const connectOverlay = document.getElementById('ssConnectingOverlay');
       const rotateHint = document.getElementById('ssRotateHint');
 
-      const ICE_CFG = {
-        iceServers: [
-          { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
-        ]
-      };
+      // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+      const ICE_CFG = window.getIceCfg();
 
       let pc = null;
       let rotated = false;
@@ -2849,6 +2875,47 @@
       justify-content: center; flex-shrink: 0; transition: background 0.2s;
     }
     #arMuteBtn:hover { background: rgba(168,85,247,0.3); }
+    /* Audio unlock overlay — shown when browser blocks autoplay */
+    #arUnlockOverlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.65);
+      backdrop-filter: blur(6px);
+    }
+    #arUnlockOverlay.active { display: flex; }
+    #arUnlockBtn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      background: linear-gradient(135deg, rgba(124,58,237,0.9), rgba(168,85,247,0.9));
+      border: 1px solid rgba(168,85,247,0.6);
+      border-radius: 20px;
+      padding: 36px 48px;
+      cursor: pointer;
+      box-shadow: 0 0 60px rgba(168,85,247,0.5);
+      animation: pulseBtn 1.5s ease-in-out infinite;
+      transition: transform 0.2s;
+    }
+    #arUnlockBtn:hover { transform: scale(1.05); }
+    @keyframes pulseBtn {
+      0%,100% { box-shadow: 0 0 30px rgba(168,85,247,0.4); }
+      50%      { box-shadow: 0 0 60px rgba(168,85,247,0.8); }
+    }
+    #arUnlockBtn .unlock-icon { font-size: 3.5rem; }
+    #arUnlockBtn .unlock-text {
+      font-size: 1.2rem; font-weight: 700;
+      color: white; font-family: 'Outfit', sans-serif;
+      letter-spacing: 0.5px; text-align: center;
+    }
+    #arUnlockBtn .unlock-sub {
+      font-size: 0.82rem; color: rgba(255,255,255,0.7);
+      font-family: 'Outfit', sans-serif; text-align: center;
+    }
   </style>
 
   <div id="audioReceiverBar">
@@ -2861,6 +2928,15 @@
     <button id="arCloseBtn" title="Close">✕</button>
   </div>
 
+  <!-- Audio unlock overlay — shown when browser blocks autoplay -->
+  <div id="arUnlockOverlay">
+    <button id="arUnlockBtn">
+      <span class="unlock-icon">🔊</span>
+      <span class="unlock-text">Tap to Hear Audio</span>
+      <span class="unlock-sub">Your teacher is broadcasting live audio</span>
+    </button>
+  </div>
+
   <!-- Hidden audio element for playback -->
   <audio id="arAudioEl" autoplay playsinline style="display:none;"></audio>
 
@@ -2870,16 +2946,16 @@
     //  Receives microphone stream from Dashboard via WebRTC
     // ═════════════════════════════════════════════════════════
     (function () {
-      const ICE_CFG = { iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]};
+      // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+      const ICE_CFG = window.getIceCfg();
 
-      const bar       = document.getElementById('audioReceiverBar');
-      const audioEl   = document.getElementById('arAudioEl');
-      const canvas    = document.getElementById('audioWaveCanvas');
-      const muteBtn   = document.getElementById('arMuteBtn');
-      const closeBtn2 = document.getElementById('arCloseBtn');
+      const bar           = document.getElementById('audioReceiverBar');
+      const audioEl       = document.getElementById('arAudioEl');
+      const canvas        = document.getElementById('audioWaveCanvas');
+      const muteBtn       = document.getElementById('arMuteBtn');
+      const closeBtn2     = document.getElementById('arCloseBtn');
+      const unlockOverlay = document.getElementById('arUnlockOverlay');
+      const unlockBtn     = document.getElementById('arUnlockBtn');
 
       let pc          = null;
       let arCtx       = null;
@@ -2929,11 +3005,24 @@
 
         pc.ontrack = (e) => {
           if (e.streams && e.streams[0]) {
-            audioEl.srcObject = e.streams[0];
-            audioEl.muted = arMuted;
-            audioEl.play().catch(() => { audioEl.muted = true; audioEl.play().catch(() => {}); });
-            startWave(e.streams[0]);
-            bar.classList.add('active');
+            const stream = e.streams[0];
+            audioEl.srcObject = stream;
+            audioEl.muted = false;
+
+            // Attempt to play — on local network this should succeed immediately
+            // On mobile/restricted browsers, show the unlock overlay instead of silently muting
+            audioEl.play().then(() => {
+              // Playback started cleanly
+              startWave(stream);
+              bar.classList.add('active');
+              unlockOverlay.classList.remove('active');
+            }).catch(() => {
+              // Browser blocked autoplay — show visible unlock button
+              bar.classList.add('active');
+              unlockOverlay.classList.add('active');
+              startWave(stream);
+              // The unlock button will resume on user gesture
+            });
           }
         };
 
@@ -2951,6 +3040,7 @@
       // ── Close / cleanup ──────────────────────────────────────
       function closeAudio() {
         bar.classList.remove('active');
+        unlockOverlay.classList.remove('active');
         audioEl.srcObject = null;
         stopWave();
         if (pc) { try { pc.close(); } catch(e) {} pc = null; }
@@ -2999,6 +3089,17 @@
         // Also tell dashboard if needed (optional)
         const s = window.socket || window.presSocket;
         if (s) s.emit('audioshare-stop');
+      });
+
+      // ── Unlock audio on user gesture (browser autoplay policy) ──
+      unlockBtn.addEventListener('click', async () => {
+        try {
+          // Resume suspended AudioContext (required on iOS/Android Chrome)
+          if (arCtx && arCtx.state === 'suspended') await arCtx.resume();
+          audioEl.muted = false;
+          await audioEl.play();
+        } catch(e) { console.warn('[AR] Unlock play failed:', e); }
+        unlockOverlay.classList.remove('active');
       });
 
       // ── Hook into main socket ─────────────────────────────────

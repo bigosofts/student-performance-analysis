@@ -4261,6 +4261,39 @@ Kingdom → Plantae
 
   <!-- Live Camera: native WebRTC broadcaster -->
   <script>
+  // ════════════════════════════════════════════════════
+  //  SMART ICE CONFIG HELPER
+  //  On local/private IPs (hotspot, LAN) we skip STUN entirely —
+  //  host candidates (the device's own LAN IP) are available
+  //  immediately and work perfectly on the same network.
+  //  On the public internet we include Google STUN as fallback.
+  // ════════════════════════════════════════════════════
+  window.getIceCfg = function() {
+    const h = window.location.hostname;
+    const isLocal =
+      h === 'localhost' ||
+      h === '127.0.0.1' ||
+      /^10\./.test(h) ||
+      /^192\.168\./.test(h) ||
+      /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h) ||
+      h.endsWith('.local');
+    if (isLocal) {
+      // Pure LAN — no STUN needed, host candidates resolve instantly
+      return { iceServers: [], iceCandidatePoolSize: 4 };
+    }
+    // Public internet — include STUN to discover public IP
+    return {
+      iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' }
+      ],
+      iceCandidatePoolSize: 4
+    };
+  };
+  </script>
+
+  <!-- Live Camera share IIFE broadcaster -->
+  <script>
   (function() {
     const camModal      = document.getElementById('cameraShareModal');
     const camStartBtn   = document.getElementById('camStartBtn');
@@ -4274,10 +4307,8 @@ Kingdom → Plantae
     const camCard       = document.getElementById('shareCameraBtn');
     const camFacingSel  = document.getElementById('camFacingSelect');
 
-    const ICE_CFG = { iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]};
+    // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+    const ICE_CFG = window.getIceCfg();
 
     let pc = null;
     let localStream = null;
@@ -4414,10 +4445,8 @@ Kingdom → Plantae
     const ssLiveOverlay= document.getElementById('ssLiveOverlay');
     const ssCard       = document.getElementById('shareScreenBtn');
 
-    const ICE_CFG = { iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]};
+    // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+    const ICE_CFG = window.getIceCfg();
 
     let pc = null;
     let localStream = null;
@@ -4590,10 +4619,8 @@ Kingdom → Plantae
   //  Streams microphone live via WebRTC to game-presentation
   // ════════════════════════════════════════════════════
   (function() {
-    const ICE_CFG = { iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]};
+    // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+    const ICE_CFG = window.getIceCfg();
 
     const asStartBtn     = document.getElementById('asStartBtn');
     const asStatusDot    = document.getElementById('asStatusDot');
