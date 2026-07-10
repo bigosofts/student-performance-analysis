@@ -540,6 +540,45 @@ app.post("/clear-uploads", (req, res) => {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  // ── Extract client's real IP for mDNS fix ──────────────────
+  // Chrome replaces local IPs with .local mDNS names in WebRTC ICE candidates.
+  // Mobile hotspots can't resolve mDNS, so connections fail.
+  // The server knows each client's real IP, so we replace .local with the real IP.
+  let rawIp = socket.handshake.address || '';
+  // Strip IPv6-mapped-IPv4 prefix (e.g. "::ffff:192.168.43.240" → "192.168.43.240")
+  if (rawIp.startsWith('::ffff:')) rawIp = rawIp.slice(7);
+  socket.realIp = rawIp;
+  // Send the real IP to the client so it can self-fix candidates too
+  socket.emit('your-ip', { ip: rawIp });
+
+  // Helper: replace .local mDNS addresses in an ICE candidate string with real IP
+  function fixMdnsCandidate(data, senderIp) {
+    if (!data || !data.candidate || !data.candidate.candidate || !senderIp) return data;
+    const orig = data.candidate.candidate;
+    // Match patterns like "abc123-def4-5678.local" in the candidate string
+    if (orig.includes('.local')) {
+      const fixed = orig.replace(/[a-f0-9-]+\.local/gi, senderIp);
+      // Return a new object with fixed candidate, preserve everything else
+      return {
+        ...data,
+        candidate: { ...data.candidate, candidate: fixed, address: senderIp }
+      };
+    }
+    return data;
+  }
+
+  // Helper: replace .local mDNS addresses in SDP offer/answer
+  function fixMdnsSdp(data, senderIp) {
+    if (!data || !data.sdp || !data.sdp.sdp || !senderIp) return data;
+    if (data.sdp.sdp.includes('.local')) {
+      return {
+        ...data,
+        sdp: { ...data.sdp, sdp: data.sdp.sdp.replace(/[a-f0-9-]+\.local/gi, senderIp) }
+      };
+    }
+    return data;
+  }
+
   // PC Control Agent Registration
   socket.on("agent:register", (data) => {
     if (data && data.deviceId) {
@@ -720,13 +759,13 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("screenshare-ready");
   });
   socket.on("screenshare-offer", (data) => {
-    socket.broadcast.emit("screenshare-offer", data);
+    socket.broadcast.emit("screenshare-offer", fixMdnsSdp(data, socket.realIp));
   });
   socket.on("screenshare-answer", (data) => {
-    socket.broadcast.emit("screenshare-answer", data);
+    socket.broadcast.emit("screenshare-answer", fixMdnsSdp(data, socket.realIp));
   });
   socket.on("screenshare-ice", (data) => {
-    socket.broadcast.emit("screenshare-ice", data);
+    socket.broadcast.emit("screenshare-ice", fixMdnsCandidate(data, socket.realIp));
   });
   socket.on('screenshare-stop', () => {
     socket.broadcast.emit('screenshare-stop');
@@ -740,13 +779,13 @@ io.on("connection", (socket) => {
     socket.broadcast.emit('audioshare-ready');
   });
   socket.on('audioshare-offer', (data) => {
-    socket.broadcast.emit('audioshare-offer', data);
+    socket.broadcast.emit('audioshare-offer', fixMdnsSdp(data, socket.realIp));
   });
   socket.on('audioshare-answer', (data) => {
-    socket.broadcast.emit('audioshare-answer', data);
+    socket.broadcast.emit('audioshare-answer', fixMdnsSdp(data, socket.realIp));
   });
   socket.on('audioshare-ice', (data) => {
-    socket.broadcast.emit('audioshare-ice', data);
+    socket.broadcast.emit('audioshare-ice', fixMdnsCandidate(data, socket.realIp));
   });
   socket.on('audioshare-stop', () => {
     socket.broadcast.emit('audioshare-stop');

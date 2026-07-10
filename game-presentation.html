@@ -2631,7 +2631,7 @@
     </div>
 
     <!-- The live video feed -->
-    <video id="ssReceiverVideo" autoplay playsinline muted="false"></video>
+    <video id="ssReceiverVideo" autoplay playsinline></video>
 
     <!-- Rotate device hint (fades after a few seconds) -->
     <div class="ss-rotate-hint" id="ssRotateHint">
@@ -2647,23 +2647,25 @@
     //  Internet: use Google STUN servers
     // ══════════════════════════════════════════════════════════
     window.getIceCfg = function() {
-      const h = window.location.hostname;
-      const isLocal =
-        h === 'localhost' ||
-        h === '127.0.0.1' ||
-        /^10\./.test(h) ||
-        /^192\.168\./.test(h) ||
-        /^172\.(1[6-9]|2[0-9]|3[01])\./.test(h) ||
-        h.endsWith('.local');
-      if (isLocal) {
-        // Pure LAN — no STUN needed, host candidates resolve instantly
-        return { iceServers: [], iceCandidatePoolSize: 4 };
-      }
-      // Public internet — include STUN to discover public IP
       return {
         iceServers: [
           { urls: 'stun:stun.l.google.com:19302' },
-          { urls: 'stun:stun1.l.google.com:19302' }
+          { urls: 'stun:stun1.l.google.com:19302' },
+          {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject'
+          }
         ],
         iceCandidatePoolSize: 4
       };
@@ -2735,11 +2737,13 @@
         // When we get video tracks, show the stream
         pc.ontrack = (e) => {
           if (e.streams && e.streams[0]) {
-            video.srcObject = e.streams[0];
-            video.play().catch(() => {
-              video.muted = true;
-              video.play().catch(() => { });
-            });
+            if (video.srcObject !== e.streams[0]) {
+              video.srcObject = e.streams[0];
+              video.play().catch(() => {
+                video.muted = true;
+                video.play().catch(() => { });
+              });
+            }
             connectOverlay.classList.add('hidden');
           }
         };
@@ -2965,27 +2969,27 @@
       let arMuted     = false;
       let sigBound    = false;
 
-      // ── Wave visualiser ──────────────────────────────────────
-      function startWave(stream) {
-        arCtx = new (window.AudioContext || window.webkitAudioContext)();
-        arAnalyser = arCtx.createAnalyser();
-        arAnalyser.fftSize = 128;
-        arCtx.createMediaStreamSource(stream).connect(arAnalyser);
+      // ── Wave visualiser (Simulated to bypass Chrome WebAudio bugs) ──
+      function startWave() {
         arCtx2d = canvas.getContext('2d');
-        const bufLen = arAnalyser.frequencyBinCount;
-        const data   = new Uint8Array(bufLen);
+        const bufLen = 32;
 
         function draw() {
           arAnimFrame = requestAnimationFrame(draw);
           const W = canvas.offsetWidth || 120;
           const H = canvas.offsetHeight || 36;
           canvas.width = W; canvas.height = H;
-          arAnalyser.getByteFrequencyData(data);
           arCtx2d.clearRect(0, 0, W, H);
           const bw = W / bufLen;
+          
           for (let i = 0; i < bufLen; i++) {
-            const bh = (data[i] / 255) * H;
-            arCtx2d.fillStyle = `hsla(${270 + (data[i]/255)*40},80%,65%,0.85)`;
+            let val = 10; // Default flat line
+            // Only bounce if audio is actively playing and not muted
+            if (!audioEl.paused && !audioEl.muted) {
+              val = (Math.sin(Date.now() / 150 + i * 0.5) * 0.5 + 0.5) * 180 + Math.random() * 75;
+            }
+            const bh = (val / 255) * H;
+            arCtx2d.fillStyle = `hsla(${270 + (val/255)*40},80%,65%,0.85)`;
             arCtx2d.fillRect(i * bw, H - bh, bw - 1, bh);
           }
         }
@@ -2994,7 +2998,6 @@
 
       function stopWave() {
         if (arAnimFrame) { cancelAnimationFrame(arAnimFrame); arAnimFrame = null; }
-        if (arCtx) { try { arCtx.close(); } catch(e) {} arCtx = null; }
         if (arCtx2d) arCtx2d.clearRect(0, 0, canvas.width, canvas.height);
       }
 
@@ -3006,22 +3009,20 @@
         pc.ontrack = (e) => {
           if (e.streams && e.streams[0]) {
             const stream = e.streams[0];
+            
+            // 100% Safe fallback: use standard HTML5 audio element only
             audioEl.srcObject = stream;
             audioEl.muted = false;
 
-            // Attempt to play — on local network this should succeed immediately
-            // On mobile/restricted browsers, show the unlock overlay instead of silently muting
             audioEl.play().then(() => {
-              // Playback started cleanly
-              startWave(stream);
+              startWave();
               bar.classList.add('active');
               unlockOverlay.classList.remove('active');
             }).catch(() => {
               // Browser blocked autoplay — show visible unlock button
               bar.classList.add('active');
               unlockOverlay.classList.add('active');
-              startWave(stream);
-              // The unlock button will resume on user gesture
+              startWave();
             });
           }
         };
@@ -3094,8 +3095,6 @@
       // ── Unlock audio on user gesture (browser autoplay policy) ──
       unlockBtn.addEventListener('click', async () => {
         try {
-          // Resume suspended AudioContext (required on iOS/Android Chrome)
-          if (arCtx && arCtx.state === 'suspended') await arCtx.resume();
           audioEl.muted = false;
           await audioEl.play();
         } catch(e) { console.warn('[AR] Unlock play failed:', e); }
