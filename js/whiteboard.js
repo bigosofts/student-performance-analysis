@@ -510,7 +510,10 @@
     }
 
     function captureCanvasState() {
-      return JSON.stringify(canvas.toJSON(WB_JSON_PROPS));
+      const json = canvas.toJSON(WB_JSON_PROPS);
+      // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
+      const jsonStr = JSON.stringify(json).replace(/"src":"https?:\/\/[^\/]+/g, '"src":"');
+      return jsonStr;
     }
 
     function recordUndoStateSync() {
@@ -753,7 +756,14 @@
         const payloads = [];
         items.forEach(o => {
           o.setCoords();
-          if (o.id) payloads.push(o.toJSON(['id', 'wbBackground']));
+          if (o.id) {
+            const objData = o.toJSON(['id', 'wbBackground']);
+            // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
+            if (objData.src) {
+              objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, '');
+            }
+            payloads.push(objData);
+          }
         });
         if (payloads.length) socket.emit('wb-modify-batch', payloads);
         if (items.length > 1) {
@@ -764,13 +774,23 @@
         }
         canvas.requestRenderAll();
       } else if (target.id && !target.wbBackground) {
-        socket.emit('wb-modify', target.toJSON(['id', 'wbBackground']));
+        const objData = target.toJSON(['id', 'wbBackground']);
+        // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
+        if (objData.src) {
+          objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, '');
+        }
+        socket.emit('wb-modify', objData);
       }
     }
 
     function syncAdd(obj) {
       if (socket && !isPresenter && obj.id) {
-        socket.emit('wb-add', obj.toJSON(['id', 'wbBackground']));
+        const objData = obj.toJSON(['id', 'wbBackground']);
+        // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
+        if (objData.src) {
+          objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, '');
+        }
+        socket.emit('wb-add', objData);
       }
     }
 
