@@ -16,4 +16,5 @@ uploads/~$*.xlsx
 .git/
 tmp/
 .htaccess
-
+.ftpquota
+stderr.log
