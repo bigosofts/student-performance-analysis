@@ -15,6 +15,5 @@ uploads/~$*.xlsx
 .well-known/
 .git/
 tmp/
-uploads/
 .htaccess
 

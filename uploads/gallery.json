@@ -1,0 +1,135 @@
+[
+  {
+    "id": "img_1779672822823",
+    "type": "image",
+    "chapterName": "Chapter01",
+    "itemName": "Nature",
+    "url": "/uploads/gallery/gallery-1779672822802.jpeg",
+    "createdAt": "2026-05-25T01:33:42.823Z"
+  },
+  {
+    "id": "vid_1779672905312",
+    "type": "video",
+    "chapterName": "Chapter01",
+    "itemName": "silkworm",
+    "url": "https://www.youtube.com/watch?v=GN8yEmkVLGs",
+    "previewUrl": "",
+    "createdAt": "2026-05-25T01:35:05.312Z"
+  },
+  {
+    "id": "vid_1779672947796",
+    "type": "video",
+    "chapterName": "Chapter01",
+    "itemName": "Mashroom",
+    "url": "https://www.youtube.com/watch?v=dFhvP7hbn6Y",
+    "previewUrl": "",
+    "createdAt": "2026-05-25T01:35:47.796Z"
+  },
+  {
+    "id": "vid_1781104587264",
+    "type": "video",
+    "chapterName": "Chapter03",
+    "itemName": "sindhi-cow",
+    "url": "https://www.youtube.com/watch?v=0x3crMt0k7I",
+    "previewUrl": "",
+    "createdAt": "2026-06-10T15:16:27.264Z"
+  },
+  {
+    "id": "vid_1781104986306",
+    "type": "video",
+    "chapterName": "Chapter03",
+    "itemName": "shahiwal-cow",
+    "url": "https://www.youtube.com/watch?v=K4Kv6iwK61c",
+    "previewUrl": "",
+    "createdAt": "2026-06-10T15:23:06.306Z"
+  },
+  {
+    "id": "vid_1781105065465",
+    "type": "video",
+    "chapterName": "Chapter03",
+    "itemName": "Hariyana-cow",
+    "url": "https://www.youtube.com/watch?v=l-QfR5Tsiec",
+    "previewUrl": "",
+    "createdAt": "2026-06-10T15:24:25.465Z"
+  },
+  {
+    "id": "img_1781106130989",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "therparker-cow",
+    "url": "/uploads/gallery/gallery-1781106130988.jpg",
+    "createdAt": "2026-06-10T15:42:10.989Z"
+  },
+  {
+    "id": "img_1781106246718",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "carluis cattle",
+    "url": "/uploads/gallery/gallery-1781106246717.jpg",
+    "createdAt": "2026-06-10T15:44:06.718Z"
+  },
+  {
+    "id": "img_1781106282639",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "Angus Abardin cow",
+    "url": "/uploads/gallery/gallery-1781106282639.png",
+    "createdAt": "2026-06-10T15:44:42.639Z"
+  },
+  {
+    "id": "img_1781106310013",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "Cow Comparison",
+    "url": "/uploads/gallery/gallery-1781106310012.webp",
+    "createdAt": "2026-06-10T15:45:10.013Z"
+  },
+  {
+    "id": "img_1781106379438",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "jersey cow",
+    "url": "/uploads/gallery/gallery-1781106379438.webp",
+    "createdAt": "2026-06-10T15:46:19.438Z"
+  },
+  {
+    "id": "img_1781106458549",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "Red chitangang",
+    "url": "/uploads/gallery/gallery-1781106458548.webp",
+    "createdAt": "2026-06-10T15:47:38.549Z"
+  },
+  {
+    "id": "img_1781106833058",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "Beefmaster-cow",
+    "url": "/uploads/gallery/gallery-1781106833057.jpg",
+    "createdAt": "2026-06-10T15:53:53.058Z"
+  },
+  {
+    "id": "img_1781106896126",
+    "type": "image",
+    "chapterName": "Chapter03",
+    "itemName": "shorthorn cow",
+    "url": "/uploads/gallery/gallery-1781106896125.jpg",
+    "createdAt": "2026-06-10T15:54:56.126Z"
+  },
+  {
+    "id": "img_1781294651169",
+    "type": "pdf",
+    "chapterName": "Agriculture Practical",
+    "itemName": "agriculture-practical",
+    "url": "https://drive.google.com/file/d/1nF2gxhN0nJ71Y4xABbmOIsdvHyKNMikk/preview",
+    "createdAt": "2026-06-12T20:04:11.169Z"
+  },
+  {
+    "id": "img_1782015641515",
+    "type": "pdf",
+    "chapterName": "Agriculture Syllabus",
+    "itemName": "Syllabus 2025-26",
+    "url": "https://drive.google.com/file/d/1qfCrQMAZULz6Jpv5kPtH6Mjnoc06Pcqi/preview?usp=drivesdk",
+    "createdAt": "2026-06-21T04:20:41.515Z"
+  }
+]
