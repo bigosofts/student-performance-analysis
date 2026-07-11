@@ -163,5 +163,13 @@
     "itemName": "Demo3",
     "url": "/uploads/gallery/gallery-1783778616399.webp",
     "createdAt": "2026-07-11T14:03:36.406Z"
+  },
+  {
+    "id": "img_1783784381812",
+    "type": "image",
+    "chapterName": "Chapter01",
+    "itemName": "Demo5",
+    "url": "/uploads/gallery/gallery-1783784381781.png",
+    "createdAt": "2026-07-11T15:39:41.812Z"
   }
 ]
