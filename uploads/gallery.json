@@ -139,37 +139,5 @@
     "itemName": "class-10-12-2026",
     "url": "/uploads/gallery/gallery-1783716625266.jpg",
     "createdAt": "2026-07-10T20:50:25.272Z"
-  },
-  {
-    "id": "img_1783759986275",
-    "type": "image",
-    "chapterName": "Chapter01",
-    "itemName": "Demo",
-    "url": "/uploads/gallery/gallery-1783759986265.png",
-    "createdAt": "2026-07-11T08:53:06.275Z"
-  },
-  {
-    "id": "img_1783765831224",
-    "type": "image",
-    "chapterName": "Chapter01",
-    "itemName": "Demo2",
-    "url": "/uploads/gallery/gallery-1783765831216.webp",
-    "createdAt": "2026-07-11T10:30:31.224Z"
-  },
-  {
-    "id": "img_1783778616406",
-    "type": "image",
-    "chapterName": "Chapter01",
-    "itemName": "Demo3",
-    "url": "/uploads/gallery/gallery-1783778616399.webp",
-    "createdAt": "2026-07-11T14:03:36.406Z"
-  },
-  {
-    "id": "img_1783784381812",
-    "type": "image",
-    "chapterName": "Chapter01",
-    "itemName": "Demo5",
-    "url": "/uploads/gallery/gallery-1783784381781.png",
-    "createdAt": "2026-07-11T15:39:41.812Z"
   }
 ]
