@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "git:push": "git add --all && git commit -m \"added chrome and firefox\" && git pull --no-rebase origin main && git push origin main",
-    "git:pull": "git pull origin main",
+    "git:pull": "git pull --no-rebase origin main",
     "git:reset": "git reset --hard HEAD && git clean -fd"
   },
   "dependencies": {
