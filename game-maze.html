@@ -10,11 +10,7 @@
     />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/maze.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Outfit:wght@400;600;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
   </head>
   <body class="game-maze">
     <!-- HUD -->
@@ -182,12 +178,15 @@
         const visitedSolutionSet = new Set(visitedSet || []);
         if (visitedSolutionSet.size > 0) {
           ctx.fillStyle =
-            team === "boys"
-              ? "rgba(59,130,246,0.25)"
-              : "rgba(236,72,153,0.25)";
+            team === "boys" ? "rgba(59,130,246,0.25)" : "rgba(236,72,153,0.25)";
           for (const key of visitedSolutionSet) {
             const [vx, vy] = key.split(",").map(Number);
-            ctx.fillRect(vx * cellPx + 1, vy * cellPx + 1, cellPx - 2, cellPx - 2);
+            ctx.fillRect(
+              vx * cellPx + 1,
+              vy * cellPx + 1,
+              cellPx - 2,
+              cellPx - 2,
+            );
           }
         }
 
@@ -444,7 +443,7 @@
           fullUpdate();
         });
         socket.on("maze-close-quiz", () => closeMazeQuiz());
-        socket.on('classroom-navigate', (data) => {
+        socket.on("classroom-navigate", (data) => {
           if (data && data.url) {
             window.location.href = data.url;
           }
@@ -461,7 +460,6 @@
       startRenderLoop();
     </script>
     <script src="js/wake-lock.js"></script>
-  <script src="js/whiteboard.js"></script>
+    <script src="js/whiteboard.js"></script>
   </body>
 </html>
-

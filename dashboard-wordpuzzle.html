@@ -1,695 +1,1240 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <script src="js/auth-check.js"></script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Word Puzzle Game — Teacher Dashboard</title>
-  <meta name="description" content="Teacher control panel for the Word Puzzle classroom game" />
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/wordpuzzle.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Outfit:wght@400;600;800;900&display=swap"
-    rel="stylesheet" />
-  <style>
-    /* --- MOBILE TAB NAVIGATION --- */
-    .mobile-tab-bar {
-      display: none;
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: #1e293b;
-      border-top: 1px solid #334155;
-      padding: 8px;
-      z-index: 100;
-      justify-content: space-around;
-      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
-    }
-
-    .mobile-tab-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 4px 8px;
-      transition: all 0.2s;
-    }
-
-    .mobile-tab-btn.active {
-      color: #3b82f6;
-    }
-
-    .mobile-tab-btn .tab-icon {
-      font-size: 1.2rem;
-    }
-
-    @media (max-width: 768px) {
-      body {
-        padding-bottom: 80px;
-      }
-
+  <head>
+    <script src="js/auth-check.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word Puzzle Game — Teacher Dashboard</title>
+    <meta
+      name="description"
+      content="Teacher control panel for the Word Puzzle classroom game"
+    />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/wordpuzzle.css" />
+    <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
+    <style>
+      /* --- MOBILE TAB NAVIGATION --- */
       .mobile-tab-bar {
-        display: flex;
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1e293b;
+        border-top: 1px solid #334155;
+        padding: 8px;
+        z-index: 100;
+        justify-content: space-around;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
       }
 
-      .wp-control-grid {
+      .mobile-tab-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
         display: flex;
         flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 8px;
+        transition: all 0.2s;
       }
 
-      [data-mobile-tab] {
-        display: none !important;
+      .mobile-tab-btn.active {
+        color: #3b82f6;
       }
 
-      [data-mobile-tab].mob-active {
-        display: block !important;
-        width: 100%
+      .mobile-tab-btn .tab-icon {
+        font-size: 1.2rem;
       }
-    }
-  </style>
-</head>
 
-<body class="dashboard-wp">
+      @media (max-width: 768px) {
+        body {
+          padding-bottom: 80px;
+        }
 
-  <!-- ── Header ── -->
-  <div class="glass-card"
-    style="margin:20px; padding:22px; text-align:center; border-bottom:3px solid #7c3aed; box-shadow:0 0 30px rgba(124,58,237,0.15);">
-    <h1
-      style="font-size:2.2rem; font-family:'Orbitron',sans-serif; background:linear-gradient(to right,#7c3aed,#ec4899,#3b82f6); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">
-      🔤 Word Puzzle Game Manager
-    </h1>
-    <p style="color:var(--text-dim); margin-top:6px;">
-      Teacher Control Panel &nbsp;•&nbsp;
-      <a href="dashboard.html" style="color:#7c3aed; text-decoration:none; font-weight:800;">BACK TO HUB</a>
-      &nbsp;|&nbsp;
-      <a href="game-wordpuzzle.html" target="_blank" style="color:#ec4899; text-decoration:none; font-weight:800;">OPEN
-        GAME PAGE ↗</a>
-    </p>
-  </div>
+        .mobile-tab-bar {
+          display: flex;
+        }
 
-  <!-- ── Three-column control grid ── -->
-  <div class="wp-control-grid">
+        .wp-control-grid {
+          display: flex;
+          flex-direction: column;
+        }
 
-    <!-- ══ BLUE TEAM ══ -->
-    <div class="wp-team-card boys" data-mobile-tab="boys">
-      <h2 style="color:var(--boys-color); font-family:'Orbitron',sans-serif; letter-spacing:2px; margin-bottom:16px;">
-        BLUE TEAM</h2>
+        [data-mobile-tab] {
+          display: none !important;
+        }
 
-      <!-- Photo -->
-      <div id="boysImgPreview"
-        style="width:110px; height:110px; border-radius:50%; background:#000; margin:0 auto 10px; overflow:hidden; border:4px solid var(--boys-color); box-shadow:0 0 20px var(--boys-glow);">
-        <img id="boysImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Blue Team" />
-        <div id="boysNoImg"
-          style="display:flex; align-items:center; justify-content:center; height:100%; font-size:2rem;">🏃‍♂️</div>
-      </div>
-      <input type="file" id="boysPhotoInput" accept="image/*" onchange="uploadWPPhoto('boys', this)"
-        style="font-size:0.72rem; max-width:200px; margin-bottom:14px;" />
-
-      <!-- Points display -->
-      <div class="glass-card" style="padding:18px; margin-top:4px; background:rgba(0,0,0,0.3);">
-        <div class="wp-stat-label">Current Points</div>
-        <div id="boysPoints" class="wp-stat-value" style="color:#3b82f6;">0</div>
-
-        <!-- Set Points -->
-        <div class="wp-stat-label" style="margin-top:14px;">Set Initial Points</div>
-        <div class="wp-points-row">
-          <input type="number" id="boysSetPointsInput" class="wp-points-input" placeholder="e.g. 500" min="0" />
-          <button class="btn-primary"
-            style="background:#1d4ed8; font-size:0.78rem; padding:9px 12px; font-weight:800; white-space:nowrap;"
-            onclick="handleSetPoints('boys')">SET</button>
-          <button class="btn-primary"
-            style="background:#10b981; font-size:0.78rem; padding:9px 10px; font-weight:800; white-space:nowrap;"
-            onclick="handleAddPoints('boys')">+ADD</button>
-        </div>
-
-        <!-- Send points modal to game page -->
-        <div class="wp-addpoints-section" style="margin-top:10px;">
-          <div class="wp-stat-label" style="margin-bottom:8px;">📢 Announce Points on Game Page</div>
-          <div style="display:grid; grid-template-columns:1fr auto; gap:6px;">
-            <input type="number" id="boysAnnounceInput" class="wp-points-input" placeholder="Amount" min="0" />
-            <button class="btn-primary"
-              style="background:linear-gradient(135deg,#1d4ed8,#3b82f6); font-size:0.78rem; padding:9px 12px; font-weight:800;"
-              onclick="announcePoints('boys')">📣 SHOW</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ══ GAME COMMANDS (centre column) ══ -->
-    <div class="wp-team-card control" data-mobile-tab="control">
-      <h2 style="color:#7c3aed; font-family:'Orbitron',sans-serif; letter-spacing:2px; margin-bottom:16px;">GAME
-        CONTROLS</h2>
-
-      <!-- Grid Size -->
-      <div class="glass-card" style="padding:16px; background:rgba(0,0,0,0.3); border:1px solid rgba(124,58,237,0.25);">
-        <div class="wp-stat-label" style="margin-bottom:10px;">⚙️ Grid Size (shared by both teams)</div>
-        <div class="wp-size-btns">
-          <button class="wp-size-btn active" id="sizeBtn10x10" onclick="selectGridSize(10,10,this)">10×10</button>
-          <button class="wp-size-btn" id="sizeBtn20x20" onclick="selectGridSize(20,20,this)">20×20</button>
-          <button class="wp-size-btn" id="sizeBtn20x30" onclick="selectGridSize(20,30,this)">20×30</button>
-          <button class="wp-size-btn" id="sizeBtn40x40" onclick="selectGridSize(40,40,this)">40×40</button>
-        </div>
-        <div id="gridSizeStatus" style="font-size:0.7rem; color:#94a3b8; margin-top:4px; text-align:center;">10×10 grid
-          active</div>
-      </div>
-
-      <!-- Turn Control -->
-      <div class="glass-card" style="padding:16px; margin-top:14px; background:rgba(0,0,0,0.3);">
-        <div class="wp-stat-label" style="margin-bottom:10px;">🔄 Turn Control</div>
-        <div class="wp-turn-btn-group">
-          <button class="wp-turn-btn boys-turn" id="btnBoysTurn" onclick="setTurn('boys')">🏃‍♂️ BLUE TEAM TURN</button>
-          <button class="wp-turn-btn girls-turn" id="btnGirlsTurn" onclick="setTurn('girls')">🏃‍♀️ RED TEAM TURN</button>
-        </div>
-        <button class="btn-primary"
-          style="width:100%; background:linear-gradient(135deg,#7c3aed,#6d28d9); font-family:'Orbitron',sans-serif; font-size:0.82rem;"
-          onclick="switchTurn()">
-          ⇄ SWITCH TURN: <span id="nextTurnText">RED TEAM</span>
-        </button>
-      </div>
-
-      <!-- Word Input -->
-      <div class="wp-word-section">
-        <div class="wp-stat-label" style="margin-bottom:10px;">✏️ Current Word — Click cells below to assign letters
-        </div>
-        <div class="wp-word-input-row">
-          <input type="text" id="wordInput" class="wp-word-input" placeholder="Type word..."
-            oninput="handleWordInput(this.value)" />
-          <button class="btn-primary" style="background:#7c3aed; padding:10px 14px; font-size:0.82rem;"
-            onclick="resetWordIndex()">↺ RESET</button>
-        </div>
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
-          <span class="wp-word-index-badge" id="wordIndexBadge">Letter 1 of 0</span>
-          <span id="wordProgressDisplay"
-            style="font-size:0.75rem; color:#94a3b8; font-weight:700; letter-spacing:2px;"></span>
-        </div>
-      </div>
-
-      <!-- Interactive Grid -->
-      <div class="wp-grid-section">
-        <div class="wp-stat-label" style="margin-bottom:10px;">🎯 Click cells to paint with current team colour + assign
-          letters</div>
-        <div class="wp-grid-scroll-wrap" id="dashGridWrap">
-          <div class="wp-dash-grid" id="dashGrid"></div>
-        </div>
-      </div>
-
-      <!-- Session Management -->
-      <div class="wp-session-section">
-        <div class="wp-stat-label" style="margin-bottom:12px;">💾 Session Management</div>
-
-        <div id="wpSessionBadge"
-          style="margin-bottom:10px; padding:8px 12px; border-radius:10px; font-size:0.78rem; font-weight:800; display:none; text-align:center; letter-spacing:1px;">
-        </div>
-
-        <div style="margin-bottom:8px;">
-          <select id="wpSessionDropdown" onchange="handleSessionSelect(this.value)">
-            <option value="">-- Select a Session --</option>
-          </select>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr auto; gap:6px; margin-bottom:8px;">
-          <input type="text" id="wpNewSessionName" placeholder="New session name..."
-            style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.15); background:rgba(0,0,0,0.3); color:#fff; font-size:0.85rem; font-weight:700; box-sizing:border-box;" />
-          <button onclick="handleCreateSession()"
-            style="padding:10px 14px; border-radius:8px; border:none; background:linear-gradient(135deg,#7c3aed,#6d28d9); color:#fff; font-weight:800; cursor:pointer; font-size:0.78rem; white-space:nowrap; transition:all 0.2s;">+
-            CREATE</button>
-        </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
-          <button onclick="handleSaveSession()" class="btn-primary"
-            style="font-size:0.78rem; padding:10px; background:linear-gradient(135deg,#10b981,#059669); font-weight:800;">💾
-            SAVE</button>
-          <button onclick="handleDeleteSession()" class="btn-primary"
-            style="font-size:0.78rem; padding:10px; background:linear-gradient(135deg,#ef4444,#dc2626); font-weight:800;">🗑️
-            DELETE</button>
-        </div>
-      </div>
-
-      <!-- Winner Section -->
-      <div class="wp-winner-section">
-        <div class="wp-stat-label" style="margin-bottom:10px;">🏆 Announce Result</div>
-        <input type="text" id="wpClassName" placeholder="Class (e.g. 12)" />
-        <input type="text" id="wpSectionName" placeholder="Section (e.g. Shitolokkha)" />
-        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:10px;">
-          <button class="btn-primary" style="background:#3b82f6; font-weight:800; font-size:0.8rem; padding:10px 6px;"
-            onclick="handleAnnounce('boys')">🎉 BLUE TEAM WIN</button>
-          <button class="btn-primary" style="background:#7c3aed; font-weight:800; font-size:0.8rem; padding:10px 6px;"
-            onclick="handleAnnounce('draw')">🤝 DRAW</button>
-          <button class="btn-primary" style="background:#ec4899; font-weight:800; font-size:0.8rem; padding:10px 6px;"
-            onclick="handleAnnounce('girls')">🎉 RED TEAM WIN</button>
-        </div>
-        <button class="btn-primary" style="background:#64748b; width:100%; margin-top:8px; font-size:0.78rem;"
-          onclick="handleClearWinner()">CLOSE WINNER SCREEN</button>
-      </div>
-
-      <!-- Reset -->
-      <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:20px;">
-        <button class="btn-secondary" style="width:100%; opacity:0.7; font-weight:800;" onclick="confirmReset()">⚠️
-          RESET ENTIRE GAME</button>
-      </div>
-    </div>
-
-    <!-- ══ RED TEAM ══ -->
-    <div class="wp-team-card girls" data-mobile-tab="girls">
-      <h2 style="color:var(--girls-color); font-family:'Orbitron',sans-serif; letter-spacing:2px; margin-bottom:16px;">
-        RED TEAM</h2>
-
-      <!-- Photo -->
-      <div id="girlsImgPreview"
-        style="width:110px; height:110px; border-radius:50%; background:#000; margin:0 auto 10px; overflow:hidden; border:4px solid var(--girls-color); box-shadow:0 0 20px var(--girls-glow);">
-        <img id="girlsImg" src="" style="width:100%; height:100%; object-fit:cover; display:none;" alt="Red Team" />
-        <div id="girlsNoImg"
-          style="display:flex; align-items:center; justify-content:center; height:100%; font-size:2rem;">🏃‍♀️</div>
-      </div>
-      <input type="file" id="girlsPhotoInput" accept="image/*" onchange="uploadWPPhoto('girls', this)"
-        style="font-size:0.72rem; max-width:200px; margin-bottom:14px;" />
-
-      <!-- Points display -->
-      <div class="glass-card" style="padding:18px; margin-top:4px; background:rgba(0,0,0,0.3);">
-        <div class="wp-stat-label">Current Points</div>
-        <div id="girlsPoints" class="wp-stat-value" style="color:#ec4899;">0</div>
-
-        <!-- Set Points -->
-        <div class="wp-stat-label" style="margin-top:14px;">Set Initial Points</div>
-        <div class="wp-points-row">
-          <input type="number" id="girlsSetPointsInput" class="wp-points-input" placeholder="e.g. 500" min="0" />
-          <button class="btn-primary"
-            style="background:#be185d; font-size:0.78rem; padding:9px 12px; font-weight:800; white-space:nowrap;"
-            onclick="handleSetPoints('girls')">SET</button>
-          <button class="btn-primary"
-            style="background:#10b981; font-size:0.78rem; padding:9px 10px; font-weight:800; white-space:nowrap;"
-            onclick="handleAddPoints('girls')">+ADD</button>
-        </div>
-
-        <!-- Send points modal to game page -->
-        <div class="wp-addpoints-section" style="margin-top:10px;">
-          <div class="wp-stat-label" style="margin-bottom:8px;">📢 Announce Points on Game Page</div>
-          <div style="display:grid; grid-template-columns:1fr auto; gap:6px;">
-            <input type="number" id="girlsAnnounceInput" class="wp-points-input" placeholder="Amount" min="0" />
-            <button class="btn-primary"
-              style="background:linear-gradient(135deg,#be185d,#ec4899); font-size:0.78rem; padding:9px 12px; font-weight:800;"
-              onclick="announcePoints('girls')">📣 SHOW</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- end wp-control-grid -->
-
-  <!-- Toast -->
-  <div id="wpToast" class="wp-toast" style="opacity:0;"></div>
-
-  <!-- Mobile Tab Bar -->
-  <nav class="mobile-tab-bar" id="mobileTabBar">
-    <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
-      <span class="tab-icon">🎮</span>
-      Global
-    </button>
-    <button class="mobile-tab-btn" data-tab="boys" onclick="switchMobileTab('boys')">
-      <span class="tab-icon">👦</span>
-      Blue Team
-    </button>
-    <button class="mobile-tab-btn" data-tab="girls" onclick="switchMobileTab('girls')">
-      <span class="tab-icon">👧</span>
-      Red Team
-    </button>
-  </nav>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="js/wordpuzzle.js"></script>
-  <script>
-    const { WordPuzzle } = window;
-
-    let dashSocket = null;
-    let selectedRows = 10, selectedCols = 10;
-    const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
-    const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
-
-    // ── Socket ──────────────────────────────────────────
-    if (typeof io !== 'undefined') {
-      dashSocket = io();
-      WordPuzzle.setSocket(dashSocket);
-
-      dashSocket.on('wordpuzzle-game-updated', (newState) => {
-        if (newState.lastUpdate && newState.lastUpdate <= WordPuzzle.game.lastUpdate) return;
-        WordPuzzle.setWPGame(newState);
-        updateUI();
-      });
-    }
-
-    // ── Grid rendering ──────────────────────────────────
-    function buildDashGrid() {
-      const g = WordPuzzle.game;
-      const rows = g.gridRows;
-      const cols = g.gridCols;
-      const grid = document.getElementById('dashGrid');
-
-      // Cell size based on grid dimensions
-      let cellSize = 40;
-      if (rows >= 40 || cols >= 40) cellSize = 18;
-      else if (rows >= 20 || cols >= 20) cellSize = 26;
-      else if (rows >= 20 && cols >= 30) cellSize = 22;
-
-      grid.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
-      grid.innerHTML = '';
-
-      for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < cols; c++) {
-          const key = `${r},${c}`;
-          const cell = g.cells[key];
-          const div = document.createElement('div');
-          div.className = 'wp-dash-cell';
-          div.style.width = cellSize + 'px';
-          div.style.height = cellSize + 'px';
-          div.style.fontSize = Math.max(7, cellSize * 0.38) + 'px';
-          div.dataset.row = r;
-          div.dataset.col = c;
-          div.id = `dcell-${r}-${c}`;
-
-          if (cell) {
-            if (cell.color === 'boys') div.classList.add('painted-boys');
-            if (cell.color === 'girls') div.classList.add('painted-girls');
-            if (cell.letter) div.textContent = cell.letter;
-          }
-
-          div.addEventListener('click', () => handleCellClick(r, c));
-          grid.appendChild(div);
+        [data-mobile-tab].mob-active {
+          display: block !important;
+          width: 100%;
         }
       }
-    }
+    </style>
+  </head>
 
-    function updateDashCell(row, col) {
-      const key = `${row},${col}`;
-      const cell = WordPuzzle.game.cells[key];
-      const div = document.getElementById(`dcell-${row}-${col}`);
-      if (!div) return;
+  <body class="dashboard-wp">
+    <!-- ── Header ── -->
+    <div
+      class="glass-card"
+      style="
+        margin: 20px;
+        padding: 22px;
+        text-align: center;
+        border-bottom: 3px solid #7c3aed;
+        box-shadow: 0 0 30px rgba(124, 58, 237, 0.15);
+      "
+    >
+      <h1
+        style="
+          font-size: 2.2rem;
+          font-family: &quot;Orbitron&quot;, sans-serif;
+          background: linear-gradient(to right, #7c3aed, #ec4899, #3b82f6);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+        "
+      >
+        🔤 Word Puzzle Game Manager
+      </h1>
+      <p style="color: var(--text-dim); margin-top: 6px">
+        Teacher Control Panel &nbsp;•&nbsp;
+        <a
+          href="dashboard.html"
+          style="color: #7c3aed; text-decoration: none; font-weight: 800"
+          >BACK TO HUB</a
+        >
+        &nbsp;|&nbsp;
+        <a
+          href="game-wordpuzzle.html"
+          target="_blank"
+          style="color: #ec4899; text-decoration: none; font-weight: 800"
+          >OPEN GAME PAGE ↗</a
+        >
+      </p>
+    </div>
 
-      div.classList.remove('painted-boys', 'painted-girls');
-      div.textContent = '';
+    <!-- ── Three-column control grid ── -->
+    <div class="wp-control-grid">
+      <!-- ══ BLUE TEAM ══ -->
+      <div class="wp-team-card boys" data-mobile-tab="boys">
+        <h2
+          style="
+            color: var(--boys-color);
+            font-family: &quot;Orbitron&quot;, sans-serif;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+          "
+        >
+          BLUE TEAM
+        </h2>
 
-      if (cell) {
-        if (cell.color === 'boys') div.classList.add('painted-boys');
-        if (cell.color === 'girls') div.classList.add('painted-girls');
-        if (cell.letter) div.textContent = cell.letter;
+        <!-- Photo -->
+        <div
+          id="boysImgPreview"
+          style="
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: #000;
+            margin: 0 auto 10px;
+            overflow: hidden;
+            border: 4px solid var(--boys-color);
+            box-shadow: 0 0 20px var(--boys-glow);
+          "
+        >
+          <img
+            id="boysImg"
+            src=""
+            style="width: 100%; height: 100%; object-fit: cover; display: none"
+            alt="Blue Team"
+          />
+          <div
+            id="boysNoImg"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100%;
+              font-size: 2rem;
+            "
+          >
+            🏃‍♂️
+          </div>
+        </div>
+        <input
+          type="file"
+          id="boysPhotoInput"
+          accept="image/*"
+          onchange="uploadWPPhoto('boys', this)"
+          style="font-size: 0.72rem; max-width: 200px; margin-bottom: 14px"
+        />
+
+        <!-- Points display -->
+        <div
+          class="glass-card"
+          style="padding: 18px; margin-top: 4px; background: rgba(0, 0, 0, 0.3)"
+        >
+          <div class="wp-stat-label">Current Points</div>
+          <div id="boysPoints" class="wp-stat-value" style="color: #3b82f6">
+            0
+          </div>
+
+          <!-- Set Points -->
+          <div class="wp-stat-label" style="margin-top: 14px">
+            Set Initial Points
+          </div>
+          <div class="wp-points-row">
+            <input
+              type="number"
+              id="boysSetPointsInput"
+              class="wp-points-input"
+              placeholder="e.g. 500"
+              min="0"
+            />
+            <button
+              class="btn-primary"
+              style="
+                background: #1d4ed8;
+                font-size: 0.78rem;
+                padding: 9px 12px;
+                font-weight: 800;
+                white-space: nowrap;
+              "
+              onclick="handleSetPoints('boys')"
+            >
+              SET
+            </button>
+            <button
+              class="btn-primary"
+              style="
+                background: #10b981;
+                font-size: 0.78rem;
+                padding: 9px 10px;
+                font-weight: 800;
+                white-space: nowrap;
+              "
+              onclick="handleAddPoints('boys')"
+            >
+              +ADD
+            </button>
+          </div>
+
+          <!-- Send points modal to game page -->
+          <div class="wp-addpoints-section" style="margin-top: 10px">
+            <div class="wp-stat-label" style="margin-bottom: 8px">
+              📢 Announce Points on Game Page
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr auto; gap: 6px"
+            >
+              <input
+                type="number"
+                id="boysAnnounceInput"
+                class="wp-points-input"
+                placeholder="Amount"
+                min="0"
+              />
+              <button
+                class="btn-primary"
+                style="
+                  background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+                  font-size: 0.78rem;
+                  padding: 9px 12px;
+                  font-weight: 800;
+                "
+                onclick="announcePoints('boys')"
+              >
+                📣 SHOW
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ GAME COMMANDS (centre column) ══ -->
+      <div class="wp-team-card control" data-mobile-tab="control">
+        <h2
+          style="
+            color: #7c3aed;
+            font-family: &quot;Orbitron&quot;, sans-serif;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+          "
+        >
+          GAME CONTROLS
+        </h2>
+
+        <!-- Grid Size -->
+        <div
+          class="glass-card"
+          style="
+            padding: 16px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(124, 58, 237, 0.25);
+          "
+        >
+          <div class="wp-stat-label" style="margin-bottom: 10px">
+            ⚙️ Grid Size (shared by both teams)
+          </div>
+          <div class="wp-size-btns">
+            <button
+              class="wp-size-btn active"
+              id="sizeBtn10x10"
+              onclick="selectGridSize(10, 10, this)"
+            >
+              10×10
+            </button>
+            <button
+              class="wp-size-btn"
+              id="sizeBtn20x20"
+              onclick="selectGridSize(20, 20, this)"
+            >
+              20×20
+            </button>
+            <button
+              class="wp-size-btn"
+              id="sizeBtn20x30"
+              onclick="selectGridSize(20, 30, this)"
+            >
+              20×30
+            </button>
+            <button
+              class="wp-size-btn"
+              id="sizeBtn40x40"
+              onclick="selectGridSize(40, 40, this)"
+            >
+              40×40
+            </button>
+          </div>
+          <div
+            id="gridSizeStatus"
+            style="
+              font-size: 0.7rem;
+              color: #94a3b8;
+              margin-top: 4px;
+              text-align: center;
+            "
+          >
+            10×10 grid active
+          </div>
+        </div>
+
+        <!-- Turn Control -->
+        <div
+          class="glass-card"
+          style="
+            padding: 16px;
+            margin-top: 14px;
+            background: rgba(0, 0, 0, 0.3);
+          "
+        >
+          <div class="wp-stat-label" style="margin-bottom: 10px">
+            🔄 Turn Control
+          </div>
+          <div class="wp-turn-btn-group">
+            <button
+              class="wp-turn-btn boys-turn"
+              id="btnBoysTurn"
+              onclick="setTurn('boys')"
+            >
+              🏃‍♂️ BLUE TEAM TURN
+            </button>
+            <button
+              class="wp-turn-btn girls-turn"
+              id="btnGirlsTurn"
+              onclick="setTurn('girls')"
+            >
+              🏃‍♀️ RED TEAM TURN
+            </button>
+          </div>
+          <button
+            class="btn-primary"
+            style="
+              width: 100%;
+              background: linear-gradient(135deg, #7c3aed, #6d28d9);
+              font-family: &quot;Orbitron&quot;, sans-serif;
+              font-size: 0.82rem;
+            "
+            onclick="switchTurn()"
+          >
+            ⇄ SWITCH TURN: <span id="nextTurnText">RED TEAM</span>
+          </button>
+        </div>
+
+        <!-- Word Input -->
+        <div class="wp-word-section">
+          <div class="wp-stat-label" style="margin-bottom: 10px">
+            ✏️ Current Word — Click cells below to assign letters
+          </div>
+          <div class="wp-word-input-row">
+            <input
+              type="text"
+              id="wordInput"
+              class="wp-word-input"
+              placeholder="Type word..."
+              oninput="handleWordInput(this.value)"
+            />
+            <button
+              class="btn-primary"
+              style="
+                background: #7c3aed;
+                padding: 10px 14px;
+                font-size: 0.82rem;
+              "
+              onclick="resetWordIndex()"
+            >
+              ↺ RESET
+            </button>
+          </div>
+          <div
+            style="
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              flex-wrap: wrap;
+            "
+          >
+            <span class="wp-word-index-badge" id="wordIndexBadge"
+              >Letter 1 of 0</span
+            >
+            <span
+              id="wordProgressDisplay"
+              style="
+                font-size: 0.75rem;
+                color: #94a3b8;
+                font-weight: 700;
+                letter-spacing: 2px;
+              "
+            ></span>
+          </div>
+        </div>
+
+        <!-- Interactive Grid -->
+        <div class="wp-grid-section">
+          <div class="wp-stat-label" style="margin-bottom: 10px">
+            🎯 Click cells to paint with current team colour + assign letters
+          </div>
+          <div class="wp-grid-scroll-wrap" id="dashGridWrap">
+            <div class="wp-dash-grid" id="dashGrid"></div>
+          </div>
+        </div>
+
+        <!-- Session Management -->
+        <div class="wp-session-section">
+          <div class="wp-stat-label" style="margin-bottom: 12px">
+            💾 Session Management
+          </div>
+
+          <div
+            id="wpSessionBadge"
+            style="
+              margin-bottom: 10px;
+              padding: 8px 12px;
+              border-radius: 10px;
+              font-size: 0.78rem;
+              font-weight: 800;
+              display: none;
+              text-align: center;
+              letter-spacing: 1px;
+            "
+          ></div>
+
+          <div style="margin-bottom: 8px">
+            <select
+              id="wpSessionDropdown"
+              onchange="handleSessionSelect(this.value)"
+            >
+              <option value="">-- Select a Session --</option>
+            </select>
+          </div>
+
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr auto;
+              gap: 6px;
+              margin-bottom: 8px;
+            "
+          >
+            <input
+              type="text"
+              id="wpNewSessionName"
+              placeholder="New session name..."
+              style="
+                width: 100%;
+                padding: 10px 12px;
+                border-radius: 8px;
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                background: rgba(0, 0, 0, 0.3);
+                color: #fff;
+                font-size: 0.85rem;
+                font-weight: 700;
+                box-sizing: border-box;
+              "
+            />
+            <button
+              onclick="handleCreateSession()"
+              style="
+                padding: 10px 14px;
+                border-radius: 8px;
+                border: none;
+                background: linear-gradient(135deg, #7c3aed, #6d28d9);
+                color: #fff;
+                font-weight: 800;
+                cursor: pointer;
+                font-size: 0.78rem;
+                white-space: nowrap;
+                transition: all 0.2s;
+              "
+            >
+              + CREATE
+            </button>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px">
+            <button
+              onclick="handleSaveSession()"
+              class="btn-primary"
+              style="
+                font-size: 0.78rem;
+                padding: 10px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                font-weight: 800;
+              "
+            >
+              💾 SAVE
+            </button>
+            <button
+              onclick="handleDeleteSession()"
+              class="btn-primary"
+              style="
+                font-size: 0.78rem;
+                padding: 10px;
+                background: linear-gradient(135deg, #ef4444, #dc2626);
+                font-weight: 800;
+              "
+            >
+              🗑️ DELETE
+            </button>
+          </div>
+        </div>
+
+        <!-- Winner Section -->
+        <div class="wp-winner-section">
+          <div class="wp-stat-label" style="margin-bottom: 10px">
+            🏆 Announce Result
+          </div>
+          <input type="text" id="wpClassName" placeholder="Class (e.g. 12)" />
+          <input
+            type="text"
+            id="wpSectionName"
+            placeholder="Section (e.g. Shitolokkha)"
+          />
+          <div
+            style="
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              gap: 8px;
+              margin-top: 10px;
+            "
+          >
+            <button
+              class="btn-primary"
+              style="
+                background: #3b82f6;
+                font-weight: 800;
+                font-size: 0.8rem;
+                padding: 10px 6px;
+              "
+              onclick="handleAnnounce('boys')"
+            >
+              🎉 BLUE TEAM WIN
+            </button>
+            <button
+              class="btn-primary"
+              style="
+                background: #7c3aed;
+                font-weight: 800;
+                font-size: 0.8rem;
+                padding: 10px 6px;
+              "
+              onclick="handleAnnounce('draw')"
+            >
+              🤝 DRAW
+            </button>
+            <button
+              class="btn-primary"
+              style="
+                background: #ec4899;
+                font-weight: 800;
+                font-size: 0.8rem;
+                padding: 10px 6px;
+              "
+              onclick="handleAnnounce('girls')"
+            >
+              🎉 RED TEAM WIN
+            </button>
+          </div>
+          <button
+            class="btn-primary"
+            style="
+              background: #64748b;
+              width: 100%;
+              margin-top: 8px;
+              font-size: 0.78rem;
+            "
+            onclick="handleClearWinner()"
+          >
+            CLOSE WINNER SCREEN
+          </button>
+        </div>
+
+        <!-- Reset -->
+        <div
+          style="
+            margin-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            padding-top: 20px;
+          "
+        >
+          <button
+            class="btn-secondary"
+            style="width: 100%; opacity: 0.7; font-weight: 800"
+            onclick="confirmReset()"
+          >
+            ⚠️ RESET ENTIRE GAME
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ RED TEAM ══ -->
+      <div class="wp-team-card girls" data-mobile-tab="girls">
+        <h2
+          style="
+            color: var(--girls-color);
+            font-family: &quot;Orbitron&quot;, sans-serif;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+          "
+        >
+          RED TEAM
+        </h2>
+
+        <!-- Photo -->
+        <div
+          id="girlsImgPreview"
+          style="
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            background: #000;
+            margin: 0 auto 10px;
+            overflow: hidden;
+            border: 4px solid var(--girls-color);
+            box-shadow: 0 0 20px var(--girls-glow);
+          "
+        >
+          <img
+            id="girlsImg"
+            src=""
+            style="width: 100%; height: 100%; object-fit: cover; display: none"
+            alt="Red Team"
+          />
+          <div
+            id="girlsNoImg"
+            style="
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              height: 100%;
+              font-size: 2rem;
+            "
+          >
+            🏃‍♀️
+          </div>
+        </div>
+        <input
+          type="file"
+          id="girlsPhotoInput"
+          accept="image/*"
+          onchange="uploadWPPhoto('girls', this)"
+          style="font-size: 0.72rem; max-width: 200px; margin-bottom: 14px"
+        />
+
+        <!-- Points display -->
+        <div
+          class="glass-card"
+          style="padding: 18px; margin-top: 4px; background: rgba(0, 0, 0, 0.3)"
+        >
+          <div class="wp-stat-label">Current Points</div>
+          <div id="girlsPoints" class="wp-stat-value" style="color: #ec4899">
+            0
+          </div>
+
+          <!-- Set Points -->
+          <div class="wp-stat-label" style="margin-top: 14px">
+            Set Initial Points
+          </div>
+          <div class="wp-points-row">
+            <input
+              type="number"
+              id="girlsSetPointsInput"
+              class="wp-points-input"
+              placeholder="e.g. 500"
+              min="0"
+            />
+            <button
+              class="btn-primary"
+              style="
+                background: #be185d;
+                font-size: 0.78rem;
+                padding: 9px 12px;
+                font-weight: 800;
+                white-space: nowrap;
+              "
+              onclick="handleSetPoints('girls')"
+            >
+              SET
+            </button>
+            <button
+              class="btn-primary"
+              style="
+                background: #10b981;
+                font-size: 0.78rem;
+                padding: 9px 10px;
+                font-weight: 800;
+                white-space: nowrap;
+              "
+              onclick="handleAddPoints('girls')"
+            >
+              +ADD
+            </button>
+          </div>
+
+          <!-- Send points modal to game page -->
+          <div class="wp-addpoints-section" style="margin-top: 10px">
+            <div class="wp-stat-label" style="margin-bottom: 8px">
+              📢 Announce Points on Game Page
+            </div>
+            <div
+              style="display: grid; grid-template-columns: 1fr auto; gap: 6px"
+            >
+              <input
+                type="number"
+                id="girlsAnnounceInput"
+                class="wp-points-input"
+                placeholder="Amount"
+                min="0"
+              />
+              <button
+                class="btn-primary"
+                style="
+                  background: linear-gradient(135deg, #be185d, #ec4899);
+                  font-size: 0.78rem;
+                  padding: 9px 12px;
+                  font-weight: 800;
+                "
+                onclick="announcePoints('girls')"
+              >
+                📣 SHOW
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- end wp-control-grid -->
+
+    <!-- Toast -->
+    <div id="wpToast" class="wp-toast" style="opacity: 0"></div>
+
+    <!-- Mobile Tab Bar -->
+    <nav class="mobile-tab-bar" id="mobileTabBar">
+      <button
+        class="mobile-tab-btn active"
+        data-tab="control"
+        onclick="switchMobileTab('control')"
+      >
+        <span class="tab-icon">🎮</span>
+        Global
+      </button>
+      <button
+        class="mobile-tab-btn"
+        data-tab="boys"
+        onclick="switchMobileTab('boys')"
+      >
+        <span class="tab-icon">👦</span>
+        Blue Team
+      </button>
+      <button
+        class="mobile-tab-btn"
+        data-tab="girls"
+        onclick="switchMobileTab('girls')"
+      >
+        <span class="tab-icon">👧</span>
+        Red Team
+      </button>
+    </nav>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/wordpuzzle.js"></script>
+    <script>
+      const { WordPuzzle } = window;
+
+      let dashSocket = null;
+      let selectedRows = 10,
+        selectedCols = 10;
+      const teamLabel = (team) => (team === "boys" ? "Blue Team" : "Red Team");
+      const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
+
+      // ── Socket ──────────────────────────────────────────
+      if (typeof io !== "undefined") {
+        dashSocket = io();
+        WordPuzzle.setSocket(dashSocket);
+
+        dashSocket.on("wordpuzzle-game-updated", (newState) => {
+          if (
+            newState.lastUpdate &&
+            newState.lastUpdate <= WordPuzzle.game.lastUpdate
+          )
+            return;
+          WordPuzzle.setWPGame(newState);
+          updateUI();
+        });
       }
-    }
 
-    function handleCellClick(row, col) {
-      WordPuzzle.paintWPCell(row, col);
-      updateDashCell(row, col);
-      updateWordBadge();
-      // Update UI for points/turn (no full rebuild needed)
-      updateStats();
-    }
+      // ── Grid rendering ──────────────────────────────────
+      function buildDashGrid() {
+        const g = WordPuzzle.game;
+        const rows = g.gridRows;
+        const cols = g.gridCols;
+        const grid = document.getElementById("dashGrid");
 
-    // ── UI Update ────────────────────────────────────────
-    function updateUI() {
-      updateStats();
-      updatePhotos();
-      updateGridSizeBtns();
-      buildDashGrid();
-      updateWordBadge();
-      refreshSessionDropdown();
-    }
+        // Cell size based on grid dimensions
+        let cellSize = 40;
+        if (rows >= 40 || cols >= 40) cellSize = 18;
+        else if (rows >= 20 || cols >= 20) cellSize = 26;
+        else if (rows >= 20 && cols >= 30) cellSize = 22;
 
-    function updateStats() {
-      const g = WordPuzzle.game;
-      document.getElementById('boysPoints').textContent = g.boysPoints;
-      document.getElementById('girlsPoints').textContent = g.girlsPoints;
+        grid.style.gridTemplateColumns = `repeat(${cols}, ${cellSize}px)`;
+        grid.innerHTML = "";
 
-      // Turn
-      const turn = g.currentTurn;
-      document.getElementById('nextTurnText').textContent = turn === 'boys' ? 'RED TEAM' : 'BLUE TEAM';
-      document.getElementById('btnBoysTurn').classList.toggle('active-turn', turn === 'boys');
-      document.getElementById('btnGirlsTurn').classList.toggle('active-turn', turn === 'girls');
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            const key = `${r},${c}`;
+            const cell = g.cells[key];
+            const div = document.createElement("div");
+            div.className = "wp-dash-cell";
+            div.style.width = cellSize + "px";
+            div.style.height = cellSize + "px";
+            div.style.fontSize = Math.max(7, cellSize * 0.38) + "px";
+            div.dataset.row = r;
+            div.dataset.col = c;
+            div.id = `dcell-${r}-${c}`;
 
-      // Grid status
-      document.getElementById('gridSizeStatus').textContent = `${g.gridRows}×${g.gridCols} grid active`;
-    }
+            if (cell) {
+              if (cell.color === "boys") div.classList.add("painted-boys");
+              if (cell.color === "girls") div.classList.add("painted-girls");
+              if (cell.letter) div.textContent = cell.letter;
+            }
 
-    function updatePhotos() {
-      const g = WordPuzzle.game;
-      const bImg = document.getElementById('boysImg');
-      const bNo = document.getElementById('boysNoImg');
-      if (g.boysImage) { bImg.src = g.boysImage + '?v=' + g.lastUpdate; bImg.style.display = 'block'; bNo.style.display = 'none'; }
-      else { bImg.style.display = 'none'; bNo.style.display = 'flex'; }
-
-      const gImg = document.getElementById('girlsImg');
-      const gNo = document.getElementById('girlsNoImg');
-      if (g.girlsImage) { gImg.src = g.girlsImage + '?v=' + g.lastUpdate; gImg.style.display = 'block'; gNo.style.display = 'none'; }
-      else { gImg.style.display = 'none'; gNo.style.display = 'flex'; }
-    }
-
-    function updateGridSizeBtns() {
-      const g = WordPuzzle.game;
-      document.querySelectorAll('.wp-size-btn').forEach(b => b.classList.remove('active'));
-      const key = `sizeBtn${g.gridRows}x${g.gridCols}`;
-      const btn = document.getElementById(key);
-      if (btn) btn.classList.add('active');
-    }
-
-    function updateWordBadge() {
-      const g = WordPuzzle.game;
-      const word = g.currentWord.toUpperCase();
-      const idx = g.currentWordIndex;
-
-      document.getElementById('wordIndexBadge').textContent =
-        word.length > 0 ? `Letter ${Math.min(idx + 1, word.length)} of ${word.length}` : 'No word set';
-
-      // Show word with used letters highlighted
-      if (word.length > 0) {
-        const parts = word.split('').map((ch, i) =>
-          i < idx
-            ? `<span style="color:#10b981; text-decoration:line-through;">${ch}</span>`
-            : `<span style="color:#f1f5f9;">${ch}</span>`
-        ).join('');
-        document.getElementById('wordProgressDisplay').innerHTML = parts;
-      } else {
-        document.getElementById('wordProgressDisplay').textContent = '';
+            div.addEventListener("click", () => handleCellClick(r, c));
+            grid.appendChild(div);
+          }
+        }
       }
-    }
 
-    // ── Grid Size ────────────────────────────────────────
-    function selectGridSize(rows, cols, el) {
-      selectedRows = rows;
-      selectedCols = cols;
-      document.querySelectorAll('.wp-size-btn').forEach(b => b.classList.remove('active'));
-      el.classList.add('active');
+      function updateDashCell(row, col) {
+        const key = `${row},${col}`;
+        const cell = WordPuzzle.game.cells[key];
+        const div = document.getElementById(`dcell-${row}-${col}`);
+        if (!div) return;
 
-      if (confirm(`Switch to ${rows}×${cols} grid? Cells outside new size will be removed.`)) {
-        WordPuzzle.setWPGridSize(rows, cols);
-        buildDashGrid();
-        document.getElementById('gridSizeStatus').textContent = `${rows}×${cols} grid active`;
-        showToast(`✅ Grid changed to ${rows}×${cols}`);
-      } else {
+        div.classList.remove("painted-boys", "painted-girls");
+        div.textContent = "";
+
+        if (cell) {
+          if (cell.color === "boys") div.classList.add("painted-boys");
+          if (cell.color === "girls") div.classList.add("painted-girls");
+          if (cell.letter) div.textContent = cell.letter;
+        }
+      }
+
+      function handleCellClick(row, col) {
+        WordPuzzle.paintWPCell(row, col);
+        updateDashCell(row, col);
+        updateWordBadge();
+        // Update UI for points/turn (no full rebuild needed)
+        updateStats();
+      }
+
+      // ── UI Update ────────────────────────────────────────
+      function updateUI() {
+        updateStats();
+        updatePhotos();
         updateGridSizeBtns();
-      }
-    }
-
-    // ── Turn ─────────────────────────────────────────────
-    function setTurn(turn) { WordPuzzle.setWPTurn(turn); updateStats(); }
-    function switchTurn() { WordPuzzle.switchWPTurn(); updateStats(); }
-
-    // ── Points ───────────────────────────────────────────
-    function handleSetPoints(team) {
-      const val = document.getElementById(team + 'SetPointsInput').value;
-      WordPuzzle.setWPPoints(team, val);
-      updateStats();
-      showToast(`✅ ${teamLabelUpper(team)} points set to ${val}`);
-    }
-
-    function handleAddPoints(team) {
-      const val = document.getElementById(team + 'SetPointsInput').value;
-      WordPuzzle.addWPPoints(team, val);
-      updateStats();
-      showToast(`➕ ${val} points added to ${teamLabelUpper(team)}`);
-    }
-
-    function announcePoints(team) {
-      const amount = parseInt(document.getElementById(team + 'AnnounceInput').value || '0', 10);
-      if (isNaN(amount) || amount <= 0) { alert('Enter a valid amount!'); return; }
-      const g = WordPuzzle.game;
-      const total = team === 'boys' ? g.boysPoints : g.girlsPoints;
-      if (dashSocket) {
-        dashSocket.emit('wordpuzzle-add-points', { team, amount, total });
-      }
-      showToast(`📣 Points modal sent to game page!`);
-    }
-
-    // ── Word ─────────────────────────────────────────────
-    function handleWordInput(val) {
-      WordPuzzle.setWPCurrentWord(val);
-      updateWordBadge();
-    }
-
-    function resetWordIndex() {
-      WordPuzzle.resetWPWordIndex();
-      updateWordBadge();
-      showToast('↺ Word index reset — starting from first letter again!');
-    }
-
-    // ── Photo ─────────────────────────────────────────────
-    async function uploadWPPhoto(team, input) {
-      if (!input.files[0]) return;
-      await WordPuzzle.saveWPTeamImage(team, input.files[0]);
-      updatePhotos();
-      showToast(`✅ ${teamLabelUpper(team)} photo updated!`);
-    }
-
-    // ── Winner ───────────────────────────────────────────
-    function handleAnnounce(team) {
-      const cls = document.getElementById('wpClassName').value || '12';
-      const sec = document.getElementById('wpSectionName').value || 'Shitolokkha';
-      WordPuzzle.announceWPWinner(team, cls, sec);
-      showToast(team === 'draw' ? '🤝 DRAW announced!' : `🏆 ${teamLabelUpper(team)} WIN announced!`);
-    }
-
-    function handleClearWinner() {
-      WordPuzzle.clearWPWinner();
-      showToast('Winner screen closed.');
-    }
-
-    // ── Reset ─────────────────────────────────────────────
-    async function confirmReset() {
-      if (confirm('CAUTION: This will reset all points, grid cells, and photos. Continue?')) {
-        await WordPuzzle.resetWPGame();
-        document.getElementById('wordInput').value = '';
         buildDashGrid();
-        updateUI();
-        showToast('🔄 Game fully reset.');
-      }
-    }
-
-    // ── Session Management ────────────────────────────────
-    function refreshSessionDropdown() {
-      const dropdown = document.getElementById('wpSessionDropdown');
-      const sessions = WordPuzzle.getWPSessions();
-      const currentName = WordPuzzle.getWPCurrentSessionName();
-      dropdown.innerHTML = '<option value="">-- Select a Session --</option>';
-      const sorted = Object.keys(sessions).sort((a, b) => {
-        const ta = sessions[a].savedAt || ''; const tb = sessions[b].savedAt || '';
-        return tb.localeCompare(ta);
-      });
-      sorted.forEach(name => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        const date = sessions[name].savedAt ? new Date(sessions[name].savedAt).toLocaleString() : '';
-        opt.textContent = `${name} (${date})`;
-        if (name === currentName) opt.selected = true;
-        dropdown.appendChild(opt);
-      });
-      updateSessionBadge();
-    }
-
-    function updateSessionBadge() {
-      const badge = document.getElementById('wpSessionBadge');
-      const name = WordPuzzle.getWPCurrentSessionName();
-      badge.style.display = 'block';
-      if (name) {
-        badge.style.background = 'rgba(124,58,237,0.18)'; badge.style.border = '1px solid rgba(124,58,237,0.5)'; badge.style.color = '#c4b5fd';
-        badge.innerHTML = `🎮 Active: <strong>${name}</strong> <span style="font-size:0.62rem;opacity:0.7;">(auto-saving)</span>`;
-      } else {
-        badge.style.background = 'rgba(245,158,11,0.12)'; badge.style.border = '1px solid rgba(245,158,11,0.35)'; badge.style.color = '#fbbf24';
-        badge.innerHTML = '⚠️ No session active — create or select one';
-      }
-    }
-
-    function handleCreateSession() {
-      const input = document.getElementById('wpNewSessionName');
-      const name = input.value.trim();
-      if (!name) { alert('Enter a session name!'); return; }
-      const sessions = WordPuzzle.getWPSessions();
-      if (sessions[name] && !confirm(`Session "${name}" exists. Overwrite?`)) return;
-      WordPuzzle.saveWPSession(name);
-      input.value = '';
-      refreshSessionDropdown();
-      showToast(`✅ Session "${name}" created & saved!`);
-    }
-
-    function handleSessionSelect(name) {
-      if (!name) return;
-      if (confirm(`Load session "${name}"? This will replace the current game state.\n\nNote: Loaded letters will become VISIBLE on the game page.`)) {
-        WordPuzzle.loadWPSession(name);
-        document.getElementById('wordInput').value = WordPuzzle.game.currentWord;
-        buildDashGrid();
-        updateUI();
-        showToast(`🔄 Session "${name}" loaded! Previous letters now visible on game page.`);
-      } else {
+        updateWordBadge();
         refreshSessionDropdown();
       }
-    }
 
-    function handleSaveSession() {
-      const name = WordPuzzle.getWPCurrentSessionName();
-      if (!name) { alert('No active session! Create one first.'); return; }
-      WordPuzzle.saveWPSession(name);
-      refreshSessionDropdown();
-      showToast(`💾 Session "${name}" saved!`);
-    }
+      function updateStats() {
+        const g = WordPuzzle.game;
+        document.getElementById("boysPoints").textContent = g.boysPoints;
+        document.getElementById("girlsPoints").textContent = g.girlsPoints;
 
-    function handleDeleteSession() {
-      const dropdown = document.getElementById('wpSessionDropdown');
-      const name = dropdown.value;
-      if (!name) { alert('Select a session to delete!'); return; }
-      if (!confirm(`Delete session "${name}"?`)) return;
-      WordPuzzle.deleteWPSession(name);
-      refreshSessionDropdown();
-      showToast(`🗑️ Session "${name}" deleted.`);
-    }
+        // Turn
+        const turn = g.currentTurn;
+        document.getElementById("nextTurnText").textContent =
+          turn === "boys" ? "RED TEAM" : "BLUE TEAM";
+        document
+          .getElementById("btnBoysTurn")
+          .classList.toggle("active-turn", turn === "boys");
+        document
+          .getElementById("btnGirlsTurn")
+          .classList.toggle("active-turn", turn === "girls");
 
-    // ── Toast ─────────────────────────────────────────────
-    let toastTimer = null;
-    function showToast(msg) {
-      const t = document.getElementById('wpToast');
-      t.textContent = msg;
-      t.style.opacity = '1';
-      if (toastTimer) clearTimeout(toastTimer);
-      toastTimer = setTimeout(() => { t.style.opacity = '0'; }, 2800);
-    }
-
-    // ── Boot ──────────────────────────────────────────────
-    document.getElementById('wordInput').value = WordPuzzle.game.currentWord || '';
-    updateUI();
-
-    // ════════════════════════════════════════════
-    //  MOBILE TAB SWITCHING
-    // ════════════════════════════════════════════
-    function switchMobileTab(tabName) {
-      document.querySelectorAll('[data-mobile-tab]').forEach(el => {
-        el.classList.remove('mob-active');
-      });
-      document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
-        btn.classList.remove('active');
-      });
-      document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
-        el.classList.add('mob-active');
-      });
-      const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
-      if (activeBtn) activeBtn.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    (function () {
-      if (window.innerWidth <= 768) {
-        switchMobileTab('control');
-      } else {
-        document.querySelectorAll('[data-mobile-tab]').forEach(el => el.classList.add('mob-active'));
+        // Grid status
+        document.getElementById("gridSizeStatus").textContent =
+          `${g.gridRows}×${g.gridCols} grid active`;
       }
-    })();
-  </script>
-  <script src="js/wake-lock.js"></script>
-<script src="js/pc-control.js"></script>
-  <script src="js/whiteboard.js"></script>
+
+      function updatePhotos() {
+        const g = WordPuzzle.game;
+        const bImg = document.getElementById("boysImg");
+        const bNo = document.getElementById("boysNoImg");
+        if (g.boysImage) {
+          bImg.src = g.boysImage + "?v=" + g.lastUpdate;
+          bImg.style.display = "block";
+          bNo.style.display = "none";
+        } else {
+          bImg.style.display = "none";
+          bNo.style.display = "flex";
+        }
+
+        const gImg = document.getElementById("girlsImg");
+        const gNo = document.getElementById("girlsNoImg");
+        if (g.girlsImage) {
+          gImg.src = g.girlsImage + "?v=" + g.lastUpdate;
+          gImg.style.display = "block";
+          gNo.style.display = "none";
+        } else {
+          gImg.style.display = "none";
+          gNo.style.display = "flex";
+        }
+      }
+
+      function updateGridSizeBtns() {
+        const g = WordPuzzle.game;
+        document
+          .querySelectorAll(".wp-size-btn")
+          .forEach((b) => b.classList.remove("active"));
+        const key = `sizeBtn${g.gridRows}x${g.gridCols}`;
+        const btn = document.getElementById(key);
+        if (btn) btn.classList.add("active");
+      }
+
+      function updateWordBadge() {
+        const g = WordPuzzle.game;
+        const word = g.currentWord.toUpperCase();
+        const idx = g.currentWordIndex;
+
+        document.getElementById("wordIndexBadge").textContent =
+          word.length > 0
+            ? `Letter ${Math.min(idx + 1, word.length)} of ${word.length}`
+            : "No word set";
+
+        // Show word with used letters highlighted
+        if (word.length > 0) {
+          const parts = word
+            .split("")
+            .map((ch, i) =>
+              i < idx
+                ? `<span style="color:#10b981; text-decoration:line-through;">${ch}</span>`
+                : `<span style="color:#f1f5f9;">${ch}</span>`,
+            )
+            .join("");
+          document.getElementById("wordProgressDisplay").innerHTML = parts;
+        } else {
+          document.getElementById("wordProgressDisplay").textContent = "";
+        }
+      }
+
+      // ── Grid Size ────────────────────────────────────────
+      function selectGridSize(rows, cols, el) {
+        selectedRows = rows;
+        selectedCols = cols;
+        document
+          .querySelectorAll(".wp-size-btn")
+          .forEach((b) => b.classList.remove("active"));
+        el.classList.add("active");
+
+        if (
+          confirm(
+            `Switch to ${rows}×${cols} grid? Cells outside new size will be removed.`,
+          )
+        ) {
+          WordPuzzle.setWPGridSize(rows, cols);
+          buildDashGrid();
+          document.getElementById("gridSizeStatus").textContent =
+            `${rows}×${cols} grid active`;
+          showToast(`✅ Grid changed to ${rows}×${cols}`);
+        } else {
+          updateGridSizeBtns();
+        }
+      }
+
+      // ── Turn ─────────────────────────────────────────────
+      function setTurn(turn) {
+        WordPuzzle.setWPTurn(turn);
+        updateStats();
+      }
+      function switchTurn() {
+        WordPuzzle.switchWPTurn();
+        updateStats();
+      }
+
+      // ── Points ───────────────────────────────────────────
+      function handleSetPoints(team) {
+        const val = document.getElementById(team + "SetPointsInput").value;
+        WordPuzzle.setWPPoints(team, val);
+        updateStats();
+        showToast(`✅ ${teamLabelUpper(team)} points set to ${val}`);
+      }
+
+      function handleAddPoints(team) {
+        const val = document.getElementById(team + "SetPointsInput").value;
+        WordPuzzle.addWPPoints(team, val);
+        updateStats();
+        showToast(`➕ ${val} points added to ${teamLabelUpper(team)}`);
+      }
+
+      function announcePoints(team) {
+        const amount = parseInt(
+          document.getElementById(team + "AnnounceInput").value || "0",
+          10,
+        );
+        if (isNaN(amount) || amount <= 0) {
+          alert("Enter a valid amount!");
+          return;
+        }
+        const g = WordPuzzle.game;
+        const total = team === "boys" ? g.boysPoints : g.girlsPoints;
+        if (dashSocket) {
+          dashSocket.emit("wordpuzzle-add-points", { team, amount, total });
+        }
+        showToast(`📣 Points modal sent to game page!`);
+      }
+
+      // ── Word ─────────────────────────────────────────────
+      function handleWordInput(val) {
+        WordPuzzle.setWPCurrentWord(val);
+        updateWordBadge();
+      }
+
+      function resetWordIndex() {
+        WordPuzzle.resetWPWordIndex();
+        updateWordBadge();
+        showToast("↺ Word index reset — starting from first letter again!");
+      }
+
+      // ── Photo ─────────────────────────────────────────────
+      async function uploadWPPhoto(team, input) {
+        if (!input.files[0]) return;
+        await WordPuzzle.saveWPTeamImage(team, input.files[0]);
+        updatePhotos();
+        showToast(`✅ ${teamLabelUpper(team)} photo updated!`);
+      }
+
+      // ── Winner ───────────────────────────────────────────
+      function handleAnnounce(team) {
+        const cls = document.getElementById("wpClassName").value || "12";
+        const sec =
+          document.getElementById("wpSectionName").value || "Shitolokkha";
+        WordPuzzle.announceWPWinner(team, cls, sec);
+        showToast(
+          team === "draw"
+            ? "🤝 DRAW announced!"
+            : `🏆 ${teamLabelUpper(team)} WIN announced!`,
+        );
+      }
+
+      function handleClearWinner() {
+        WordPuzzle.clearWPWinner();
+        showToast("Winner screen closed.");
+      }
+
+      // ── Reset ─────────────────────────────────────────────
+      async function confirmReset() {
+        if (
+          confirm(
+            "CAUTION: This will reset all points, grid cells, and photos. Continue?",
+          )
+        ) {
+          await WordPuzzle.resetWPGame();
+          document.getElementById("wordInput").value = "";
+          buildDashGrid();
+          updateUI();
+          showToast("🔄 Game fully reset.");
+        }
+      }
+
+      // ── Session Management ────────────────────────────────
+      function refreshSessionDropdown() {
+        const dropdown = document.getElementById("wpSessionDropdown");
+        const sessions = WordPuzzle.getWPSessions();
+        const currentName = WordPuzzle.getWPCurrentSessionName();
+        dropdown.innerHTML = '<option value="">-- Select a Session --</option>';
+        const sorted = Object.keys(sessions).sort((a, b) => {
+          const ta = sessions[a].savedAt || "";
+          const tb = sessions[b].savedAt || "";
+          return tb.localeCompare(ta);
+        });
+        sorted.forEach((name) => {
+          const opt = document.createElement("option");
+          opt.value = name;
+          const date = sessions[name].savedAt
+            ? new Date(sessions[name].savedAt).toLocaleString()
+            : "";
+          opt.textContent = `${name} (${date})`;
+          if (name === currentName) opt.selected = true;
+          dropdown.appendChild(opt);
+        });
+        updateSessionBadge();
+      }
+
+      function updateSessionBadge() {
+        const badge = document.getElementById("wpSessionBadge");
+        const name = WordPuzzle.getWPCurrentSessionName();
+        badge.style.display = "block";
+        if (name) {
+          badge.style.background = "rgba(124,58,237,0.18)";
+          badge.style.border = "1px solid rgba(124,58,237,0.5)";
+          badge.style.color = "#c4b5fd";
+          badge.innerHTML = `🎮 Active: <strong>${name}</strong> <span style="font-size:0.62rem;opacity:0.7;">(auto-saving)</span>`;
+        } else {
+          badge.style.background = "rgba(245,158,11,0.12)";
+          badge.style.border = "1px solid rgba(245,158,11,0.35)";
+          badge.style.color = "#fbbf24";
+          badge.innerHTML = "⚠️ No session active — create or select one";
+        }
+      }
+
+      function handleCreateSession() {
+        const input = document.getElementById("wpNewSessionName");
+        const name = input.value.trim();
+        if (!name) {
+          alert("Enter a session name!");
+          return;
+        }
+        const sessions = WordPuzzle.getWPSessions();
+        if (sessions[name] && !confirm(`Session "${name}" exists. Overwrite?`))
+          return;
+        WordPuzzle.saveWPSession(name);
+        input.value = "";
+        refreshSessionDropdown();
+        showToast(`✅ Session "${name}" created & saved!`);
+      }
+
+      function handleSessionSelect(name) {
+        if (!name) return;
+        if (
+          confirm(
+            `Load session "${name}"? This will replace the current game state.\n\nNote: Loaded letters will become VISIBLE on the game page.`,
+          )
+        ) {
+          WordPuzzle.loadWPSession(name);
+          document.getElementById("wordInput").value =
+            WordPuzzle.game.currentWord;
+          buildDashGrid();
+          updateUI();
+          showToast(
+            `🔄 Session "${name}" loaded! Previous letters now visible on game page.`,
+          );
+        } else {
+          refreshSessionDropdown();
+        }
+      }
+
+      function handleSaveSession() {
+        const name = WordPuzzle.getWPCurrentSessionName();
+        if (!name) {
+          alert("No active session! Create one first.");
+          return;
+        }
+        WordPuzzle.saveWPSession(name);
+        refreshSessionDropdown();
+        showToast(`💾 Session "${name}" saved!`);
+      }
+
+      function handleDeleteSession() {
+        const dropdown = document.getElementById("wpSessionDropdown");
+        const name = dropdown.value;
+        if (!name) {
+          alert("Select a session to delete!");
+          return;
+        }
+        if (!confirm(`Delete session "${name}"?`)) return;
+        WordPuzzle.deleteWPSession(name);
+        refreshSessionDropdown();
+        showToast(`🗑️ Session "${name}" deleted.`);
+      }
+
+      // ── Toast ─────────────────────────────────────────────
+      let toastTimer = null;
+      function showToast(msg) {
+        const t = document.getElementById("wpToast");
+        t.textContent = msg;
+        t.style.opacity = "1";
+        if (toastTimer) clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          t.style.opacity = "0";
+        }, 2800);
+      }
+
+      // ── Boot ──────────────────────────────────────────────
+      document.getElementById("wordInput").value =
+        WordPuzzle.game.currentWord || "";
+      updateUI();
+
+      // ════════════════════════════════════════════
+      //  MOBILE TAB SWITCHING
+      // ════════════════════════════════════════════
+      function switchMobileTab(tabName) {
+        document.querySelectorAll("[data-mobile-tab]").forEach((el) => {
+          el.classList.remove("mob-active");
+        });
+        document.querySelectorAll(".mobile-tab-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        document
+          .querySelectorAll(`[data-mobile-tab="${tabName}"]`)
+          .forEach((el) => {
+            el.classList.add("mob-active");
+          });
+        const activeBtn = document.querySelector(
+          `.mobile-tab-btn[data-tab="${tabName}"]`,
+        );
+        if (activeBtn) activeBtn.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      (function () {
+        if (window.innerWidth <= 768) {
+          switchMobileTab("control");
+        } else {
+          document
+            .querySelectorAll("[data-mobile-tab]")
+            .forEach((el) => el.classList.add("mob-active"));
+        }
+      })();
+    </script>
+    <script src="js/wake-lock.js"></script>
+    <script src="js/pc-control.js"></script>
+    <script src="js/whiteboard.js"></script>
   </body>
-
 </html>
-

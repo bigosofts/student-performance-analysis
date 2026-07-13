@@ -6,11 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Presentation Control — Teacher Dashboard</title>
     <link rel="stylesheet" href="css/style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
     <style>
       :root {
         --pres-primary: #7c3aed;
@@ -849,8 +845,13 @@
         animation: liveCardPulse 2s ease-in-out infinite;
       }
       @keyframes liveCardPulse {
-        0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-        50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+        }
       }
       .live-badge-card {
         display: none;
@@ -866,30 +867,44 @@
         letter-spacing: 1px;
         animation: blink 1s ease-in-out infinite;
       }
-      .screen-share.is-live .live-badge-card { display: block; }
+      .screen-share.is-live .live-badge-card {
+        display: block;
+      }
 
       /* ── Screen Share Modal ── */
       #screenShareModal {
         z-index: 100010;
       }
       .ss-modal-box {
-        background: linear-gradient(160deg, rgba(10,12,35,0.98) 0%, rgba(20,10,40,0.98) 100%);
+        background: linear-gradient(
+          160deg,
+          rgba(10, 12, 35, 0.98) 0%,
+          rgba(20, 10, 40, 0.98) 100%
+        );
         border: 1px solid rgba(251, 146, 60, 0.2);
         border-radius: 28px;
         padding: 32px;
         width: 100%;
         max-width: 500px;
-        box-shadow: 0 30px 80px rgba(0,0,0,0.7), 0 0 60px rgba(251,146,60,0.08);
-        animation: modalIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        box-shadow:
+          0 30px 80px rgba(0, 0, 0, 0.7),
+          0 0 60px rgba(251, 146, 60, 0.08);
+        animation: modalIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
         position: relative;
         overflow: hidden;
       }
       .ss-modal-box::before {
-        content: '';
+        content: "";
         position: absolute;
-        top: -60px; right: -60px;
-        width: 200px; height: 200px;
-        background: radial-gradient(circle, rgba(251,146,60,0.15), transparent 70%);
+        top: -60px;
+        right: -60px;
+        width: 200px;
+        height: 200px;
+        background: radial-gradient(
+          circle,
+          rgba(251, 146, 60, 0.15),
+          transparent 70%
+        );
         pointer-events: none;
       }
       .ss-header {
@@ -915,7 +930,7 @@
         align-items: center;
         justify-content: center;
         font-size: 1.4rem;
-        box-shadow: 0 6px 20px rgba(249,115,22,0.4);
+        box-shadow: 0 6px 20px rgba(249, 115, 22, 0.4);
       }
       .ss-status-bar {
         display: flex;
@@ -923,8 +938,8 @@
         gap: 10px;
         padding: 14px 18px;
         border-radius: 14px;
-        background: rgba(255,255,255,0.04);
-        border: 1px solid rgba(255,255,255,0.08);
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
         margin-bottom: 22px;
       }
       .ss-status-dot {
@@ -935,10 +950,12 @@
         transition: background 0.3s;
         flex-shrink: 0;
       }
-      .ss-status-dot.idle { background: #64748b; }
+      .ss-status-dot.idle {
+        background: #64748b;
+      }
       .ss-status-dot.live {
         background: #ef4444;
-        box-shadow: 0 0 0 3px rgba(239,68,68,0.25);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
         animation: blink 1s ease-in-out infinite;
       }
       .ss-status-text {
@@ -951,13 +968,15 @@
         display: none;
         padding: 4px 10px;
         border-radius: 50px;
-        background: rgba(239,68,68,0.15);
-        border: 1px solid rgba(239,68,68,0.3);
+        background: rgba(239, 68, 68, 0.15);
+        border: 1px solid rgba(239, 68, 68, 0.3);
         font-size: 0.75rem;
         font-weight: 700;
         color: #f87171;
       }
-      .ss-viewer-badge.visible { display: block; }
+      .ss-viewer-badge.visible {
+        display: block;
+      }
       .ss-preview-wrap {
         position: relative;
         border-radius: 16px;
@@ -965,7 +984,7 @@
         background: #000;
         aspect-ratio: 16/9;
         margin-bottom: 22px;
-        border: 1px solid rgba(255,255,255,0.07);
+        border: 1px solid rgba(255, 255, 255, 0.07);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -983,11 +1002,18 @@
         gap: 10px;
         color: #475569;
       }
-      .ss-preview-placeholder .ph-icon { font-size: 2.5rem; }
-      .ss-preview-placeholder p { font-size: 0.82rem; text-align: center; line-height: 1.5; }
+      .ss-preview-placeholder .ph-icon {
+        font-size: 2.5rem;
+      }
+      .ss-preview-placeholder p {
+        font-size: 0.82rem;
+        text-align: center;
+        line-height: 1.5;
+      }
       .ss-live-overlay {
         position: absolute;
-        top: 10px; left: 10px;
+        top: 10px;
+        left: 10px;
         display: none;
         background: #ef4444;
         color: white;
@@ -1009,7 +1035,7 @@
         border-radius: 14px;
         background: linear-gradient(135deg, #ea580c, #f97316);
         color: white;
-        font-family: 'Outfit', sans-serif;
+        font-family: "Outfit", sans-serif;
         font-size: 1rem;
         font-weight: 800;
         cursor: pointer;
@@ -1018,35 +1044,43 @@
         align-items: center;
         justify-content: center;
         gap: 9px;
-        box-shadow: 0 6px 24px rgba(249,115,22,0.4);
+        box-shadow: 0 6px 24px rgba(249, 115, 22, 0.4);
         letter-spacing: 0.3px;
       }
       .btn-ss-start:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 32px rgba(249,115,22,0.6);
+        box-shadow: 0 10px 32px rgba(249, 115, 22, 0.6);
       }
-      .btn-ss-start:active { transform: scale(0.97); }
+      .btn-ss-start:active {
+        transform: scale(0.97);
+      }
       .btn-ss-start.btn-ss-stop {
         background: linear-gradient(135deg, #b91c1c, #ef4444);
-        box-shadow: 0 6px 24px rgba(239,68,68,0.4);
+        box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
       }
       .btn-ss-stop:hover {
-        box-shadow: 0 10px 32px rgba(239,68,68,0.6) !important;
+        box-shadow: 0 10px 32px rgba(239, 68, 68, 0.6) !important;
       }
       .ss-tips {
         margin-top: 18px;
         padding: 14px 16px;
         border-radius: 12px;
-        background: rgba(251,146,60,0.06);
-        border: 1px solid rgba(251,146,60,0.15);
+        background: rgba(251, 146, 60, 0.06);
+        border: 1px solid rgba(251, 146, 60, 0.15);
         font-size: 0.78rem;
         color: #94a3b8;
         line-height: 1.7;
       }
-      .ss-tips b { color: #fb923c; }
+      .ss-tips b {
+        color: #fb923c;
+      }
       @media (max-width: 768px) {
-        .ss-modal-box { padding: 22px 18px; }
-        .btn-ctrl.btn-screenshare { grid-column: 1 / -1; }
+        .ss-modal-box {
+          padding: 22px 18px;
+        }
+        .btn-ctrl.btn-screenshare {
+          grid-column: 1 / -1;
+        }
       }
 
       /* ─── MODALS ─── */
@@ -2027,14 +2061,32 @@
                   <div class="share-name">Screen Share</div>
                   <div class="share-desc">Mirror your screen live</div>
                 </div>
-                <div class="share-card live-camera" id="shareCameraBtn" style="background: rgba(16, 185, 129, 0.05); border-color: rgba(16, 185, 129, 0.2);">
-                  <span class="live-badge-card" style="background: #10b981;">LIVE</span>
+                <div
+                  class="share-card live-camera"
+                  id="shareCameraBtn"
+                  style="
+                    background: rgba(16, 185, 129, 0.05);
+                    border-color: rgba(16, 185, 129, 0.2);
+                  "
+                >
+                  <span class="live-badge-card" style="background: #10b981"
+                    >LIVE</span
+                  >
                   <span class="share-icon">📷</span>
                   <div class="share-name">Live Camera</div>
                   <div class="share-desc">Broadcast phone camera</div>
                 </div>
-                <div class="share-card" id="shareAudioBtn" style="background: rgba(168, 85, 247, 0.05); border-color: rgba(168, 85, 247, 0.2);">
-                  <span class="live-badge-card" style="background: #a855f7;">LIVE</span>
+                <div
+                  class="share-card"
+                  id="shareAudioBtn"
+                  style="
+                    background: rgba(168, 85, 247, 0.05);
+                    border-color: rgba(168, 85, 247, 0.2);
+                  "
+                >
+                  <span class="live-badge-card" style="background: #a855f7"
+                    >LIVE</span
+                  >
                   <span class="share-icon">🎙️</span>
                   <div class="share-name">Share Audio</div>
                   <div class="share-desc">Stream mic to classroom</div>
@@ -2123,7 +2175,12 @@
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select from Gallery</label>
-          <input list="galleryImageDatalist" id="galleryImageSelect" class="select-input" placeholder="-- Search and Choose an Image --" />
+          <input
+            list="galleryImageDatalist"
+            id="galleryImageSelect"
+            class="select-input"
+            placeholder="-- Search and Choose an Image --"
+          />
           <datalist id="galleryImageDatalist">
             <option value="">-- Choose an Image --</option>
           </datalist>
@@ -2420,7 +2477,12 @@ Kingdom → Plantae
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select from Gallery</label>
-          <input list="galleryVideoDatalist" id="galleryVideoSelect" class="select-input" placeholder="-- Search and Choose a Video --" />
+          <input
+            list="galleryVideoDatalist"
+            id="galleryVideoSelect"
+            class="select-input"
+            placeholder="-- Search and Choose a Video --"
+          />
           <datalist id="galleryVideoDatalist">
             <option value="">-- Choose a Video --</option>
           </datalist>
@@ -2583,7 +2645,12 @@ Kingdom → Plantae
 
         <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Select PDF from Gallery</label>
-          <input list="galleryPdfDatalist" id="galleryPdfSelect" class="select-input" placeholder="-- Search and Choose a PDF --" />
+          <input
+            list="galleryPdfDatalist"
+            id="galleryPdfSelect"
+            class="select-input"
+            placeholder="-- Search and Choose a PDF --"
+          />
           <datalist id="galleryPdfDatalist">
             <option value="">-- Choose a PDF --</option>
           </datalist>
@@ -2606,24 +2673,68 @@ Kingdom → Plantae
         <div class="modal-header">
           <div class="modal-title">🎙️ Share Audio (Live)</div>
           <div style="display: flex; gap: 8px">
-            <button class="modal-close" onclick="minimizeShareModal('audioModal', '🎙️ Share Audio')" title="Minimize">_</button>
-            <button class="modal-close" onclick="closeSpecificShareModal('audioModal')" title="Close">✕</button>
+            <button
+              class="modal-close"
+              onclick="minimizeShareModal('audioModal', '🎙️ Share Audio')"
+              title="Minimize"
+            >
+              _
+            </button>
+            <button
+              class="modal-close"
+              onclick="closeSpecificShareModal('audioModal')"
+              title="Close"
+            >
+              ✕
+            </button>
           </div>
         </div>
 
         <!-- Status row -->
-        <div style="display:flex; align-items:center; gap:12px; padding:14px 0 10px;">
-          <div id="asStatusDot" style="width:12px;height:12px;border-radius:50%;background:#475569;transition:background 0.3s;flex-shrink:0;"></div>
-          <div id="asStatusText" style="font-size:0.9rem;color:#94a3b8;">Ready to stream</div>
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0 10px;
+          "
+        >
+          <div
+            id="asStatusDot"
+            style="
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: #475569;
+              transition: background 0.3s;
+              flex-shrink: 0;
+            "
+          ></div>
+          <div id="asStatusText" style="font-size: 0.9rem; color: #94a3b8">
+            Ready to stream
+          </div>
         </div>
 
         <!-- Visualiser bar -->
-        <div id="audioVisualiser" style="height:48px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.2);border-radius:10px;overflow:hidden;display:flex;align-items:center;justify-content:center;margin-bottom:16px;">
-          <canvas id="audioCanvas" style="width:100%;height:100%;"></canvas>
+        <div
+          id="audioVisualiser"
+          style="
+            height: 48px;
+            background: rgba(168, 85, 247, 0.06);
+            border: 1px solid rgba(168, 85, 247, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+          "
+        >
+          <canvas id="audioCanvas" style="width: 100%; height: 100%"></canvas>
         </div>
 
         <!-- Microphone selector -->
-        <div class="form-row" style="margin-bottom:16px;">
+        <div class="form-row" style="margin-bottom: 16px">
           <label class="form-label">Microphone</label>
           <select id="audioDeviceSelect" class="select-input">
             <option value="">Default Microphone</option>
@@ -2631,16 +2742,43 @@ Kingdom → Plantae
         </div>
 
         <!-- Volume indicator -->
-        <div style="margin-bottom:20px;">
-          <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:#64748b;margin-bottom:4px;">
+        <div style="margin-bottom: 20px">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              font-size: 0.75rem;
+              color: #64748b;
+              margin-bottom: 4px;
+            "
+          >
             <span>Level</span><span id="audioLevelPct">0%</span>
           </div>
-          <div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;">
-            <div id="audioLevelBar" style="height:100%;width:0%;background:linear-gradient(90deg,#7c3aed,#a855f7);border-radius:3px;transition:width 0.05s;"></div>
+          <div
+            style="
+              height: 6px;
+              background: rgba(255, 255, 255, 0.06);
+              border-radius: 3px;
+            "
+          >
+            <div
+              id="audioLevelBar"
+              style="
+                height: 100%;
+                width: 0%;
+                background: linear-gradient(90deg, #7c3aed, #a855f7);
+                border-radius: 3px;
+                transition: width 0.05s;
+              "
+            ></div>
           </div>
         </div>
 
-        <button class="btn-share" id="asStartBtn" style="background:linear-gradient(135deg,#7c3aed,#a855f7);">
+        <button
+          class="btn-share"
+          id="asStartBtn"
+          style="background: linear-gradient(135deg, #7c3aed, #a855f7)"
+        >
           🎙️ Start Streaming
         </button>
       </div>
@@ -4164,637 +4302,856 @@ Kingdom → Plantae
     </script>
     <script src="js/wake-lock.js"></script>
     <script src="js/pc-control.js"></script>
-  <script src="js/whiteboard.js"></script>
+    <script src="js/whiteboard.js"></script>
 
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        SCREEN SHARE MODAL
   ══════════════════════════════════════════ -->
-  <div class="modal-overlay" id="screenShareModal">
-    <div class="ss-modal-box">
-      <div class="ss-header">
-        <div class="ss-title">
-          <div class="ss-title-icon">📱</div>
-          <div>
-            <div>Screen Share</div>
-            <div style="font-size:0.72rem;font-weight:500;color:#64748b;margin-top:2px">Broadcast your screen live to the game page</div>
+    <div class="modal-overlay" id="screenShareModal">
+      <div class="ss-modal-box">
+        <div class="ss-header">
+          <div class="ss-title">
+            <div class="ss-title-icon">📱</div>
+            <div>
+              <div>Screen Share</div>
+              <div
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 500;
+                  color: #64748b;
+                  margin-top: 2px;
+                "
+              >
+                Broadcast your screen live to the game page
+              </div>
+            </div>
           </div>
+          <button class="modal-close" id="ssCloseBtn" title="Close">✕</button>
         </div>
-        <button class="modal-close" id="ssCloseBtn" title="Close">✕</button>
-      </div>
 
-      <div class="ss-status-bar">
-        <div class="ss-status-dot idle" id="ssStatusDot"></div>
-        <span class="ss-status-text" id="ssStatusText">Ready to share your screen</span>
-        <span class="ss-viewer-badge" id="ssViewerBadge">👁 LIVE</span>
-      </div>
-
-      <div class="ss-preview-wrap">
-        <video id="ssPreviewVideo" autoplay muted playsinline></video>
-        <div class="ss-preview-placeholder" id="ssPlaceholder">
-          <span class="ph-icon">🖥️</span>
-          <p>Your screen preview will appear here<br/>when sharing starts</p>
+        <div class="ss-status-bar">
+          <div class="ss-status-dot idle" id="ssStatusDot"></div>
+          <span class="ss-status-text" id="ssStatusText"
+            >Ready to share your screen</span
+          >
+          <span class="ss-viewer-badge" id="ssViewerBadge">👁 LIVE</span>
         </div>
-        <div class="ss-live-overlay" id="ssLiveOverlay">🔴 LIVE</div>
-      </div>
 
-      <div class="ss-controls">
-        <button class="btn-ss-start" id="ssStartBtn">📡 Start Sharing</button>
-      </div>
+        <div class="ss-preview-wrap">
+          <video id="ssPreviewVideo" autoplay muted playsinline></video>
+          <div class="ss-preview-placeholder" id="ssPlaceholder">
+            <span class="ph-icon">🖥️</span>
+            <p>Your screen preview will appear here<br />when sharing starts</p>
+          </div>
+          <div class="ss-live-overlay" id="ssLiveOverlay">🔴 LIVE</div>
+        </div>
 
-      <div class="ss-tips">
-        <b>📌 Tips:</b><br/>
-        • On <b>Android</b>: tap &ldquo;Start now&rdquo; in the native system prompt to share your entire screen<br/>
-        • On <b>iOS Safari</b>: only the current browser tab can be shared<br/>
-        • The game page will auto-display a full-screen live view instantly
+        <div class="ss-controls">
+          <button class="btn-ss-start" id="ssStartBtn">📡 Start Sharing</button>
+        </div>
+
+        <div class="ss-tips">
+          <b>📌 Tips:</b><br />
+          • On <b>Android</b>: tap &ldquo;Start now&rdquo; in the native system
+          prompt to share your entire screen<br />
+          • On <b>iOS Safari</b>: only the current browser tab can be shared<br />
+          • The game page will auto-display a full-screen live view instantly
+        </div>
       </div>
     </div>
-  </div>
-  <!-- ══════════════════════════════════════════
+    <!-- ══════════════════════════════════════════
        CAMERA SHARE MODAL
   ══════════════════════════════════════════ -->
-  <div class="modal-overlay" id="cameraShareModal">
-    <div class="ss-modal-box">
-      <div class="ss-header">
-        <div class="ss-title">
-          <div class="ss-title-icon">📷</div>
-          <div>
-            <div>Live Camera</div>
-            <div style="font-size:0.72rem;font-weight:500;color:#64748b;margin-top:2px">Broadcast your camera to the game page</div>
+    <div class="modal-overlay" id="cameraShareModal">
+      <div class="ss-modal-box">
+        <div class="ss-header">
+          <div class="ss-title">
+            <div class="ss-title-icon">📷</div>
+            <div>
+              <div>Live Camera</div>
+              <div
+                style="
+                  font-size: 0.72rem;
+                  font-weight: 500;
+                  color: #64748b;
+                  margin-top: 2px;
+                "
+              >
+                Broadcast your camera to the game page
+              </div>
+            </div>
           </div>
+          <button class="modal-close" id="camCloseBtn" title="Close">✕</button>
         </div>
-        <button class="modal-close" id="camCloseBtn" title="Close">✕</button>
-      </div>
 
-      <div class="ss-status-bar">
-        <div class="ss-status-dot idle" id="camStatusDot"></div>
-        <span class="ss-status-text" id="camStatusText">Ready to share camera</span>
-        <span class="ss-viewer-badge" id="camViewerBadge">👁 LIVE</span>
-      </div>
-
-      <div class="ss-preview-wrap">
-        <video id="camPreviewVideo" autoplay muted playsinline></video>
-        <div class="ss-preview-placeholder" id="camPlaceholder">
-          <span class="ph-icon">📷</span>
-          <p>Camera preview will appear here<br/>when sharing starts</p>
+        <div class="ss-status-bar">
+          <div class="ss-status-dot idle" id="camStatusDot"></div>
+          <span class="ss-status-text" id="camStatusText"
+            >Ready to share camera</span
+          >
+          <span class="ss-viewer-badge" id="camViewerBadge">👁 LIVE</span>
         </div>
-        <div class="ss-live-overlay" id="camLiveOverlay">🔴 LIVE</div>
-      </div>
 
-      <div style="margin-bottom: 15px;">
-        <select id="camFacingSelect" class="form-input" style="width: 100%; padding: 12px; border-radius: 10px; background: rgba(255,255,255,0.05); color: white; border: 1px solid rgba(255,255,255,0.1);">
-          <option value="environment" style="color: black;">Rear Camera (Environment)</option>
-          <option value="user" style="color: black;">Front Camera (Selfie)</option>
-        </select>
-      </div>
+        <div class="ss-preview-wrap">
+          <video id="camPreviewVideo" autoplay muted playsinline></video>
+          <div class="ss-preview-placeholder" id="camPlaceholder">
+            <span class="ph-icon">📷</span>
+            <p>Camera preview will appear here<br />when sharing starts</p>
+          </div>
+          <div class="ss-live-overlay" id="camLiveOverlay">🔴 LIVE</div>
+        </div>
 
-      <div class="ss-controls">
-        <button class="btn-ss-start" id="camStartBtn" style="background: linear-gradient(135deg, #10b981, #059669); box-shadow: 0 6px 24px rgba(16,185,129,0.4);">📡 Start Camera</button>
-      </div>
+        <div style="margin-bottom: 15px">
+          <select
+            id="camFacingSelect"
+            class="form-input"
+            style="
+              width: 100%;
+              padding: 12px;
+              border-radius: 10px;
+              background: rgba(255, 255, 255, 0.05);
+              color: white;
+              border: 1px solid rgba(255, 255, 255, 0.1);
+            "
+          >
+            <option value="environment" style="color: black">
+              Rear Camera (Environment)
+            </option>
+            <option value="user" style="color: black">
+              Front Camera (Selfie)
+            </option>
+          </select>
+        </div>
 
-      <div class="ss-tips">
-        <b>📌 Tips:</b><br/>
-        • Use the <b>Rear Camera</b> as a document camera to show physical books or worksheets<br/>
-        • The game page will automatically switch to a full-screen view of this camera
+        <div class="ss-controls">
+          <button
+            class="btn-ss-start"
+            id="camStartBtn"
+            style="
+              background: linear-gradient(135deg, #10b981, #059669);
+              box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+            "
+          >
+            📡 Start Camera
+          </button>
+        </div>
+
+        <div class="ss-tips">
+          <b>📌 Tips:</b><br />
+          • Use the <b>Rear Camera</b> as a document camera to show physical
+          books or worksheets<br />
+          • The game page will automatically switch to a full-screen view of
+          this camera
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Live Camera: native WebRTC broadcaster -->
-  <script>
-  // ════════════════════════════════════════════════════
-  //  SMART ICE CONFIG HELPER
-  //  On local/private IPs (hotspot, LAN) we skip STUN entirely —
-  //  host candidates (the device's own LAN IP) are available
-  //  immediately and work perfectly on the same network.
-  //  On the public internet we include Google STUN as fallback.
-  // ════════════════════════════════════════════════════
-  window.getIceCfg = function() {
-    return {
-      iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' },
-        {
-          urls: 'turn:openrelay.metered.ca:80',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        },
-        {
-          urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-          username: 'openrelayproject',
-          credential: 'openrelayproject'
-        }
-      ],
-      iceCandidatePoolSize: 4
-    };
-  };
-  </script>
-
-  <!-- Live Camera share IIFE broadcaster -->
-  <script>
-  (function() {
-    const camModal      = document.getElementById('cameraShareModal');
-    const camStartBtn   = document.getElementById('camStartBtn');
-    const camCloseBtn   = document.getElementById('camCloseBtn');
-    const camStatusDot  = document.getElementById('camStatusDot');
-    const camStatusText = document.getElementById('camStatusText');
-    const camViewerBadge= document.getElementById('camViewerBadge');
-    const camPreview    = document.getElementById('camPreviewVideo');
-    const camPlaceholder= document.getElementById('camPlaceholder');
-    const camLiveOverlay= document.getElementById('camLiveOverlay');
-    const camCard       = document.getElementById('shareCameraBtn');
-    const camFacingSel  = document.getElementById('camFacingSelect');
-
-    // Use smart ICE config: no STUN on local/hotspot, STUN on internet
-    const ICE_CFG = window.getIceCfg();
-
-    let pc = null;
-    let localStream = null;
-    let isSharing = false;
-    let sock = null;
-
-    function getSocket() {
-      if (sock) return sock;
-      if (window.presSocket) { sock = window.presSocket; return sock; }
-      try { sock = io(); } catch(e) {}
-      return sock;
-    }
-
-    let sigBound = false;
-
-    function bindSignaling() {
-      if (sigBound) return;
-      sigBound = true;
-      const s = getSocket();
-      if (!s) return;
-      s.on('screenshare-answer', async (data) => {
-        if (!pc || !isSharing) return;
-        try { await pc.setRemoteDescription(new RTCSessionDescription(data.sdp)); setStatus('live', 'Live — classroom connected ✓'); } catch(e) {}
-      });
-      s.on('screenshare-ice', async (data) => {
-        if (!pc || !isSharing || data.from === 'broadcaster') return;
-        try { if (data.candidate) await pc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e) {}
-      });
-      s.on('screenshare-ready', async () => {
-        if (!localStream || !isSharing) return;
-        await createAndSendOffer();
-      });
-    }
-
-    async function createAndSendOffer() {
-      const s = getSocket();
-      if (pc) { try { pc.close(); } catch(e) {} }
-      pc = new RTCPeerConnection(ICE_CFG);
-      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-      pc.onicecandidate = (e) => {
-        if (e.candidate && s) s.emit('screenshare-ice', { candidate: e.candidate, from: 'broadcaster' });
+    <!-- Live Camera: native WebRTC broadcaster -->
+    <script>
+      // ════════════════════════════════════════════════════
+      //  SMART ICE CONFIG HELPER
+      //  On local/private IPs (hotspot, LAN) we skip STUN entirely —
+      //  host candidates (the device's own LAN IP) are available
+      //  immediately and work perfectly on the same network.
+      //  On the public internet we include Google STUN as fallback.
+      // ════════════════════════════════════════════════════
+      window.getIceCfg = function () {
+        return {
+          iceServers: [
+            { urls: "stun:stun.l.google.com:19302" },
+            { urls: "stun:stun1.l.google.com:19302" },
+            {
+              urls: "turn:openrelay.metered.ca:80",
+              username: "openrelayproject",
+              credential: "openrelayproject",
+            },
+            {
+              urls: "turn:openrelay.metered.ca:443",
+              username: "openrelayproject",
+              credential: "openrelayproject",
+            },
+            {
+              urls: "turn:openrelay.metered.ca:443?transport=tcp",
+              username: "openrelayproject",
+              credential: "openrelayproject",
+            },
+          ],
+          iceCandidatePoolSize: 4,
+        };
       };
-      pc.onconnectionstatechange = () => {
-        if (pc && pc.connectionState === 'connected') setStatus('live', 'Live — classroom connected ✓');
-        else if (pc && (pc.connectionState === 'disconnected' || pc.connectionState === 'failed')) setStatus('live', 'Broadcasting… (viewer disconnected)');
-      };
-      try {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        if (s) s.emit('screenshare-offer', { sdp: pc.localDescription });
-        setStatus('live', 'Offer sent — waiting for game page…');
-      } catch(e) {
-        setStatus('idle', 'Failed to create connection');
-      }
-    }
+    </script>
 
-    if(camCard) camCard.addEventListener('click', () => camModal.classList.add('open'));
-    camCloseBtn.addEventListener('click', () => camModal.classList.remove('open'));
-    camModal.addEventListener('click', (e) => { if (e.target === camModal) camModal.classList.remove('open'); });
+    <!-- Live Camera share IIFE broadcaster -->
+    <script>
+      (function () {
+        const camModal = document.getElementById("cameraShareModal");
+        const camStartBtn = document.getElementById("camStartBtn");
+        const camCloseBtn = document.getElementById("camCloseBtn");
+        const camStatusDot = document.getElementById("camStatusDot");
+        const camStatusText = document.getElementById("camStatusText");
+        const camViewerBadge = document.getElementById("camViewerBadge");
+        const camPreview = document.getElementById("camPreviewVideo");
+        const camPlaceholder = document.getElementById("camPlaceholder");
+        const camLiveOverlay = document.getElementById("camLiveOverlay");
+        const camCard = document.getElementById("shareCameraBtn");
+        const camFacingSel = document.getElementById("camFacingSelect");
 
-    function setStatus(state, text) {
-      camStatusDot.className = 'ss-status-dot ' + state;
-      camStatusText.textContent = text;
-      const isLive = state === 'live';
-      camViewerBadge.classList.toggle('visible', isLive);
-      camLiveOverlay.style.display = isLive ? 'block' : 'none';
-      if(camCard) camCard.classList.toggle('is-live', isLive);
-    }
+        // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+        const ICE_CFG = window.getIceCfg();
 
-    function stopSharing() {
-      isSharing = false;
-      if (pc) { try { pc.close(); } catch(e) {} pc = null; }
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-      camPreview.srcObject = null;
-      camPreview.style.display = 'none';
-      camPlaceholder.style.display = 'flex';
-      setStatus('idle', 'Ready to share camera');
-      camStartBtn.innerHTML = '📡 Start Camera';
-      camStartBtn.classList.remove('btn-ss-stop');
-      const s = getSocket();
-      if (s) s.emit('screenshare-stop'); // Reuse the same receiver off event
-    }
+        let pc = null;
+        let localStream = null;
+        let isSharing = false;
+        let sock = null;
 
-    async function startSharing() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Camera access requires a Secure Context (HTTPS).');
-        return;
-      }
-      setStatus('idle', 'Requesting camera access…');
-      try {
-        const facing = camFacingSel.value;
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: { ideal: facing }, width: { ideal: 1280 }, height: { ideal: 720 } },
-          audio: { echoCancellation: true, noiseSuppression: true, sampleRate: 44100 }
-        });
-        localStream = stream;
-        isSharing = true;
-        camPreview.srcObject = stream;
-        camPreview.style.display = 'block';
-        camPlaceholder.style.display = 'none';
-        camStartBtn.innerHTML = '⏹ Stop Camera';
-        camStartBtn.classList.add('btn-ss-stop');
-        setStatus('live', 'Broadcasting… waiting for game page');
-
-        bindSignaling();
-        const s = getSocket();
-        if (s) s.emit('screenshare-start', {}); // Reuse the same receiver on event
-
-        stream.getVideoTracks()[0].addEventListener('ended', stopSharing);
-      } catch(err) {
-        alert('Camera share failed: ' + err.name + ' - ' + err.message);
-        setStatus('idle', 'Could not start camera share');
-      }
-    }
-
-    camStartBtn.addEventListener('click', () => isSharing ? stopSharing() : startSharing());
-    
-    // Auto-stop if user closes modal? No, let them keep broadcasting while navigating.
-  })();
-  </script>
-
-  <!-- Screen Share: native WebRTC broadcaster (no external services) -->
-  <script>
-
-  // ════════════════════════════════════════════════════
-  //  SCREEN SHARE MODULE — Dashboard (Broadcaster side)
-  //  Uses native RTCPeerConnection + Socket.IO signaling
-  // ════════════════════════════════════════════════════
-  (function() {
-    const ssModal      = document.getElementById('screenShareModal');
-    const ssStartBtn   = document.getElementById('ssStartBtn');
-    const ssCloseBtn   = document.getElementById('ssCloseBtn');
-    const ssStatusDot  = document.getElementById('ssStatusDot');
-    const ssStatusText = document.getElementById('ssStatusText');
-    const ssViewerBadge= document.getElementById('ssViewerBadge');
-    const ssPreview    = document.getElementById('ssPreviewVideo');
-    const ssPlaceholder= document.getElementById('ssPlaceholder');
-    const ssLiveOverlay= document.getElementById('ssLiveOverlay');
-    const ssCard       = document.getElementById('shareScreenBtn');
-
-    // Use smart ICE config: no STUN on local/hotspot, STUN on internet
-    const ICE_CFG = window.getIceCfg();
-
-    let pc = null;
-    let localStream = null;
-    let isSharing = false;
-    let sock = null;
-
-    // Get the Socket.IO socket (reuse the page's existing one)
-    function getSocket() {
-      if (sock) return sock;
-      if (window.presSocket) { sock = window.presSocket; return sock; }
-      try { sock = io(); } catch(e) {}
-      return sock;
-    }
-
-    let sigBound = false;
-    // Bind socket listeners for WebRTC signaling
-    function bindSignaling() {
-      if (sigBound) return;
-      sigBound = true;
-      const s = getSocket();
-      if (!s) return;
-
-      // Game page answered our offer
-      s.on('screenshare-answer', async (data) => {
-        if (!pc) return;
-        try {
-          await pc.setRemoteDescription(new RTCSessionDescription(data.sdp));
-          setStatus('live', 'Live — game screen connected ✓');
-        } catch(e) { console.warn('[SS] setRemoteDescription failed:', e); }
-      });
-
-      // ICE candidates from game page
-      s.on('screenshare-ice', async (data) => {
-        if (!pc || data.from === 'broadcaster') return;
-        try {
-          if (data.candidate) await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
-        } catch(e) {}
-      });
-
-      // Game page is ready to receive — create and send the offer
-      s.on('screenshare-ready', async () => {
-        if (!localStream || !isSharing) return;
-        await createAndSendOffer();
-      });
-    }
-
-    async function createAndSendOffer() {
-      const s = getSocket();
-      // Create fresh RTCPeerConnection
-      if (pc) { try { pc.close(); } catch(e) {} }
-      pc = new RTCPeerConnection(ICE_CFG);
-
-      // Add all screen tracks
-      localStream.getTracks().forEach(track => pc.addTrack(track, localStream));
-
-      // Send our ICE candidates to game page
-      pc.onicecandidate = (e) => {
-        if (e.candidate && s) {
-          s.emit('screenshare-ice', { candidate: e.candidate, from: 'broadcaster' });
-        }
-      };
-
-      pc.onconnectionstatechange = () => {
-        if (pc && (pc.connectionState === 'connected')) {
-          setStatus('live', 'Live — game screen connected ✓');
-        } else if (pc && (pc.connectionState === 'disconnected' || pc.connectionState === 'failed')) {
-          setStatus('live', 'Broadcasting… (viewer may have disconnected)');
-        }
-      };
-
-      try {
-        const offer = await pc.createOffer();
-        await pc.setLocalDescription(offer);
-        if (s) s.emit('screenshare-offer', { sdp: pc.localDescription });
-        setStatus('live', 'Offer sent — waiting for game page…');
-      } catch(e) {
-        console.warn('[SS] createOffer failed:', e);
-        setStatus('idle', 'Failed to create connection — try again');
-      }
-    }
-
-    // Open/close modal
-    ssCard.addEventListener('click', () => ssModal.classList.add('open'));
-    ssCloseBtn.addEventListener('click', () => ssModal.classList.remove('open'));
-    ssModal.addEventListener('click', (e) => { if (e.target === ssModal) ssModal.classList.remove('open'); });
-
-    function setStatus(state, text) {
-      ssStatusDot.className = 'ss-status-dot ' + state;
-      ssStatusText.textContent = text;
-      const isLive = state === 'live';
-      ssViewerBadge.classList.toggle('visible', isLive);
-      ssLiveOverlay.style.display = isLive ? 'block' : 'none';
-      ssCard.classList.toggle('is-live', isLive);
-    }
-
-    function stopSharing() {
-      isSharing = false;
-      if (pc) { try { pc.close(); } catch(e) {} pc = null; }
-      if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-
-      ssPreview.srcObject = null;
-      ssPreview.style.display = 'none';
-      ssPlaceholder.style.display = 'flex';
-      setStatus('idle', 'Ready to share your screen');
-      ssStartBtn.textContent = '📡 Start Sharing';
-      ssStartBtn.classList.remove('btn-ss-stop');
-
-      const s = getSocket();
-      if (s) s.emit('screenshare-stop');
-    }
-
-    async function startSharing() {
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      if (isMobile) {
-        let url = prompt("Please enter the web address to share:");
-        if (url) {
-          if (!/^https?:\/\//i.test(url)) {
-            url = "https://" + url;
+        function getSocket() {
+          if (sock) return sock;
+          if (window.presSocket) {
+            sock = window.presSocket;
+            return sock;
           }
+          try {
+            sock = io();
+          } catch (e) {}
+          return sock;
+        }
+
+        let sigBound = false;
+
+        function bindSignaling() {
+          if (sigBound) return;
+          sigBound = true;
           const s = getSocket();
-          if (s) s.emit('pres-share-webpage', { url });
-          showToast("🌐 Webpage sent to game screen!", "success");
+          if (!s) return;
+          s.on("screenshare-answer", async (data) => {
+            if (!pc || !isSharing) return;
+            try {
+              await pc.setRemoteDescription(
+                new RTCSessionDescription(data.sdp),
+              );
+              setStatus("live", "Live — classroom connected ✓");
+            } catch (e) {}
+          });
+          s.on("screenshare-ice", async (data) => {
+            if (!pc || !isSharing || data.from === "broadcaster") return;
+            try {
+              if (data.candidate)
+                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (e) {}
+          });
+          s.on("screenshare-ready", async () => {
+            if (!localStream || !isSharing) return;
+            await createAndSendOffer();
+          });
         }
-        return;
-      }
 
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getDisplayMedia) {
-        alert('Screen sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://' + window.location.host + '\n3. Relaunch Chrome and try again.');
-        return;
-      }
-      setStatus('idle', 'Requesting screen access…');
-      try {
-        const stream = await navigator.mediaDevices.getDisplayMedia({
-          video: { frameRate: { ideal: 30, max: 30 } },
-          audio: { echoCancellation: false, noiseSuppression: false, sampleRate: 44100 }
-        });
-        localStream = stream;
-        isSharing = true;
-
-        // Show local preview
-        ssPreview.srcObject = stream;
-        ssPreview.style.display = 'block';
-        ssPlaceholder.style.display = 'none';
-        ssStartBtn.textContent = '⏹ Stop Sharing';
-        ssStartBtn.classList.add('btn-ss-stop');
-        setStatus('live', 'Broadcasting… waiting for game page');
-
-        // Bind signaling listeners (idempotent)
-        bindSignaling();
-
-        // Notify game page to show the modal and signal ready
-        const s = getSocket();
-        if (s) s.emit('screenshare-start', {});
-
-        // Stop when user clicks browser's native "Stop sharing" button
-        stream.getVideoTracks()[0].addEventListener('ended', stopSharing);
-
-      } catch(err) {
-        console.warn('[SS] getDisplayMedia error:', err);
-        alert('Screen share failed: ' + err.name + ' - ' + err.message);
-        setStatus('idle', err.name === 'NotAllowedError'
-          ? 'Permission denied — please allow screen capture'
-          : 'Could not start screen share');
-      }
-    }
-
-    ssStartBtn.addEventListener('click', () => isSharing ? stopSharing() : startSharing());
-    window.stopScreenShare = stopSharing;
-  })();
-
-  // ════════════════════════════════════════════════════
-  //  AUDIO SHARE MODULE — Dashboard (Broadcaster side)
-  //  Streams microphone live via WebRTC to game-presentation
-  // ════════════════════════════════════════════════════
-  (function() {
-    // Use smart ICE config: no STUN on local/hotspot, STUN on internet
-    const ICE_CFG = window.getIceCfg();
-
-    const asStartBtn     = document.getElementById('asStartBtn');
-    const asStatusDot    = document.getElementById('asStatusDot');
-    const asStatusText   = document.getElementById('asStatusText');
-    const asLevelBar     = document.getElementById('audioLevelBar');
-    const asLevelPct     = document.getElementById('audioLevelPct');
-    const asCanvas       = document.getElementById('audioCanvas');
-    const asDevSelect    = document.getElementById('audioDeviceSelect');
-    const audioModal     = document.getElementById('audioModal');
-    const shareAudioBtn  = document.getElementById('shareAudioBtn');
-
-    let asStream    = null;
-    let asPc        = null;
-    let asIsLive    = false;
-    let asCtx       = null;  // AudioContext
-    let asAnalyser  = null;
-    let asAnimFrame = null;
-    let asCtx2d     = null;  // Canvas 2D
-
-    function getSocket() { return window.presSocket || (typeof io !== 'undefined' ? io() : null); }
-
-    // ── Open modal + populate mic list ─────────────────────────
-    shareAudioBtn.addEventListener('click', async () => {
-      openModal('audioModal');
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-        asDevSelect.innerHTML = '';
-        devices.filter(d => d.kind === 'audioinput').forEach(d => {
-          const opt = document.createElement('option');
-          opt.value = d.deviceId;
-          opt.textContent = d.label || 'Microphone ' + (asDevSelect.options.length + 1);
-          asDevSelect.appendChild(opt);
-        });
-      } catch(e) { console.warn('[AS] Could not enumerate devices:', e); }
-    });
-
-    // ── Status helper ────────────────────────────────────────
-    function asSetStatus(state, text) {
-      asStatusText.textContent = text;
-      const colors = { idle: '#475569', connecting: '#f59e0b', live: '#10b981', error: '#ef4444' };
-      asStatusDot.style.background = colors[state] || '#475569';
-    }
-
-    // ── Canvas visualiser ─────────────────────────────────────
-    function startVisualiser(stream) {
-      asCtx = new (window.AudioContext || window.webkitAudioContext)();
-      asAnalyser = asCtx.createAnalyser();
-      asAnalyser.fftSize = 256;
-      asCtx.createMediaStreamSource(stream).connect(asAnalyser);
-      asCtx2d = asCanvas.getContext('2d');
-
-      const bufLen = asAnalyser.frequencyBinCount;
-      const dataArr = new Uint8Array(bufLen);
-
-      function draw() {
-        asAnimFrame = requestAnimationFrame(draw);
-        const W = asCanvas.offsetWidth; const H = asCanvas.offsetHeight;
-        asCanvas.width = W; asCanvas.height = H;
-        asAnalyser.getByteFrequencyData(dataArr);
-
-        asCtx2d.clearRect(0, 0, W, H);
-        const bw = W / bufLen * 2.5;
-        let peak = 0;
-        for (let i = 0; i < bufLen; i++) {
-          const v = dataArr[i];
-          if (v > peak) peak = v;
-          const bh = (v / 255) * H;
-          const hue = 270 + (v / 255) * 30;
-          asCtx2d.fillStyle = `hsla(${hue},80%,60%,0.85)`;
-          asCtx2d.fillRect(i * (bw + 1), H - bh, bw, bh);
+        async function createAndSendOffer() {
+          const s = getSocket();
+          if (pc) {
+            try {
+              pc.close();
+            } catch (e) {}
+          }
+          pc = new RTCPeerConnection(ICE_CFG);
+          localStream
+            .getTracks()
+            .forEach((track) => pc.addTrack(track, localStream));
+          pc.onicecandidate = (e) => {
+            if (e.candidate && s)
+              s.emit("screenshare-ice", {
+                candidate: e.candidate,
+                from: "broadcaster",
+              });
+          };
+          pc.onconnectionstatechange = () => {
+            if (pc && pc.connectionState === "connected")
+              setStatus("live", "Live — classroom connected ✓");
+            else if (
+              pc &&
+              (pc.connectionState === "disconnected" ||
+                pc.connectionState === "failed")
+            )
+              setStatus("live", "Broadcasting… (viewer disconnected)");
+          };
+          try {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            if (s) s.emit("screenshare-offer", { sdp: pc.localDescription });
+            setStatus("live", "Offer sent — waiting for game page…");
+          } catch (e) {
+            setStatus("idle", "Failed to create connection");
+          }
         }
-        const pct = Math.round((peak / 255) * 100);
-        asLevelBar.style.width = pct + '%';
-        asLevelPct.textContent = pct + '%';
-      }
-      draw();
-    }
 
-    function stopVisualiser() {
-      if (asAnimFrame) { cancelAnimationFrame(asAnimFrame); asAnimFrame = null; }
-      if (asCtx) { try { asCtx.close(); } catch(e) {} asCtx = null; }
-      asLevelBar.style.width = '0%';
-      asLevelPct.textContent = '0%';
-      if (asCtx2d && asCanvas) asCtx2d.clearRect(0, 0, asCanvas.width, asCanvas.height);
-    }
+        if (camCard)
+          camCard.addEventListener("click", () =>
+            camModal.classList.add("open"),
+          );
+        camCloseBtn.addEventListener("click", () =>
+          camModal.classList.remove("open"),
+        );
+        camModal.addEventListener("click", (e) => {
+          if (e.target === camModal) camModal.classList.remove("open");
+        });
 
-    // ── WebRTC offer creation ──────────────────────────────────
-    async function asCreateOffer() {
-      const s = getSocket(); if (!s) return;
-      if (asPc) { try { asPc.close(); } catch(e) {} }
-      asPc = new RTCPeerConnection(ICE_CFG);
+        function setStatus(state, text) {
+          camStatusDot.className = "ss-status-dot " + state;
+          camStatusText.textContent = text;
+          const isLive = state === "live";
+          camViewerBadge.classList.toggle("visible", isLive);
+          camLiveOverlay.style.display = isLive ? "block" : "none";
+          if (camCard) camCard.classList.toggle("is-live", isLive);
+        }
 
-      asStream.getTracks().forEach(t => asPc.addTrack(t, asStream));
+        function stopSharing() {
+          isSharing = false;
+          if (pc) {
+            try {
+              pc.close();
+            } catch (e) {}
+            pc = null;
+          }
+          if (localStream) {
+            localStream.getTracks().forEach((t) => t.stop());
+            localStream = null;
+          }
+          camPreview.srcObject = null;
+          camPreview.style.display = "none";
+          camPlaceholder.style.display = "flex";
+          setStatus("idle", "Ready to share camera");
+          camStartBtn.innerHTML = "📡 Start Camera";
+          camStartBtn.classList.remove("btn-ss-stop");
+          const s = getSocket();
+          if (s) s.emit("screenshare-stop"); // Reuse the same receiver off event
+        }
 
-      asPc.onicecandidate = e => {
-        if (e.candidate) s.emit('audioshare-ice', { candidate: e.candidate, from: 'broadcaster' });
-      };
-      asPc.onconnectionstatechange = () => {
-        if (asPc.connectionState === 'connected') asSetStatus('live', 'Live — streaming to classroom ✓');
-        if (asPc.connectionState === 'disconnected' || asPc.connectionState === 'failed') asSetStatus('connecting', 'Reconnecting…');
-      };
+        async function startSharing() {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert("Camera access requires a Secure Context (HTTPS).");
+            return;
+          }
+          setStatus("idle", "Requesting camera access…");
+          try {
+            const facing = camFacingSel.value;
+            const stream = await navigator.mediaDevices.getUserMedia({
+              video: {
+                facingMode: { ideal: facing },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
+              },
+              audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                sampleRate: 44100,
+              },
+            });
+            localStream = stream;
+            isSharing = true;
+            camPreview.srcObject = stream;
+            camPreview.style.display = "block";
+            camPlaceholder.style.display = "none";
+            camStartBtn.innerHTML = "⏹ Stop Camera";
+            camStartBtn.classList.add("btn-ss-stop");
+            setStatus("live", "Broadcasting… waiting for game page");
 
-      const offer = await asPc.createOffer();
-      await asPc.setLocalDescription(offer);
-      s.emit('audioshare-offer', { sdp: asPc.localDescription });
-      asSetStatus('connecting', 'Offer sent — waiting for game page…');
-    }
+            bindSignaling();
+            const s = getSocket();
+            if (s) s.emit("screenshare-start", {}); // Reuse the same receiver on event
 
-    let asSigBound = false;
-    // ── Socket signaling listeners ─────────────────────────────
-    function asBindSignaling() {
-      if (asSigBound) return;
-      asSigBound = true;
-      const s = getSocket(); if (!s) return;
-      s.on('audioshare-answer', async data => {
-        if (!asPc) return;
-        try { await asPc.setRemoteDescription(new RTCSessionDescription(data.sdp)); } catch(e) {}
-      });
-      s.on('audioshare-ice', async data => {
-        if (!asPc || data.from === 'broadcaster') return;
-        try { if (data.candidate) await asPc.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e) {}
-      });
-      s.on('audioshare-ready', () => { if (asStream && asIsLive) asCreateOffer(); });
-    }
+            stream.getVideoTracks()[0].addEventListener("ended", stopSharing);
+          } catch (err) {
+            alert("Camera share failed: " + err.name + " - " + err.message);
+            setStatus("idle", "Could not start camera share");
+          }
+        }
 
-    // ── Start / Stop ───────────────────────────────────────────
-    async function asStart() {
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Audio sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://' + window.location.host + '\n3. Relaunch Chrome and try again.');
-        return;
-      }
-      const deviceId = asDevSelect.value;
-      const constraints = { audio: deviceId ? { deviceId: { exact: deviceId } } : true };
-      asSetStatus('connecting', 'Requesting microphone…');
-      try {
-        asStream = await navigator.mediaDevices.getUserMedia(constraints);
-        asIsLive = true;
-        startVisualiser(asStream);
-        asStartBtn.textContent = '⏹ Stop Streaming';
-        asStartBtn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
-        asBindSignaling();
-        const s = getSocket();
-        if (s) s.emit('audioshare-start', {});
-        asSetStatus('connecting', 'Broadcasting… waiting for game page');
-      } catch(err) {
-        asSetStatus('error', 'Microphone access denied');
-        console.warn('[AS] getUserMedia error:', err);
-      }
-    }
+        camStartBtn.addEventListener("click", () =>
+          isSharing ? stopSharing() : startSharing(),
+        );
 
-    function asStop() {
-      asIsLive = false;
-      if (asPc) { try { asPc.close(); } catch(e) {} asPc = null; }
-      if (asStream) { asStream.getTracks().forEach(t => t.stop()); asStream = null; }
-      stopVisualiser();
-      asStartBtn.textContent = '🎙️ Start Streaming';
-      asStartBtn.style.background = 'linear-gradient(135deg,#7c3aed,#a855f7)';
-      asSetStatus('idle', 'Ready to stream');
-      const s = getSocket();
-      if (s) s.emit('audioshare-stop');
-    }
+        // Auto-stop if user closes modal? No, let them keep broadcasting while navigating.
+      })();
+    </script>
 
-    asStartBtn.addEventListener('click', () => asIsLive ? asStop() : asStart());
-  })();
-  </script>
+    <!-- Screen Share: native WebRTC broadcaster (no external services) -->
+    <script>
+      // ════════════════════════════════════════════════════
+      //  SCREEN SHARE MODULE — Dashboard (Broadcaster side)
+      //  Uses native RTCPeerConnection + Socket.IO signaling
+      // ════════════════════════════════════════════════════
+      (function () {
+        const ssModal = document.getElementById("screenShareModal");
+        const ssStartBtn = document.getElementById("ssStartBtn");
+        const ssCloseBtn = document.getElementById("ssCloseBtn");
+        const ssStatusDot = document.getElementById("ssStatusDot");
+        const ssStatusText = document.getElementById("ssStatusText");
+        const ssViewerBadge = document.getElementById("ssViewerBadge");
+        const ssPreview = document.getElementById("ssPreviewVideo");
+        const ssPlaceholder = document.getElementById("ssPlaceholder");
+        const ssLiveOverlay = document.getElementById("ssLiveOverlay");
+        const ssCard = document.getElementById("shareScreenBtn");
 
+        // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+        const ICE_CFG = window.getIceCfg();
+
+        let pc = null;
+        let localStream = null;
+        let isSharing = false;
+        let sock = null;
+
+        // Get the Socket.IO socket (reuse the page's existing one)
+        function getSocket() {
+          if (sock) return sock;
+          if (window.presSocket) {
+            sock = window.presSocket;
+            return sock;
+          }
+          try {
+            sock = io();
+          } catch (e) {}
+          return sock;
+        }
+
+        let sigBound = false;
+        // Bind socket listeners for WebRTC signaling
+        function bindSignaling() {
+          if (sigBound) return;
+          sigBound = true;
+          const s = getSocket();
+          if (!s) return;
+
+          // Game page answered our offer
+          s.on("screenshare-answer", async (data) => {
+            if (!pc) return;
+            try {
+              await pc.setRemoteDescription(
+                new RTCSessionDescription(data.sdp),
+              );
+              setStatus("live", "Live — game screen connected ✓");
+            } catch (e) {
+              console.warn("[SS] setRemoteDescription failed:", e);
+            }
+          });
+
+          // ICE candidates from game page
+          s.on("screenshare-ice", async (data) => {
+            if (!pc || data.from === "broadcaster") return;
+            try {
+              if (data.candidate)
+                await pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (e) {}
+          });
+
+          // Game page is ready to receive — create and send the offer
+          s.on("screenshare-ready", async () => {
+            if (!localStream || !isSharing) return;
+            await createAndSendOffer();
+          });
+        }
+
+        async function createAndSendOffer() {
+          const s = getSocket();
+          // Create fresh RTCPeerConnection
+          if (pc) {
+            try {
+              pc.close();
+            } catch (e) {}
+          }
+          pc = new RTCPeerConnection(ICE_CFG);
+
+          // Add all screen tracks
+          localStream
+            .getTracks()
+            .forEach((track) => pc.addTrack(track, localStream));
+
+          // Send our ICE candidates to game page
+          pc.onicecandidate = (e) => {
+            if (e.candidate && s) {
+              s.emit("screenshare-ice", {
+                candidate: e.candidate,
+                from: "broadcaster",
+              });
+            }
+          };
+
+          pc.onconnectionstatechange = () => {
+            if (pc && pc.connectionState === "connected") {
+              setStatus("live", "Live — game screen connected ✓");
+            } else if (
+              pc &&
+              (pc.connectionState === "disconnected" ||
+                pc.connectionState === "failed")
+            ) {
+              setStatus("live", "Broadcasting… (viewer may have disconnected)");
+            }
+          };
+
+          try {
+            const offer = await pc.createOffer();
+            await pc.setLocalDescription(offer);
+            if (s) s.emit("screenshare-offer", { sdp: pc.localDescription });
+            setStatus("live", "Offer sent — waiting for game page…");
+          } catch (e) {
+            console.warn("[SS] createOffer failed:", e);
+            setStatus("idle", "Failed to create connection — try again");
+          }
+        }
+
+        // Open/close modal
+        ssCard.addEventListener("click", () => ssModal.classList.add("open"));
+        ssCloseBtn.addEventListener("click", () =>
+          ssModal.classList.remove("open"),
+        );
+        ssModal.addEventListener("click", (e) => {
+          if (e.target === ssModal) ssModal.classList.remove("open");
+        });
+
+        function setStatus(state, text) {
+          ssStatusDot.className = "ss-status-dot " + state;
+          ssStatusText.textContent = text;
+          const isLive = state === "live";
+          ssViewerBadge.classList.toggle("visible", isLive);
+          ssLiveOverlay.style.display = isLive ? "block" : "none";
+          ssCard.classList.toggle("is-live", isLive);
+        }
+
+        function stopSharing() {
+          isSharing = false;
+          if (pc) {
+            try {
+              pc.close();
+            } catch (e) {}
+            pc = null;
+          }
+          if (localStream) {
+            localStream.getTracks().forEach((t) => t.stop());
+            localStream = null;
+          }
+
+          ssPreview.srcObject = null;
+          ssPreview.style.display = "none";
+          ssPlaceholder.style.display = "flex";
+          setStatus("idle", "Ready to share your screen");
+          ssStartBtn.textContent = "📡 Start Sharing";
+          ssStartBtn.classList.remove("btn-ss-stop");
+
+          const s = getSocket();
+          if (s) s.emit("screenshare-stop");
+        }
+
+        async function startSharing() {
+          const isMobile =
+            /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+              navigator.userAgent,
+            );
+          if (isMobile) {
+            let url = prompt("Please enter the web address to share:");
+            if (url) {
+              if (!/^https?:\/\//i.test(url)) {
+                url = "https://" + url;
+              }
+              const s = getSocket();
+              if (s) s.emit("pres-share-webpage", { url });
+              showToast("🌐 Webpage sent to game screen!", "success");
+            }
+            return;
+          }
+
+          if (
+            !navigator.mediaDevices ||
+            !navigator.mediaDevices.getDisplayMedia
+          ) {
+            alert(
+              "Screen sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://" +
+                window.location.host +
+                "\n3. Relaunch Chrome and try again.",
+            );
+            return;
+          }
+          setStatus("idle", "Requesting screen access…");
+          try {
+            const stream = await navigator.mediaDevices.getDisplayMedia({
+              video: { frameRate: { ideal: 30, max: 30 } },
+              audio: {
+                echoCancellation: false,
+                noiseSuppression: false,
+                sampleRate: 44100,
+              },
+            });
+            localStream = stream;
+            isSharing = true;
+
+            // Show local preview
+            ssPreview.srcObject = stream;
+            ssPreview.style.display = "block";
+            ssPlaceholder.style.display = "none";
+            ssStartBtn.textContent = "⏹ Stop Sharing";
+            ssStartBtn.classList.add("btn-ss-stop");
+            setStatus("live", "Broadcasting… waiting for game page");
+
+            // Bind signaling listeners (idempotent)
+            bindSignaling();
+
+            // Notify game page to show the modal and signal ready
+            const s = getSocket();
+            if (s) s.emit("screenshare-start", {});
+
+            // Stop when user clicks browser's native "Stop sharing" button
+            stream.getVideoTracks()[0].addEventListener("ended", stopSharing);
+          } catch (err) {
+            console.warn("[SS] getDisplayMedia error:", err);
+            alert("Screen share failed: " + err.name + " - " + err.message);
+            setStatus(
+              "idle",
+              err.name === "NotAllowedError"
+                ? "Permission denied — please allow screen capture"
+                : "Could not start screen share",
+            );
+          }
+        }
+
+        ssStartBtn.addEventListener("click", () =>
+          isSharing ? stopSharing() : startSharing(),
+        );
+        window.stopScreenShare = stopSharing;
+      })();
+
+      // ════════════════════════════════════════════════════
+      //  AUDIO SHARE MODULE — Dashboard (Broadcaster side)
+      //  Streams microphone live via WebRTC to game-presentation
+      // ════════════════════════════════════════════════════
+      (function () {
+        // Use smart ICE config: no STUN on local/hotspot, STUN on internet
+        const ICE_CFG = window.getIceCfg();
+
+        const asStartBtn = document.getElementById("asStartBtn");
+        const asStatusDot = document.getElementById("asStatusDot");
+        const asStatusText = document.getElementById("asStatusText");
+        const asLevelBar = document.getElementById("audioLevelBar");
+        const asLevelPct = document.getElementById("audioLevelPct");
+        const asCanvas = document.getElementById("audioCanvas");
+        const asDevSelect = document.getElementById("audioDeviceSelect");
+        const audioModal = document.getElementById("audioModal");
+        const shareAudioBtn = document.getElementById("shareAudioBtn");
+
+        let asStream = null;
+        let asPc = null;
+        let asIsLive = false;
+        let asCtx = null; // AudioContext
+        let asAnalyser = null;
+        let asAnimFrame = null;
+        let asCtx2d = null; // Canvas 2D
+
+        function getSocket() {
+          return window.presSocket || (typeof io !== "undefined" ? io() : null);
+        }
+
+        // ── Open modal + populate mic list ─────────────────────────
+        shareAudioBtn.addEventListener("click", async () => {
+          openModal("audioModal");
+          try {
+            const devices = await navigator.mediaDevices.enumerateDevices();
+            asDevSelect.innerHTML = "";
+            devices
+              .filter((d) => d.kind === "audioinput")
+              .forEach((d) => {
+                const opt = document.createElement("option");
+                opt.value = d.deviceId;
+                opt.textContent =
+                  d.label || "Microphone " + (asDevSelect.options.length + 1);
+                asDevSelect.appendChild(opt);
+              });
+          } catch (e) {
+            console.warn("[AS] Could not enumerate devices:", e);
+          }
+        });
+
+        // ── Status helper ────────────────────────────────────────
+        function asSetStatus(state, text) {
+          asStatusText.textContent = text;
+          const colors = {
+            idle: "#475569",
+            connecting: "#f59e0b",
+            live: "#10b981",
+            error: "#ef4444",
+          };
+          asStatusDot.style.background = colors[state] || "#475569";
+        }
+
+        // ── Canvas visualiser ─────────────────────────────────────
+        function startVisualiser(stream) {
+          asCtx = new (window.AudioContext || window.webkitAudioContext)();
+          asAnalyser = asCtx.createAnalyser();
+          asAnalyser.fftSize = 256;
+          asCtx.createMediaStreamSource(stream).connect(asAnalyser);
+          asCtx2d = asCanvas.getContext("2d");
+
+          const bufLen = asAnalyser.frequencyBinCount;
+          const dataArr = new Uint8Array(bufLen);
+
+          function draw() {
+            asAnimFrame = requestAnimationFrame(draw);
+            const W = asCanvas.offsetWidth;
+            const H = asCanvas.offsetHeight;
+            asCanvas.width = W;
+            asCanvas.height = H;
+            asAnalyser.getByteFrequencyData(dataArr);
+
+            asCtx2d.clearRect(0, 0, W, H);
+            const bw = (W / bufLen) * 2.5;
+            let peak = 0;
+            for (let i = 0; i < bufLen; i++) {
+              const v = dataArr[i];
+              if (v > peak) peak = v;
+              const bh = (v / 255) * H;
+              const hue = 270 + (v / 255) * 30;
+              asCtx2d.fillStyle = `hsla(${hue},80%,60%,0.85)`;
+              asCtx2d.fillRect(i * (bw + 1), H - bh, bw, bh);
+            }
+            const pct = Math.round((peak / 255) * 100);
+            asLevelBar.style.width = pct + "%";
+            asLevelPct.textContent = pct + "%";
+          }
+          draw();
+        }
+
+        function stopVisualiser() {
+          if (asAnimFrame) {
+            cancelAnimationFrame(asAnimFrame);
+            asAnimFrame = null;
+          }
+          if (asCtx) {
+            try {
+              asCtx.close();
+            } catch (e) {}
+            asCtx = null;
+          }
+          asLevelBar.style.width = "0%";
+          asLevelPct.textContent = "0%";
+          if (asCtx2d && asCanvas)
+            asCtx2d.clearRect(0, 0, asCanvas.width, asCanvas.height);
+        }
+
+        // ── WebRTC offer creation ──────────────────────────────────
+        async function asCreateOffer() {
+          const s = getSocket();
+          if (!s) return;
+          if (asPc) {
+            try {
+              asPc.close();
+            } catch (e) {}
+          }
+          asPc = new RTCPeerConnection(ICE_CFG);
+
+          asStream.getTracks().forEach((t) => asPc.addTrack(t, asStream));
+
+          asPc.onicecandidate = (e) => {
+            if (e.candidate)
+              s.emit("audioshare-ice", {
+                candidate: e.candidate,
+                from: "broadcaster",
+              });
+          };
+          asPc.onconnectionstatechange = () => {
+            if (asPc.connectionState === "connected")
+              asSetStatus("live", "Live — streaming to classroom ✓");
+            if (
+              asPc.connectionState === "disconnected" ||
+              asPc.connectionState === "failed"
+            )
+              asSetStatus("connecting", "Reconnecting…");
+          };
+
+          const offer = await asPc.createOffer();
+          await asPc.setLocalDescription(offer);
+          s.emit("audioshare-offer", { sdp: asPc.localDescription });
+          asSetStatus("connecting", "Offer sent — waiting for game page…");
+        }
+
+        let asSigBound = false;
+        // ── Socket signaling listeners ─────────────────────────────
+        function asBindSignaling() {
+          if (asSigBound) return;
+          asSigBound = true;
+          const s = getSocket();
+          if (!s) return;
+          s.on("audioshare-answer", async (data) => {
+            if (!asPc) return;
+            try {
+              await asPc.setRemoteDescription(
+                new RTCSessionDescription(data.sdp),
+              );
+            } catch (e) {}
+          });
+          s.on("audioshare-ice", async (data) => {
+            if (!asPc || data.from === "broadcaster") return;
+            try {
+              if (data.candidate)
+                await asPc.addIceCandidate(new RTCIceCandidate(data.candidate));
+            } catch (e) {}
+          });
+          s.on("audioshare-ready", () => {
+            if (asStream && asIsLive) asCreateOffer();
+          });
+        }
+
+        // ── Start / Stop ───────────────────────────────────────────
+        async function asStart() {
+          if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            alert(
+              "Audio sharing requires a Secure Context (HTTPS or localhost).\n\nSince you are on a local IP, do this on your Android Chrome:\n\n1. Go to: chrome://flags/#unsafely-treat-insecure-origin-as-secure\n2. Enable it and add your IP: http://" +
+                window.location.host +
+                "\n3. Relaunch Chrome and try again.",
+            );
+            return;
+          }
+          const deviceId = asDevSelect.value;
+          const constraints = {
+            audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+          };
+          asSetStatus("connecting", "Requesting microphone…");
+          try {
+            asStream = await navigator.mediaDevices.getUserMedia(constraints);
+            asIsLive = true;
+            startVisualiser(asStream);
+            asStartBtn.textContent = "⏹ Stop Streaming";
+            asStartBtn.style.background =
+              "linear-gradient(135deg,#ef4444,#dc2626)";
+            asBindSignaling();
+            const s = getSocket();
+            if (s) s.emit("audioshare-start", {});
+            asSetStatus("connecting", "Broadcasting… waiting for game page");
+          } catch (err) {
+            asSetStatus("error", "Microphone access denied");
+            console.warn("[AS] getUserMedia error:", err);
+          }
+        }
+
+        function asStop() {
+          asIsLive = false;
+          if (asPc) {
+            try {
+              asPc.close();
+            } catch (e) {}
+            asPc = null;
+          }
+          if (asStream) {
+            asStream.getTracks().forEach((t) => t.stop());
+            asStream = null;
+          }
+          stopVisualiser();
+          asStartBtn.textContent = "🎙️ Start Streaming";
+          asStartBtn.style.background =
+            "linear-gradient(135deg,#7c3aed,#a855f7)";
+          asSetStatus("idle", "Ready to stream");
+          const s = getSocket();
+          if (s) s.emit("audioshare-stop");
+        }
+
+        asStartBtn.addEventListener("click", () =>
+          asIsLive ? asStop() : asStart(),
+        );
+      })();
+    </script>
   </body>
 </html>

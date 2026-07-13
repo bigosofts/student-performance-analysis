@@ -1,4 +1,4 @@
-import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js";
+import * as THREE from "../assets/vendor/three.module.js";
 
 let scene, camera, renderer, clock, terrain, river;
 let animationFrameId;

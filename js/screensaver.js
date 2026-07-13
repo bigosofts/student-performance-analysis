@@ -1,7 +1,10 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js';
+import * as THREE from "../assets/vendor/three.module.js";
 
 let scene, camera, renderer;
-let clock, terrain, river, clouds = [];
+let clock,
+  terrain,
+  river,
+  clouds = [];
 let animationFrameId;
 let isActive = false;
 
@@ -14,8 +17,8 @@ const CONFIG = {
     river: 0x4ca1af,
     treeTrunk: 0x4d3b2a,
     treeLeaves: 0x2d5a27,
-    grass: 0x5a9e52
-  }
+    grass: 0x5a9e52,
+  },
 };
 
 export function initScreensaver(containerId) {
@@ -27,7 +30,12 @@ export function initScreensaver(containerId) {
   scene.background = new THREE.Color(CONFIG.colors.skyBottom);
   scene.fog = new THREE.FogExp2(CONFIG.colors.skyBottom, 0.002);
 
-  camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera = new THREE.PerspectiveCamera(
+    60,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    1000,
+  );
   camera.position.set(0, 15, 40);
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -35,7 +43,7 @@ export function initScreensaver(containerId) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  container.innerHTML = '';
+  container.innerHTML = "";
   container.appendChild(renderer.domElement);
 
   clock = new THREE.Clock();
@@ -65,7 +73,7 @@ export function initScreensaver(containerId) {
   createGroundBase(); // deep green base layer so sky never shows through
 
   // Handle resize
-  window.addEventListener('resize', onWindowResize, false);
+  window.addEventListener("resize", onWindowResize, false);
 }
 
 function createTerrain() {
@@ -80,7 +88,10 @@ function createTerrain() {
     const distFromCenter = Math.abs(x);
     let y = 0;
     if (distFromCenter > 20) {
-      y = Math.sin(x * 0.05) * 5 + Math.cos(z * 0.05) * 5 + (distFromCenter - 20) * 0.2;
+      y =
+        Math.sin(x * 0.05) * 5 +
+        Math.cos(z * 0.05) * 5 +
+        (distFromCenter - 20) * 0.2;
     } else {
       y = (distFromCenter / 20) * 2 - 2; // River bed dip
     }
@@ -91,7 +102,7 @@ function createTerrain() {
   const material = new THREE.MeshStandardMaterial({
     color: CONFIG.colors.terrain,
     roughness: 0.8,
-    flatShading: true
+    flatShading: true,
   });
 
   terrain = new THREE.Mesh(geometry, material);
@@ -105,9 +116,9 @@ function createGroundBase() {
   geometry.rotateX(-Math.PI / 2);
 
   const material = new THREE.MeshStandardMaterial({
-    color: 0x2e5e35,   // dark earthy green — slightly darker than terrain
+    color: 0x2e5e35, // dark earthy green — slightly darker than terrain
     roughness: 1.0,
-    flatShading: false
+    flatShading: false,
   });
 
   const base = new THREE.Mesh(geometry, material);
@@ -131,7 +142,7 @@ function createRiver() {
     opacity: 0.8,
     roughness: 0.1,
     metalness: 0.1,
-    flatShading: true
+    flatShading: true,
   });
 
   river = new THREE.Mesh(geometry, material);
@@ -141,10 +152,16 @@ function createRiver() {
 
 function createTrees(count) {
   const trunkGeo = new THREE.CylinderGeometry(0.5, 0.7, 3, 5);
-  const trunkMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.treeTrunk, flatShading: true });
+  const trunkMat = new THREE.MeshStandardMaterial({
+    color: CONFIG.colors.treeTrunk,
+    flatShading: true,
+  });
 
   const leavesGeo = new THREE.ConeGeometry(2.5, 6, 5);
-  const leavesMat = new THREE.MeshStandardMaterial({ color: CONFIG.colors.treeLeaves, flatShading: true });
+  const leavesMat = new THREE.MeshStandardMaterial({
+    color: CONFIG.colors.treeLeaves,
+    flatShading: true,
+  });
 
   for (let i = 0; i < count; i++) {
     const x = (Math.random() - 0.5) * 300;
@@ -170,7 +187,10 @@ function createTrees(count) {
 
     // Calculate approximate height (matching terrain logic)
     const distFromCenter = Math.abs(x);
-    let y = Math.sin(x * 0.05) * 5 + Math.cos(z * 0.05) * 5 + (distFromCenter - 20) * 0.2;
+    let y =
+      Math.sin(x * 0.05) * 5 +
+      Math.cos(z * 0.05) * 5 +
+      (distFromCenter - 20) * 0.2;
 
     group.position.set(x, y, z);
 
@@ -188,7 +208,7 @@ function createClouds(count) {
     color: 0xffffff,
     transparent: true,
     opacity: 0.8,
-    flatShading: true
+    flatShading: true,
   });
 
   for (let i = 0; i < count; i++) {
@@ -200,7 +220,7 @@ function createClouds(count) {
       mesh.position.set(
         (Math.random() - 0.5) * 8,
         (Math.random() - 0.5) * 3,
-        (Math.random() - 0.5) * 6
+        (Math.random() - 0.5) * 6,
       );
       const s = 3 + Math.random() * 4;
       mesh.scale.set(s, s * 0.6, s);
@@ -210,7 +230,7 @@ function createClouds(count) {
     group.position.set(
       (Math.random() - 0.5) * 300,
       40 + Math.random() * 30,
-      (Math.random() - 0.5) * 300
+      (Math.random() - 0.5) * 300,
     );
     scene.add(group);
     clouds.push(group);
@@ -227,25 +247,24 @@ function onWindowResize() {
 export function startScreensaver() {
   if (isActive) return;
   isActive = true;
-  document.getElementById('screensaverOverlay').style.display = 'block';
+  document.getElementById("screensaverOverlay").style.display = "block";
 
   // Fade in the title panel after a short delay
   setTimeout(() => {
-    const textEl = document.getElementById('screensaverText');
-    if (textEl) textEl.style.opacity = '1';
+    const textEl = document.getElementById("screensaverText");
+    if (textEl) textEl.style.opacity = "1";
   }, 1000);
 
   animate();
 }
 
-
 export function stopScreensaver() {
   if (!isActive) return;
   isActive = false;
   cancelAnimationFrame(animationFrameId);
-  document.getElementById('screensaverOverlay').style.display = 'none';
-  const textEl = document.getElementById('screensaverText');
-  if (textEl) textEl.style.opacity = '0';
+  document.getElementById("screensaverOverlay").style.display = "none";
+  const textEl = document.getElementById("screensaverText");
+  if (textEl) textEl.style.opacity = "0";
 }
 
 /**
@@ -257,17 +276,16 @@ export function stopScreensaver() {
  * @param {string} chapterName - e.g. "বাংলাদেশের কৃষি"
  */
 export function updateScreensaverTitle(subject, paper, chapter, chapterName) {
-  const subjectEl = document.getElementById('ssSubject');
-  const paperEl = document.getElementById('ssPaper');
-  const chNumEl = document.getElementById('ssChapterNum');
-  const chTitleEl = document.getElementById('ssChapterTitle');
+  const subjectEl = document.getElementById("ssSubject");
+  const paperEl = document.getElementById("ssPaper");
+  const chNumEl = document.getElementById("ssChapterNum");
+  const chTitleEl = document.getElementById("ssChapterTitle");
 
-  if (subjectEl) subjectEl.innerText = subject || '';
-  if (paperEl) paperEl.innerText = paper || '';
-  if (chNumEl) chNumEl.innerText = chapter || '';  // already "Chapter XX"
-  if (chTitleEl) chTitleEl.innerText = chapterName || '';
+  if (subjectEl) subjectEl.innerText = subject || "";
+  if (paperEl) paperEl.innerText = paper || "";
+  if (chNumEl) chNumEl.innerText = chapter || ""; // already "Chapter XX"
+  if (chTitleEl) chTitleEl.innerText = chapterName || "";
 }
-
 
 function animate() {
   if (!isActive) return;
@@ -281,13 +299,16 @@ function animate() {
     for (let i = 0; i < positions.length; i += 3) {
       const x = positions[i];
       const z = positions[i + 2];
-      positions[i + 1] = -1.5 + Math.sin(z * 0.2 + elapsedTime * 2) * 0.3 + Math.cos(x * 0.5 + elapsedTime) * 0.2;
+      positions[i + 1] =
+        -1.5 +
+        Math.sin(z * 0.2 + elapsedTime * 2) * 0.3 +
+        Math.cos(x * 0.5 + elapsedTime) * 0.2;
     }
     river.geometry.attributes.position.needsUpdate = true;
   }
 
   // Move clouds
-  clouds.forEach(cloud => {
+  clouds.forEach((cloud) => {
     cloud.position.z -= 0.05;
     cloud.position.x -= 0.02;
     if (cloud.position.z < -200) cloud.position.z = 200;

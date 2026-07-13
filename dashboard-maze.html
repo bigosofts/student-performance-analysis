@@ -11,51 +11,60 @@
     />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/maze.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Outfit:wght@400;600;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
     <style>
       /* --- MOBILE TAB NAVIGATION --- */
       .mobile-tab-bar {
-          display: none;
-          position: fixed;
-          bottom: 0; left: 0; right: 0;
-          background: #1e293b;
-          border-top: 1px solid #334155;
-          padding: 8px;
-          z-index: 100;
-          justify-content: space-around;
-          box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1e293b;
+        border-top: 1px solid #334155;
+        padding: 8px;
+        z-index: 100;
+        justify-content: space-around;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
       }
       .mobile-tab-btn {
-          background: transparent;
-          border: none;
-          color: #94a3b8;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          gap: 4px;
-          font-size: 0.7rem;
-          font-weight: 600;
-          cursor: pointer;
-          padding: 4px 8px;
-          transition: all 0.2s;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 8px;
+        transition: all 0.2s;
       }
       .mobile-tab-btn.active {
-          color: #3b82f6;
+        color: #3b82f6;
       }
       .mobile-tab-btn .tab-icon {
-          font-size: 1.2rem;
+        font-size: 1.2rem;
       }
 
       @media (max-width: 768px) {
-          body { padding-bottom: 80px; }
-          .mobile-tab-bar { display: flex; }
-          .maze-control-grid { display: flex; flex-direction: column; }
-          [data-mobile-tab] { display: none !important; }
-          [data-mobile-tab].mob-active { display: block !important; }
+        body {
+          padding-bottom: 80px;
+        }
+        .mobile-tab-bar {
+          display: flex;
+        }
+        .maze-control-grid {
+          display: flex;
+          flex-direction: column;
+        }
+        [data-mobile-tab] {
+          display: none !important;
+        }
+        [data-mobile-tab].mob-active {
+          display: block !important;
+        }
       }
     </style>
   </head>
@@ -638,33 +647,130 @@
           </div>
 
           <!-- Q-Bank Import Section -->
-          <div style="background: rgba(0,0,0,0.2); border: 1px dashed rgba(255,255,255,0.2); padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-              <div style="font-size: 0.75rem; color: #10b981; font-weight: 800; margin-bottom: 8px;">📚 IMPORT FROM QUESTION BANK (TYPE 1 ONLY)</div>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
-                  <select id="qbPaper" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
-                      <option value="All">All Papers</option>
-                      <option value="1st">1st Paper</option>
-                      <option value="2nd">2nd Paper</option>
-                  </select>
-                  <select id="qbAmount" style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
-                      <option value="All">All Qs</option>
-                      <option value="10">10 Qs</option>
-                      <option value="20">20 Qs</option>
-                      <option value="30">30 Qs</option>
-                  </select>
-                  <input type="text" id="qbChapter" list="qbChapterList" placeholder="Chapter..." style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
-                  <datalist id="qbChapterList"></datalist>
-                  <input type="text" id="qbTopics" list="qbTopicList" placeholder="Topic..." style="width: 100%; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.4); color: #fff; font-size: 0.75rem;">
-                  <datalist id="qbTopicList"></datalist>
-              </div>
-              <div style="display: flex; gap: 10px; margin-bottom: 8px; font-size: 0.75rem;">
-                  <label><input type="checkbox" id="qbBoard"> Board Only</label>
-                  <label><input type="checkbox" id="qbImportant"> Important Only</label>
-              </div>
-              <button class="btn-primary btn-small" style="background: linear-gradient(135deg, #10b981, #059669); width: 100%; font-size: 0.8rem; font-weight: 800;" onclick="importFromQBank('maze')">📥 FILTER & LOAD INTO GAME</button>
+          <div
+            style="
+              background: rgba(0, 0, 0, 0.2);
+              border: 1px dashed rgba(255, 255, 255, 0.2);
+              padding: 12px;
+              border-radius: 8px;
+              margin-bottom: 15px;
+            "
+          >
+            <div
+              style="
+                font-size: 0.75rem;
+                color: #10b981;
+                font-weight: 800;
+                margin-bottom: 8px;
+              "
+            >
+              📚 IMPORT FROM QUESTION BANK (TYPE 1 ONLY)
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+                margin-bottom: 8px;
+              "
+            >
+              <select
+                id="qbPaper"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  border-radius: 6px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  background: rgba(0, 0, 0, 0.4);
+                  color: #fff;
+                  font-size: 0.75rem;
+                "
+              >
+                <option value="All">All Papers</option>
+                <option value="1st">1st Paper</option>
+                <option value="2nd">2nd Paper</option>
+              </select>
+              <select
+                id="qbAmount"
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  border-radius: 6px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  background: rgba(0, 0, 0, 0.4);
+                  color: #fff;
+                  font-size: 0.75rem;
+                "
+              >
+                <option value="All">All Qs</option>
+                <option value="10">10 Qs</option>
+                <option value="20">20 Qs</option>
+                <option value="30">30 Qs</option>
+              </select>
+              <input
+                type="text"
+                id="qbChapter"
+                list="qbChapterList"
+                placeholder="Chapter..."
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  border-radius: 6px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  background: rgba(0, 0, 0, 0.4);
+                  color: #fff;
+                  font-size: 0.75rem;
+                "
+              />
+              <datalist id="qbChapterList"></datalist>
+              <input
+                type="text"
+                id="qbTopics"
+                list="qbTopicList"
+                placeholder="Topic..."
+                style="
+                  width: 100%;
+                  padding: 6px;
+                  border-radius: 6px;
+                  border: 1px solid rgba(255, 255, 255, 0.2);
+                  background: rgba(0, 0, 0, 0.4);
+                  color: #fff;
+                  font-size: 0.75rem;
+                "
+              />
+              <datalist id="qbTopicList"></datalist>
+            </div>
+            <div
+              style="
+                display: flex;
+                gap: 10px;
+                margin-bottom: 8px;
+                font-size: 0.75rem;
+              "
+            >
+              <label><input type="checkbox" id="qbBoard" /> Board Only</label>
+              <label
+                ><input type="checkbox" id="qbImportant" /> Important
+                Only</label
+              >
+            </div>
+            <button
+              class="btn-primary btn-small"
+              style="
+                background: linear-gradient(135deg, #10b981, #059669);
+                width: 100%;
+                font-size: 0.8rem;
+                font-weight: 800;
+              "
+              onclick="importFromQBank('maze')"
+            >
+              📥 FILTER & LOAD INTO GAME
+            </button>
           </div>
-          
-          <div class="maze-stat-label" style="margin-bottom: 5px;">📤 OR MANUAL EXCEL UPLOAD</div>
+
+          <div class="maze-stat-label" style="margin-bottom: 5px">
+            📤 OR MANUAL EXCEL UPLOAD
+          </div>
 
           <div
             style="
@@ -863,18 +969,30 @@
 
     <!-- Mobile Tab Bar -->
     <nav class="mobile-tab-bar" id="mobileTabBar">
-        <button class="mobile-tab-btn active" data-tab="control" onclick="switchMobileTab('control')">
-            <span class="tab-icon">🎮</span>
-            Global
-        </button>
-        <button class="mobile-tab-btn" data-tab="boys" onclick="switchMobileTab('boys')">
-            <span class="tab-icon">👦</span>
-      Blue Team
-    </button>
-        <button class="mobile-tab-btn" data-tab="girls" onclick="switchMobileTab('girls')">
-            <span class="tab-icon">👧</span>
-      Red Team
-    </button>
+      <button
+        class="mobile-tab-btn active"
+        data-tab="control"
+        onclick="switchMobileTab('control')"
+      >
+        <span class="tab-icon">🎮</span>
+        Global
+      </button>
+      <button
+        class="mobile-tab-btn"
+        data-tab="boys"
+        onclick="switchMobileTab('boys')"
+      >
+        <span class="tab-icon">👦</span>
+        Blue Team
+      </button>
+      <button
+        class="mobile-tab-btn"
+        data-tab="girls"
+        onclick="switchMobileTab('girls')"
+      >
+        <span class="tab-icon">👧</span>
+        Red Team
+      </button>
     </nav>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -883,26 +1001,32 @@
       const { MazeGame } = window;
 
       function switchMobileTab(tabName) {
-        document.querySelectorAll('[data-mobile-tab]').forEach(el => {
-            el.classList.remove('mob-active');
+        document.querySelectorAll("[data-mobile-tab]").forEach((el) => {
+          el.classList.remove("mob-active");
         });
-        document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
-            btn.classList.remove('active');
+        document.querySelectorAll(".mobile-tab-btn").forEach((btn) => {
+          btn.classList.remove("active");
         });
-        document.querySelectorAll(`[data-mobile-tab="${tabName}"]`).forEach(el => {
-            el.classList.add('mob-active');
-        });
-        const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
-        if (activeBtn) activeBtn.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        document
+          .querySelectorAll(`[data-mobile-tab="${tabName}"]`)
+          .forEach((el) => {
+            el.classList.add("mob-active");
+          });
+        const activeBtn = document.querySelector(
+          `.mobile-tab-btn[data-tab="${tabName}"]`,
+        );
+        if (activeBtn) activeBtn.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
 
-      (function() {
-          if (window.innerWidth <= 768) {
-              switchMobileTab('control');
-          } else {
-              document.querySelectorAll('[data-mobile-tab]').forEach(el => el.classList.add('mob-active'));
-          }
+      (function () {
+        if (window.innerWidth <= 768) {
+          switchMobileTab("control");
+        } else {
+          document
+            .querySelectorAll("[data-mobile-tab]")
+            .forEach((el) => el.classList.add("mob-active"));
+        }
       })();
 
       let dashSocket = null;
@@ -1032,7 +1156,9 @@
         setTimeout(() => {
           MazeGame.generateTeamMaze(team, size);
           updateUI();
-          showToast(`✅ ${teamLabelUpper(team)} ${size}×${size} maze generated!`);
+          showToast(
+            `✅ ${teamLabelUpper(team)} ${size}×${size} maze generated!`,
+          );
         }, 50);
       }
 
@@ -1306,81 +1432,85 @@
       }, 500);
 
       // ── Boot ──────────────────────────────────────────────────
-      
+
       async function fetchQBankFilters() {
-          try {
-              const [topicsRes, chaptersRes] = await Promise.all([
-                  fetch('/api/mcq/topics'),
-                  fetch('/api/mcq/chapters')
-              ]);
-              const topics = await topicsRes.json();
-              const chapters = await chaptersRes.json();
-              const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
-              document.getElementById('qbTopicList').innerHTML = toOptions(topics);
-              document.getElementById('qbChapterList').innerHTML = toOptions(chapters);
-          } catch (e) {
-              console.error("Error fetching QBank filters:", e);
-          }
-      }
-      
-      async function importFromQBank(game) {
-          const btn = event.target;
-          const origText = btn.innerText;
-          btn.innerText = "⏳ IMPORTING...";
-          btn.disabled = true;
-          
-          try {
-              const data = {
-                  game: game,
-                  paper: document.getElementById('qbPaper').value,
-                  amount: document.getElementById('qbAmount').value,
-                  chapter: document.getElementById('qbChapter').value,
-                  topics: document.getElementById('qbTopics').value,
-                  boardOnly: document.getElementById('qbBoard').checked,
-                  importantOnly: document.getElementById('qbImportant').checked
-              };
-              
-              const exportRes = await fetch('/api/mcq/export-to-game', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(data)
-              });
-              
-              if (!exportRes.ok) {
-                  const err = await exportRes.json();
-                  alert("Error exporting: " + (err.error || 'Failed.'));
-                  return;
-              }
-              
-              const json = await exportRes.json();
-              
-              // Trigger reload in server memory
-              await fetch('/api/reload-quiz', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ game: game })
-              });
-              
-              alert(`Successfully imported ${json.count} Type 1 questions into Maze!`);
-              document.getElementById('mazeQuizStatus').innerText = `📊 ${json.count} questions loaded from Q-Bank`;
-          } catch (e) {
-              console.error(e);
-              alert("Failed to import from QBank.");
-          } finally {
-              btn.innerText = origText;
-              btn.disabled = false;
-          }
+        try {
+          const [topicsRes, chaptersRes] = await Promise.all([
+            fetch("/api/mcq/topics"),
+            fetch("/api/mcq/chapters"),
+          ]);
+          const topics = await topicsRes.json();
+          const chapters = await chaptersRes.json();
+          const toOptions = (arr) =>
+            arr.map((t) => `<option value="${t}">`).join("");
+          document.getElementById("qbTopicList").innerHTML = toOptions(topics);
+          document.getElementById("qbChapterList").innerHTML =
+            toOptions(chapters);
+        } catch (e) {
+          console.error("Error fetching QBank filters:", e);
+        }
       }
 
-      document.addEventListener('DOMContentLoaded', () => {
-          updateUI();
-          refreshSessionDropdown();
-          fetchQBankFilters();
+      async function importFromQBank(game) {
+        const btn = event.target;
+        const origText = btn.innerText;
+        btn.innerText = "⏳ IMPORTING...";
+        btn.disabled = true;
+
+        try {
+          const data = {
+            game: game,
+            paper: document.getElementById("qbPaper").value,
+            amount: document.getElementById("qbAmount").value,
+            chapter: document.getElementById("qbChapter").value,
+            topics: document.getElementById("qbTopics").value,
+            boardOnly: document.getElementById("qbBoard").checked,
+            importantOnly: document.getElementById("qbImportant").checked,
+          };
+
+          const exportRes = await fetch("/api/mcq/export-to-game", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+
+          if (!exportRes.ok) {
+            const err = await exportRes.json();
+            alert("Error exporting: " + (err.error || "Failed."));
+            return;
+          }
+
+          const json = await exportRes.json();
+
+          // Trigger reload in server memory
+          await fetch("/api/reload-quiz", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ game: game }),
+          });
+
+          alert(
+            `Successfully imported ${json.count} Type 1 questions into Maze!`,
+          );
+          document.getElementById("mazeQuizStatus").innerText =
+            `📊 ${json.count} questions loaded from Q-Bank`;
+        } catch (e) {
+          console.error(e);
+          alert("Failed to import from QBank.");
+        } finally {
+          btn.innerText = origText;
+          btn.disabled = false;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        updateUI();
+        refreshSessionDropdown();
+        fetchQBankFilters();
       });
     </script>
     <script src="js/wake-lock.js"></script>
-  <script src="js/pc-control.js"></script>
-  <script src="js/whiteboard.js"></script>
+    <script src="js/pc-control.js"></script>
+    <script src="js/whiteboard.js"></script>
   </body>
 </html>
-

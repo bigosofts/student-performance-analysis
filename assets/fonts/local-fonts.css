@@ -1,0 +1,175 @@
+﻿@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 300;
+  src: url('./QGYyz_MVcBeNP4NjuGObqx1XmO1I4W61C4E.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./QGYyz_MVcBeNP4NjuGObqx1XmO1I4TC1C4E.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./QGYyz_MVcBeNP4NjuGObqx1XmO1I4e6yC4E.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./QGYyz_MVcBeNP4NjuGObqx1XmO1I4deyC4E.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 800;
+  src: url('./QGYyz_MVcBeNP4NjuGObqx1XmO1I4bCyC4E.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Outfit';
+  font-style: normal;
+  font-weight: 900;
+  src: url('./QGYyz_MVcBeNP4NjuGObqx1XmO1I4ZmyC4E.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./yMJMMIlzdpvBhQQL_SC3X9yhF25-T1ny_Cmxpg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Orbitron';
+  font-style: normal;
+  font-weight: 900;
+  src: url('./yMJMMIlzdpvBhQQL_SC3X9yhF25-T1nysimxpg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuLyfMZg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYMZg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuFuYMZg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 800;
+  src: url('./UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuDyYMZg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 900;
+  src: url('./UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuBWYMZg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Siliguri';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./ijwTs5juQtsyLLR5jN4cxBEofJs.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Siliguri';
+  font-style: normal;
+  font-weight: 500;
+  src: url('./ijwOs5juQtsyLLR5jN4cxBEoRG_54uE.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Siliguri';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./ijwOs5juQtsyLLR5jN4cxBEoREP-4uE.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Hind Siliguri';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./ijwOs5juQtsyLLR5jN4cxBEoRCf_4uE.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: 400;
+  src: url('./7cH1v4okm5zmbvwkAx_sfcEuiD8jvvKcPg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: 600;
+  src: url('./7cH1v4okm5zmbvwkAx_sfcEuiD8jYPWcPg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: 700;
+  src: url('./7cH1v4okm5zmbvwkAx_sfcEuiD8jWfWcPg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: 800;
+  src: url('./7cH1v4okm5zmbvwkAx_sfcEuiD8jPvWcPg.ttf') format('woff2');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Exo 2';
+  font-style: normal;
+  font-weight: 900;
+  src: url('./7cH1v4okm5zmbvwkAx_sfcEuiD8jF_WcPg.ttf') format('woff2');
+  font-display: swap;
+}

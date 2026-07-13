@@ -4,31 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Word Puzzle Game — Live Display</title>
-    <meta name="description" content="Word Puzzle classroom game — live whiteboard display for students" />
+    <meta
+      name="description"
+      content="Word Puzzle classroom game — live whiteboard display for students"
+    />
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/wordpuzzle.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;600;700&family=Orbitron:wght@400;700;900&family=Outfit:wght@400;600;800;900&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
     <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      html, body { height: 100%; overflow: hidden; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
 
       /* ── Animated background ── */
       body.game-wp {
         background:
-          radial-gradient(ellipse at 20% 50%, rgba(124,58,237,0.08) 0%, transparent 60%),
-          radial-gradient(ellipse at 80% 20%, rgba(59,130,246,0.08) 0%, transparent 60%),
-          radial-gradient(ellipse at 60% 80%, rgba(236,72,153,0.06) 0%, transparent 60%),
+          radial-gradient(
+            ellipse at 20% 50%,
+            rgba(124, 58, 237, 0.08) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 80% 20%,
+            rgba(59, 130, 246, 0.08) 0%,
+            transparent 60%
+          ),
+          radial-gradient(
+            ellipse at 60% 80%,
+            rgba(236, 72, 153, 0.06) 0%,
+            transparent 60%
+          ),
           linear-gradient(135deg, #060614 0%, #0a0a1e 50%, #06060f 100%);
         animation: bgShift 12s ease-in-out infinite alternate;
       }
 
       @keyframes bgShift {
-        from { filter: hue-rotate(0deg); }
-        to   { filter: hue-rotate(15deg); }
+        from {
+          filter: hue-rotate(0deg);
+        }
+        to {
+          filter: hue-rotate(15deg);
+        }
       }
 
       /* ── Team panel cards at top ── */
@@ -43,58 +66,113 @@
       }
 
       .wp-team-panel.boys-panel {
-        background: linear-gradient(135deg, rgba(29,78,216,0.2), rgba(59,130,246,0.08));
-        border: 2px solid rgba(59,130,246,0.35);
-        box-shadow: 0 0 30px rgba(59,130,246,0.1);
+        background: linear-gradient(
+          135deg,
+          rgba(29, 78, 216, 0.2),
+          rgba(59, 130, 246, 0.08)
+        );
+        border: 2px solid rgba(59, 130, 246, 0.35);
+        box-shadow: 0 0 30px rgba(59, 130, 246, 0.1);
       }
 
       .wp-team-panel.girls-panel {
-        background: linear-gradient(135deg, rgba(190,24,93,0.2), rgba(236,72,153,0.08));
-        border: 2px solid rgba(236,72,153,0.35);
-        box-shadow: 0 0 30px rgba(236,72,153,0.1);
+        background: linear-gradient(
+          135deg,
+          rgba(190, 24, 93, 0.2),
+          rgba(236, 72, 153, 0.08)
+        );
+        border: 2px solid rgba(236, 72, 153, 0.35);
+        box-shadow: 0 0 30px rgba(236, 72, 153, 0.1);
         flex-direction: row-reverse;
       }
 
       .wp-avatar-ring {
-        width: 80px; height: 80px;
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-size: 2.4rem;
         flex-shrink: 0;
         overflow: hidden;
         position: relative;
       }
 
-      .boys-panel  .wp-avatar-ring { border: 3px solid #3b82f6; box-shadow: 0 0 24px rgba(59,130,246,0.6), inset 0 0 20px rgba(59,130,246,0.1); background: rgba(59,130,246,0.1); }
-      .girls-panel .wp-avatar-ring { border: 3px solid #ec4899; box-shadow: 0 0 24px rgba(236,72,153,0.6), inset 0 0 20px rgba(236,72,153,0.1); background: rgba(236,72,153,0.1); }
+      .boys-panel .wp-avatar-ring {
+        border: 3px solid #3b82f6;
+        box-shadow:
+          0 0 24px rgba(59, 130, 246, 0.6),
+          inset 0 0 20px rgba(59, 130, 246, 0.1);
+        background: rgba(59, 130, 246, 0.1);
+      }
+      .girls-panel .wp-avatar-ring {
+        border: 3px solid #ec4899;
+        box-shadow:
+          0 0 24px rgba(236, 72, 153, 0.6),
+          inset 0 0 20px rgba(236, 72, 153, 0.1);
+        background: rgba(236, 72, 153, 0.1);
+      }
 
-      .wp-avatar-ring img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+      .wp-avatar-ring img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
 
-      .wp-team-info { display: flex; flex-direction: column; gap: 3px; }
-      .girls-panel .wp-team-info { align-items: flex-end; }
+      .wp-team-info {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+      }
+      .girls-panel .wp-team-info {
+        align-items: flex-end;
+      }
 
       .wp-team-label {
-        font-size: 0.72rem; font-weight: 700; letter-spacing: 3px;
-        text-transform: uppercase; color: #94a3b8;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+        color: #94a3b8;
       }
 
       .wp-score-display {
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-size: clamp(1.8rem, 4vw, 2.8rem);
         font-weight: 900;
         line-height: 1;
       }
 
-      .boys-panel  .wp-score-display { color: #60a5fa; text-shadow: 0 0 30px rgba(59,130,246,0.7); }
-      .girls-panel .wp-score-display { color: #f472b6; text-shadow: 0 0 30px rgba(236,72,153,0.7); }
+      .boys-panel .wp-score-display {
+        color: #60a5fa;
+        text-shadow: 0 0 30px rgba(59, 130, 246, 0.7);
+      }
+      .girls-panel .wp-score-display {
+        color: #f472b6;
+        text-shadow: 0 0 30px rgba(236, 72, 153, 0.7);
+      }
 
       .wp-score-label {
-        font-size: 0.65rem; color: #64748b; font-weight: 700; letter-spacing: 1px; text-transform: uppercase;
+        font-size: 0.65rem;
+        color: #64748b;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
       }
 
       /* Active turn glow */
-      .wp-team-panel.active-team.boys-panel  { box-shadow: 0 0 50px rgba(59,130,246,0.3), 0 0 0 2px rgba(59,130,246,0.6); }
-      .wp-team-panel.active-team.girls-panel { box-shadow: 0 0 50px rgba(236,72,153,0.3), 0 0 0 2px rgba(236,72,153,0.6); }
+      .wp-team-panel.active-team.boys-panel {
+        box-shadow:
+          0 0 50px rgba(59, 130, 246, 0.3),
+          0 0 0 2px rgba(59, 130, 246, 0.6);
+      }
+      .wp-team-panel.active-team.girls-panel {
+        box-shadow:
+          0 0 50px rgba(236, 72, 153, 0.3),
+          0 0 0 2px rgba(236, 72, 153, 0.6);
+      }
 
       /* ── Top Bar ── */
       .wp-top-bar {
@@ -103,9 +181,9 @@
         gap: 14px;
         padding: 12px 20px;
         flex-shrink: 0;
-        background: rgba(6,6,20,0.6);
+        background: rgba(6, 6, 20, 0.6);
         backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(255,255,255,0.06);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
       }
 
       .wp-game-title-center {
@@ -115,7 +193,7 @@
       }
 
       .wp-game-title-text {
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-size: clamp(0.7rem, 1.8vw, 1rem);
         font-weight: 900;
         letter-spacing: 2px;
@@ -127,8 +205,12 @@
       }
 
       @keyframes titleShimmer {
-        from { background-position: 0% center; }
-        to   { background-position: 200% center; }
+        from {
+          background-position: 0% center;
+        }
+        to {
+          background-position: 200% center;
+        }
       }
 
       /* ── Game stage ── */
@@ -152,15 +234,29 @@
           0 0 0 2px #0f172a,
           0 0 0 5px #1e3a8a,
           0 0 0 7px #0f172a,
-          0 0 60px rgba(59,130,246,0.2),
-          0 0 120px rgba(124,58,237,0.15),
-          inset 0 0 30px rgba(0,0,0,0.5);
+          0 0 60px rgba(59, 130, 246, 0.2),
+          0 0 120px rgba(124, 58, 237, 0.15),
+          inset 0 0 30px rgba(0, 0, 0, 0.5);
         animation: frameGlow 4s ease-in-out infinite alternate;
       }
 
       @keyframes frameGlow {
-        from { box-shadow: 0 0 0 2px #0f172a, 0 0 0 5px #1e3a8a, 0 0 0 7px #0f172a, 0 0 60px rgba(59,130,246,0.2), 0 0 120px rgba(124,58,237,0.15); }
-        to   { box-shadow: 0 0 0 2px #0f172a, 0 0 0 5px #312e81, 0 0 0 7px #0f172a, 0 0 80px rgba(124,58,237,0.35), 0 0 160px rgba(59,130,246,0.2);  }
+        from {
+          box-shadow:
+            0 0 0 2px #0f172a,
+            0 0 0 5px #1e3a8a,
+            0 0 0 7px #0f172a,
+            0 0 60px rgba(59, 130, 246, 0.2),
+            0 0 120px rgba(124, 58, 237, 0.15);
+        }
+        to {
+          box-shadow:
+            0 0 0 2px #0f172a,
+            0 0 0 5px #312e81,
+            0 0 0 7px #0f172a,
+            0 0 80px rgba(124, 58, 237, 0.35),
+            0 0 160px rgba(59, 130, 246, 0.2);
+        }
       }
 
       .wp-game-grid {
@@ -179,85 +275,144 @@
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        font-family: 'Orbitron', monospace;
+        font-family: "Orbitron", monospace;
         color: #1e293b;
         transition: background 0.4s ease;
       }
 
-      .wp-game-cell.colored-boys  { background: #bfdbfe; border-color: #1e40af; }
-      .wp-game-cell.colored-girls { background: #fce7f3; border-color: #9d174d; }
+      .wp-game-cell.colored-boys {
+        background: #bfdbfe;
+        border-color: #1e40af;
+      }
+      .wp-game-cell.colored-girls {
+        background: #fce7f3;
+        border-color: #9d174d;
+      }
 
       .wp-game-cell .cell-letter {
         line-height: 1;
         font-weight: 900;
         pointer-events: none;
-        animation: letterReveal 0.4s cubic-bezier(0.34,1.56,0.64,1);
+        animation: letterReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
       @keyframes letterReveal {
-        from { transform: scale(0) rotate(-20deg); opacity: 0; }
-        to   { transform: scale(1) rotate(0deg);   opacity: 1; }
+        from {
+          transform: scale(0) rotate(-20deg);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) rotate(0deg);
+          opacity: 1;
+        }
       }
 
       /* ── Winner Overlay ── */
       .wp-winner-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.93);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 1000; opacity: 0; pointer-events: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.93);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
         transition: opacity 0.5s;
       }
 
-      .wp-winner-overlay.active { opacity: 1; pointer-events: all; }
+      .wp-winner-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
 
       .wp-winner-content {
-        text-align: center; padding: 60px;
-        animation: wpWinnerBounce 0.7s cubic-bezier(0.34,1.56,0.64,1);
+        text-align: center;
+        padding: 60px;
+        animation: wpWinnerBounce 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
       }
 
       @keyframes wpWinnerBounce {
-        from { transform: scale(0.3) translateY(60px); opacity: 0; }
-        to   { transform: scale(1)   translateY(0);    opacity: 1; }
+        from {
+          transform: scale(0.3) translateY(60px);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
       }
 
-      .wp-winner-confetti { font-size: 5rem; display: block; margin-bottom: 20px; animation: wpConfettiSpin 1s ease-in-out infinite alternate; }
+      .wp-winner-confetti {
+        font-size: 5rem;
+        display: block;
+        margin-bottom: 20px;
+        animation: wpConfettiSpin 1s ease-in-out infinite alternate;
+      }
       @keyframes wpConfettiSpin {
-        from { transform: rotate(-12deg) scale(1); }
-        to   { transform: rotate(12deg)  scale(1.15); }
+        from {
+          transform: rotate(-12deg) scale(1);
+        }
+        to {
+          transform: rotate(12deg) scale(1.15);
+        }
       }
 
       /* ── Add Points Modal ── */
       .wp-points-modal-overlay {
-        position: fixed; inset: 0;
-        background: rgba(0,0,0,0.8);
-        display: flex; align-items: center; justify-content: center;
-        z-index: 900; opacity: 0; pointer-events: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 900;
+        opacity: 0;
+        pointer-events: none;
         transition: opacity 0.4s;
       }
 
-      .wp-points-modal-overlay.active { opacity: 1; pointer-events: all; }
+      .wp-points-modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
 
       .wp-points-modal-card {
         background: linear-gradient(135deg, #0f172a, #1e1b4b);
-        border: 2px solid rgba(255,255,255,0.12);
+        border: 2px solid rgba(255, 255, 255, 0.12);
         border-radius: 28px;
         padding: 52px 64px;
         text-align: center;
-        box-shadow: 0 40px 100px rgba(0,0,0,0.7);
-        animation: wpModalPop 0.55s cubic-bezier(0.34,1.56,0.64,1);
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.7);
+        animation: wpModalPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
         max-width: 500px;
         width: 90%;
       }
 
       @keyframes wpModalPop {
-        from { transform: scale(0.4) translateY(50px); opacity: 0; }
-        to   { transform: scale(1)   translateY(0);    opacity: 1; }
+        from {
+          transform: scale(0.4) translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1) translateY(0);
+          opacity: 1;
+        }
       }
 
-      .wp-modal-icon { font-size: 4rem; display: block; margin-bottom: 16px; animation: iconBounce 0.6s cubic-bezier(0.34,1.56,0.64,1) 0.15s both; }
+      .wp-modal-icon {
+        font-size: 4rem;
+        display: block;
+        margin-bottom: 16px;
+        animation: iconBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
+      }
       @keyframes iconBounce {
-        from { transform: scale(0); }
-        to   { transform: scale(1); }
+        from {
+          transform: scale(0);
+        }
+        to {
+          transform: scale(1);
+        }
       }
 
       .wp-modal-team-badge {
@@ -267,30 +422,58 @@
         font-weight: 900;
         font-size: 1rem;
         letter-spacing: 4px;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         margin-bottom: 24px;
       }
 
-      .wp-modal-team-badge.boys  { background: rgba(59,130,246,0.2);  border: 2px solid #3b82f6; color: #93c5fd; }
-      .wp-modal-team-badge.girls { background: rgba(236,72,153,0.2); border: 2px solid #ec4899; color: #f9a8d4; }
+      .wp-modal-team-badge.boys {
+        background: rgba(59, 130, 246, 0.2);
+        border: 2px solid #3b82f6;
+        color: #93c5fd;
+      }
+      .wp-modal-team-badge.girls {
+        background: rgba(236, 72, 153, 0.2);
+        border: 2px solid #ec4899;
+        color: #f9a8d4;
+      }
 
-      .wp-modal-amount-label { font-size: 0.85rem; color: #64748b; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+      .wp-modal-amount-label {
+        font-size: 0.85rem;
+        color: #64748b;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
 
       .wp-modal-amount-value {
         font-size: clamp(3.5rem, 10vw, 6rem);
         font-weight: 900;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         line-height: 1;
-        animation: wpModalAmountGrow 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.25s both;
+        animation: wpModalAmountGrow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)
+          0.25s both;
       }
 
       @keyframes wpModalAmountGrow {
-        from { transform: scale(0.2); opacity: 0; }
-        to   { transform: scale(1);   opacity: 1; }
+        from {
+          transform: scale(0.2);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
       }
 
-      .wp-modal-amount-value.boys  { color: #3b82f6; text-shadow: 0 0 50px rgba(59,130,246,0.8); }
-      .wp-modal-amount-value.girls { color: #ec4899; text-shadow: 0 0 50px rgba(236,72,153,0.8); }
+      .wp-modal-amount-value.boys {
+        color: #3b82f6;
+        text-shadow: 0 0 50px rgba(59, 130, 246, 0.8);
+      }
+      .wp-modal-amount-value.girls {
+        color: #ec4899;
+        text-shadow: 0 0 50px rgba(236, 72, 153, 0.8);
+      }
 
       .wp-modal-total-line {
         margin-top: 18px;
@@ -300,32 +483,41 @@
       }
 
       .wp-modal-total-line strong {
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         font-size: 1.4rem;
       }
 
-      .wp-modal-total-line.boys  strong { color: #60a5fa; }
-      .wp-modal-total-line.girls strong { color: #f472b6; }
+      .wp-modal-total-line.boys strong {
+        color: #60a5fa;
+      }
+      .wp-modal-total-line.girls strong {
+        color: #f472b6;
+      }
 
       /* ── Point particle ── */
       .wp-point-particle {
         position: fixed;
         font-size: 1.8rem;
         font-weight: 900;
-        font-family: 'Orbitron', sans-serif;
+        font-family: "Orbitron", sans-serif;
         pointer-events: none;
         z-index: 999;
         animation: particleFloat 2s ease-out forwards;
       }
 
       @keyframes particleFloat {
-        from { transform: translateY(0) scale(1);   opacity: 1; }
-        to   { transform: translateY(-180px) scale(0.5); opacity: 0; }
+        from {
+          transform: translateY(0) scale(1);
+          opacity: 1;
+        }
+        to {
+          transform: translateY(-180px) scale(0.5);
+          opacity: 0;
+        }
       }
     </style>
   </head>
   <body class="game-wp">
-
     <!-- ── Top Bar: Team Panels ── -->
     <div class="wp-top-bar">
       <!-- Red Team -->
@@ -341,7 +533,9 @@
       <!-- Centre title + turn badge -->
       <div class="wp-game-title-center">
         <div class="wp-game-title-text">🔤 WORD PUZZLE</div>
-        <div class="wp-turn-badge boys" id="turnBadge" style="margin-top:6px;">BLUE TEAM TURN</div>
+        <div class="wp-turn-badge boys" id="turnBadge" style="margin-top: 6px">
+          BLUE TEAM TURN
+        </div>
       </div>
 
       <!-- Blue Team -->
@@ -366,9 +560,26 @@
     <div id="wpWinnerOverlay" class="wp-winner-overlay">
       <div class="wp-winner-content">
         <span class="wp-winner-confetti" id="winnerConfetti">🎉</span>
-        <h1 id="winnerTitle" style="font-size:clamp(2rem,8vh,4.5rem); font-family:'Orbitron',sans-serif; color:#fff; text-shadow:0 0 40px rgba(124,58,237,0.8); margin-bottom:20px;"></h1>
-        <p id="winnerMsg" style="font-size:clamp(1rem,3vh,1.5rem); color:#e2e8f0; line-height:1.7; font-family:'Outfit',sans-serif;"></p>
-        <div style="font-size:4rem; margin-top:24px;">🏆</div>
+        <h1
+          id="winnerTitle"
+          style="
+            font-size: clamp(2rem, 8vh, 4.5rem);
+            font-family: &quot;Orbitron&quot;, sans-serif;
+            color: #fff;
+            text-shadow: 0 0 40px rgba(124, 58, 237, 0.8);
+            margin-bottom: 20px;
+          "
+        ></h1>
+        <p
+          id="winnerMsg"
+          style="
+            font-size: clamp(1rem, 3vh, 1.5rem);
+            color: #e2e8f0;
+            line-height: 1.7;
+            font-family: &quot;Outfit&quot;, sans-serif;
+          "
+        ></p>
+        <div style="font-size: 4rem; margin-top: 24px">🏆</div>
       </div>
     </div>
 
@@ -376,10 +587,14 @@
     <div id="pointsModalOverlay" class="wp-points-modal-overlay">
       <div class="wp-points-modal-card">
         <span class="wp-modal-icon" id="modalIcon">🎉</span>
-        <div class="wp-modal-team-badge boys" id="modalTeamBadge">BLUE TEAM</div>
+        <div class="wp-modal-team-badge boys" id="modalTeamBadge">
+          BLUE TEAM
+        </div>
         <div class="wp-modal-amount-label">POINTS AWARDED</div>
         <div class="wp-modal-amount-value boys" id="modalAmountValue">+0</div>
-        <div class="wp-modal-total-line boys" id="modalTotalLine">Total: <strong id="modalTotal">0</strong></div>
+        <div class="wp-modal-total-line boys" id="modalTotalLine">
+          Total: <strong id="modalTotal">0</strong>
+        </div>
       </div>
     </div>
 
@@ -388,44 +603,45 @@
     <script>
       const { WordPuzzle } = window;
 
-      let gameSocket    = null;
+      let gameSocket = null;
       let autoCloseTimer = null;
-      const teamLabel = (team) => team === 'boys' ? 'Blue Team' : 'Red Team';
+      const teamLabel = (team) => (team === "boys" ? "Blue Team" : "Red Team");
       const teamLabelUpper = (team) => teamLabel(team).toUpperCase();
 
       // ── Grid rendering ──────────────────────────────────
-      let lastRenderedRows = 0, lastRenderedCols = 0;
+      let lastRenderedRows = 0,
+        lastRenderedCols = 0;
 
       function calcCellSize(rows, cols) {
-        const stage   = document.getElementById('gameStage');
-        const stageW  = stage.clientWidth  - 40;
-        const stageH  = stage.clientHeight - 40;
-        const byWidth  = Math.floor(stageW / cols);
+        const stage = document.getElementById("gameStage");
+        const stageW = stage.clientWidth - 40;
+        const stageH = stage.clientHeight - 40;
+        const byWidth = Math.floor(stageW / cols);
         const byHeight = Math.floor(stageH / rows);
         return Math.max(12, Math.min(byWidth, byHeight, 70));
       }
 
       function buildGameGrid(force = false) {
-        const g    = WordPuzzle.game;
+        const g = WordPuzzle.game;
         const rows = g.gridRows;
         const cols = g.gridCols;
 
-        const grid = document.getElementById('gameGrid');
+        const grid = document.getElementById("gameGrid");
 
         if (force || rows !== lastRenderedRows || cols !== lastRenderedCols) {
           const cellPx = calcCellSize(rows, cols);
           const fontSize = Math.max(7, cellPx * 0.45);
 
           grid.style.gridTemplateColumns = `repeat(${cols}, ${cellPx}px)`;
-          grid.innerHTML = '';
+          grid.innerHTML = "";
 
           for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
-              const div       = document.createElement('div');
-              div.className   = 'wp-game-cell';
-              div.style.width  = cellPx + 'px';
-              div.style.height = cellPx + 'px';
-              div.style.fontSize = fontSize + 'px';
+              const div = document.createElement("div");
+              div.className = "wp-game-cell";
+              div.style.width = cellPx + "px";
+              div.style.height = cellPx + "px";
+              div.style.fontSize = fontSize + "px";
               div.id = `gcell-${r}-${c}`;
               grid.appendChild(div);
             }
@@ -440,7 +656,7 @@
       }
 
       function renderAllCells(rows, cols) {
-        const g     = WordPuzzle.game;
+        const g = WordPuzzle.game;
         const cells = g.cells;
 
         for (let r = 0; r < rows; r++) {
@@ -451,23 +667,23 @@
       }
 
       function updateGameCell(row, col, cells) {
-        const key  = `${row},${col}`;
+        const key = `${row},${col}`;
         const cell = cells ? cells[key] : WordPuzzle.game.cells[key];
-        const div  = document.getElementById(`gcell-${row}-${col}`);
+        const div = document.getElementById(`gcell-${row}-${col}`);
         if (!div) return;
 
-        div.classList.remove('colored-boys', 'colored-girls');
-        div.innerHTML = '';
+        div.classList.remove("colored-boys", "colored-girls");
+        div.innerHTML = "";
 
         if (cell) {
-          if (cell.color === 'boys')  div.classList.add('colored-boys');
-          if (cell.color === 'girls') div.classList.add('colored-girls');
+          if (cell.color === "boys") div.classList.add("colored-boys");
+          if (cell.color === "girls") div.classList.add("colored-girls");
 
           // Only show displayLetter (from previously loaded session)
           if (cell.displayLetter) {
-            const span        = document.createElement('span');
-            span.className    = 'cell-letter';
-            span.textContent  = cell.displayLetter;
+            const span = document.createElement("span");
+            span.className = "cell-letter";
+            span.textContent = cell.displayLetter;
             div.appendChild(span);
           }
         }
@@ -478,50 +694,57 @@
         const g = WordPuzzle.game;
 
         // Scores
-        document.getElementById('boysScoreDisplay').textContent  = g.boysPoints;
-        document.getElementById('girlsScoreDisplay').textContent = g.girlsPoints;
+        document.getElementById("boysScoreDisplay").textContent = g.boysPoints;
+        document.getElementById("girlsScoreDisplay").textContent =
+          g.girlsPoints;
 
         // Turn badge
-        const badge = document.getElementById('turnBadge');
-        badge.textContent  = teamLabelUpper(g.currentTurn) + ' TURN';
-        badge.className    = 'wp-turn-badge ' + g.currentTurn;
+        const badge = document.getElementById("turnBadge");
+        badge.textContent = teamLabelUpper(g.currentTurn) + " TURN";
+        badge.className = "wp-turn-badge " + g.currentTurn;
 
         // Active-team glow
-        document.getElementById('boysPanel').classList.toggle('active-team', g.currentTurn === 'boys');
-        document.getElementById('girlsPanel').classList.toggle('active-team', g.currentTurn === 'girls');
+        document
+          .getElementById("boysPanel")
+          .classList.toggle("active-team", g.currentTurn === "boys");
+        document
+          .getElementById("girlsPanel")
+          .classList.toggle("active-team", g.currentTurn === "girls");
 
         // Avatars
-        const bAvatar = document.getElementById('boysAvatar');
+        const bAvatar = document.getElementById("boysAvatar");
         if (g.boysImage) {
           bAvatar.innerHTML = `<img src="${g.boysImage}?v=${g.lastUpdate}" alt="Blue Team">`;
         } else {
-          bAvatar.textContent = '🏃‍♂️';
+          bAvatar.textContent = "🏃‍♂️";
         }
 
-        const gAvatar = document.getElementById('girlsAvatar');
+        const gAvatar = document.getElementById("girlsAvatar");
         if (g.girlsImage) {
           gAvatar.innerHTML = `<img src="${g.girlsImage}?v=${g.lastUpdate}" alt="Red Team">`;
         } else {
-          gAvatar.textContent = '🏃‍♀️';
+          gAvatar.textContent = "🏃‍♀️";
         }
 
         // Winner overlay
-        const winnerOverlay = document.getElementById('wpWinnerOverlay');
+        const winnerOverlay = document.getElementById("wpWinnerOverlay");
         if (g.winner) {
-          const isDraw = g.winner === 'draw';
-          const team   = teamLabel(g.winner);
+          const isDraw = g.winner === "draw";
+          const team = teamLabel(g.winner);
 
-          document.getElementById('winnerConfetti').textContent = isDraw ? '🤝' : '🎉';
-          document.getElementById('winnerTitle').textContent    = isDraw
-            ? 'DRAW! 🤝'
+          document.getElementById("winnerConfetti").textContent = isDraw
+            ? "🤝"
+            : "🎉";
+          document.getElementById("winnerTitle").textContent = isDraw
+            ? "DRAW! 🤝"
             : `🏆 ${team.toUpperCase()} WIN!`;
-          document.getElementById('winnerMsg').innerHTML = isDraw
+          document.getElementById("winnerMsg").innerHTML = isDraw
             ? `Both teams gave an incredible effort!<br><span style="color:#7c3aed;">Class: ${g.classInfo} | Section: ${g.sectionInfo}</span>`
             : `Congratulations to all <strong>${team}</strong>!<br><span style="color:#7c3aed;">Class: ${g.classInfo} | Section: ${g.sectionInfo}</span>`;
 
-          winnerOverlay.classList.add('active');
+          winnerOverlay.classList.add("active");
         } else {
-          winnerOverlay.classList.remove('active');
+          winnerOverlay.classList.remove("active");
         }
       }
 
@@ -537,41 +760,45 @@
 
         // Play sound
         try {
-          const ctx   = new (window.AudioContext || window.webkitAudioContext)();
+          const ctx = new (window.AudioContext || window.webkitAudioContext)();
           const notes = [523, 659, 784, 1047, 1319];
           notes.forEach((freq, i) => {
-            const osc  = ctx.createOscillator();
+            const osc = ctx.createOscillator();
             const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'triangle';
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.type = "triangle";
             osc.frequency.value = freq;
             gain.gain.setValueAtTime(0.14, ctx.currentTime + i * 0.08);
-            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.08 + 0.12);
+            gain.gain.exponentialRampToValueAtTime(
+              0.001,
+              ctx.currentTime + i * 0.08 + 0.12,
+            );
             osc.start(ctx.currentTime + i * 0.08);
-            osc.stop(ctx.currentTime  + i * 0.08 + 0.14);
+            osc.stop(ctx.currentTime + i * 0.08 + 0.14);
           });
         } catch (e) {}
 
         // Update modal content
-        const overlay    = document.getElementById('pointsModalOverlay');
-        const icon       = document.getElementById('modalIcon');
-        const badge      = document.getElementById('modalTeamBadge');
-        const amount_el  = document.getElementById('modalAmountValue');
-        const totalLine  = document.getElementById('modalTotalLine');
-        const total_el   = document.getElementById('modalTotal');
+        const overlay = document.getElementById("pointsModalOverlay");
+        const icon = document.getElementById("modalIcon");
+        const badge = document.getElementById("modalTeamBadge");
+        const amount_el = document.getElementById("modalAmountValue");
+        const totalLine = document.getElementById("modalTotalLine");
+        const total_el = document.getElementById("modalTotal");
 
-        icon.textContent        = team === 'boys' ? '🏃‍♂️' : '🏃‍♀️';
-        badge.textContent       = teamLabelUpper(team);
-        badge.className         = `wp-modal-team-badge ${team}`;
-        amount_el.textContent   = `+${amount}`;
-        amount_el.className     = `wp-modal-amount-value ${team}`;
-        totalLine.className     = `wp-modal-total-line ${team}`;
-        total_el.textContent    = total;
+        icon.textContent = team === "boys" ? "🏃‍♂️" : "🏃‍♀️";
+        badge.textContent = teamLabelUpper(team);
+        badge.className = `wp-modal-team-badge ${team}`;
+        amount_el.textContent = `+${amount}`;
+        amount_el.className = `wp-modal-amount-value ${team}`;
+        totalLine.className = `wp-modal-total-line ${team}`;
+        total_el.textContent = total;
 
-        overlay.classList.add('active');
+        overlay.classList.add("active");
 
         // Point particle
-        spawnParticle('+' + amount, team);
+        spawnParticle("+" + amount, team);
 
         // Auto-close after 5 seconds
         if (autoCloseTimer) clearTimeout(autoCloseTimer);
@@ -579,43 +806,46 @@
       }
 
       function closePointsModal() {
-        document.getElementById('pointsModalOverlay').classList.remove('active');
+        document
+          .getElementById("pointsModalOverlay")
+          .classList.remove("active");
         if (autoCloseTimer) clearTimeout(autoCloseTimer);
       }
 
       function spawnParticle(text, team) {
-        const el        = document.createElement('div');
-        el.className    = 'wp-point-particle';
-        el.textContent  = text;
-        el.style.color  = team === 'boys' ? '#60a5fa' : '#f472b6';
-        el.style.left   = (window.innerWidth  / 2 - 40) + 'px';
-        el.style.top    = (window.innerHeight / 2)      + 'px';
+        const el = document.createElement("div");
+        el.className = "wp-point-particle";
+        el.textContent = text;
+        el.style.color = team === "boys" ? "#60a5fa" : "#f472b6";
+        el.style.left = window.innerWidth / 2 - 40 + "px";
+        el.style.top = window.innerHeight / 2 + "px";
         document.body.appendChild(el);
         setTimeout(() => el.remove(), 2200);
       }
 
       // ── Socket ──────────────────────────────────────────
-      if (typeof io !== 'undefined') {
+      if (typeof io !== "undefined") {
         gameSocket = io();
         WordPuzzle.setSocket(gameSocket);
 
-        gameSocket.on('wordpuzzle-game-updated', (newState) => {
+        gameSocket.on("wordpuzzle-game-updated", (newState) => {
           const prevRows = WordPuzzle.game.gridRows;
           const prevCols = WordPuzzle.game.gridCols;
           WordPuzzle.setWPGame(newState);
-          const sizeChanged = newState.gridRows !== prevRows || newState.gridCols !== prevCols;
+          const sizeChanged =
+            newState.gridRows !== prevRows || newState.gridCols !== prevCols;
           fullUpdate(sizeChanged);
         });
 
-        gameSocket.on('wordpuzzle-show-points-modal', (data) => {
+        gameSocket.on("wordpuzzle-show-points-modal", (data) => {
           showPointsModal(data);
         });
 
-        gameSocket.on('wordpuzzle-close-points-modal', () => {
+        gameSocket.on("wordpuzzle-close-points-modal", () => {
           closePointsModal();
         });
 
-        gameSocket.on('classroom-navigate', (data) => {
+        gameSocket.on("classroom-navigate", (data) => {
           if (data && data.url) {
             window.location.href = data.url;
           }
@@ -624,7 +854,7 @@
 
       // ── Resize handler ───────────────────────────────────
       let resizeTimer = null;
-      window.addEventListener('resize', () => {
+      window.addEventListener("resize", () => {
         clearTimeout(resizeTimer);
         resizeTimer = setTimeout(() => fullUpdate(true), 150);
       });
@@ -633,7 +863,6 @@
       fullUpdate(true);
     </script>
     <script src="js/wake-lock.js"></script>
-  <script src="js/whiteboard.js"></script>
+    <script src="js/whiteboard.js"></script>
   </body>
 </html>
-
