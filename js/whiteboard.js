@@ -1388,6 +1388,7 @@
     function toggleWhiteboard(show) {
       if (show) {
         overlay.classList.add("active");
+        document.body.classList.add("wb-active");
         if (triggerBtnRef) triggerBtnRef.classList.add("active");
         if (isMobile() && !isPresenter) {
           updateMobileViewportHeight();
@@ -1406,6 +1407,7 @@
         }, 300);
       } else {
         overlay.classList.remove("active");
+        document.body.classList.remove("wb-active");
         overlay.classList.remove("wb-mobile-ui-hidden");
         overlay.classList.remove("wb-mobile-viewport-fit");
         overlay.style.position = "";
