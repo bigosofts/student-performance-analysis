@@ -325,7 +325,9 @@
       height: CANVAS_HEIGHT,
       allowTouchScrolling: false,
       preserveObjectStacking: true,
-      enableRetinaScaling: false, // Prevents 18-megapixel backing stores on mobile
+      enableRetinaScaling: false,
+      fireMiddleClick: true,
+      stopContextMenu: true,
     });
 
     let currentTool = "draw";
@@ -336,7 +338,27 @@
 
     canvas.freeDrawingBrush.color = "#000000";
     canvas.freeDrawingBrush.width = 5;
-    canvas.freeDrawingBrush.decimate = 0; // Set to 0 to disable simplification completely for maximum touch sensitivity
+    canvas.freeDrawingBrush.decimate = 1.5; // Optimized for performance vs smoothness trade-off
+
+    // Optimizing event delivery for modern browsers/webviews
+    const upperCanvas = canvas.upperCanvasEl;
+    if (upperCanvas) {
+      upperCanvas.style.touchAction = "none"; // CRITICAL: Disable browser-side gesture detection
+
+      // Use PointerEvents if available for lower latency
+      if (window.PointerEvent) {
+        upperCanvas.addEventListener(
+          "pointerdown",
+          (e) => {
+            if (e.pointerType === "touch") {
+              setMobileUIVisible(true);
+              clearTimeout(centerCanvasTimer);
+            }
+          },
+          { passive: true },
+        );
+      }
+    }
 
     if (canvasStack) {
       canvasStack.style.width = CANVAS_WIDTH + "px";
@@ -1300,39 +1322,35 @@
     }
     setTimeout(resizeCanvas, 100);
 
+    let modifySyncTimer = null;
     function syncModifiedObject(target) {
       if (!socket || isPresenter) return;
-      if (target.type === "activeSelection") {
-        const items = target.getObjects().slice();
-        canvas.discardActiveObject();
-        const payloads = [];
-        items.forEach((o) => {
-          o.setCoords();
-          if (o.id) {
-            const objData = o.toJSON(["id", "wbBackground"]);
-            // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
-            if (objData.src) {
-              objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, "");
+
+      // Debounce modification sync to prevent socket/thread saturation during drags
+      clearTimeout(modifySyncTimer);
+      modifySyncTimer = setTimeout(() => {
+        if (target.type === "activeSelection") {
+          const items = target.getObjects().slice();
+          const payloads = [];
+          items.forEach((o) => {
+            o.setCoords();
+            if (o.id) {
+              const objData = o.toJSON(["id", "wbBackground"]);
+              if (objData.src) {
+                objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, "");
+              }
+              payloads.push(objData);
             }
-            payloads.push(objData);
+          });
+          if (payloads.length) socket.emit("wb-modify-batch", payloads);
+        } else if (target.id && !target.wbBackground) {
+          const objData = target.toJSON(["id", "wbBackground"]);
+          if (objData.src) {
+            objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, "");
           }
-        });
-        if (payloads.length) socket.emit("wb-modify-batch", payloads);
-        if (items.length > 1) {
-          const sel = new fabric.ActiveSelection(items, { canvas });
-          canvas.setActiveObject(sel);
-        } else if (items.length === 1) {
-          canvas.setActiveObject(items[0]);
+          socket.emit("wb-modify", objData);
         }
-        canvas.requestRenderAll();
-      } else if (target.id && !target.wbBackground) {
-        const objData = target.toJSON(["id", "wbBackground"]);
-        // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
-        if (objData.src) {
-          objData.src = objData.src.replace(/^https?:\/\/[^\/]+/i, "");
-        }
-        socket.emit("wb-modify", objData);
-      }
+      }, 50); // 50ms debounce is imperceptible but saves lots of CPU
     }
 
     function syncAdd(obj) {
