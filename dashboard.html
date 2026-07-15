@@ -787,7 +787,7 @@
       -webkit-backdrop-filter: blur(20px);
       padding: 20px;
     ">
-      <div style="
+      <div class="cs-dialog" style="
         background: rgba(15, 23, 42, 0.95);
         border: 1px solid rgba(124, 58, 237, 0.3);
         border-radius: 28px;
@@ -940,6 +940,58 @@
       @keyframes csModalIn {
         from { opacity: 0; transform: scale(0.88) translateY(30px); }
         to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+
+      /* Responsive adjustments for class session modal */
+      #classSessionModal {
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      #classSessionModal .cs-dialog {
+        max-height: calc(100vh - 48px);
+        overflow-y: auto;
+      }
+
+      @media (max-width: 640px) {
+        #classSessionModal {
+          align-items: flex-start;
+          padding: 16px;
+        }
+
+        #classSessionModal .cs-dialog {
+          width: 100%;
+          max-width: 100%;
+          border-radius: 14px;
+          padding: 18px;
+          box-shadow: 0 10px 30px rgba(0,0,0,0.45);
+          margin-top: 18px;
+        }
+
+        #classSessionModal h2 {
+          font-size: 1.25rem;
+        }
+
+        #classSessionModal > .cs-dialog > div:first-child {
+          font-size: 2rem;
+          margin-bottom: 8px;
+        }
+
+        #classSessionModal input,
+        #classSessionModal select,
+        #classSessionModal button {
+          font-size: 1rem;
+        }
+
+        #classSessionModal input,
+        #classSessionModal select {
+          padding: 12px 14px !important;
+        }
+
+        #csStartBtn {
+          padding: 14px !important;
+          border-radius: 10px !important;
+        }
       }
     </style>
 
