@@ -1526,13 +1526,6 @@
       this.selection = currentTool === "select";
     });
 
-    canvas.on("mouse:dblclick", function (opt) {
-      if (!isPresenter && opt.target && !opt.target.wbBackground) {
-        setActiveTool("select");
-        canvas.setActiveObject(opt.target);
-      }
-    });
-
     // ── Mobile: two-finger pinch zoom only (no pan, no accidental dots) ──
     if (!isPresenter) {
       const onMobileTouchStart = (e) => {
@@ -1876,11 +1869,17 @@
               0,
               scrollEl.scrollWidth - scrollEl.clientWidth,
             );
-            const shiftAmount = Math.max(scrollEl.clientWidth * 0.9, 80);
+            const viewportWidth = scrollEl.clientWidth;
+            const strokeRightEdgeX =
+              (pathBounds.left + pathBounds.width) * scale;
+            const strokeLeftEdgeX = pathBounds.left * scale;
             const targetScrollLeft =
               visibleStrokeCenterX < viewportMidX
-                ? Math.max(0, scrollEl.scrollLeft - shiftAmount)
-                : Math.min(maxScrollLeft, scrollEl.scrollLeft + shiftAmount);
+                ? Math.max(
+                    0,
+                    Math.min(maxScrollLeft, strokeRightEdgeX - viewportWidth),
+                  )
+                : Math.max(0, Math.min(maxScrollLeft, strokeLeftEdgeX));
             scrollEl.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
           }, 1000);
         }
