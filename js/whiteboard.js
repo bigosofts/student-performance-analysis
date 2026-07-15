@@ -351,7 +351,8 @@
           "pointerdown",
           (e) => {
             if (e.pointerType === "touch") {
-              setMobileUIVisible(true);
+              // Prevent opening the controls when touching the canvas.
+              // Only keep centerCanvasTimer logic (used for recent drawing focus).
               clearTimeout(centerCanvasTimer);
             }
           },
@@ -1014,11 +1015,14 @@
     const btnSelect = document.getElementById("wb-tool-select");
 
     function setMobileUIVisible(visible) {
-      if (!isMobile() || isPresenter) return;
+      // Allow minimizing/showing the controls on desktop as well
+      // but keep presenter mode locked (presenter shouldn't see editor controls)
+      if (isPresenter) return;
       if (visible) {
         overlay.classList.remove("wb-mobile-ui-hidden");
         if (mobileUiReveal) mobileUiReveal.hidden = true;
-        scheduleMobileUIHide();
+        // Only auto-hide on mobile devices
+        if (isMobile()) scheduleMobileUIHide();
       } else {
         clearTimeout(mobileUiHideTimer);
         overlay.classList.add("wb-mobile-ui-hidden");

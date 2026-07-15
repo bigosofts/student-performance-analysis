@@ -752,4 +752,20 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
   #wb-mobile-bar {
     display: none !important;
   }
+
+  /* Keep the main (primary) toolbar row on a single line for desktop.
+     Allow horizontal scrolling if viewport is too narrow. */
+  #wb-toolbar .wb-toolbar-primary {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  /* Ensure controls row is visible on desktop */
+  #wb-toolbar .wb-toolbar-controls {
+    display: flex;
+    align-items: center;
+  }
 }
