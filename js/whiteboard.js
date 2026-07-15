@@ -1868,10 +1868,19 @@
           centerCanvasTimer = setTimeout(() => {
             const pathBounds = opt.path.getBoundingRect();
             const scale = getMobileScale();
-            const scaledLeftEdge = pathBounds.left * scale;
-            // Place the last stroke 10% from the left edge, leaving 90% of screen to the right for more writing
+            const strokeCenterX =
+              (pathBounds.left + pathBounds.width / 2) * scale;
+            const viewportMidX = scrollEl.clientWidth / 2;
+            const visibleStrokeCenterX = strokeCenterX - scrollEl.scrollLeft;
+            const maxScrollLeft = Math.max(
+              0,
+              scrollEl.scrollWidth - scrollEl.clientWidth,
+            );
+            const shiftAmount = Math.max(scrollEl.clientWidth * 0.9, 80);
             const targetScrollLeft =
-              scaledLeftEdge - scrollEl.clientWidth * 0.1;
+              visibleStrokeCenterX < viewportMidX
+                ? Math.max(0, scrollEl.scrollLeft - shiftAmount)
+                : Math.min(maxScrollLeft, scrollEl.scrollLeft + shiftAmount);
             scrollEl.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
           }, 1000);
         }
