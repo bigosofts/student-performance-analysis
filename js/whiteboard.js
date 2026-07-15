@@ -121,6 +121,7 @@
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-out" aria-label="Zoom out">−</button>
             <span id="wb-mobile-zoom-label">100%</span>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-minimize-btn" aria-label="Minimize controls">▾</button>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-tools-toggle" aria-label="Tools">🛠️</button>
           </div>
 
@@ -149,6 +150,7 @@
             <div class="wb-separator"></div>
               <button class="wb-tool-btn" id="wb-tool-clear" title="Clear">🗑️</button>
               <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
+              <button class="wb-tool-btn" id="wb-toolbar-minimize-btn" title="Minimize controls" aria-label="Minimize controls">⤓</button>
               <button class="wb-tool-btn wb-tool-close-main" id="wb-tool-close" title="Close">❌</button>
             </div>
 
@@ -263,7 +265,7 @@
     let isDarkBoard = false;
     let mobileUiHideTimer = null;
     let centerCanvasTimer = null;
-    const MOBILE_UI_HIDE_MS = 3000;
+    const MOBILE_UI_HIDE_MS = 8000;
     let touchStartDist = 0;
     let suppressDraw = false;
     let lastPathTime = 0;
@@ -989,11 +991,21 @@
     const btnErase = document.getElementById("wb-tool-erase");
     const btnSelect = document.getElementById("wb-tool-select");
 
-    function showMobileUI() {
+    function setMobileUIVisible(visible) {
       if (!isMobile() || isPresenter) return;
-      overlay.classList.remove("wb-mobile-ui-hidden");
-      if (mobileUiReveal) mobileUiReveal.hidden = true;
-      scheduleMobileUIHide();
+      if (visible) {
+        overlay.classList.remove("wb-mobile-ui-hidden");
+        if (mobileUiReveal) mobileUiReveal.hidden = true;
+        scheduleMobileUIHide();
+      } else {
+        clearTimeout(mobileUiHideTimer);
+        overlay.classList.add("wb-mobile-ui-hidden");
+        if (mobileUiReveal) mobileUiReveal.hidden = false;
+      }
+    }
+
+    function showMobileUI() {
+      setMobileUIVisible(true);
     }
 
     let lastMobileUIHideSchedule = 0;
@@ -1007,8 +1019,7 @@
       clearTimeout(centerCanvasTimer);
       mobileUiHideTimer = setTimeout(() => {
         if (!overlay.classList.contains("active")) return;
-        overlay.classList.add("wb-mobile-ui-hidden");
-        if (mobileUiReveal) mobileUiReveal.hidden = false;
+        setMobileUIVisible(false);
       }, MOBILE_UI_HIDE_MS);
     }
 
@@ -1765,11 +1776,27 @@
       document.getElementById("wb-tool-close").onclick = closeWhiteboard;
 
       const mobileToggle = document.getElementById("wb-mobile-tools-toggle");
+      const mobileMinimize = document.getElementById("wb-mobile-minimize-btn");
+      const toolbarMinimize = document.getElementById(
+        "wb-toolbar-minimize-btn",
+      );
       const toolbar = document.getElementById("wb-toolbar");
       if (mobileToggle) {
         mobileToggle.onclick = () => {
           toolbar.classList.toggle("wb-toolbar-expanded");
           showMobileUI();
+        };
+      }
+      if (mobileMinimize) {
+        mobileMinimize.onclick = (e) => {
+          e.stopPropagation();
+          setMobileUIVisible(false);
+        };
+      }
+      if (toolbarMinimize) {
+        toolbarMinimize.onclick = (e) => {
+          e.stopPropagation();
+          setMobileUIVisible(false);
         };
       }
       document
