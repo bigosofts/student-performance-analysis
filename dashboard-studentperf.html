@@ -1,434 +1,493 @@
 <!doctype html>
 <html lang="en">
-
-<head>
-  <script src="js/auth-check.js"></script>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Student Performance Manager</title>
-  <link rel="stylesheet" href="css/style.css" />
-  <link rel="stylesheet" href="css/questionbank.css" />
-  <script src="/socket.io/socket.io.js"></script>
-  <style>
-    .dashboard-container {
-      padding: 20px;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .card {
-      margin-bottom: 20px;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-
-    .back-btn {
-      padding: 10px 20px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 8px;
-      color: white;
-      text-decoration: none;
-    }
-
-    .back-btn:hover {
-      background: rgba(255, 255, 255, 0.2);
-    }
-
-    .btn {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: 700;
-      color: white;
-    }
-
-    .btn-primary {
-      background: linear-gradient(135deg, var(--primary), var(--secondary));
-    }
-
-    .btn-danger {
-      background: #ef4444;
-    }
-
-    .btn-success {
-      background: #10b981;
-    }
-
-    /* --- MOBILE TAB NAVIGATION --- */
-    .mobile-tab-bar {
-      display: none;
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      background: #1e293b;
-      border-top: 1px solid #334155;
-      padding: 8px 4px;
-      z-index: 200;
-      justify-content: space-around;
-      box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
-    }
-    .mobile-tab-btn {
-      background: transparent;
-      border: none;
-      color: #94a3b8;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      font-size: 0.65rem;
-      font-weight: 600;
-      cursor: pointer;
-      padding: 4px 10px;
-      transition: all 0.2s;
-      border-radius: 8px;
-    }
-    .mobile-tab-btn.active {
-      color: #3b82f6;
-      background: rgba(59,130,246,0.1);
-    }
-    .mobile-tab-btn .tab-icon { font-size: 1.2rem; }
-
-    @media (max-width: 768px) {
-      body {
-        padding-bottom: 92px;
-        background:
-          radial-gradient(circle at 18% 8%, rgba(59, 130, 246, 0.22), transparent 34%),
-          radial-gradient(circle at 88% 18%, rgba(16, 185, 129, 0.16), transparent 32%),
-          #020617;
-        -webkit-overflow-scrolling: touch;
-      }
-
+  <head>
+    <script src="js/auth-check.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Student Performance Manager</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/questionbank.css" />
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
       .dashboard-container {
-        padding: 14px;
+        padding: 20px;
+        max-width: 1200px;
+        margin: 0 auto;
       }
 
-      .mobile-tab-bar { display: flex; }
-      .tabs-container { display: none !important; }
-      .tab-content { display: none !important; }
-      .tab-content.mob-active { display: block !important; }
+      .card {
+        margin-bottom: 20px;
+      }
 
       .header {
-        flex-wrap: nowrap;
-        gap: 12px;
+        display: flex;
+        justify-content: space-between;
         align-items: center;
-        padding: 14px;
-        margin-bottom: 14px;
-        border-radius: 18px;
-        background: rgba(15, 23, 42, 0.74);
-        border: 1px solid rgba(148, 163, 184, 0.16);
-        backdrop-filter: blur(18px);
-        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
-      }
-
-      .header h1 {
-        font-size: clamp(1.08rem, 5vw, 1.35rem);
-        line-height: 1.18;
-        letter-spacing: 0;
+        margin-bottom: 20px;
       }
 
       .back-btn {
-        flex: 0 0 auto;
-        padding: 10px 12px;
-        border-radius: 12px;
-        font-size: 0.78rem;
-        white-space: nowrap;
-        background: rgba(59, 130, 246, 0.16);
-        border: 1px solid rgba(96, 165, 250, 0.24);
+        padding: 10px 20px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 8px;
+        color: white;
+        text-decoration: none;
       }
 
-      .glass-panel.card {
-        margin-bottom: 14px;
-        padding: 16px !important;
-        border-radius: 18px;
-        background: rgba(15, 23, 42, 0.72);
-        border: 1px solid rgba(148, 163, 184, 0.16);
-        box-shadow:
-          0 18px 42px rgba(0, 0, 0, 0.25),
-          inset 0 1px 0 rgba(255, 255, 255, 0.06);
-      }
-
-      .glass-panel h2 {
-        font-size: 1.08rem;
-        margin-bottom: 14px;
-      }
-
-      .glass-panel h3,
-      .glass-panel h4 {
-        margin-bottom: 10px;
-      }
-
-      .form-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-      }
-
-      .form-group label {
-        font-size: 0.75rem;
-        letter-spacing: 0.6px;
-        color: #cbd5e1;
-      }
-
-      .form-control,
-      .grid-input {
-        min-height: 48px;
-        border-radius: 12px;
-        font-size: 0.95rem;
-        background: rgba(2, 6, 23, 0.52);
-      }
-
-      input[type="file"].form-control {
-        min-height: auto;
-        padding: 12px;
+      .back-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
       }
 
       .btn {
-        width: 100%;
-        min-height: 48px;
-        margin: 5px 0;
-        border-radius: 12px;
-        font-size: 0.9rem;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 700;
+        color: white;
       }
 
-      #studentCancelBtn {
-        width: 100%;
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
       }
 
-      .data-table-wrapper {
-        margin-top: 14px;
-        border-radius: 14px;
-        border: 1px solid rgba(148, 163, 184, 0.14);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        background: rgba(2, 6, 23, 0.35);
+      .btn-danger {
+        background: #ef4444;
       }
 
-      .data-table {
-        min-width: 720px;
+      .btn-success {
+        background: #10b981;
       }
 
-      .data-table th {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-        background: rgba(15, 23, 42, 0.96);
-      }
-
-      .data-table th,
-      .data-table td {
-        padding: 12px 10px;
-        font-size: 0.84rem;
-        white-space: nowrap;
-      }
-
-      #attTableBody .att-check {
-        width: 22px;
-        height: 22px;
-      }
-
-      #marksTableBody .grid-input {
-        min-width: 72px;
-        min-height: 42px;
-        text-align: center;
-      }
-
-      #tab-perf .glass-panel.card > div[style*="display: flex"],
-      #attendanceSection div[style*="display:flex"],
-      #marksSection div[style*="display:flex"],
-      .glass-panel.card > div[style*="display:flex"] {
-        display: grid !important;
-        grid-template-columns: 1fr;
-        gap: 8px !important;
-      }
-
+      /* --- MOBILE TAB NAVIGATION --- */
       .mobile-tab-bar {
-        padding: 10px 10px max(10px, env(safe-area-inset-bottom));
-        background: rgba(15, 23, 42, 0.92);
-        backdrop-filter: blur(18px);
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #1e293b;
+        border-top: 1px solid #334155;
+        padding: 8px 4px;
+        z-index: 200;
+        justify-content: space-around;
+        box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
       }
-
       .mobile-tab-btn {
-        flex: 1;
-        min-height: 54px;
-        border-radius: 14px;
-        font-size: 0.72rem;
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        font-size: 0.65rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 4px 10px;
+        transition: all 0.2s;
+        border-radius: 8px;
       }
-
       .mobile-tab-btn.active {
-        color: #dbeafe;
-        background: linear-gradient(135deg, rgba(59,130,246,0.34), rgba(16,185,129,0.18));
-        box-shadow: inset 0 1px 0 rgba(255,255,255,0.12);
+        color: #3b82f6;
+        background: rgba(59, 130, 246, 0.1);
       }
-    }
-  </style>
-</head>
+      .mobile-tab-btn .tab-icon {
+        font-size: 1.2rem;
+      }
 
-<body>
-  <div class="dashboard-container qb-font-bn">
-    <div class="header">
-      <h1>📊 Student Performance Manager</h1>
-      <a href="dashboard.html" class="back-btn">⬅ Back to Hub</a>
-    </div>
+      @media (max-width: 768px) {
+        body {
+          padding-bottom: 92px;
+          background:
+            radial-gradient(
+              circle at 18% 8%,
+              rgba(59, 130, 246, 0.22),
+              transparent 34%
+            ),
+            radial-gradient(
+              circle at 88% 18%,
+              rgba(16, 185, 129, 0.16),
+              transparent 32%
+            ),
+            #020617;
+          -webkit-overflow-scrolling: touch;
+        }
 
-    <div class="tabs-container">
-      <button class="tab-btn active" onclick="switchTab('student')">Student Bank</button>
-      <button class="tab-btn" onclick="switchTab('perf')">Performance & Marks</button>
-    </div>
+        .dashboard-container {
+          padding: 14px;
+        }
 
-    <!-- STUDENT BANK TAB -->
-    <div id="tab-student" class="tab-content active mob-active">
-      <div class="glass-panel card">
-        <h2>Add Student</h2>
-        <form id="studentForm" onsubmit="saveStudent(event)">
-          <div class="form-grid">
-            <div class="form-group"><label>Name</label><input type="text" id="sName" class="form-control" required />
-            </div>
-            <div class="form-group"><label>Roll</label><input type="text" id="sRoll" class="form-control" required />
-            </div>
-            <div class="form-group"><label>ID</label><input type="text" id="sId" class="form-control" required /></div>
-            <div class="form-group"><label>Mobile</label><input type="text" id="sMobile" class="form-control" /></div>
-            <div class="form-group"><label>Session</label><input type="text" id="sSession" class="form-control"
-                placeholder="e.g. 2024-25" required /></div>
-            <div class="form-group"><label>Class</label>
-              <select id="sClass" class="form-control" required>
-                <option value="">Select Class</option>
-                <option value="Eleven">Eleven</option>
-                <option value="Twelve">Twelve</option>
-              </select>
-            </div>
-            <div class="form-group"><label>Section</label>
-              <select id="sSection" class="form-control" required>
-                <option value="">Select Section</option>
-                <option value="Karnaphuli">Karnaphuli</option>
-                <option value="Shitalakhya">Shitalakhya</option>
-                <option value="Titash">Titash</option>
-                <option value="Turag">Turag</option>
-                <option value="Jamuna">Jamuna</option>
-                <option value="Chitra">Chitra</option>
-                <option value="Teesta">Teesta</option>
-                <option value="Rupsha">Rupsha</option>
-                <option value="Madhumati">Madhumati</option>
-                <option value="Surma">Surma</option>
-                <option value="Gumati">Gumati</option>
-              </select>
-            </div>
-            <div class="form-group"><label>Group</label>
-              <select id="sGroup" class="form-control" required>
-                <option value="">Select Group</option>
-                <option value="A">A</option>
-                <option value="B">B</option>
-                <option value="C">C</option>
-                <option value="D">D</option>
-                <option value="E">E</option>
+        .mobile-tab-bar {
+          display: flex;
+        }
+        .tabs-container {
+          display: none !important;
+        }
+        .tab-content {
+          display: none !important;
+        }
+        .tab-content.mob-active {
+          display: block !important;
+        }
 
-                <option value="Good">Good</option>
-                <option value="Bad">Bad</option>
-                <option value="Moderate">Moderate</option>
-                <option value="Science">Science</option>
-                <option value="Commerce">Commerce</option>
-                <option value="Humanities">Humanities</option>
+        .header {
+          flex-wrap: nowrap;
+          gap: 12px;
+          align-items: center;
+          padding: 14px;
+          margin-bottom: 14px;
+          border-radius: 18px;
+          background: rgba(15, 23, 42, 0.74);
+          border: 1px solid rgba(148, 163, 184, 0.16);
+          backdrop-filter: blur(18px);
+          box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+        }
 
-                <option value="Talented">Talented</option>
-                <option value="Weak">Weak</option>
+        .header h1 {
+          font-size: clamp(1.08rem, 5vw, 1.35rem);
+          line-height: 1.18;
+          letter-spacing: 0;
+        }
 
-              </select>
+        .back-btn {
+          flex: 0 0 auto;
+          padding: 10px 12px;
+          border-radius: 12px;
+          font-size: 0.78rem;
+          white-space: nowrap;
+          background: rgba(59, 130, 246, 0.16);
+          border: 1px solid rgba(96, 165, 250, 0.24);
+        }
+
+        .glass-panel.card {
+          margin-bottom: 14px;
+          padding: 16px !important;
+          border-radius: 18px;
+          background: rgba(15, 23, 42, 0.72);
+          border: 1px solid rgba(148, 163, 184, 0.16);
+          box-shadow:
+            0 18px 42px rgba(0, 0, 0, 0.25),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+        }
+
+        .glass-panel h2 {
+          font-size: 1.08rem;
+          margin-bottom: 14px;
+        }
+
+        .glass-panel h3,
+        .glass-panel h4 {
+          margin-bottom: 10px;
+        }
+
+        .form-grid {
+          grid-template-columns: 1fr !important;
+          gap: 12px !important;
+        }
+
+        .form-group label {
+          font-size: 0.75rem;
+          letter-spacing: 0.6px;
+          color: #cbd5e1;
+        }
+
+        .form-control,
+        .grid-input {
+          min-height: 48px;
+          border-radius: 12px;
+          font-size: 0.95rem;
+          background: rgba(2, 6, 23, 0.52);
+        }
+
+        input[type="file"].form-control {
+          min-height: auto;
+          padding: 12px;
+        }
+
+        .btn {
+          width: 100%;
+          min-height: 48px;
+          margin: 5px 0;
+          border-radius: 12px;
+          font-size: 0.9rem;
+        }
+
+        #studentCancelBtn {
+          width: 100%;
+        }
+
+        .data-table-wrapper {
+          margin-top: 14px;
+          border-radius: 14px;
+          border: 1px solid rgba(148, 163, 184, 0.14);
+          overflow-x: auto;
+          -webkit-overflow-scrolling: touch;
+          background: rgba(2, 6, 23, 0.35);
+        }
+
+        .data-table {
+          min-width: 720px;
+        }
+
+        .data-table th {
+          position: sticky;
+          top: 0;
+          z-index: 1;
+          background: rgba(15, 23, 42, 0.96);
+        }
+
+        .data-table th,
+        .data-table td {
+          padding: 12px 10px;
+          font-size: 0.84rem;
+          white-space: nowrap;
+        }
+
+        #attTableBody .att-check {
+          width: 22px;
+          height: 22px;
+        }
+
+        #marksTableBody .grid-input {
+          min-width: 72px;
+          min-height: 42px;
+          text-align: center;
+        }
+
+        #tab-perf .glass-panel.card > div[style*="display: flex"],
+        #attendanceSection div[style*="display:flex"],
+        #marksSection div[style*="display:flex"],
+        .glass-panel.card > div[style*="display:flex"] {
+          display: grid !important;
+          grid-template-columns: 1fr;
+          gap: 8px !important;
+        }
+
+        .mobile-tab-bar {
+          padding: 10px 10px max(10px, env(safe-area-inset-bottom));
+          background: rgba(15, 23, 42, 0.92);
+          backdrop-filter: blur(18px);
+        }
+
+        .mobile-tab-btn {
+          flex: 1;
+          min-height: 54px;
+          border-radius: 14px;
+          font-size: 0.72rem;
+        }
+
+        .mobile-tab-btn.active {
+          color: #dbeafe;
+          background: linear-gradient(
+            135deg,
+            rgba(59, 130, 246, 0.34),
+            rgba(16, 185, 129, 0.18)
+          );
+          box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="dashboard-container qb-font-bn">
+      <div class="header">
+        <h1>📊 Student Performance Manager</h1>
+        <a href="dashboard.html" class="back-btn">⬅ Back to Hub</a>
+      </div>
+
+      <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('student')">
+          Student Bank
+        </button>
+        <button class="tab-btn" onclick="switchTab('perf')">
+          Performance & Marks
+        </button>
+      </div>
+
+      <!-- STUDENT BANK TAB -->
+      <div id="tab-student" class="tab-content active mob-active">
+        <div class="glass-panel card">
+          <h2>Add Student</h2>
+          <form id="studentForm" onsubmit="saveStudent(event)">
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Name</label
+                ><input type="text" id="sName" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Roll</label
+                ><input type="text" id="sRoll" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>ID</label
+                ><input type="text" id="sId" class="form-control" required />
+              </div>
+              <div class="form-group">
+                <label>Mobile</label
+                ><input type="text" id="sMobile" class="form-control" />
+              </div>
+              <div class="form-group">
+                <label>Session</label
+                ><input
+                  type="text"
+                  id="sSession"
+                  class="form-control"
+                  placeholder="e.g. 2024-25"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label>Class</label>
+                <select id="sClass" class="form-control" required>
+                  <option value="">Select Class</option>
+                  <option value="Eleven">Eleven</option>
+                  <option value="Twelve">Twelve</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Section</label>
+                <select id="sSection" class="form-control" required>
+                  <option value="">Select Section</option>
+                  <option value="Karnaphuli">Karnaphuli</option>
+                  <option value="Shitalakhya">Shitalakhya</option>
+                  <option value="Titash">Titash</option>
+                  <option value="Turag">Turag</option>
+                  <option value="Jamuna">Jamuna</option>
+                  <option value="Chitra">Chitra</option>
+                  <option value="Teesta">Teesta</option>
+                  <option value="Rupsha">Rupsha</option>
+                  <option value="Madhumati">Madhumati</option>
+                  <option value="Surma">Surma</option>
+                  <option value="Gumati">Gumati</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Group</label>
+                <select id="sGroup" class="form-control" required>
+                  <option value="">Select Group</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
+                  <option value="C">C</option>
+                  <option value="D">D</option>
+                  <option value="E">E</option>
+
+                  <option value="Good">Good</option>
+                  <option value="Bad">Bad</option>
+                  <option value="Moderate">Moderate</option>
+                  <option value="Science">Science</option>
+                  <option value="Commerce">Commerce</option>
+                  <option value="Humanities">Humanities</option>
+
+                  <option value="Talented">Talented</option>
+                  <option value="Weak">Weak</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Gender</label>
+                <select id="sGender" class="form-control">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
+              </div>
             </div>
-            <div class="form-group"><label>Gender</label>
-              <select id="sGender" class="form-control">
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-            </div>
+            <button type="submit" id="studentSubmitBtn" class="btn btn-primary">
+              Add Student
+            </button>
+            <button
+              type="button"
+              id="studentCancelBtn"
+              class="btn btn-danger"
+              style="display: none"
+              onclick="cancelUpdate()"
+            >
+              Cancel
+            </button>
+          </form>
+
+          <hr
+            style="border: 1px solid rgba(255, 255, 255, 0.1); margin: 30px 0"
+          />
+
+          <h3>Or Bulk Upload</h3>
+          <div
+            style="
+              display: flex;
+              gap: 10px;
+              align-items: center;
+              flex-wrap: wrap;
+            "
+          >
+            <input
+              type="file"
+              id="studentBulkFile"
+              accept=".xlsx"
+              class="form-control"
+            />
+            <button class="btn btn-success" onclick="uploadBulkStudent()">
+              ⬆️ Upload Excel
+            </button>
+            <a
+              href="/uploads/student-bank.xlsx"
+              class="btn btn-primary"
+              download="student-bank.xlsx"
+              >📥 Download Demo</a
+            >
           </div>
-          <button type="submit" id="studentSubmitBtn" class="btn btn-primary">Add Student</button>
-          <button type="button" id="studentCancelBtn" class="btn btn-danger" style="display:none;"
-            onclick="cancelUpdate()">Cancel</button>
-        </form>
-
-        <hr style="border: 1px solid rgba(255,255,255,0.1); margin: 30px 0;" />
-
-        <h3>Or Bulk Upload</h3>
-        <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
-          <input type="file" id="studentBulkFile" accept=".xlsx" class="form-control" />
-          <button class="btn btn-success" onclick="uploadBulkStudent()">⬆️ Upload Excel</button>
-          <a href="/uploads/student-bank.xlsx" class="btn btn-primary" download="student-bank.xlsx">📥 Download Demo</a>
-        </div>
-      </div>
-
-      <div class="glass-panel card">
-        <h2>Student List</h2>
-        <datalist id="dlSession"></datalist>
-        <datalist id="dlClass"></datalist>
-        <datalist id="dlSection"></datalist>
-        <datalist id="dlGroup"></datalist>
-
-        <div class="form-grid" style="margin-bottom: 20px;">
-          <div class="form-group"><label>Session</label><input type="text" id="fSession" list="dlSession"
-              class="form-control" /></div>
-          <div class="form-group"><label>Class</label><input type="text" id="fClass" list="dlClass"
-              class="form-control" /></div>
-          <div class="form-group"><label>Section</label><input type="text" id="fSection" list="dlSection"
-              class="form-control" /></div>
-          <div class="form-group"><label>Group</label><input type="text" id="fGroup" list="dlGroup"
-              class="form-control" /></div>
-        </div>
-        <button class="btn btn-primary" onclick="loadStudents()">🔍 Search</button>
-        <button class="btn btn-success" onclick="initPerformance()">📥 Initialize Performance Records for Filtered
-          Students</button>
-
-        <div class="data-table-wrapper no-id-sticky">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th class="sticky-col sticky-roll">Roll</th>
-                <th class="sticky-col sticky-name">Name</th>
-                <th>ID</th>
-                <th>Session</th>
-                <th>Class</th>
-                <th>Section</th>
-                <th>Group</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="studentTableBody"></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- PERFORMANCE TAB -->
-    <div id="tab-perf" class="tab-content">
-      <div class="glass-panel card">
-        <h2>Performance Mode</h2>
-        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-          <button class="btn btn-primary" onclick="setMode('attendance')">📋 Attendance Mode</button>
-          <button class="btn btn-primary" onclick="setMode('marks')">📝 Marks Mode</button>
         </div>
 
-        <!-- ATTENDANCE -->
-        <div id="attendanceSection" style="display:none;">
-          <h3>Attendance</h3>
-          <div class="form-grid">
+        <div class="glass-panel card">
+          <h2>Student List</h2>
+          <datalist id="dlSession"></datalist>
+          <datalist id="dlClass"></datalist>
+          <datalist id="dlSection"></datalist>
+          <datalist id="dlGroup"></datalist>
+
+          <div class="form-grid" style="margin-bottom: 20px">
             <div class="form-group">
-              <label>Date</label>
-              <input type="date" id="attDate" class="form-control" />
+              <label>Session</label
+              ><input
+                type="text"
+                id="fSession"
+                list="dlSession"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Class</label
+              ><input
+                type="text"
+                id="fClass"
+                list="dlClass"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Section</label
+              ><input
+                type="text"
+                id="fSection"
+                list="dlSection"
+                class="form-control"
+              />
+            </div>
+            <div class="form-group">
+              <label>Group</label
+              ><input
+                type="text"
+                id="fGroup"
+                list="dlGroup"
+                class="form-control"
+              />
             </div>
           </div>
-
-          <div style="margin: 20px 0;">
-            <h4>Bulk Upload Attendance</h4>
-            <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
-              <input type="file" id="attBulkFile" accept=".xlsx" class="form-control" />
-              <button class="btn btn-success" onclick="uploadBulkAttendance()">⬆️ Upload Excel</button>
-              <button class="btn btn-primary" onclick="downloadAttendanceDemo()">📥 Download Demo</button>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="loadAttendanceGrid()">Load Grid for Selected Filter</button>
+          <button class="btn btn-primary" onclick="loadStudents()">
+            🔍 Search
+          </button>
+          <button class="btn btn-success" onclick="initPerformance()">
+            📥 Initialize Performance Records for Filtered Students
+          </button>
 
           <div class="data-table-wrapper no-id-sticky">
             <table class="data-table">
@@ -436,216 +495,359 @@
                 <tr>
                   <th class="sticky-col sticky-roll">Roll</th>
                   <th class="sticky-col sticky-name">Name</th>
-                  <th>✅ Present</th>
+                  <th>ID</th>
+                  <th>Session</th>
+                  <th>Class</th>
+                  <th>Section</th>
+                  <th>Group</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody id="attTableBody"></tbody>
+              <tbody id="studentTableBody"></tbody>
             </table>
           </div>
-          <button class="btn btn-success" style="margin-top: 15px;" onclick="saveAttendance()">💾 Save
-            Attendance</button>
         </div>
-
-        <!-- MARKS -->
-        <div id="marksSection" style="display:none;">
-          <h3>Marks</h3>
-          <div style="margin: 20px 0;">
-            <h4>Bulk Upload Marks</h4>
-            <div style="display:flex; gap: 10px; align-items:center; flex-wrap:wrap;">
-              <input type="file" id="marksBulkFile" accept=".xlsx" class="form-control" />
-              <button class="btn btn-success" onclick="uploadBulkMarks()">⬆️ Upload Excel</button>
-              <button class="btn btn-primary" onclick="downloadMarksDemo()">📥 Download Demo</button>
-            </div>
-          </div>
-
-          <button class="btn btn-primary" onclick="loadMarksGrid()">Load Grid for Selected Filter</button>
-
-          <div class="data-table-wrapper">
-            <table class="data-table">
-              <thead>
-                <tr>
-                  <th class="sticky-col sticky-id">ID</th>
-                  <th class="sticky-col sticky-roll">Roll</th>
-                  <th class="sticky-col sticky-name">Name</th>
-                  <th>CT1</th>
-                  <th>CT2</th>
-                  <th>CT3</th>
-                  <th>CT4</th>
-                  <th>CT5</th>
-                  <th>HY</th>
-                  <th>Y</th>
-                  <th>PT</th>
-                  <th>T</th>
-                  <th>MT1</th>
-                  <th>MT2</th>
-                  <th>MCQ1</th>
-                  <th>MCQ2</th>
-                  <th>MCQ3</th>
-                  <th>Rewards</th>
-                </tr>
-              </thead>
-              <tbody id="marksTableBody"></tbody>
-            </table>
-          </div>
-          <button class="btn btn-success" style="margin-top: 15px;" onclick="saveMarks()">💾 Save Marks</button>
-        </div>
-
       </div>
 
-      <div class="glass-panel card">
-        <h2>Summary & Leaderboard Projector</h2>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn btn-primary" onclick="launchProjector('leaderboard')">🏆 Launch Leaderboard</button>
-          <button class="btn btn-primary" onclick="launchProjector('attendance')">📋 Launch Attendance Grid</button>
-          <button class="btn btn-primary" onclick="launchProjector('marks')">📝 Launch Marks Grid</button>
+      <!-- PERFORMANCE TAB -->
+      <div id="tab-perf" class="tab-content">
+        <div class="glass-panel card">
+          <h2>Performance Mode</h2>
+          <div style="display: flex; gap: 10px; margin-bottom: 20px">
+            <button class="btn btn-primary" onclick="setMode('attendance')">
+              📋 Attendance Mode
+            </button>
+            <button class="btn btn-primary" onclick="setMode('marks')">
+              📝 Marks Mode
+            </button>
+          </div>
+
+          <!-- ATTENDANCE -->
+          <div id="attendanceSection" style="display: none">
+            <h3>Attendance</h3>
+            <div class="form-grid">
+              <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="attDate" class="form-control" />
+              </div>
+            </div>
+
+            <div style="margin: 20px 0">
+              <h4>Bulk Upload Attendance</h4>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  flex-wrap: wrap;
+                "
+              >
+                <input
+                  type="file"
+                  id="attBulkFile"
+                  accept=".xlsx"
+                  class="form-control"
+                />
+                <button
+                  class="btn btn-success"
+                  onclick="uploadBulkAttendance()"
+                >
+                  ⬆️ Upload Excel
+                </button>
+                <button
+                  class="btn btn-primary"
+                  onclick="downloadAttendanceDemo()"
+                >
+                  📥 Download Demo
+                </button>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="loadAttendanceGrid()">
+              Load Grid for Selected Filter
+            </button>
+
+            <div class="data-table-wrapper no-id-sticky">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="sticky-col sticky-roll">Roll</th>
+                    <th class="sticky-col sticky-name">Name</th>
+                    <th>✅ Present</th>
+                  </tr>
+                </thead>
+                <tbody id="attTableBody"></tbody>
+              </table>
+            </div>
+            <button
+              class="btn btn-success"
+              style="margin-top: 15px"
+              onclick="saveAttendance()"
+            >
+              💾 Save Attendance
+            </button>
+          </div>
+
+          <!-- MARKS -->
+          <div id="marksSection" style="display: none">
+            <h3>Marks</h3>
+            <div style="margin: 20px 0">
+              <h4>Bulk Upload Marks</h4>
+              <div
+                style="
+                  display: flex;
+                  gap: 10px;
+                  align-items: center;
+                  flex-wrap: wrap;
+                "
+              >
+                <input
+                  type="file"
+                  id="marksBulkFile"
+                  accept=".xlsx"
+                  class="form-control"
+                />
+                <button class="btn btn-success" onclick="uploadBulkMarks()">
+                  ⬆️ Upload Excel
+                </button>
+                <button class="btn btn-primary" onclick="downloadMarksDemo()">
+                  📥 Download Demo
+                </button>
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="loadMarksGrid()">
+              Load Grid for Selected Filter
+            </button>
+
+            <div class="data-table-wrapper">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th class="sticky-col sticky-id">ID</th>
+                    <th class="sticky-col sticky-roll">Roll</th>
+                    <th class="sticky-col sticky-name">Name</th>
+                    <th>CT1</th>
+                    <th>CT2</th>
+                    <th>CT3</th>
+                    <th>CT4</th>
+                    <th>CT5</th>
+                    <th>HY</th>
+                    <th>Y</th>
+                    <th>PT</th>
+                    <th>T</th>
+                    <th>MT1</th>
+                    <th>MT2</th>
+                    <th>MCQ1</th>
+                    <th>MCQ2</th>
+                    <th>MCQ3</th>
+                    <th>Rewards</th>
+                  </tr>
+                </thead>
+                <tbody id="marksTableBody"></tbody>
+              </table>
+            </div>
+            <button
+              class="btn btn-success"
+              style="margin-top: 15px"
+              onclick="saveMarks()"
+            >
+              💾 Save Marks
+            </button>
+          </div>
+        </div>
+
+        <div class="glass-panel card">
+          <h2>Summary & Leaderboard Projector</h2>
+          <div style="display: flex; gap: 10px">
+            <button
+              class="btn btn-primary"
+              onclick="launchProjector('leaderboard')"
+            >
+              🏆 Launch Leaderboard
+            </button>
+            <button
+              class="btn btn-primary"
+              onclick="launchProjector('attendance')"
+            >
+              📋 Launch Attendance Grid
+            </button>
+            <button class="btn btn-primary" onclick="launchProjector('marks')">
+              📝 Launch Marks Grid
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-  </div>
+    <!-- Mobile Tab Bar -->
+    <nav class="mobile-tab-bar" id="mobileTabBarSP">
+      <button
+        class="mobile-tab-btn active"
+        data-tab="student"
+        onclick="switchMobileTabSP('student')"
+      >
+        <span class="tab-icon">👥</span>
+        Students
+      </button>
+      <button
+        class="mobile-tab-btn"
+        data-tab="perf"
+        onclick="switchMobileTabSP('perf')"
+      >
+        <span class="tab-icon">📊</span>
+        Performance
+      </button>
+    </nav>
 
-  <!-- Mobile Tab Bar -->
-  <nav class="mobile-tab-bar" id="mobileTabBarSP">
-    <button class="mobile-tab-btn active" data-tab="student" onclick="switchMobileTabSP('student')">
-      <span class="tab-icon">👥</span>
-      Students
-    </button>
-    <button class="mobile-tab-btn" data-tab="perf" onclick="switchMobileTabSP('perf')">
-      <span class="tab-icon">📊</span>
-      Performance
-    </button>
-  </nav>
+    <script>
+      const socket = io();
+      document.getElementById("attDate").valueAsDate = new Date();
 
-  <script>
-    const socket = io();
-    document.getElementById('attDate').valueAsDate = new Date();
-
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      event.target.classList.add('active');
-      document.getElementById(`tab-${tabId}`).classList.add('active');
-    }
-
-    function setMode(mode) {
-      document.getElementById('attendanceSection').style.display = mode === 'attendance' ? 'block' : 'none';
-      document.getElementById('marksSection').style.display = mode === 'marks' ? 'block' : 'none';
-    }
-
-    // ==== STUDENT BANK ====
-    let isUpdatingRoll = null;
-
-    async function fetchStudentFilters() {
-      try {
-        const res = await fetch('/api/students/filters');
-        const data = await res.json();
-        const toOptions = arr => arr.map(t => `<option value="${t}">`).join('');
-        document.getElementById('dlSession').innerHTML = toOptions(data.sessions);
-        document.getElementById('dlClass').innerHTML = toOptions(data.classes);
-        document.getElementById('dlSection').innerHTML = toOptions(data.sections);
-        document.getElementById('dlGroup').innerHTML = toOptions(data.groups);
-      } catch (e) {
-        console.error("Error fetching student filters:", e);
-      }
-    }
-
-    // Load filters on boot
-    document.addEventListener('DOMContentLoaded', () => {
-      fetchStudentFilters();
-    });
-
-    async function saveStudent(e) {
-      e.preventDefault();
-      const data = {
-        name: document.getElementById('sName').value,
-        roll: document.getElementById('sRoll').value,
-        id: document.getElementById('sId').value,
-        mobile: document.getElementById('sMobile').value,
-        session: document.getElementById('sSession').value,
-        class: document.getElementById('sClass').value,
-        section: document.getElementById('sSection').value,
-        group: document.getElementById('sGroup').value,
-        gender: document.getElementById('sGender').value,
-      };
-
-
-      if (isUpdatingRoll) {
-        await fetch(`/api/students/${isUpdatingRoll}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        alert('Student Updated!');
-        cancelUpdate();
-      } else {
-        await fetch('/api/students', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
-        alert('Student Added!');
-        document.getElementById('studentForm').reset();
+      function switchTab(tabId) {
+        document
+          .querySelectorAll(".tab-btn")
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((c) => c.classList.remove("active"));
+        event.target.classList.add("active");
+        document.getElementById(`tab-${tabId}`).classList.add("active");
       }
 
-      loadStudents();
-      fetchStudentFilters();
-    }
+      function setMode(mode) {
+        document.getElementById("attendanceSection").style.display =
+          mode === "attendance" ? "block" : "none";
+        document.getElementById("marksSection").style.display =
+          mode === "marks" ? "block" : "none";
+      }
 
-    function editStudent(roll) {
-      const s = currentStudents.find(st => String(st.roll) === String(roll));
-      if (!s) return;
+      // ==== STUDENT BANK ====
+      let isUpdatingRoll = null;
 
-      document.getElementById('sName').value = s.name || '';
-      document.getElementById('sRoll').value = s.roll || '';
-      document.getElementById('sId').value = s.id || '';
-      document.getElementById('sMobile').value = s.mobile || '';
-      document.getElementById('sSession').value = s.session || '';
-      document.getElementById('sClass').value = s.class || '';
-      document.getElementById('sSection').value = s.section || '';
-      document.getElementById('sGroup').value = s.group || '';
-      document.getElementById('sGender').value = s.gender || '';
+      async function fetchStudentFilters() {
+        try {
+          const res = await fetch("/api/students/filters");
+          const data = await res.json();
+          const toOptions = (arr) =>
+            arr.map((t) => `<option value="${t}">`).join("");
+          document.getElementById("dlSession").innerHTML = toOptions(
+            data.sessions,
+          );
+          document.getElementById("dlClass").innerHTML = toOptions(
+            data.classes,
+          );
+          document.getElementById("dlSection").innerHTML = toOptions(
+            data.sections,
+          );
+          document.getElementById("dlGroup").innerHTML = toOptions(data.groups);
+        } catch (e) {
+          console.error("Error fetching student filters:", e);
+        }
+      }
 
-      isUpdatingRoll = roll;
-      document.getElementById('studentSubmitBtn').innerText = 'Save Changes';
-      document.getElementById('studentCancelBtn').style.display = 'inline-block';
-    }
+      // Load filters on boot
+      document.addEventListener("DOMContentLoaded", () => {
+        fetchStudentFilters();
+      });
 
-    function cancelUpdate() {
-      isUpdatingRoll = null;
-      document.getElementById('studentForm').reset();
-      document.getElementById('studentSubmitBtn').innerText = 'Add Student';
-      document.getElementById('studentCancelBtn').style.display = 'none';
-    }
+      async function saveStudent(e) {
+        e.preventDefault();
+        const data = {
+          name: document.getElementById("sName").value,
+          roll: document.getElementById("sRoll").value,
+          id: document.getElementById("sId").value,
+          mobile: document.getElementById("sMobile").value,
+          session: document.getElementById("sSession").value,
+          class: document.getElementById("sClass").value,
+          section: document.getElementById("sSection").value,
+          group: document.getElementById("sGroup").value,
+          gender: document.getElementById("sGender").value,
+        };
 
-    async function uploadBulkStudent() {
-      const file = document.getElementById('studentBulkFile').files[0];
-      if (!file) return alert('Select file first');
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/students/bulk-upload', { method: 'POST', body: fd });
-      const json = await res.json();
-      alert(`Uploaded ${json.count} rows successfully!`);
-      loadStudents();
-    }
+        if (isUpdatingRoll) {
+          await fetch(`/api/students/${isUpdatingRoll}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          alert("Student Updated!");
+          cancelUpdate();
+        } else {
+          await fetch("/api/students", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+          });
+          alert("Student Added!");
+          document.getElementById("studentForm").reset();
+        }
 
-    function buildStudentQuery() {
-      let qs = `?session=${document.getElementById('fSession').value}`;
-      qs += `&className=${document.getElementById('fClass').value}`;
-      qs += `&section=${document.getElementById('fSection').value}`;
-      qs += `&group=${document.getElementById('fGroup').value}`;
-      return qs;
-    }
+        loadStudents();
+        fetchStudentFilters();
+      }
 
-    let currentStudents = [];
+      function editStudent(roll) {
+        const s = currentStudents.find(
+          (st) => String(st.roll) === String(roll),
+        );
+        if (!s) return;
 
-    async function loadStudents() {
-      const res = await fetch(`/api/students${buildStudentQuery()}`);
-      currentStudents = await res.json();
-      const tbody = document.getElementById('studentTableBody');
-      
-      let html = '';
-      currentStudents.forEach(s => {
-        html += `<tr>
+        document.getElementById("sName").value = s.name || "";
+        document.getElementById("sRoll").value = s.roll || "";
+        document.getElementById("sId").value = s.id || "";
+        document.getElementById("sMobile").value = s.mobile || "";
+        document.getElementById("sSession").value = s.session || "";
+        document.getElementById("sClass").value = s.class || "";
+        document.getElementById("sSection").value = s.section || "";
+        document.getElementById("sGroup").value = s.group || "";
+        document.getElementById("sGender").value = s.gender || "";
+
+        isUpdatingRoll = roll;
+        document.getElementById("studentSubmitBtn").innerText = "Save Changes";
+        document.getElementById("studentCancelBtn").style.display =
+          "inline-block";
+      }
+
+      function cancelUpdate() {
+        isUpdatingRoll = null;
+        document.getElementById("studentForm").reset();
+        document.getElementById("studentSubmitBtn").innerText = "Add Student";
+        document.getElementById("studentCancelBtn").style.display = "none";
+      }
+
+      async function uploadBulkStudent() {
+        const file = document.getElementById("studentBulkFile").files[0];
+        if (!file) return alert("Select file first");
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/students/bulk-upload", {
+          method: "POST",
+          body: fd,
+        });
+        const json = await res.json();
+        alert(`Uploaded ${json.count} rows successfully!`);
+        loadStudents();
+      }
+
+      function buildStudentQuery() {
+        let qs = `?session=${document.getElementById("fSession").value}`;
+        qs += `&className=${document.getElementById("fClass").value}`;
+        qs += `&section=${document.getElementById("fSection").value}`;
+        qs += `&group=${document.getElementById("fGroup").value}`;
+        return qs;
+      }
+
+      let currentStudents = [];
+
+      async function loadStudents() {
+        const res = await fetch(`/api/students${buildStudentQuery()}`);
+        currentStudents = await res.json();
+        const tbody = document.getElementById("studentTableBody");
+
+        let html = "";
+        currentStudents.forEach((s) => {
+          html += `<tr>
                   <td class="sticky-col sticky-roll">${s.roll}</td>
                   <td class="sticky-col sticky-name">${s.name}</td>
                   <td>${s.id}</td>
@@ -655,236 +857,401 @@
                       <button class="btn btn-danger" onclick="deleteStudent('${s.roll}')">🗑️</button>
                   </td>
               </tr>`;
-      });
-      tbody.innerHTML = html;
-    }
-
-    async function deleteStudent(roll) {
-      if (!confirm('Are you sure?')) return;
-      await fetch(`/api/students/${roll}`, { method: 'DELETE' });
-      loadStudents();
-    }
-
-    async function initPerformance() {
-      if (currentStudents.length === 0) return alert('No students selected to initialize!');
-      await fetch('/api/performance/init', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ students: currentStudents })
-      });
-      alert('Performance records initialized for these students!');
-    }
-
-    // ==== ATTENDANCE & MARKS ====
-    let perfData = [];
-
-    async function loadPerfData() {
-      // Make sure we have the latest filtered students before filtering the performance records
-      await loadStudents();
-      
-      if (currentStudents.length === 0) {
-        perfData = [];
-        return;
+        });
+        tbody.innerHTML = html;
       }
-      const res = await fetch('/api/performance');
-      const allPerf = await res.json();
-      perfData = allPerf.filter(p => currentStudents.find(s => String(s.roll) === String(p.roll) && String(s.id) === String(p.id)));
-    }
 
-    async function loadAttendanceGrid() {
-      await loadPerfData();
-      const date = document.getElementById('attDate').value;
-      const tbody = document.getElementById('attTableBody');
-      
-      let html = '';
-      perfData.forEach(p => {
-        const att = (p.attendance || []).find(a => a.date === date);
-        const checked = att && att.isPresent ? 'checked' : '';
-        html += `<tr>
+      async function deleteStudent(roll) {
+        if (!confirm("Are you sure?")) return;
+        await fetch(`/api/students/${roll}`, { method: "DELETE" });
+        loadStudents();
+      }
+
+      async function initPerformance() {
+        if (currentStudents.length === 0)
+          return alert("No students selected to initialize!");
+        await fetch("/api/performance/init", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ students: currentStudents }),
+        });
+        alert("Performance records initialized for these students!");
+      }
+
+      // ==== ATTENDANCE & MARKS ====
+      let perfData = [];
+
+      async function loadPerfData() {
+        // Make sure we have the latest filtered students before filtering the performance records
+        await loadStudents();
+
+        if (currentStudents.length === 0) {
+          perfData = [];
+          return;
+        }
+        const res = await fetch("/api/performance");
+        const allPerf = await res.json();
+        perfData = allPerf.filter((p) =>
+          currentStudents.find(
+            (s) =>
+              String(s.roll) === String(p.roll) &&
+              String(s.id) === String(p.id),
+          ),
+        );
+      }
+
+      async function loadAttendanceGrid() {
+        await loadPerfData();
+        const date = document.getElementById("attDate").value;
+        const tbody = document.getElementById("attTableBody");
+
+        let html = "";
+        perfData.forEach((p) => {
+          const att = (p.attendance || []).find((a) => a.date === date);
+          const checked = att && att.isPresent ? "checked" : "";
+          html += `<tr>
                   <td class="sticky-col sticky-roll">${p.roll}</td>
                   <td class="sticky-col sticky-name">${p.name}</td>
                   <td><input type="checkbox" data-roll="${p.roll}" data-id="${p.id}" class="att-check" style="transform: scale(1.5)" ${checked} /></td>
               </tr>`;
-      });
-      tbody.innerHTML = html;
-    }
+        });
+        tbody.innerHTML = html;
+      }
 
-    async function saveAttendance() {
-      const date = document.getElementById('attDate').value;
-      if (!date) return alert('Select date');
-      const records = [];
-      document.querySelectorAll('.att-check').forEach(cb => {
-        records.push({ roll: cb.dataset.roll, id: cb.dataset.id, isPresent: cb.checked });
-      });
+      async function saveAttendance() {
+        const date = document.getElementById("attDate").value;
+        if (!date) return alert("Select date");
+        const records = [];
+        document.querySelectorAll(".att-check").forEach((cb) => {
+          records.push({
+            roll: cb.dataset.roll,
+            id: cb.dataset.id,
+            isPresent: cb.checked,
+          });
+        });
 
-      await fetch('/api/performance/attendance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date, records })
-      });
-      alert('Attendance Saved!');
-    }
+        await fetch("/api/performance/attendance", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ date, records }),
+        });
+        alert("Attendance Saved!");
+      }
 
-    async function loadMarksGrid() {
-      await loadPerfData();
-      const tbody = document.getElementById('marksTableBody');
-      const cols = ['CT1', 'CT2', 'CT3', 'CT4', 'CT5', 'HY', 'Y', 'PT', 'T', 'MT1', 'MT2', 'MCQ1', 'MCQ2', 'MCQ3', 'Rewards'];
+      async function loadMarksGrid() {
+        await loadPerfData();
+        const tbody = document.getElementById("marksTableBody");
+        const cols = [
+          "CT1",
+          "CT2",
+          "CT3",
+          "CT4",
+          "CT5",
+          "HY",
+          "Y",
+          "PT",
+          "T",
+          "MT1",
+          "MT2",
+          "MCQ1",
+          "MCQ2",
+          "MCQ3",
+          "Rewards",
+        ];
 
-      let finalHtml = '';
-      perfData.forEach(p => {
-        let html = `<tr>
-            <td class="sticky-col sticky-id">${p.id || ''}</td>
+        let finalHtml = "";
+        perfData.forEach((p) => {
+          let html = `<tr>
+            <td class="sticky-col sticky-id">${p.id || ""}</td>
             <td class="sticky-col sticky-roll">${p.roll}</td>
             <td class="sticky-col sticky-name">${p.name}</td>`;
-        cols.forEach(c => {
-          const val = (p.mark && p.mark[c]) ? p.mark[c] : '';
-          html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-id="${p.id}" data-col="${c}" value="${val}" oninput="updateLiveMarks(this)" /></td>`;
+          cols.forEach((c) => {
+            const val = p.mark && p.mark[c] ? p.mark[c] : "";
+            html += `<td><input type="number" class="grid-input mark-input" data-roll="${p.roll}" data-id="${p.id}" data-col="${c}" value="${val}" oninput="updateLiveMarks(this)" /></td>`;
+          });
+          html += `</tr>`;
+          finalHtml += html;
         });
-        html += `</tr>`;
-        finalHtml += html;
-      });
-      tbody.innerHTML = finalHtml;
-    }
+        tbody.innerHTML = finalHtml;
+      }
 
-    async function saveMarks() {
-      const recordsMap = {};
-      document.querySelectorAll('.mark-input').forEach(inp => {
+      async function saveMarks() {
+        const recordsMap = {};
+        document.querySelectorAll(".mark-input").forEach((inp) => {
+          const roll = inp.dataset.roll;
+          const id = inp.dataset.id;
+          const col = inp.dataset.col;
+          const key = roll + "_" + id;
+          if (!recordsMap[key]) recordsMap[key] = { roll, id };
+          recordsMap[key][col] = inp.value;
+        });
+
+        await fetch("/api/performance/marks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ records: Object.values(recordsMap) }),
+        });
+        alert("Marks Saved!");
+      }
+
+      async function uploadBulkAttendance() {
+        const file = document.getElementById("attBulkFile").files[0];
+        if (!file) return alert("Select file first");
+        const fd = new FormData();
+        fd.append("file", file);
+        await fetch("/api/performance/attendance/bulk", {
+          method: "POST",
+          body: fd,
+        });
+        alert("Attendance bulk uploaded!");
+        loadAttendanceGrid();
+      }
+
+      async function uploadBulkMarks() {
+        const file = document.getElementById("marksBulkFile").files[0];
+        if (!file) return alert("Select file first");
+        const fd = new FormData();
+        fd.append("file", file);
+        await fetch("/api/performance/marks/bulk", {
+          method: "POST",
+          body: fd,
+        });
+        alert("Marks bulk uploaded!");
+        loadMarksGrid();
+      }
+
+      function buildFilterParams() {
+        const session = encodeURIComponent(
+          document.getElementById("fSession").value,
+        );
+        const className = encodeURIComponent(
+          document.getElementById("fClass").value,
+        );
+        const section = encodeURIComponent(
+          document.getElementById("fSection").value,
+        );
+        const group = encodeURIComponent(
+          document.getElementById("fGroup").value,
+        );
+        return `session=${session}&className=${className}&section=${section}&group=${group}`;
+      }
+
+      function downloadMarksDemo() {
+        window.location.href = `/api/performance/marks/demo-xlsx?${buildFilterParams()}`;
+      }
+
+      function downloadAttendanceDemo() {
+        const date = encodeURIComponent(
+          document.getElementById("attDate").value,
+        );
+        window.location.href = `/api/performance/attendance/demo-xlsx?${buildFilterParams()}&date=${date}`;
+      }
+
+      let lastLaunchedProjectorType = null;
+
+      function emitProjectorData(type) {
+        const filters = {
+          className: document.getElementById("fClass").value,
+          section: document.getElementById("fSection").value,
+          session: document.getElementById("fSession").value,
+        };
+
+        if (type === "leaderboard") {
+          const data = perfData.map((s) => {
+            const attCount = (s.attendance || []).filter(
+              (a) => a.isPresent,
+            ).length;
+            const attScore = attCount * 5;
+            let examScore = 0;
+            if (s.mark) {
+              Object.keys(s.mark).forEach(
+                (k) => (examScore += parseFloat(s.mark[k]) || 0),
+              );
+            }
+            return {
+              name: s.name,
+              roll: s.roll,
+              attendanceScore: attScore,
+              examScore: examScore,
+              totalScore: attScore + examScore,
+            };
+          });
+          data.sort((a, b) => b.totalScore - a.totalScore);
+          socket.emit("leaderboard-show", {
+            type: "leaderboard",
+            data,
+            filters,
+          });
+        } else if (type === "attendance") {
+          socket.emit("leaderboard-show", {
+            type: "attendance",
+            data: perfData,
+            filters,
+          });
+        } else if (type === "marks") {
+          socket.emit("leaderboard-show", {
+            type: "marks",
+            data: perfData,
+            filters,
+          });
+        }
+      }
+
+      function updateLiveMarks(inp) {
         const roll = inp.dataset.roll;
         const id = inp.dataset.id;
         const col = inp.dataset.col;
-        const key = roll + '_' + id;
-        if (!recordsMap[key]) recordsMap[key] = { roll, id };
-        recordsMap[key][col] = inp.value;
-      });
+        const val = inp.value;
 
-      await fetch('/api/performance/marks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ records: Object.values(recordsMap) })
-      });
-      alert('Marks Saved!');
-    }
+        const student = perfData.find(
+          (p) => String(p.roll) === String(roll) && String(p.id) === String(id),
+        );
+        if (student) {
+          if (!student.mark) student.mark = {};
+          student.mark[col] = val;
 
-    async function uploadBulkAttendance() {
-      const file = document.getElementById('attBulkFile').files[0];
-      if (!file) return alert('Select file first');
-      const fd = new FormData();
-      fd.append('file', file);
-      await fetch('/api/performance/attendance/bulk', { method: 'POST', body: fd });
-      alert('Attendance bulk uploaded!');
-      loadAttendanceGrid();
-    }
-
-    async function uploadBulkMarks() {
-      const file = document.getElementById('marksBulkFile').files[0];
-      if (!file) return alert('Select file first');
-      const fd = new FormData();
-      fd.append('file', file);
-      await fetch('/api/performance/marks/bulk', { method: 'POST', body: fd });
-      alert('Marks bulk uploaded!');
-      loadMarksGrid();
-    }
-
-    function buildFilterParams() {
-      const session = encodeURIComponent(document.getElementById('fSession').value);
-      const className = encodeURIComponent(document.getElementById('fClass').value);
-      const section = encodeURIComponent(document.getElementById('fSection').value);
-      const group = encodeURIComponent(document.getElementById('fGroup').value);
-      return `session=${session}&className=${className}&section=${section}&group=${group}`;
-    }
-
-    function downloadMarksDemo() {
-      window.location.href = `/api/performance/marks/demo-xlsx?${buildFilterParams()}`;
-    }
-
-    function downloadAttendanceDemo() {
-      const date = encodeURIComponent(document.getElementById('attDate').value);
-      window.location.href = `/api/performance/attendance/demo-xlsx?${buildFilterParams()}&date=${date}`;
-    }
-
-    let lastLaunchedProjectorType = null;
-
-    function emitProjectorData(type) {
-      const filters = {
-        className: document.getElementById('fClass').value,
-        section: document.getElementById('fSection').value,
-        session: document.getElementById('fSession').value
-      };
-
-      if (type === 'leaderboard') {
-        const data = perfData.map(s => {
-          const attCount = (s.attendance || []).filter(a => a.isPresent).length;
-          const attScore = attCount * 5;
-          let examScore = 0;
-          if (s.mark) {
-            Object.keys(s.mark).forEach(k => examScore += (parseFloat(s.mark[k]) || 0));
+          if (lastLaunchedProjectorType) {
+            emitProjectorData(lastLaunchedProjectorType);
           }
-          return {
-            name: s.name, roll: s.roll,
-            attendanceScore: attScore, examScore: examScore,
-            totalScore: attScore + examScore
-          };
-        });
-        data.sort((a, b) => b.totalScore - a.totalScore);
-        socket.emit('leaderboard-show', { type: 'leaderboard', data, filters });
-      } else if (type === 'attendance') {
-        socket.emit('leaderboard-show', { type: 'attendance', data: perfData, filters });
-      } else if (type === 'marks') {
-        socket.emit('leaderboard-show', { type: 'marks', data: perfData, filters });
-      }
-    }
-
-    function updateLiveMarks(inp) {
-      const roll = inp.dataset.roll;
-      const id = inp.dataset.id;
-      const col = inp.dataset.col;
-      const val = inp.value;
-      
-      const student = perfData.find(p => String(p.roll) === String(roll) && String(p.id) === String(id));
-      if (student) {
-        if (!student.mark) student.mark = {};
-        student.mark[col] = val;
-        
-        if (lastLaunchedProjectorType) {
-          emitProjectorData(lastLaunchedProjectorType);
         }
       }
-    }
 
-    async function launchProjector(type) {
-      if (currentStudents.length === 0) return alert('No students in memory! Please search first.');
+      async function launchProjector(type) {
+        if (currentStudents.length === 0)
+          return alert("No students in memory! Please search first.");
 
-      await loadPerfData();
-      
-      lastLaunchedProjectorType = type;
-      emitProjectorData(type);
+        await loadPerfData();
 
-      alert('Pushed to projector!');
-    }
+        lastLaunchedProjectorType = type;
+        emitProjectorData(type);
 
-    // ════════════════════════════════════════════
-    //  MOBILE TAB SWITCHING (Student Perf)
-    // ════════════════════════════════════════════
-    function switchMobileTabSP(tabName) {
-      document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('mob-active'));
-      document.querySelectorAll('.mobile-tab-btn').forEach(btn => btn.classList.remove('active'));
-      const targetTab = document.getElementById(`tab-${tabName}`);
-      if (targetTab) targetTab.classList.add('mob-active');
-      const activeBtn = document.querySelector(`.mobile-tab-btn[data-tab="${tabName}"]`);
-      if (activeBtn) activeBtn.classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    (function() {
-      if (window.innerWidth <= 768) {
-        switchMobileTabSP('student');
+        alert("Pushed to projector!");
       }
-    })();
-  </script>
-  <script src="js/wake-lock.js"></script>
-<script src="js/pc-control.js"></script>
-  <script src="js/whiteboard.js"></script>
+
+      // ════════════════════════════════════════════
+      //  MOBILE TAB SWITCHING (Student Perf)
+      // ════════════════════════════════════════════
+      function switchMobileTabSP(tabName) {
+        document
+          .querySelectorAll(".tab-content")
+          .forEach((el) => el.classList.remove("mob-active"));
+        document
+          .querySelectorAll(".mobile-tab-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        const targetTab = document.getElementById(`tab-${tabName}`);
+        if (targetTab) targetTab.classList.add("mob-active");
+        const activeBtn = document.querySelector(
+          `.mobile-tab-btn[data-tab="${tabName}"]`,
+        );
+        if (activeBtn) activeBtn.classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      (function () {
+        if (window.innerWidth <= 768) {
+          switchMobileTabSP("student");
+        }
+      })();
+    </script>
+    <script>
+      // Keyboard navigation for marks grid inputs:
+      // ArrowDown / ArrowUp => move to same column next/previous row
+      // ArrowLeft / ArrowRight / Enter => move to previous/next column in same row
+      document.addEventListener("keydown", function (e) {
+        const el = document.activeElement;
+        if (!el || !el.classList || !el.classList.contains("mark-input"))
+          return;
+        const key = e.key;
+        if (
+          ![
+            "ArrowUp",
+            "ArrowDown",
+            "ArrowLeft",
+            "ArrowRight",
+            "Enter",
+          ].includes(key)
+        )
+          return;
+        e.preventDefault();
+
+        const td = el.closest("td");
+        const tr = el.closest("tr");
+        if (!td || !tr) return;
+
+        const cellIndex = td.cellIndex;
+        const tbody = tr.parentElement;
+        const rows = Array.from(tbody.querySelectorAll("tr"));
+        const rowIndex = rows.indexOf(tr);
+
+        let targetCell = null;
+
+        if (key === "ArrowLeft") {
+          for (let ci = cellIndex - 1; ci >= 0; ci--) {
+            const c = tr.cells[ci];
+            if (c && c.querySelector && c.querySelector(".mark-input")) {
+              targetCell = c;
+              break;
+            }
+          }
+        } else if (key === "ArrowRight" || key === "Enter") {
+          for (let ci = cellIndex + 1; ci < tr.cells.length; ci++) {
+            const c = tr.cells[ci];
+            if (c && c.querySelector && c.querySelector(".mark-input")) {
+              targetCell = c;
+              break;
+            }
+          }
+        } else if (key === "ArrowDown" || key === "ArrowUp") {
+          const nextRow =
+            key === "ArrowDown" ? rows[rowIndex + 1] : rows[rowIndex - 1];
+          if (nextRow && nextRow.cells && nextRow.cells.length > cellIndex) {
+            let c = nextRow.cells[cellIndex];
+            if (c && c.querySelector && c.querySelector(".mark-input")) {
+              targetCell = c;
+            } else {
+              // fallback: search nearest cell in that row with .mark-input
+              let found = null;
+              for (let offset = 1; offset < nextRow.cells.length; offset++) {
+                const right = nextRow.cells[cellIndex + offset];
+                const left = nextRow.cells[cellIndex - offset];
+                if (
+                  right &&
+                  right.querySelector &&
+                  right.querySelector(".mark-input")
+                ) {
+                  found = right;
+                  break;
+                }
+                if (
+                  left &&
+                  left.querySelector &&
+                  left.querySelector(".mark-input")
+                ) {
+                  found = left;
+                  break;
+                }
+              }
+              if (found) targetCell = found;
+            }
+          }
+        }
+
+        if (targetCell) {
+          const targetInput = targetCell.querySelector(".mark-input");
+          if (targetInput) {
+            targetInput.focus();
+            const len = targetInput.value ? targetInput.value.length : 0;
+            try {
+              targetInput.setSelectionRange(len, len);
+            } catch (err) {
+              /* ignore if not supported */
+            }
+          }
+        }
+      });
+    </script>
+    <script src="js/wake-lock.js"></script>
+    <script src="js/pc-control.js"></script>
+    <script src="js/whiteboard.js"></script>
   </body>
-
 </html>
-
