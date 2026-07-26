@@ -1534,9 +1534,16 @@
             return;
           }
 
-          // 2. Fetch performance data filtered to the same student filters
-          const perfRes = await fetch(`/api/performance${qs}`);
-          const allPerf = await perfRes.json();
+          // 2. Fetch performance data and filter by matching students
+          const perfRes = await fetch("/api/performance");
+          const allPerfData = await perfRes.json();
+          const allPerf = allPerfData.filter((p) =>
+            students.find(
+              (s) =>
+                String(s.roll) === String(p.roll) &&
+                String(s.id) === String(p.id)
+            )
+          );
           const perfMap = {};
           allPerf.forEach((p) => {
             perfMap[String(p.roll)] = p;
