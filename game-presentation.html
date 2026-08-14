@@ -3023,6 +3023,17 @@
       };
     </script>
 
+    <style>
+      /* Performance hints for received video to encourage GPU compositing */
+      #ssReceiverVideo {
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+        transform: translateZ(0);
+        -webkit-transform: translateZ(0);
+        object-fit: contain;
+      }
+    </style>
+
     <script>
       // ═════════════════════════════════════════════════════════
       //  SCREEN SHARE RECEIVER — Game Page
@@ -3131,6 +3142,13 @@
           connectOverlay.querySelector(".ss-conn-sub").textContent =
             "Setting up peer-to-peer stream";
           video.srcObject = null;
+
+          // Rendering hints for smoother playback/compositing
+          try {
+            video.style.willChange = "transform, opacity";
+            video.style.backfaceVisibility = "hidden";
+            video.style.transform = "translateZ(0)";
+          } catch (e) {}
 
           rotateHint.classList.remove("fade");
           clearTimeout(hintTimer);
