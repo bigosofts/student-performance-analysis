@@ -4359,25 +4359,6 @@ Kingdom → Plantae
         </div>
       </div>
     </div>
-    <!-- Performance: video compositing hints -->
-    <style>
-      /* Minimize repaint cost for camera preview */
-      #camPreviewVideo {
-        object-fit: cover;
-        width: 320px;
-        height: 180px;
-        will-change: transform, opacity;
-        backface-visibility: hidden;
-        transform: translateZ(0);
-      }
-      /* Provide the same hints for the mini receiver preview */
-      #ssReceiverVideo {
-        will-change: transform, opacity;
-        backface-visibility: hidden;
-        transform: translateZ(0);
-        -webkit-transform: translateZ(0);
-      }
-    </style>
     <!-- ══════════════════════════════════════════
        CAMERA SHARE MODAL
   ══════════════════════════════════════════ -->
@@ -4652,15 +4633,11 @@ Kingdom → Plantae
           setStatus("idle", "Requesting camera access…");
           try {
             const facing = camFacingSel.value;
-            // Request a lower-resolution, lower-framerate camera stream to
-            // reduce CPU/GPU cost when previewing or broadcasting the camera.
             const stream = await navigator.mediaDevices.getUserMedia({
               video: {
                 facingMode: { ideal: facing },
-                // Prefer modest resolution and frame rate for embedded preview
-                width: { ideal: 640 },
-                height: { ideal: 360 },
-                frameRate: { ideal: 15, max: 20 },
+                width: { ideal: 1280 },
+                height: { ideal: 720 },
               },
               audio: {
                 echoCancellation: true,
@@ -4671,13 +4648,7 @@ Kingdom → Plantae
             localStream = stream;
             isSharing = true;
             camPreview.srcObject = stream;
-            // Apply lightweight rendering hints for smoother compositing
             camPreview.style.display = "block";
-            camPreview.style.objectFit = "cover";
-            camPreview.style.width = "320px";
-            camPreview.style.height = "180px";
-            camPreview.style.willChange = "transform, opacity";
-            camPreview.style.backfaceVisibility = "hidden";
             camPlaceholder.style.display = "none";
             camStartBtn.innerHTML = "⏹ Stop Camera";
             camStartBtn.classList.add("btn-ss-stop");
