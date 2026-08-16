@@ -7708,7 +7708,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7736,7 +7741,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7764,7 +7774,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7792,7 +7807,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7820,7 +7840,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7848,7 +7873,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7876,7 +7906,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7904,7 +7939,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7932,7 +7972,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7960,7 +8005,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -7988,7 +8038,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8016,7 +8071,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8044,7 +8104,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8072,7 +8137,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8100,7 +8170,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8128,7 +8203,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8156,7 +8236,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8184,7 +8269,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8212,7 +8302,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8240,7 +8335,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8268,7 +8368,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8296,7 +8401,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8324,7 +8434,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8352,7 +8467,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8380,7 +8500,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8408,7 +8533,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8436,7 +8566,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8464,7 +8599,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8492,7 +8632,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8520,7 +8665,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8548,7 +8698,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8576,7 +8731,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8604,7 +8764,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8632,7 +8797,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8660,7 +8830,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8688,7 +8863,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8716,7 +8896,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8744,7 +8929,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8772,7 +8962,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8800,7 +8995,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8828,7 +9028,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8856,7 +9061,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8884,7 +9094,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8912,7 +9127,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8940,7 +9160,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8968,7 +9193,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -8996,7 +9226,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9024,7 +9259,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9052,7 +9292,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9080,7 +9325,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9108,7 +9358,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9136,7 +9391,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9164,7 +9424,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9192,7 +9457,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9220,7 +9490,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9248,7 +9523,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9276,7 +9556,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9304,7 +9589,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9332,7 +9622,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9360,7 +9655,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9388,7 +9688,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9416,7 +9721,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9444,7 +9754,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9472,7 +9787,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9500,7 +9820,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9528,7 +9853,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9556,7 +9886,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9584,7 +9919,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9612,7 +9952,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9640,7 +9985,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9668,7 +10018,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9696,7 +10051,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": true
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9724,7 +10084,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9752,7 +10117,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9780,7 +10150,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9808,7 +10183,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9836,7 +10216,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9864,7 +10249,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9892,7 +10282,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9920,7 +10315,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Male",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9948,7 +10348,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -9976,7 +10381,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -10004,7 +10414,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
@@ -10032,7 +10447,12 @@
     "section": "Titas",
     "group": "Commerce",
     "gender": "Female",
-    "attendance": [],
+    "attendance": [
+      {
+        "date": "2026-08-16",
+        "isPresent": false
+      }
+    ],
     "mark": {
       "CT1": 0,
       "CT2": 0,
