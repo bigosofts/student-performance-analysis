@@ -88,17 +88,6 @@
     "converted": true
   },
   {
-    "filename": "pres-1780793875473-Agi_2nd_paper_chapter_04.pptx",
-    "originalname": "Agi 2nd paper chapter 04.pptx",
-    "subject": "Agriculture 2nd",
-    "chapter": "Chapter 04",
-    "size": 11516271,
-    "uploadedAt": "07/06/2026",
-    "slideCount": 20,
-    "slideDirName": "slides-pres-1780793875473-Agi_2nd_paper_chapter_04",
-    "converted": true
-  },
-  {
     "filename": "pres-1781015716842-Agi_1st_paper_chapter_04.pptx",
     "originalname": "Agi_1st_paper_chapter_04.zip",
     "subject": "Agriculture 1st",
@@ -107,6 +96,28 @@
     "uploadedAt": "09/06/2026",
     "slideCount": 16,
     "slideDirName": "slides-pres-1781015716842-Agi_1st_paper_chapter_04",
+    "converted": true
+  },
+  {
+    "filename": "pres-1787014642657-Agi_2nd_paper_chapter_03.pptx",
+    "originalname": "Agi 2nd paper chapter 03.pptx",
+    "subject": "Agriculture 2nd",
+    "chapter": "Chapter 03 - 1st",
+    "size": 11516271,
+    "uploadedAt": "18/08/2026",
+    "slideCount": 20,
+    "slideDirName": "slides-pres-1787014642657-Agi_2nd_paper_chapter_03",
+    "converted": true
+  },
+  {
+    "filename": "pres-1787014714308-Agri-2nd-chapter03-Final.pptx",
+    "originalname": "Agri-2nd-chapter03-Final.pptx",
+    "subject": "Agriculture 2nd",
+    "chapter": "Chapter 03 - 2nd",
+    "size": 2700423,
+    "uploadedAt": "18/08/2026",
+    "slideCount": 32,
+    "slideDirName": "slides-pres-1787014714308-Agri-2nd-chapter03-Final",
     "converted": true
   }
 ]
