@@ -2150,60 +2150,82 @@
 
     <!-- Image Share Modal -->
     <div class="modal-overlay" id="imageModal">
-      <div class="modal-box">
+      <div class="modal-box" style="max-width: 680px; width: 95vw;">
         <div class="modal-header">
           <div class="modal-title">🖼️ Share Image to Screen</div>
           <div style="display: flex; gap: 8px">
             <button
               class="modal-close"
-              onclick="
-                minimizeShareModal('imageModal', '🖼️ Share Image to Screen')
-              "
+              onclick="minimizeShareModal('imageModal', '🖼️ Share Image to Screen')"
               title="Minimize"
-            >
-              _
-            </button>
+            >_</button>
             <button
               class="modal-close"
               onclick="closeSpecificShareModal('imageModal')"
               title="Close"
-            >
-              ✕
-            </button>
+            >✕</button>
           </div>
         </div>
 
-        <div class="form-row" style="margin-bottom: 16px">
-          <label class="form-label">Select from Gallery</label>
+        <!-- Search bar -->
+        <div style="padding: 0 0 12px 0;">
           <input
-            list="galleryImageDatalist"
-            id="galleryImageSelect"
+            type="text"
+            id="imgGallerySearch"
             class="select-input"
-            placeholder="-- Search and Choose an Image --"
+            placeholder="🔍 Search images..."
+            oninput="filterImageGalleryGrid(this.value)"
+            style="width: 100%;"
           />
-          <datalist id="galleryImageDatalist">
-            <option value="">-- Choose an Image --</option>
-          </datalist>
+        </div>
+
+        <!-- Image grid label -->
+        <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px;">📂 Select from Gallery</div>
+
+        <!-- Image thumbnail grid -->
+        <div
+          id="imgGalleryGrid"
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 4px 2px 8px;
+            margin-bottom: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(124,58,237,0.5) rgba(255,255,255,0.05);
+          "
+        >
+          <div id="imgGalleryGridEmpty" style="grid-column: 1/-1; text-align: center; color: #475569; padding: 30px 0; font-size: 0.85rem;">📭 No images in gallery yet</div>
+        </div>
+
+        <!-- Selected image preview -->
+        <div id="imgSelectedPreviewWrap" style="display: none; margin: 12px 0; border-radius: 14px; overflow: hidden; border: 2px solid rgba(124, 58, 237, 0.5); background: rgba(0,0,0,0.3); position: relative;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 1px; padding: 8px 12px 0;">✅ Selected Image</div>
+          <img
+            id="img-preview"
+            alt="preview"
+            style="
+              display: block;
+              max-height: 180px;
+              width: 100%;
+              object-fit: contain;
+              padding: 10px;
+            "
+          />
+          <div id="imgSelectedName" style="text-align: center; font-size: 0.82rem; font-weight: 600; color: #e2e8f0; padding: 0 12px 10px;"></div>
         </div>
 
         <div class="divider"></div>
-        <div
-          style="
-            margin: 12px 0;
-            text-align: center;
-            color: #64748b;
-            font-size: 0.85rem;
-          "
-        >
-          OR UPLOAD NEW
-        </div>
+        <div style="margin: 12px 0; text-align: center; color: #64748b; font-size: 0.85rem;">OR UPLOAD NEW</div>
 
         <div class="img-drop-zone" id="imgDropZone">
           <input type="file" id="imgShareInput" accept="image/*" />
           <span class="drop-icon">📸</span>
           <p>Click or drag an image here</p>
         </div>
-        <img id="img-preview" alt="preview" />
+
         <button class="btn-share amber" id="sendImageBtn" disabled>
           📡 Send to Game Screen
         </button>
@@ -3413,29 +3435,42 @@ Kingdom → Plantae
       // ════════════════════════════════════════════
       document
         .getElementById("shareImageBtn")
-        .addEventListener("click", () => openModal("imageModal"));
-
-      document
-        .getElementById("imgShareInput")
-        .addEventListener("change", (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          const reader = new FileReader();
-          reader.onload = (ev) => {
-            const prev = document.getElementById("img-preview");
-            prev.src = ev.target.result;
-            prev.style.display = "block";
-            document.getElementById("sendImageBtn").disabled = false;
-            document.getElementById("sendImageBtn")._dataUrl = ev.target.result;
-          };
-          reader.readAsDataURL(file);
+        .addEventListener("click", () => {
+          openModal("imageModal");
+          renderImageGalleryGrid(galleryItems);
+          document.getElementById("imgGallerySearch").value = "";
         });
 
       let imgShareFile = null;
       document
         .getElementById("imgShareInput")
         .addEventListener("change", (e) => {
-          imgShareFile = e.target.files[0];
+          const file = e.target.files[0];
+          if (!file) return;
+          imgShareFile = file;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            // Deselect any grid selection
+            document.querySelectorAll('.img-grid-thumb').forEach(thumb => {
+              thumb.classList.remove('selected');
+              thumb.style.borderColor = 'rgba(255,255,255,0.08)';
+              const check = thumb.querySelector('.img-check-mark');
+              if (check) check.style.display = 'none';
+            });
+
+            const prev = document.getElementById("img-preview");
+            prev.src = ev.target.result;
+
+            // Show preview wrapper
+            const wrap = document.getElementById('imgSelectedPreviewWrap');
+            if (wrap) wrap.style.display = 'block';
+            const nameEl = document.getElementById('imgSelectedName');
+            if (nameEl) nameEl.textContent = '\u{1F4E4} Uploaded: ' + file.name;
+
+            document.getElementById("sendImageBtn").disabled = false;
+            document.getElementById("sendImageBtn")._dataUrl = ev.target.result;
+          };
+          reader.readAsDataURL(file);
         });
 
       document.getElementById("sendImageBtn").addEventListener("click", () => {
@@ -4212,48 +4247,129 @@ Kingdom → Plantae
       }
 
       function updateGalleryDropdowns() {
-        const imgDatalist = document.getElementById("galleryImageDatalist");
         const vidDatalist = document.getElementById("galleryVideoDatalist");
+        if (!vidDatalist) return;
 
-        if (!imgDatalist || !vidDatalist) return;
-
-        let imgHtml = '<option value="">-- Choose an Image --</option>';
         let vidHtml = '<option value="">-- Choose a Video --</option>';
 
         galleryItems.forEach((item) => {
           const text = `${item.chapterName} - ${item.itemName}`;
-          const isPdf =
-            item.type === "pdf" ||
-            (item.url && item.url.toLowerCase().endsWith(".pdf"));
-
-          if ((item.type === "image" || item.type === "media") && !isPdf) {
-            imgHtml += `<option value="${item.url}">${text}</option>`;
-          } else if (item.type === "video") {
+          if (item.type === "video") {
             vidHtml += `<option value="${item.url}">${text}</option>`;
           }
         });
 
-        imgDatalist.innerHTML = imgHtml;
         vidDatalist.innerHTML = vidHtml;
       }
 
-      document
-        .getElementById("galleryImageSelect")
-        .addEventListener("input", (e) => {
-          const val = e.target.value;
-          if (val) {
-            const prev = document.getElementById("img-preview");
-            prev.src = val;
-            prev.style.display = "block";
-            document.getElementById("sendImageBtn").disabled = false;
-            document.getElementById("sendImageBtn")._dataUrl = val;
-          } else {
-            if (!document.getElementById("imgShareInput").files[0]) {
-              document.getElementById("sendImageBtn").disabled = true;
-              document.getElementById("img-preview").style.display = "none";
-            }
-          }
+      // ── Image Gallery Grid (for Share Image modal) ──────────────────────
+      function renderImageGalleryGrid(list) {
+        const grid = document.getElementById("imgGalleryGrid");
+        if (!grid) return;
+
+        const imageItems = list.filter((item) => {
+          const isPdf = item.type === "pdf" || (item.url && item.url.toLowerCase().endsWith(".pdf"));
+          return (item.type === "image" || item.type === "media") && !isPdf;
         });
+
+        if (imageItems.length === 0) {
+          grid.innerHTML = '<div id="imgGalleryGridEmpty" style="grid-column: 1/-1; text-align: center; color: #475569; padding: 30px 0; font-size: 0.85rem;">📭 No images in gallery yet</div>';
+          return;
+        }
+
+        // Group by chapter
+        const grouped = imageItems.reduce((acc, item) => {
+          if (!acc[item.chapterName]) acc[item.chapterName] = [];
+          acc[item.chapterName].push(item);
+          return acc;
+        }, {});
+
+        let html = '';
+        for (const [chapter, items] of Object.entries(grouped)) {
+          html += `<div style="grid-column: 1/-1; font-size: 0.72rem; font-weight: 800; color: #c4b5fd; text-transform: uppercase; letter-spacing: 1px; background: rgba(124,58,237,0.12); border: 1px solid rgba(124,58,237,0.2); padding: 4px 10px; border-radius: 6px; margin-top: 4px;">📂 ${chapter}</div>`;
+          for (const item of items) {
+            const encodedUrl = item.url.replace(/'/g, "\\'");
+            const encodedName = item.itemName.replace(/'/g, "\\'");
+            html += `
+              <div
+                class="img-grid-thumb"
+                data-url="${item.url}"
+                data-name="${item.itemName}"
+                onclick="selectImageFromGrid(this, '${encodedUrl}', '${encodedName}')"
+                title="${item.itemName}"
+                style="
+                  position: relative;
+                  border-radius: 10px;
+                  overflow: hidden;
+                  aspect-ratio: 1;
+                  border: 2px solid rgba(255,255,255,0.08);
+                  cursor: pointer;
+                  background: rgba(0,0,0,0.4);
+                  transition: all 0.2s;
+                "
+                onmouseover="this.style.borderColor='rgba(124,58,237,0.7)'; this.style.transform='scale(1.05)';"
+                onmouseout="if(!this.classList.contains('selected')){this.style.borderColor='rgba(255,255,255,0.08)';} this.style.transform='scale(1)';"
+              >
+                <img
+                  src="${item.url}"
+                  alt="${item.itemName}"
+                  loading="lazy"
+                  style="width:100%; height:100%; object-fit:cover; display:block;"
+                  onerror="this.style.display='none'; this.parentElement.querySelector('.img-thumb-fallback').style.display='flex';"
+                />
+                <div class="img-thumb-fallback" style="display:none; position:absolute; inset:0; align-items:center; justify-content:center; font-size:1.8rem; background: rgba(124,58,237,0.15);">🖼️</div>
+                <div style="position:absolute; inset:0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 55%); pointer-events:none;"></div>
+                <div style="position:absolute; bottom:0; left:0; right:0; padding: 5px 6px; font-size:0.65rem; font-weight:700; color:#f8fafc; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 3px rgba(0,0,0,0.9);">${item.itemName}</div>
+                <div class="img-check-mark" style="display:none; position:absolute; top:5px; right:5px; width:20px; height:20px; border-radius:50%; background: #7c3aed; align-items:center; justify-content:center; font-size:0.7rem; color:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.5);">✓</div>
+              </div>
+            `;
+          }
+        }
+
+        grid.innerHTML = html;
+      }
+
+      function selectImageFromGrid(el, url, name) {
+        // Deselect all
+        document.querySelectorAll('.img-grid-thumb').forEach(thumb => {
+          thumb.classList.remove('selected');
+          thumb.style.borderColor = 'rgba(255,255,255,0.08)';
+          const check = thumb.querySelector('.img-check-mark');
+          if (check) check.style.display = 'none';
+        });
+
+        // Select this one
+        el.classList.add('selected');
+        el.style.borderColor = '#7c3aed';
+        const check = el.querySelector('.img-check-mark');
+        if (check) check.style.display = 'flex';
+
+        // Update preview
+        const prev = document.getElementById('img-preview');
+        prev.src = url;
+        const wrap = document.getElementById('imgSelectedPreviewWrap');
+        if (wrap) wrap.style.display = 'block';
+        const nameEl = document.getElementById('imgSelectedName');
+        if (nameEl) nameEl.textContent = name;
+
+        // Enable send
+        document.getElementById('sendImageBtn').disabled = false;
+        document.getElementById('sendImageBtn')._dataUrl = url;
+
+        // Clear file upload source (gallery selection takes priority)
+        imgShareFile = null;
+      }
+
+      function filterImageGalleryGrid(query) {
+        const q = query.toLowerCase();
+        const filtered = q
+          ? galleryItems.filter(i =>
+              i.itemName.toLowerCase().includes(q) ||
+              i.chapterName.toLowerCase().includes(q)
+            )
+          : galleryItems;
+        renderImageGalleryGrid(filtered);
+      }
 
       document
         .getElementById("galleryVideoSelect")
