@@ -15146,5 +15146,33 @@
       "MCQ3": 0,
       "Rewards": 0
     }
+  },
+  {
+    "id": "251091",
+    "roll": "832",
+    "name": "Md. Riduan Kabir Nabil",
+    "session": "2025-26",
+    "class": "Eleven",
+    "section": "Shitalakhya",
+    "group": "Humanities",
+    "gender": "Male",
+    "attendance": [],
+    "mark": {
+      "CT1": 0,
+      "CT2": 0,
+      "CT3": 11,
+      "CT4": 11,
+      "CT5": 0,
+      "HY": 0,
+      "Y": 60,
+      "PT": 0,
+      "T": 0,
+      "MT1": 0,
+      "MT2": 0,
+      "MCQ1": 0,
+      "MCQ2": 0,
+      "MCQ3": 0,
+      "Rewards": 0
+    }
   }
 ]
