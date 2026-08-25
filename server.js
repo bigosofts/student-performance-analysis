@@ -699,15 +699,15 @@ io.on("connection", (socket) => {
     io.emit("pres-share-pdf", data);
   });
 
-  
+
   socket.on("pres-minimize-specific", (data) => {
     io.emit("pres-minimize-specific", data);
   });
-  
+
   socket.on("pres-restore-specific", (data) => {
     io.emit("pres-restore-specific", data);
   });
-  
+
   socket.on("pres-close-specific", (data) => {
     io.emit("pres-close-specific", data);
   });
@@ -1217,7 +1217,7 @@ app.get("/api/gallery", (req, res) => {
 app.post("/api/gallery/image", galleryUpload.single("image"), (req, res) => {
   const chapterName = (req.body.chapterName || "Uncategorized").trim();
   const itemName = (req.body.itemName || "Unnamed Image").trim();
-  
+
   const linkUrl = req.body.linkUrl;
   let url = "";
 
@@ -1357,7 +1357,7 @@ if (fs.existsSync(mazeQuizPath)) {
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`
-    🚀 Server is running!
+    🚀 Server is going!
     --------------------------------------
     Landing Page:          http://localhost:${PORT}/index.html
     Teacher Hub:           http://localhost:${PORT}/dashboard.html
