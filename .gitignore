@@ -21,3 +21,5 @@ stderr.log
 .idea
 server.crt
 server.key
+cgi-bin/
+
