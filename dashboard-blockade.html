@@ -1,0 +1,720 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <script src="js/auth-check.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blockade 3D — Controller</title>
+    <meta name="description" content="Controller for the Blockade 3D classroom game" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/blockade.css" />
+    <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
+  </head>
+  <body class="blk-dashboard-body">
+    <!-- ═══ Join Screen ═══ -->
+    <div class="blk-join-screen" id="blkJoinScreen">
+      <div class="blk-join-card">
+        <h1>🏰 Blockade 3D</h1>
+        <p>Enter join code and select your role</p>
+
+        <input type="text" class="blk-join-input" id="blkCodeInput" placeholder="ABC123" maxlength="6" autocomplete="off" />
+
+        <!-- Role Selection -->
+        <div class="blk-role-select" id="blkRoleSelect">
+          <div class="blk-role-option selected" data-role="teacher" onclick="selectRole('teacher')">
+            <span class="blk-role-icon">👨‍🏫</span>
+            <span class="blk-role-label">Admin</span>
+            <div class="blk-role-desc">Control all players</div>
+          </div>
+          <div class="blk-role-option" data-role="student" onclick="selectRole('student')">
+            <span class="blk-role-icon">🎮</span>
+            <span class="blk-role-label">Student</span>
+            <div class="blk-role-desc">Play as one color</div>
+          </div>
+        </div>
+
+        <!-- Student Name & Color (hidden until student role selected) -->
+        <div id="blkStudentFields" style="display: none">
+          <input type="text" class="blk-join-input" id="blkStudentName" placeholder="Your Name" style="letter-spacing:1px;font-size:1rem;font-weight:600;margin-bottom:12px" />
+          <div style="font-size:0.8rem;color:var(--blk-dim);margin-bottom:8px;font-weight:700">Choose your color:</div>
+          <div class="blk-color-select" id="blkColorSelect">
+            <div class="blk-color-option selected" data-pid="1" style="background:#ef4444" onclick="selectColor(1)">R</div>
+            <div class="blk-color-option" data-pid="2" style="background:#3b82f6" onclick="selectColor(2)">B</div>
+            <div class="blk-color-option" data-pid="3" style="background:#22c55e" onclick="selectColor(3)">G</div>
+            <div class="blk-color-option" data-pid="4" style="background:#a855f7" onclick="selectColor(4)">P</div>
+          </div>
+        </div>
+
+        <button class="blk-btn blk-btn-primary blk-btn-block" onclick="joinSession()">🔗 Join Session</button>
+        <div id="blkJoinError" style="color:#fca5a5;margin-top:12px;font-size:0.85rem;display:none"></div>
+      </div>
+    </div>
+
+    <!-- ═══ Controller Screen ═══ -->
+    <div class="blk-dash-container" id="blkController" style="display: none">
+      <!-- Header -->
+      <div class="blk-dash-header">
+        <h2>🏰 Blockade 3D</h2>
+        <span class="blk-dash-code" id="blkDashCode"></span>
+      </div>
+
+      <!-- Setup Section (admin only, before game starts) -->
+      <div class="blk-dash-section" id="blkSetupSection" style="display:none">
+        <h3>⚙️ Game Setup</h3>
+        <input type="text" class="blk-title-input" id="blkTitleInput" placeholder="Session title..." value="Blockade 3D" />
+        <button class="blk-btn blk-btn-sm blk-btn-primary" onclick="setTitle()" style="margin-bottom:12px">💾 Set Title</button>
+        <div class="blk-mode-select" id="blkModeSelect">
+          <div class="blk-mode-option selected" data-mode="two-player" onclick="selectMode('two-player')">👥 2 Players</div>
+          <div class="blk-mode-option" data-mode="four-player" onclick="selectMode('four-player')">👥👥 4 Players</div>
+        </div>
+        <button class="blk-btn blk-btn-success blk-btn-block" onclick="startGame()">🚀 Start Game</button>
+      </div>
+
+      <!-- Players Section -->
+      <div class="blk-dash-section" id="blkPlayersSection">
+        <h3>👥 Players</h3>
+        <div class="blk-dash-players" id="blkPlayersList"></div>
+      </div>
+
+      <!-- Mini Board + Controls (during game) -->
+      <div class="blk-dash-section" id="blkControlsSection" style="display: none">
+        <h3>🎮 Controls — <span id="blkControllingLabel" style="font-weight:800"></span></h3>
+
+        <!-- Mini Board -->
+        <div class="blk-mini-board-wrap">
+          <div class="blk-mini-board" id="blkMiniBoard"></div>
+          <div style="text-align:center;font-size:0.68rem;color:var(--blk-dim);margin-top:6px">
+            Tap a highlighted cell to move. Tap between cells for wall placement.
+          </div>
+        </div>
+
+        <!-- D-Pad -->
+        <div style="margin-top:14px">
+          <div class="blk-dpad">
+            <div></div>
+            <button class="blk-dpad-btn" onclick="movePlayer(-1,0)">⬆️</button>
+            <div></div>
+            <button class="blk-dpad-btn" onclick="movePlayer(0,-1)">⬅️</button>
+            <div class="blk-dpad-btn blk-dpad-center">•</div>
+            <button class="blk-dpad-btn" onclick="movePlayer(0,1)">➡️</button>
+            <div></div>
+            <button class="blk-dpad-btn" onclick="movePlayer(1,0)">⬇️</button>
+            <div></div>
+          </div>
+        </div>
+
+        <!-- Wall Placement -->
+        <div style="margin-top:16px">
+          <h3 style="margin-bottom:8px">🧱 Place Wall</h3>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input type="number" class="blk-title-input" id="blkWallRow" placeholder="Row (0-7)" min="0" max="7" style="flex:1;margin-bottom:0" />
+            <input type="number" class="blk-title-input" id="blkWallCol" placeholder="Col (0-7)" min="0" max="7" style="flex:1;margin-bottom:0" />
+          </div>
+          <div class="blk-mode-select" id="blkWallOrientation">
+            <div class="blk-mode-option selected" data-orient="horizontal" onclick="selectOrientation('horizontal')">─ Horizontal</div>
+            <div class="blk-mode-option" data-orient="vertical" onclick="selectOrientation('vertical')">│ Vertical</div>
+          </div>
+          <button class="blk-btn blk-btn-gold blk-btn-block blk-btn-sm" onclick="placeWall()">🧱 Place Wall</button>
+        </div>
+      </div>
+
+      <!-- Q-Bank Import Section (admin only) -->
+      <div class="blk-dash-section" id="blkQBankSection" style="display:none">
+        <h3>📝 Question System</h3>
+
+        <!-- Q-Bank Import (same as maze runner) -->
+        <div class="blk-qbank-section">
+          <div class="qb-label">📚 IMPORT FROM QUESTION BANK (TYPE 1 ONLY)</div>
+          <div class="blk-qbank-grid">
+            <select id="blkQbPaper">
+              <option value="All">All Papers</option>
+              <option value="1st">1st Paper</option>
+              <option value="2nd">2nd Paper</option>
+            </select>
+            <select id="blkQbAmount">
+              <option value="All">All Qs</option>
+              <option value="10">10 Qs</option>
+              <option value="20">20 Qs</option>
+              <option value="30">30 Qs</option>
+            </select>
+            <input type="text" id="blkQbChapter" list="blkQbChapterList" placeholder="Chapter..." />
+            <datalist id="blkQbChapterList"></datalist>
+            <input type="text" id="blkQbTopics" list="blkQbTopicList" placeholder="Topic..." />
+            <datalist id="blkQbTopicList"></datalist>
+          </div>
+          <div class="blk-qbank-checks">
+            <label><input type="checkbox" id="blkQbBoard" /> Board Only</label>
+            <label><input type="checkbox" id="blkQbImportant" /> Important Only</label>
+          </div>
+          <button class="blk-btn blk-btn-success blk-btn-block blk-btn-sm" onclick="importFromQBank()">📥 FILTER & LOAD INTO GAME</button>
+        </div>
+
+        <div id="blkQuizStatus" style="font-size:0.78rem;color:#7c3aed;font-weight:700;margin-bottom:12px">Loading quiz info...</div>
+
+        <!-- Quiz Trigger Buttons -->
+        <div style="font-size:0.8rem;color:var(--blk-dim);margin-bottom:8px;font-weight:700">Send Question To:</div>
+        <div id="blkQuizTeamBtns"></div>
+
+        <!-- Active Question Display (teacher only) -->
+        <div id="blkActiveQuestion" style="display: none; margin-top:12px">
+          <div class="blk-question-panel">
+            <div class="q-text" id="blkDashQuestionText"></div>
+            <div class="q-options" id="blkDashOptions"></div>
+            <div id="blkDashAnswer" style="margin-top:10px;font-size:0.85rem;font-weight:800;color:#22c55e"></div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+              <button class="blk-btn blk-btn-success blk-btn-sm" onclick="markAnswer(true)">✅ CORRECT (+2)</button>
+              <button class="blk-btn blk-btn-danger blk-btn-sm" onclick="markAnswer(false)">❌ WRONG (+0)</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Student Question Section (student only) -->
+      <div class="blk-dash-section" id="blkStudentQuestionSection" style="display:none">
+        <h3>📝 Your Question</h3>
+        <div id="blkStudentQuestionContent" style="text-align:center;color:var(--blk-dim);padding:20px">
+          Waiting for teacher to send a question...
+        </div>
+      </div>
+
+      <!-- Cancel Button (admin) -->
+      <div id="blkAdminFooter" style="text-align:center;margin-top:16px;padding-bottom:24px;display:none">
+        <button class="blk-btn blk-btn-danger blk-btn-sm" onclick="cancelSession()">❌ End Session</button>
+      </div>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/blockade-engine.js"></script>
+    <script>
+      (function () {
+        "use strict";
+
+        const socket = io();
+        const engine = window.BlockadeEngine;
+        let gameState = null;
+        let sessionId = null;
+        let selectedOrientation = "horizontal";
+        let joinRole = "teacher";
+        let joinPlayerId = 1;
+        let myPlayerId = null; // For student — which player they control
+        let currentQuizTeam = null;
+
+        const $ = (id) => document.getElementById(id);
+
+        // Make functions global for onclick handlers
+        window.selectRole = selectRole;
+        window.selectColor = selectColor;
+        window.joinSession = joinSession;
+        window.setTitle = setTitle;
+        window.selectMode = selectMode;
+        window.startGame = startGame;
+        window.movePlayer = movePlayer;
+        window.selectOrientation = selectOrientation;
+        window.placeWall = placeWall;
+        window.importFromQBank = importFromQBank;
+        window.triggerQuiz = triggerQuiz;
+        window.markAnswer = markAnswer;
+        window.submitStudentAnswer = submitStudentAnswer;
+        window.cancelSession = cancelSession;
+        window.miniCellClick = miniCellClick;
+
+        $("blkCodeInput").addEventListener("keypress", (e) => {
+          if (e.key === "Enter") joinSession();
+        });
+
+        // ─── Role & Color Selection ──────────────────────────
+        function selectRole(role) {
+          joinRole = role;
+          document.querySelectorAll("#blkRoleSelect .blk-role-option").forEach((el) => {
+            el.classList.toggle("selected", el.dataset.role === role);
+          });
+          $("blkStudentFields").style.display = role === "student" ? "block" : "none";
+        }
+
+        function selectColor(pid) {
+          joinPlayerId = pid;
+          document.querySelectorAll("#blkColorSelect .blk-color-option").forEach((el) => {
+            el.classList.toggle("selected", parseInt(el.dataset.pid) === pid);
+          });
+        }
+
+        // ─── Join ────────────────────────────────────────────
+        function joinSession() {
+          const code = $("blkCodeInput").value.trim().toUpperCase();
+          if (!code || code.length < 4) { showJoinError("Please enter a valid code"); return; }
+
+          const payload = { code, role: joinRole };
+          if (joinRole === "student") {
+            payload.playerSlot = joinPlayerId;
+            payload.studentName = $("blkStudentName").value.trim() || "Student";
+            myPlayerId = joinPlayerId;
+          }
+
+          socket.emit("blockade:join-session", payload, (res) => {
+            if (res.success) {
+              sessionId = res.sessionId;
+              gameState = res.state;
+              $("blkJoinScreen").style.display = "none";
+              $("blkController").style.display = "block";
+              renderController();
+            } else {
+              showJoinError(res.error || "Failed to join");
+            }
+          });
+        }
+
+        function showJoinError(msg) {
+          $("blkJoinError").textContent = msg;
+          $("blkJoinError").style.display = "block";
+          setTimeout(() => { $("blkJoinError").style.display = "none"; }, 3000);
+        }
+
+        // ─── State updates ───────────────────────────────────
+        socket.on("blockade:state", (state) => { gameState = state; renderController(); });
+        socket.on("blockade:teacher-state", (state) => { gameState = state; renderController(); });
+
+        socket.on("blockade:answer-result", (data) => {
+          showToast(data.result === "correct" ? `✅ Correct! +${data.creditsAwarded} credits` : "❌ Incorrect answer", data.result === "correct" ? "success" : "error");
+
+          setTimeout(() => {
+            const btns = $("blkDashOptions").querySelectorAll(".q-option-btn");
+            const letters = ["A", "B", "C", "D"];
+            btns.forEach((btn, i) => {
+              if (letters[i] === data.correctAnswer) btn.classList.add("correct");
+              else if (letters[i] === data.submittedAnswer && data.result === "incorrect") btn.classList.add("incorrect");
+              btn.disabled = true;
+            });
+          }, 200);
+
+          setTimeout(() => {
+            socket.emit("blockade:close-question");
+            $("blkActiveQuestion").style.display = "none";
+            $("blkStudentQuestionContent").innerHTML = '<div style="color:var(--blk-dim);padding:20px">Waiting for teacher to send a question...</div>';
+          }, 3500);
+        });
+
+        // ─── Render Controller ───────────────────────────────
+        function renderController() {
+          if (!gameState) return;
+
+          $("blkDashCode").textContent = gameState.code;
+          const isAdmin = joinRole === "teacher";
+
+          // Setup section visibility
+          if (isAdmin && gameState.phase === "waiting") {
+            $("blkSetupSection").style.display = "block";
+          } else {
+            $("blkSetupSection").style.display = "none";
+          }
+
+          // Controls section
+          if (gameState.phase === "active") {
+            $("blkControlsSection").style.display = "block";
+          } else {
+            $("blkControlsSection").style.display = "none";
+          }
+
+          // Q-Bank section (admin only)
+          $("blkQBankSection").style.display = isAdmin ? "block" : "none";
+          // Student question section (student only)
+          $("blkStudentQuestionSection").style.display = !isAdmin ? "block" : "none";
+          // Admin footer
+          $("blkAdminFooter").style.display = isAdmin ? "block" : "none";
+
+          // Players list
+          const players = Object.values(gameState.players);
+          $("blkPlayersList").innerHTML = players.map((p) => {
+            const isCurrent = gameState.currentPlayerId === p.id;
+            return `
+              <div class="blk-dash-player-card ${isCurrent ? "active-turn" : ""}">
+                <div class="blk-dash-player-dot" style="background:${p.color}">${p.finished ? "🏁" : p.name[0]}</div>
+                <div class="blk-dash-player-info">
+                  <div class="blk-dash-player-name" style="color:${p.color}">
+                    ${p.name}${p.studentName && p.studentName !== p.name ? " · " + p.studentName : ""}
+                    ${isCurrent ? " 👈" : ""}${p.rank ? " 🏆#" + p.rank : ""}
+                  </div>
+                  <div class="blk-dash-player-stats">
+                    <span>💰 ${p.credits}</span>
+                    <span>🧱 ${p.wallsRemaining}</span>
+                    <span>📍 (${p.position.row},${p.position.col})</span>
+                  </div>
+                </div>
+              </div>`;
+          }).join("");
+
+          // Controlling label
+          if (isAdmin) {
+            const cp = gameState.currentPlayerId && gameState.players[gameState.currentPlayerId];
+            if (cp) {
+              $("blkControllingLabel").textContent = cp.name + " (Admin)";
+              $("blkControllingLabel").style.color = cp.color;
+            }
+          } else {
+            const mp = gameState.players[myPlayerId];
+            if (mp) {
+              $("blkControllingLabel").textContent = mp.name;
+              $("blkControllingLabel").style.color = mp.color;
+            }
+          }
+
+          // Quiz team buttons (admin)
+          if (isAdmin) {
+            $("blkQuizTeamBtns").innerHTML = players
+              .filter((p) => p.active && !p.finished)
+              .map((p) => `<button class="blk-btn blk-btn-sm" style="background:${p.color};margin:4px" onclick="triggerQuiz(${p.id})">📝 ${p.name}</button>`)
+              .join("");
+          }
+
+          // Mini board
+          if (gameState.phase === "active") renderMiniBoard();
+
+          // Active question
+          if (gameState.currentQuestion) {
+            if (isAdmin) renderDashQuestion();
+            else renderStudentQuestion();
+          } else {
+            $("blkActiveQuestion").style.display = "none";
+          }
+        }
+
+        // ─── Mini Board ──────────────────────────────────────
+        function renderMiniBoard() {
+          const board = $("blkMiniBoard");
+          board.innerHTML = "";
+          const BS = engine.BOARD_SIZE;
+          const isAdmin = joinRole === "teacher";
+          const controlPid = isAdmin ? gameState.currentPlayerId : myPlayerId;
+
+          for (let r = 0; r < BS; r++) {
+            for (let c = 0; c < BS; c++) {
+              const cell = document.createElement("div");
+              cell.className = "blk-mini-cell";
+              cell.dataset.row = r;
+              cell.dataset.col = c;
+              cell.onclick = () => miniCellClick(r, c);
+
+              // Goal cells
+              for (const [pid, p] of Object.entries(gameState.players)) {
+                if (engine.isGoalCell(r, c, parseInt(pid), gameState.mode)) {
+                  cell.classList.add("mini-goal");
+                }
+              }
+
+              // Legal moves for controlled player
+              if (controlPid) {
+                const legalMoves = engine.getLegalMoves(controlPid, gameState);
+                if (legalMoves.some((m) => m.row === r && m.col === c)) {
+                  cell.classList.add("mini-legal");
+                }
+              }
+
+              board.appendChild(cell);
+            }
+          }
+
+          // Place pieces
+          for (const [pid, p] of Object.entries(gameState.players)) {
+            if (p.finished) continue;
+            const idx = p.position.row * BS + p.position.col;
+            const cell = board.children[idx];
+            if (cell) {
+              const piece = document.createElement("div");
+              piece.className = "blk-mini-piece";
+              piece.style.background = p.color;
+              piece.textContent = p.name[0];
+              cell.appendChild(piece);
+            }
+          }
+
+          // Render walls on mini board
+          requestAnimationFrame(() => {
+            const firstCell = board.children[0];
+            if (!firstCell) return;
+            const cellW = firstCell.offsetWidth;
+            const gapSize = 2;
+            const unit = cellW + gapSize;
+
+            for (const w of gameState.walls) {
+              const wallEl = document.createElement("div");
+              wallEl.className = `blk-mini-wall`;
+
+              if (w.orientation === "horizontal") {
+                wallEl.style.left = `${4 + w.col * unit}px`;
+                wallEl.style.top = `${4 + (w.row + 1) * unit - gapSize / 2 - 2}px`;
+                wallEl.style.width = `${2 * cellW + gapSize}px`;
+                wallEl.style.height = "4px";
+              } else {
+                wallEl.style.left = `${4 + (w.col + 1) * unit - gapSize / 2 - 2}px`;
+                wallEl.style.top = `${4 + w.row * unit}px`;
+                wallEl.style.height = `${2 * cellW + gapSize}px`;
+                wallEl.style.width = "4px";
+              }
+
+              board.appendChild(wallEl);
+            }
+          });
+        }
+
+        function miniCellClick(r, c) {
+          if (!gameState || gameState.phase !== "active") return;
+          const isAdmin = joinRole === "teacher";
+          const controlPid = isAdmin ? gameState.currentPlayerId : myPlayerId;
+          if (!controlPid) return;
+
+          // If student, only allow move on their turn
+          if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
+            showToast("Not your turn!", "error");
+            return;
+          }
+
+          socket.emit("blockade:move", { playerId: controlPid, row: r, col: c }, (res) => {
+            if (!res.success) showToast(res.error || "Invalid move", "error");
+          });
+        }
+
+        // ─── Dash Question (Admin) ───────────────────────────
+        function renderDashQuestion() {
+          const q = gameState.currentQuestion;
+          if (!q) return;
+
+          let html = q.question || "";
+          if (q.image) html += `<br><img src="/uploads/qbank-images/${q.image}" style="max-width:100%;border-radius:8px;margin-top:8px" />`;
+          $("blkDashQuestionText").innerHTML = html;
+
+          const letters = ["A", "B", "C", "D"];
+          $("blkDashOptions").innerHTML = (q.options || [])
+            .map((opt, i) => `
+              <button class="q-option-btn" onclick="submitStudentAnswer('${letters[i]}')" ${q.answered ? "disabled" : ""}>
+                <span style="width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;background:rgba(99,102,241,0.2);color:#818cf8;flex-shrink:0">${letters[i]}</span>
+                <span>${opt}</span>
+              </button>`).join("");
+
+          // Show correct answer to admin
+          if (q.correctAnswer) {
+            $("blkDashAnswer").textContent = "✅ Correct Answer: " + q.correctAnswer;
+          }
+
+          $("blkActiveQuestion").style.display = "block";
+        }
+
+        // ─── Student Question View ───────────────────────────
+        function renderStudentQuestion() {
+          const q = gameState.currentQuestion;
+          if (!q) return;
+
+          // Only show if question is for this student
+          if (q.targetPlayerId !== myPlayerId) {
+            $("blkStudentQuestionContent").innerHTML = '<div style="color:var(--blk-dim);padding:20px">Question is for another player...</div>';
+            return;
+          }
+
+          let html = `<div class="blk-question-panel">`;
+          html += `<div class="q-text">${q.question || ""}</div>`;
+          if (q.image) html += `<img src="/uploads/qbank-images/${q.image}" style="max-width:100%;border-radius:8px;margin-bottom:12px" />`;
+
+          const letters = ["A", "B", "C", "D"];
+          html += `<div class="q-options">`;
+          (q.options || []).forEach((opt, i) => {
+            html += `<button class="q-option-btn" onclick="submitStudentAnswer('${letters[i]}')" ${q.answered ? "disabled" : ""}>
+              <span style="width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.75rem;background:rgba(99,102,241,0.2);color:#818cf8;flex-shrink:0">${letters[i]}</span>
+              <span>${opt}</span>
+            </button>`;
+          });
+          html += `</div></div>`;
+
+          $("blkStudentQuestionContent").innerHTML = html;
+        }
+
+        // ─── Actions ─────────────────────────────────────────
+        function setTitle() {
+          const title = $("blkTitleInput").value.trim();
+          if (title) socket.emit("blockade:set-title", { title });
+        }
+
+        function selectMode(mode) {
+          document.querySelectorAll("#blkModeSelect .blk-mode-option").forEach((el) => {
+            el.classList.toggle("selected", el.dataset.mode === mode);
+          });
+          socket.emit("blockade:set-mode", { mode }, (res) => {
+            if (!res.success) showToast(res.error || "Failed", "error");
+          });
+        }
+
+        function startGame() {
+          socket.emit("blockade:start-game", {}, (res) => {
+            if (!res.success) showToast(res.error || "Failed to start", "error");
+          });
+        }
+
+        function movePlayer(dr, dc) {
+          if (!gameState) return;
+          const isAdmin = joinRole === "teacher";
+          const pid = isAdmin ? gameState.currentPlayerId : myPlayerId;
+          if (!pid) return;
+
+          // Student: only move on their turn
+          if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
+            showToast("Not your turn!", "error");
+            return;
+          }
+
+          const player = gameState.players[pid];
+          if (!player) return;
+
+          const dest = { row: player.position.row + dr, col: player.position.col + dc };
+
+          socket.emit("blockade:move", { playerId: pid, row: dest.row, col: dest.col }, (res) => {
+            if (!res.success) {
+              // Try jump
+              const jumpDest = { row: player.position.row + dr * 2, col: player.position.col + dc * 2 };
+              socket.emit("blockade:move", { playerId: pid, row: jumpDest.row, col: jumpDest.col }, (res2) => {
+                if (!res2.success) showToast(res.error || "Invalid move", "error");
+              });
+            }
+          });
+        }
+
+        function selectOrientation(orient) {
+          selectedOrientation = orient;
+          document.querySelectorAll("#blkWallOrientation .blk-mode-option").forEach((el) => {
+            el.classList.toggle("selected", el.dataset.orient === orient);
+          });
+        }
+
+        function placeWall() {
+          if (!gameState) return;
+          const isAdmin = joinRole === "teacher";
+          const pid = isAdmin ? gameState.currentPlayerId : myPlayerId;
+          if (!pid) return;
+
+          if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
+            showToast("Not your turn!", "error");
+            return;
+          }
+
+          const row = parseInt($("blkWallRow").value);
+          const col = parseInt($("blkWallCol").value);
+          if (isNaN(row) || isNaN(col)) { showToast("Enter row and column", "error"); return; }
+
+          socket.emit("blockade:place-wall", { playerId: pid, row, col, orientation: selectedOrientation }, (res) => {
+            if (!res.success) showToast(res.error || "Invalid wall", "error");
+            else { $("blkWallRow").value = ""; $("blkWallCol").value = ""; }
+          });
+        }
+
+        // ─── Q-Bank Import (same logic as maze) ─────────────
+        async function importFromQBank() {
+          const btn = event.target;
+          const origText = btn.innerText;
+          btn.innerText = "⏳ IMPORTING...";
+          btn.disabled = true;
+
+          try {
+            const data = {
+              game: "blockade",
+              paper: $("blkQbPaper").value,
+              amount: $("blkQbAmount").value,
+              chapter: $("blkQbChapter").value,
+              topics: $("blkQbTopics").value,
+              boardOnly: $("blkQbBoard").checked,
+              importantOnly: $("blkQbImportant").checked,
+            };
+
+            const exportRes = await fetch("/api/mcq/export-to-game", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(data),
+            });
+
+            if (!exportRes.ok) {
+              const err = await exportRes.json();
+              showToast("Error: " + (err.error || "Failed"), "error");
+              return;
+            }
+
+            const json = await exportRes.json();
+
+            // Trigger reload in server memory
+            await fetch("/api/reload-quiz", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ game: "blockade" }),
+            });
+
+            showToast(`✅ ${json.count} questions imported!`, "success");
+            $("blkQuizStatus").textContent = `📊 ${json.count} questions loaded from Q-Bank`;
+          } catch (e) {
+            console.error(e);
+            showToast("Failed to import from QBank", "error");
+          } finally {
+            btn.innerText = origText;
+            btn.disabled = false;
+          }
+        }
+
+        function triggerQuiz(targetPlayerId) {
+          socket.emit("blockade:request-question", { targetPlayerId }, (res) => {
+            if (!res.success) showToast(res.error || "Failed to get question", "error");
+          });
+        }
+
+        function markAnswer(correct) {
+          if (!gameState || !gameState.currentQuestion) return;
+          const letter = correct ? gameState.currentQuestion.correctAnswer : "X";
+          socket.emit("blockade:submit-answer", { answer: letter });
+        }
+
+        function submitStudentAnswer(letter) {
+          socket.emit("blockade:submit-answer", { answer: letter }, (res) => {
+            // Result handled by answer-result event
+          });
+        }
+
+        function cancelSession() {
+          if (confirm("End this Blockade session?")) {
+            socket.emit("blockade:cancel-session", {}, (res) => {
+              if (res.success) showToast("Session ended", "success");
+            });
+          }
+        }
+
+        // ─── Toast ───────────────────────────────────────────
+        function showToast(msg, type) {
+          const toast = document.createElement("div");
+          toast.className = "blk-toast" + (type === "success" ? " success" : "");
+          toast.textContent = msg;
+          document.body.appendChild(toast);
+          setTimeout(() => toast.remove(), 3000);
+        }
+
+        // ─── Q-Bank Filters ──────────────────────────────────
+        async function fetchQBankFilters() {
+          try {
+            const [topicsRes, chaptersRes] = await Promise.all([
+              fetch("/api/mcq/topics"),
+              fetch("/api/mcq/chapters"),
+            ]);
+            const topics = await topicsRes.json();
+            const chapters = await chaptersRes.json();
+            const toOpts = (arr) => arr.map((t) => `<option value="${t}">`).join("");
+            $("blkQbTopicList").innerHTML = toOpts(topics);
+            $("blkQbChapterList").innerHTML = toOpts(chapters);
+          } catch (e) {
+            console.error("Error fetching QBank filters:", e);
+          }
+        }
+
+        // ─── Boot ────────────────────────────────────────────
+        document.addEventListener("DOMContentLoaded", () => {
+          fetchQBankFilters();
+          setTimeout(() => {
+            fetch("/api/maze-quiz/info")
+              .then((r) => r.json())
+              .then((d) => { $("blkQuizStatus").textContent = `📊 ${d.count} questions in bank`; })
+              .catch(() => { $("blkQuizStatus").textContent = "⚠️ Could not load quiz info"; });
+          }, 500);
+        });
+      })();
+    </script>
+  </body>
+</html>

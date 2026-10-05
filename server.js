@@ -286,6 +286,9 @@ app.post("/api/reload-quiz", (req, res) => {
     const mazeQuizPath = path.join(uploadsDir, "maze-quiz-questions.xlsx");
     loadMazeQuizFromExcel(mazeQuizPath);
     res.json({ status: 'ok' });
+  } else if (game === 'blockade') {
+    if (global.reloadBlockadeQuiz) global.reloadBlockadeQuiz();
+    res.json({ status: 'ok' });
   } else {
     res.status(400).json({ error: 'Invalid game parameter' });
   }
@@ -1345,6 +1348,9 @@ app.use("/uploads", express.static(uploadsDir));
 // Question Bank and Student Performance API
 require('./server-qbank')(app, io, uploadsDir);
 
+// Blockade 3D game session handlers
+require('./server-blockade')(io, uploadsDir);
+
 // Initialize quiz systems
 initQuizSystem();
 
@@ -1376,6 +1382,9 @@ server.listen(PORT, "0.0.0.0", () => {
     --------------------------------------
     📽️  Presentation Game:  http://localhost:${PORT}/game-presentation.html
     📽️  Presentation Dash:  http://localhost:${PORT}/dashboard-presentation.html
+    --------------------------------------
+    🏰 Blockade Game:       http://localhost:${PORT}/game-blockade.html
+    🏰 Blockade Dash:       http://localhost:${PORT}/dashboard-blockade.html
     --------------------------------------
     To access from mobile, use your PC's IP address:
     http://[YOUR-IP]:${PORT}/dashboard.html

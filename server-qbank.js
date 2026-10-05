@@ -333,10 +333,10 @@ module.exports = function (app, io, uploadsDir) {
     const { paper, chapter, boardOnly, importantOnly, amount, topics, game } =
       req.body;
 
-    if (!game || (game !== "monopoly" && game !== "maze")) {
+    if (!game || (game !== "monopoly" && game !== "maze" && game !== "blockade")) {
       return res
         .status(400)
-        .json({ error: "Valid game (monopoly or maze) is required." });
+        .json({ error: "Valid game (monopoly, maze, or blockade) is required." });
     }
 
     let data = readExcel(mcqFile);
@@ -395,7 +395,7 @@ module.exports = function (app, io, uploadsDir) {
 
     // Write to respective game file
     const targetFileName =
-      game === "monopoly" ? "quiz-questions.xlsx" : "maze-quiz-questions.xlsx";
+      game === "monopoly" ? "quiz-questions.xlsx" : game === "maze" ? "maze-quiz-questions.xlsx" : "blockade-quiz-questions.xlsx";
     const targetFilePath = path.join(uploadsDir, targetFileName);
 
     try {
