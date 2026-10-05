@@ -8,6 +8,129 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/blockade.css" />
     <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
+    <style>
+      /* ─── Projector-Optimized HUD ─────────────────────── */
+      .blk-hud {
+        padding: 6px 16px;
+        min-height: 54px;
+        gap: 8px;
+      }
+      .blk-hud-title {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #e2e8f0;
+        letter-spacing: 1px;
+        max-width: 400px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .blk-hud-join-code {
+        font-size: 0.8rem;
+        padding: 1px 10px;
+        letter-spacing: 3px;
+      }
+      .blk-hud-turn {
+        font-size: 0.65rem;
+        padding: 2px 8px;
+      }
+
+      /* ─── Enhanced Projector Board ───────────────────── */
+      .blk-cell {
+        background: linear-gradient(145deg, #1a2740 0%, #0c1829 100%);
+        border: 1px solid rgba(100, 116, 139, 0.12);
+        border-radius: 3px;
+        box-shadow:
+          inset 0 1px 0 rgba(255,255,255,0.04),
+          0 1px 4px rgba(0,0,0,0.4);
+      }
+      .blk-cell:hover {
+        border-color: rgba(99, 102, 241, 0.35);
+      }
+      .blk-cell.legal-move {
+        background: linear-gradient(145deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.06) 100%);
+        border-color: rgba(34,197,94,0.5);
+        box-shadow: inset 0 0 8px rgba(34,197,94,0.08);
+      }
+      .blk-cell.legal-move::after {
+        inset: 25%;
+        background: rgba(34,197,94,0.5);
+      }
+      .blk-cell.goal-cell {
+        box-shadow: inset 0 0 12px rgba(245,158,11,0.06);
+      }
+
+      /* Larger pieces for projector */
+      .blk-piece {
+        width: 70%;
+        height: 70%;
+        font-size: 1.1rem;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.6), 0 0 20px currentColor;
+      }
+      .blk-piece::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: radial-gradient(ellipse at 35% 30%, rgba(255,255,255,0.25) 0%, transparent 60%);
+        pointer-events: none;
+      }
+
+      /* Thicker walls */
+      .blk-wall.horizontal {
+        height: 7px;
+        box-shadow: 0 0 14px rgba(245,158,11,0.5), 0 2px 6px rgba(0,0,0,0.7);
+        border-radius: 4px;
+      }
+      .blk-wall.vertical {
+        width: 7px;
+        box-shadow: 0 0 14px rgba(245,158,11,0.5), 2px 0 6px rgba(0,0,0,0.7);
+        border-radius: 4px;
+      }
+
+      /* Board grid lines */
+      .blk-board {
+        gap: 3px;
+        background: rgba(15,23,42,0.3);
+        padding: 3px;
+        border-radius: 6px;
+        border: 1px solid rgba(100,116,139,0.08);
+      }
+
+      /* HUD player info sizes for projector */
+      .blk-hud-avatar {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        font-size: 1.1rem;
+      }
+      .blk-hud-name {
+        font-size: 0.78rem;
+      }
+      .blk-hud-stats {
+        font-size: 0.68rem;
+      }
+
+      /* Question overlay on projector — make text big */
+      .blk-question-text {
+        font-size: 1.3rem;
+      }
+      .blk-option-btn {
+        font-size: 1.05rem;
+        padding: 16px 20px;
+      }
+      .blk-option-btn .opt-letter {
+        width: 34px;
+        height: 34px;
+        font-size: 0.95rem;
+      }
+
+      @media (max-width: 768px) {
+        .blk-hud-title { font-size: 1rem; }
+        .blk-piece { font-size: 0.7rem; width: 65%; height: 65%; }
+      }
+    </style>
   </head>
   <body class="blockade-game-body">
     <!-- Waiting Screen -->
@@ -26,8 +149,10 @@
       <div id="blkHudLeft" class="blk-hud-player"></div>
       <div class="blk-hud-center">
         <div class="blk-hud-title" id="blkHudTitle">Blockade 3D</div>
-        <div class="blk-hud-join-code" id="blkHudCode">------</div>
-        <div class="blk-hud-turn" id="blkHudTurn"></div>
+        <div style="display:flex;align-items:center;gap:10px;justify-content:center">
+          <div class="blk-hud-join-code" id="blkHudCode">------</div>
+          <div class="blk-hud-turn" id="blkHudTurn"></div>
+        </div>
       </div>
       <div id="blkHudRight" class="blk-hud-player right"></div>
     </div>
@@ -43,7 +168,7 @@
     <div class="blk-question-overlay" id="blkQuestionOverlay" style="display: none">
       <div class="blk-question-card">
         <div class="blk-question-header">
-          <span style="font-size: 1.2rem; font-weight: 800">📝 Question Time!</span>
+          <span style="font-size: 1.3rem; font-weight: 800">📝 Question Time!</span>
           <span class="blk-question-badge" id="blkQuestionBadge"></span>
         </div>
         <div class="blk-question-text" id="blkQuestionText"></div>
@@ -114,7 +239,6 @@
           renderHud();
           renderBoard();
 
-          // Show question if active
           if (gameState.currentQuestion && !gameState.currentQuestion.answered) {
             renderQuestion();
           } else {
@@ -188,6 +312,7 @@
               cell.dataset.row = r;
               cell.dataset.col = c;
 
+              // Goal cells with color coding
               for (const [pid, p] of Object.entries(gameState.players)) {
                 if (engine.isGoalCell(r, c, parseInt(pid), gameState.mode)) {
                   cell.classList.add("goal-cell", `goal-${p.name.toLowerCase()}`);
@@ -209,21 +334,20 @@
             if (cell) {
               const piece = document.createElement("div");
               piece.className = `blk-piece ${gameState.currentPlayerId === p.id ? "current-turn" : ""}`;
-              piece.style.background = p.color;
+              piece.style.background = `radial-gradient(circle at 40% 35%, ${lightenColor(p.color, 30)}, ${p.color})`;
               piece.style.color = p.color;
               piece.textContent = p.name[0];
               cell.appendChild(piece);
             }
           }
 
-          // Walls — compute cell size from actual rendered grid
+          // Walls
           requestAnimationFrame(() => {
             const firstCell = board.querySelector(".blk-cell");
             if (!firstCell) return;
             const cellRect = firstCell.getBoundingClientRect();
             const cellSize = cellRect.width;
             const boardRect = board.getBoundingClientRect();
-            // Gap = distance between adjacent cells
             const secondCell = board.querySelector('.blk-cell[data-row="0"][data-col="1"]');
             let gapSize = 3;
             if (secondCell) {
@@ -310,6 +434,16 @@
           banner.textContent = result === "correct" ? "✅ Correct! +2 Credits" : "❌ Incorrect";
           document.body.appendChild(banner);
           setTimeout(() => banner.remove(), 2500);
+        }
+
+        // Helper: lighten a hex color
+        function lightenColor(hex, percent) {
+          hex = hex.replace('#', '');
+          const num = parseInt(hex, 16);
+          const r = Math.min(255, (num >> 16) + Math.round(255 * percent / 100));
+          const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100));
+          const b = Math.min(255, (num & 0x0000FF) + Math.round(255 * percent / 100));
+          return `rgb(${r},${g},${b})`;
         }
       })();
     </script>

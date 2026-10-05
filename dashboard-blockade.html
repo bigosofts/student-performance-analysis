@@ -9,6 +9,104 @@
     <link rel="stylesheet" href="css/style.css" />
     <link rel="stylesheet" href="css/blockade.css" />
     <link rel="stylesheet" href="assets/fonts/local-fonts.css" />
+    <style>
+      /* Drag-and-drop wall pieces */
+      .blk-wall-source-area {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 12px;
+        margin-bottom: 8px;
+      }
+      .blk-wall-draggable {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 14px 20px;
+        border-radius: 14px;
+        border: 2px dashed rgba(245, 158, 11, 0.4);
+        background: rgba(245, 158, 11, 0.08);
+        color: #f59e0b;
+        font-size: 0.85rem;
+        font-weight: 800;
+        cursor: grab;
+        user-select: none;
+        touch-action: none;
+        transition: all 0.2s;
+        flex: 1;
+        text-align: center;
+      }
+      .blk-wall-draggable:active { cursor: grabbing; }
+      .blk-wall-draggable.dragging {
+        opacity: 0.4;
+        border-style: solid;
+        transform: scale(0.95);
+      }
+      .blk-wall-draggable .wall-icon {
+        display: inline-block;
+        border-radius: 2px;
+      }
+      .blk-wall-draggable .wall-icon.h-icon {
+        width: 32px; height: 5px;
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+      }
+      .blk-wall-draggable .wall-icon.v-icon {
+        width: 5px; height: 32px;
+        background: linear-gradient(180deg, #f59e0b, #d97706);
+      }
+      /* Floating drag ghost */
+      .blk-drag-ghost {
+        position: fixed;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0.85;
+        border-radius: 3px;
+        box-shadow: 0 0 16px rgba(245,158,11,0.6);
+      }
+      .blk-drag-ghost.horizontal {
+        width: 60px; height: 6px;
+        background: linear-gradient(90deg, #f59e0b, #d97706);
+      }
+      .blk-drag-ghost.vertical {
+        width: 6px; height: 60px;
+        background: linear-gradient(180deg, #f59e0b, #d97706);
+      }
+      /* Wall drop zones on mini board */
+      .blk-wall-drop-h, .blk-wall-drop-v {
+        position: absolute;
+        z-index: 5;
+        border-radius: 2px;
+        opacity: 0;
+        transition: opacity 0.15s, background 0.15s;
+        cursor: crosshair;
+      }
+      .blk-wall-drop-h {
+        height: 8px;
+        background: rgba(245,158,11,0.15);
+      }
+      .blk-wall-drop-v {
+        width: 8px;
+        background: rgba(245,158,11,0.15);
+      }
+      .blk-wall-drop-h.drop-visible,
+      .blk-wall-drop-v.drop-visible {
+        opacity: 1;
+      }
+      .blk-wall-drop-h:hover, .blk-wall-drop-h.drop-hover {
+        background: rgba(245,158,11,0.5) !important;
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(245,158,11,0.4);
+      }
+      .blk-wall-drop-v:hover, .blk-wall-drop-v.drop-hover {
+        background: rgba(245,158,11,0.5) !important;
+        opacity: 1;
+        box-shadow: 0 0 8px rgba(245,158,11,0.4);
+      }
+      .blk-wall-help {
+        text-align:center; font-size:0.68rem; color:var(--blk-dim); margin-top:6px;
+      }
+    </style>
   </head>
   <body class="blk-dashboard-body">
     <!-- ═══ Join Screen ═══ -->
@@ -83,46 +181,25 @@
         <!-- Mini Board -->
         <div class="blk-mini-board-wrap">
           <div class="blk-mini-board" id="blkMiniBoard"></div>
-          <div style="text-align:center;font-size:0.68rem;color:var(--blk-dim);margin-top:6px">
-            Tap a highlighted cell to move. Tap between cells for wall placement.
-          </div>
+          <div class="blk-wall-help">Tap highlighted cell to move · Drag a wall below onto the board to place it</div>
         </div>
 
-        <!-- D-Pad -->
-        <div style="margin-top:14px">
-          <div class="blk-dpad">
-            <div></div>
-            <button class="blk-dpad-btn" onclick="movePlayer(-1,0)">⬆️</button>
-            <div></div>
-            <button class="blk-dpad-btn" onclick="movePlayer(0,-1)">⬅️</button>
-            <div class="blk-dpad-btn blk-dpad-center">•</div>
-            <button class="blk-dpad-btn" onclick="movePlayer(0,1)">➡️</button>
-            <div></div>
-            <button class="blk-dpad-btn" onclick="movePlayer(1,0)">⬇️</button>
-            <div></div>
+        <!-- Wall Drag Sources -->
+        <div class="blk-wall-source-area">
+          <div class="blk-wall-draggable" id="blkWallH" data-orient="horizontal">
+            <span class="wall-icon h-icon"></span> Horizontal
+          </div>
+          <div class="blk-wall-draggable" id="blkWallV" data-orient="vertical">
+            <span class="wall-icon v-icon"></span> Vertical
           </div>
         </div>
-
-        <!-- Wall Placement -->
-        <div style="margin-top:16px">
-          <h3 style="margin-bottom:8px">🧱 Place Wall</h3>
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <input type="number" class="blk-title-input" id="blkWallRow" placeholder="Row (0-7)" min="0" max="7" style="flex:1;margin-bottom:0" />
-            <input type="number" class="blk-title-input" id="blkWallCol" placeholder="Col (0-7)" min="0" max="7" style="flex:1;margin-bottom:0" />
-          </div>
-          <div class="blk-mode-select" id="blkWallOrientation">
-            <div class="blk-mode-option selected" data-orient="horizontal" onclick="selectOrientation('horizontal')">─ Horizontal</div>
-            <div class="blk-mode-option" data-orient="vertical" onclick="selectOrientation('vertical')">│ Vertical</div>
-          </div>
-          <button class="blk-btn blk-btn-gold blk-btn-block blk-btn-sm" onclick="placeWall()">🧱 Place Wall</button>
-        </div>
+        <div id="blkWallsRemaining" style="text-align:center;font-size:0.72rem;color:var(--blk-dim);margin-bottom:4px"></div>
       </div>
 
       <!-- Q-Bank Import Section (admin only) -->
       <div class="blk-dash-section" id="blkQBankSection" style="display:none">
         <h3>📝 Question System</h3>
 
-        <!-- Q-Bank Import (same as maze runner) -->
         <div class="blk-qbank-section">
           <div class="qb-label">📚 IMPORT FROM QUESTION BANK (TYPE 1 ONLY)</div>
           <div class="blk-qbank-grid">
@@ -151,11 +228,9 @@
 
         <div id="blkQuizStatus" style="font-size:0.78rem;color:#7c3aed;font-weight:700;margin-bottom:12px">Loading quiz info...</div>
 
-        <!-- Quiz Trigger Buttons -->
         <div style="font-size:0.8rem;color:var(--blk-dim);margin-bottom:8px;font-weight:700">Send Question To:</div>
         <div id="blkQuizTeamBtns"></div>
 
-        <!-- Active Question Display (teacher only) -->
         <div id="blkActiveQuestion" style="display: none; margin-top:12px">
           <div class="blk-question-panel">
             <div class="q-text" id="blkDashQuestionText"></div>
@@ -193,24 +268,25 @@
         const engine = window.BlockadeEngine;
         let gameState = null;
         let sessionId = null;
-        let selectedOrientation = "horizontal";
         let joinRole = "teacher";
         let joinPlayerId = 1;
-        let myPlayerId = null; // For student — which player they control
+        let myPlayerId = null;
         let currentQuizTeam = null;
+
+        // Drag state
+        let dragOrientation = null;
+        let dragGhost = null;
+        let dropZones = [];
 
         const $ = (id) => document.getElementById(id);
 
-        // Make functions global for onclick handlers
+        // Make functions global
         window.selectRole = selectRole;
         window.selectColor = selectColor;
         window.joinSession = joinSession;
         window.setTitle = setTitle;
         window.selectMode = selectMode;
         window.startGame = startGame;
-        window.movePlayer = movePlayer;
-        window.selectOrientation = selectOrientation;
-        window.placeWall = placeWall;
         window.importFromQBank = importFromQBank;
         window.triggerQuiz = triggerQuiz;
         window.markAnswer = markAnswer;
@@ -257,6 +333,7 @@
               $("blkJoinScreen").style.display = "none";
               $("blkController").style.display = "block";
               renderController();
+              initWallDragDrop();
             } else {
               showJoinError(res.error || "Failed to join");
             }
@@ -277,7 +354,7 @@
           showToast(data.result === "correct" ? `✅ Correct! +${data.creditsAwarded} credits` : "❌ Incorrect answer", data.result === "correct" ? "success" : "error");
 
           setTimeout(() => {
-            const btns = $("blkDashOptions").querySelectorAll(".q-option-btn");
+            const btns = $("blkDashOptions") ? $("blkDashOptions").querySelectorAll(".q-option-btn") : [];
             const letters = ["A", "B", "C", "D"];
             btns.forEach((btn, i) => {
               if (letters[i] === data.correctAnswer) btn.classList.add("correct");
@@ -289,7 +366,9 @@
           setTimeout(() => {
             socket.emit("blockade:close-question");
             $("blkActiveQuestion").style.display = "none";
-            $("blkStudentQuestionContent").innerHTML = '<div style="color:var(--blk-dim);padding:20px">Waiting for teacher to send a question...</div>';
+            if ($("blkStudentQuestionContent")) {
+              $("blkStudentQuestionContent").innerHTML = '<div style="color:var(--blk-dim);padding:20px">Waiting for teacher to send a question...</div>';
+            }
           }, 3500);
         });
 
@@ -300,25 +379,10 @@
           $("blkDashCode").textContent = gameState.code;
           const isAdmin = joinRole === "teacher";
 
-          // Setup section visibility
-          if (isAdmin && gameState.phase === "waiting") {
-            $("blkSetupSection").style.display = "block";
-          } else {
-            $("blkSetupSection").style.display = "none";
-          }
-
-          // Controls section
-          if (gameState.phase === "active") {
-            $("blkControlsSection").style.display = "block";
-          } else {
-            $("blkControlsSection").style.display = "none";
-          }
-
-          // Q-Bank section (admin only)
+          $("blkSetupSection").style.display = (isAdmin && gameState.phase === "waiting") ? "block" : "none";
+          $("blkControlsSection").style.display = (gameState.phase === "active") ? "block" : "none";
           $("blkQBankSection").style.display = isAdmin ? "block" : "none";
-          // Student question section (student only)
           $("blkStudentQuestionSection").style.display = !isAdmin ? "block" : "none";
-          // Admin footer
           $("blkAdminFooter").style.display = isAdmin ? "block" : "none";
 
           // Players list
@@ -357,6 +421,12 @@
             }
           }
 
+          // Walls remaining
+          const controlPid = isAdmin ? gameState.currentPlayerId : myPlayerId;
+          if (controlPid && gameState.players[controlPid]) {
+            $("blkWallsRemaining").textContent = `🧱 Walls remaining: ${gameState.players[controlPid].wallsRemaining}`;
+          }
+
           // Quiz team buttons (admin)
           if (isAdmin) {
             $("blkQuizTeamBtns").innerHTML = players
@@ -393,14 +463,12 @@
               cell.dataset.col = c;
               cell.onclick = () => miniCellClick(r, c);
 
-              // Goal cells
               for (const [pid, p] of Object.entries(gameState.players)) {
                 if (engine.isGoalCell(r, c, parseInt(pid), gameState.mode)) {
                   cell.classList.add("mini-goal");
                 }
               }
 
-              // Legal moves for controlled player
               if (controlPid) {
                 const legalMoves = engine.getLegalMoves(controlPid, gameState);
                 if (legalMoves.some((m) => m.row === r && m.col === c)) {
@@ -412,7 +480,7 @@
             }
           }
 
-          // Place pieces
+          // Pieces
           for (const [pid, p] of Object.entries(gameState.players)) {
             if (p.finished) continue;
             const idx = p.position.row * BS + p.position.col;
@@ -426,42 +494,77 @@
             }
           }
 
-          // Render walls on mini board
+          // Render existing walls + drop zones after layout
           requestAnimationFrame(() => {
             const firstCell = board.children[0];
             if (!firstCell) return;
             const cellW = firstCell.offsetWidth;
             const gapSize = 2;
             const unit = cellW + gapSize;
+            const pad = 4; // board padding
 
+            // Existing walls
             for (const w of gameState.walls) {
               const wallEl = document.createElement("div");
-              wallEl.className = `blk-mini-wall`;
-
+              wallEl.className = "blk-mini-wall";
               if (w.orientation === "horizontal") {
-                wallEl.style.left = `${4 + w.col * unit}px`;
-                wallEl.style.top = `${4 + (w.row + 1) * unit - gapSize / 2 - 2}px`;
+                wallEl.style.left = `${pad + w.col * unit}px`;
+                wallEl.style.top = `${pad + (w.row + 1) * unit - gapSize / 2 - 2}px`;
                 wallEl.style.width = `${2 * cellW + gapSize}px`;
                 wallEl.style.height = "4px";
               } else {
-                wallEl.style.left = `${4 + (w.col + 1) * unit - gapSize / 2 - 2}px`;
-                wallEl.style.top = `${4 + w.row * unit}px`;
+                wallEl.style.left = `${pad + (w.col + 1) * unit - gapSize / 2 - 2}px`;
+                wallEl.style.top = `${pad + w.row * unit}px`;
                 wallEl.style.height = `${2 * cellW + gapSize}px`;
                 wallEl.style.width = "4px";
               }
-
               board.appendChild(wallEl);
+            }
+
+            // Create wall drop zones
+            dropZones = [];
+            // Horizontal drop zones (between rows)
+            for (let r = 0; r < BS - 1; r++) {
+              for (let c = 0; c < BS - 1; c++) {
+                const zone = document.createElement("div");
+                zone.className = "blk-wall-drop-h";
+                zone.style.left = `${pad + c * unit}px`;
+                zone.style.top = `${pad + (r + 1) * unit - gapSize / 2 - 4}px`;
+                zone.style.width = `${2 * cellW + gapSize}px`;
+                zone.dataset.row = r;
+                zone.dataset.col = c;
+                zone.dataset.orient = "horizontal";
+                zone.onclick = () => handleDropZoneClick(r, c, "horizontal");
+                board.appendChild(zone);
+                dropZones.push(zone);
+              }
+            }
+            // Vertical drop zones (between cols)
+            for (let r = 0; r < BS - 1; r++) {
+              for (let c = 0; c < BS - 1; c++) {
+                const zone = document.createElement("div");
+                zone.className = "blk-wall-drop-v";
+                zone.style.left = `${pad + (c + 1) * unit - gapSize / 2 - 4}px`;
+                zone.style.top = `${pad + r * unit}px`;
+                zone.style.height = `${2 * cellW + gapSize}px`;
+                zone.dataset.row = r;
+                zone.dataset.col = c;
+                zone.dataset.orient = "vertical";
+                zone.onclick = () => handleDropZoneClick(r, c, "vertical");
+                board.appendChild(zone);
+                dropZones.push(zone);
+              }
             }
           });
         }
 
         function miniCellClick(r, c) {
+          if (dragOrientation) return; // Don't move while dragging
           if (!gameState || gameState.phase !== "active") return;
           const isAdmin = joinRole === "teacher";
           const controlPid = isAdmin ? gameState.currentPlayerId : myPlayerId;
           if (!controlPid) return;
 
-          // If student, only allow move on their turn
           if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
             showToast("Not your turn!", "error");
             return;
@@ -469,6 +572,130 @@
 
           socket.emit("blockade:move", { playerId: controlPid, row: r, col: c }, (res) => {
             if (!res.success) showToast(res.error || "Invalid move", "error");
+          });
+        }
+
+        function handleDropZoneClick(row, col, orientation) {
+          // This is a fallback for when user clicks a drop zone directly (useful on desktop)
+          if (!dragOrientation) return;
+          placeWallAt(row, col, orientation);
+        }
+
+        // ─── Drag & Drop Wall Placement ──────────────────────
+        function initWallDragDrop() {
+          const hSrc = $("blkWallH");
+          const vSrc = $("blkWallV");
+          if (!hSrc || !vSrc) return;
+
+          // Mouse events
+          hSrc.addEventListener("mousedown", (e) => startDrag(e, "horizontal"));
+          vSrc.addEventListener("mousedown", (e) => startDrag(e, "vertical"));
+          document.addEventListener("mousemove", onDragMove);
+          document.addEventListener("mouseup", onDragEnd);
+
+          // Touch events
+          hSrc.addEventListener("touchstart", (e) => { e.preventDefault(); startDrag(e.touches[0], "horizontal"); }, { passive: false });
+          vSrc.addEventListener("touchstart", (e) => { e.preventDefault(); startDrag(e.touches[0], "vertical"); }, { passive: false });
+          document.addEventListener("touchmove", (e) => { if (dragOrientation) { e.preventDefault(); onDragMove(e.touches[0]); } }, { passive: false });
+          document.addEventListener("touchend", (e) => { if (dragOrientation) { e.preventDefault(); onDragEnd(e.changedTouches[0]); } }, { passive: false });
+        }
+
+        function startDrag(e, orientation) {
+          dragOrientation = orientation;
+
+          // Mark source as dragging
+          const src = orientation === "horizontal" ? $("blkWallH") : $("blkWallV");
+          src.classList.add("dragging");
+
+          // Create ghost
+          dragGhost = document.createElement("div");
+          dragGhost.className = `blk-drag-ghost ${orientation}`;
+          document.body.appendChild(dragGhost);
+          positionGhost(e.clientX, e.clientY);
+
+          // Show drop zones for this orientation
+          dropZones.forEach((z) => {
+            if (z.dataset.orient === orientation) {
+              z.classList.add("drop-visible");
+            }
+          });
+        }
+
+        function onDragMove(e) {
+          if (!dragOrientation || !dragGhost) return;
+          const x = e.clientX || 0;
+          const y = e.clientY || 0;
+          positionGhost(x, y);
+
+          // Highlight nearest drop zone
+          dropZones.forEach((z) => z.classList.remove("drop-hover"));
+          const nearest = findNearestDropZone(x, y);
+          if (nearest) nearest.classList.add("drop-hover");
+        }
+
+        function onDragEnd(e) {
+          if (!dragOrientation) return;
+          const x = e ? (e.clientX || 0) : 0;
+          const y = e ? (e.clientY || 0) : 0;
+
+          // Find and place on nearest drop zone
+          const nearest = findNearestDropZone(x, y);
+          if (nearest) {
+            const row = parseInt(nearest.dataset.row);
+            const col = parseInt(nearest.dataset.col);
+            placeWallAt(row, col, dragOrientation);
+          }
+
+          // Cleanup
+          if (dragGhost) { dragGhost.remove(); dragGhost = null; }
+          dropZones.forEach((z) => { z.classList.remove("drop-visible", "drop-hover"); });
+          $("blkWallH").classList.remove("dragging");
+          $("blkWallV").classList.remove("dragging");
+          dragOrientation = null;
+        }
+
+        function positionGhost(x, y) {
+          if (!dragGhost) return;
+          if (dragOrientation === "horizontal") {
+            dragGhost.style.left = (x - 30) + "px";
+            dragGhost.style.top = (y - 3) + "px";
+          } else {
+            dragGhost.style.left = (x - 3) + "px";
+            dragGhost.style.top = (y - 30) + "px";
+          }
+        }
+
+        function findNearestDropZone(x, y) {
+          let closest = null;
+          let closestDist = 40; // max snap distance in px
+          for (const z of dropZones) {
+            if (z.dataset.orient !== dragOrientation) continue;
+            const rect = z.getBoundingClientRect();
+            const cx = rect.left + rect.width / 2;
+            const cy = rect.top + rect.height / 2;
+            const dist = Math.sqrt((x - cx) ** 2 + (y - cy) ** 2);
+            if (dist < closestDist) {
+              closestDist = dist;
+              closest = z;
+            }
+          }
+          return closest;
+        }
+
+        function placeWallAt(row, col, orientation) {
+          if (!gameState) return;
+          const isAdmin = joinRole === "teacher";
+          const pid = isAdmin ? gameState.currentPlayerId : myPlayerId;
+          if (!pid) return;
+
+          if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
+            showToast("Not your turn!", "error");
+            return;
+          }
+
+          socket.emit("blockade:place-wall", { playerId: pid, row, col, orientation }, (res) => {
+            if (!res.success) showToast(res.error || "Invalid wall placement", "error");
+            else showToast("🧱 Wall placed!", "success");
           });
         }
 
@@ -489,7 +716,6 @@
                 <span>${opt}</span>
               </button>`).join("");
 
-          // Show correct answer to admin
           if (q.correctAnswer) {
             $("blkDashAnswer").textContent = "✅ Correct Answer: " + q.correctAnswer;
           }
@@ -502,7 +728,6 @@
           const q = gameState.currentQuestion;
           if (!q) return;
 
-          // Only show if question is for this student
           if (q.targetPlayerId !== myPlayerId) {
             $("blkStudentQuestionContent").innerHTML = '<div style="color:var(--blk-dim);padding:20px">Question is for another player...</div>';
             return;
@@ -546,63 +771,7 @@
           });
         }
 
-        function movePlayer(dr, dc) {
-          if (!gameState) return;
-          const isAdmin = joinRole === "teacher";
-          const pid = isAdmin ? gameState.currentPlayerId : myPlayerId;
-          if (!pid) return;
-
-          // Student: only move on their turn
-          if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
-            showToast("Not your turn!", "error");
-            return;
-          }
-
-          const player = gameState.players[pid];
-          if (!player) return;
-
-          const dest = { row: player.position.row + dr, col: player.position.col + dc };
-
-          socket.emit("blockade:move", { playerId: pid, row: dest.row, col: dest.col }, (res) => {
-            if (!res.success) {
-              // Try jump
-              const jumpDest = { row: player.position.row + dr * 2, col: player.position.col + dc * 2 };
-              socket.emit("blockade:move", { playerId: pid, row: jumpDest.row, col: jumpDest.col }, (res2) => {
-                if (!res2.success) showToast(res.error || "Invalid move", "error");
-              });
-            }
-          });
-        }
-
-        function selectOrientation(orient) {
-          selectedOrientation = orient;
-          document.querySelectorAll("#blkWallOrientation .blk-mode-option").forEach((el) => {
-            el.classList.toggle("selected", el.dataset.orient === orient);
-          });
-        }
-
-        function placeWall() {
-          if (!gameState) return;
-          const isAdmin = joinRole === "teacher";
-          const pid = isAdmin ? gameState.currentPlayerId : myPlayerId;
-          if (!pid) return;
-
-          if (!isAdmin && gameState.currentPlayerId !== myPlayerId) {
-            showToast("Not your turn!", "error");
-            return;
-          }
-
-          const row = parseInt($("blkWallRow").value);
-          const col = parseInt($("blkWallCol").value);
-          if (isNaN(row) || isNaN(col)) { showToast("Enter row and column", "error"); return; }
-
-          socket.emit("blockade:place-wall", { playerId: pid, row, col, orientation: selectedOrientation }, (res) => {
-            if (!res.success) showToast(res.error || "Invalid wall", "error");
-            else { $("blkWallRow").value = ""; $("blkWallCol").value = ""; }
-          });
-        }
-
-        // ─── Q-Bank Import (same logic as maze) ─────────────
+        // ─── Q-Bank Import ───────────────────────────────────
         async function importFromQBank() {
           const btn = event.target;
           const origText = btn.innerText;
@@ -634,7 +803,6 @@
 
             const json = await exportRes.json();
 
-            // Trigger reload in server memory
             await fetch("/api/reload-quiz", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
@@ -665,9 +833,7 @@
         }
 
         function submitStudentAnswer(letter) {
-          socket.emit("blockade:submit-answer", { answer: letter }, (res) => {
-            // Result handled by answer-result event
-          });
+          socket.emit("blockade:submit-answer", { answer: letter }, (res) => {});
         }
 
         function cancelSession() {
