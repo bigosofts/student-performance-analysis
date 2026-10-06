@@ -799,10 +799,6 @@
           scroll-behavior: smooth;
         }
 
-        /* Kill the scanline overlay — it's a full-screen fixed layer that causes repaint on every scroll frame */
-        body::after {
-          display: none !important;
-        }
 
         .main-content {
           padding: 10px 20px;
@@ -887,6 +883,10 @@
           animation: none;
         }
 
+        body::after {
+          display: none !important;
+        }
+
         .btn-dashboard {
           width: 100%;
           justify-content: center;
@@ -937,8 +937,28 @@
         -webkit-text-fill-color: transparent;
       }
 
+      /* Screen-wide small micro-mesh / CRT scanline overlay matching dark mode strategy */
       html[data-theme="light"] body::after {
-        display: none;
+        content: "";
+        display: block !important;
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        background:
+          linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(18, 16, 16, 0.075) 50%),
+          linear-gradient(
+            90deg,
+            rgba(255, 0, 0, 0.025),
+            rgba(0, 180, 0, 0.012),
+            rgba(0, 100, 255, 0.025)
+          );
+        z-index: 1000;
+        pointer-events: none;
+        background-size:
+          100% 4px,
+          3px 100%;
+        opacity: 0.38;
       }
 
       html[data-theme="light"] .bg-animation {
@@ -978,31 +998,49 @@
         filter: drop-shadow(0 5px 12px rgba(99, 102, 241, 0.14));
       }
 
+      /* Inactive cards: clean glassmorphism with 3D depth */
       html[data-theme="light"] .game-card {
-        background: rgba(255, 255, 255, 0.9);
-        border-color: rgba(100, 116, 139, 0.38);
+        background: rgba(255, 255, 255, 0.78);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border-color: rgba(148, 163, 184, 0.38);
         color: #1e293b;
-        box-shadow: 0 18px 42px rgba(51, 65, 85, 0.18);
+        box-shadow:
+          0 18px 42px rgba(51, 65, 85, 0.14),
+          0 1px 3px rgba(0, 0, 0, 0.06);
         transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, filter 0.6s, translate 0.22s ease, box-shadow 0.22s ease;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
       }
 
+      /* Active card: rich contrast and sharp border */
       html[data-theme="light"] .game-card.active {
-        background: rgba(255, 255, 255, 0.98);
-        border-color: rgba(101, 163, 13, 0.48);
-        box-shadow: 0 24px 58px rgba(51, 65, 85, 0.2), 0 0 28px rgba(101, 163, 13, 0.12);
+        background:
+          radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.05) 0%, transparent 65%),
+          rgba(255, 255, 255, 0.96);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        border-color: rgba(101, 163, 13, 0.52);
+        box-shadow:
+          0 24px 58px rgba(51, 65, 85, 0.18),
+          0 0 28px rgba(101, 163, 13, 0.12),
+          0 1px 3px rgba(0, 0, 0, 0.08);
         padding: clamp(22px, 3vh, 36px) clamp(20px, 2vw, 32px);
       }
 
       html[data-theme="light"] .game-card h2 {
         font-size: clamp(1.4rem, 2vw, 2rem);
-        color: #172554;
+        color: #0f172a;
+        text-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.05);
       }
 
       html[data-theme="light"] .game-card p {
         max-width: 30ch;
         font-size: clamp(0.82rem, 1vw, 0.98rem);
         line-height: 1.45;
-        color: #475569;
+        color: #334155;
+        font-weight: 450;
       }
 
       html[data-theme="light"] .game-card:not(.active):hover {
@@ -1031,23 +1069,33 @@
       }
 
       html[data-theme="light"] .game-icon {
-        border: 1px solid rgba(255, 255, 255, 0.65);
-        box-shadow: 0 15px 26px rgba(30, 41, 59, 0.2), inset 0 2px 5px rgba(255, 255, 255, 0.5);
-        filter: drop-shadow(0 5px 6px rgba(30, 41, 59, 0.12));
+        border: 1.5px solid rgba(255, 255, 255, 0.7);
+        box-shadow:
+          0 12px 24px rgba(30, 41, 59, 0.22),
+          0 4px 8px rgba(0, 0, 0, 0.1),
+          inset 0 2px 5px rgba(255, 255, 255, 0.5);
+        filter: none;
         transform: perspective(500px) rotateY(-4deg) rotateX(3deg);
+        image-rendering: -webkit-optimize-contrast;
       }
 
       html[data-theme="light"] .game-card.active .game-icon {
         transform: perspective(500px) rotateY(-7deg) rotateX(4deg);
-        box-shadow: 0 18px 30px rgba(30, 41, 59, 0.25), inset 0 2px 6px rgba(255, 255, 255, 0.55);
+        box-shadow:
+          0 16px 28px rgba(30, 41, 59, 0.26),
+          0 4px 8px rgba(0, 0, 0, 0.12),
+          inset 0 2px 6px rgba(255, 255, 255, 0.55);
+        filter: none;
       }
 
+      /* Kill the inner blur overlay entirely in light mode — this is the main cause of blurriness */
       html[data-theme="light"] .game-card::after {
-        opacity: 0.22;
+        display: none;
       }
 
       html[data-theme="light"] .game-card::before {
-        opacity: 0.65;
+        opacity: 0.75;
+        filter: none;
       }
 
       html[data-theme="light"] .carousel-nav {
@@ -1060,6 +1108,15 @@
       html[data-theme="light"] .carousel-nav:hover {
         background: linear-gradient(145deg, #4d7c0f, #07875f 55%, #0e7490);
         box-shadow: 0 12px 28px rgba(8, 145, 178, 0.34);
+      }
+
+      html[data-theme="light"] .btn-launch {
+        border: 1.5px solid rgba(255, 255, 255, 0.5);
+        box-shadow:
+          0 6px 16px rgba(0, 0, 0, 0.18),
+          0 2px 4px rgba(0, 0, 0, 0.1);
+        -webkit-font-smoothing: antialiased;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
       }
 
       html[data-theme="light"] .btn-5 {
