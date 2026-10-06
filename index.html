@@ -220,19 +220,28 @@
         font-size: clamp(2.5rem, 6vw, 4.8rem);
         font-weight: 900;
         text-transform: uppercase;
-        background: linear-gradient(to right, #6366f1, #ec4899, #f59e0b);
+        background: linear-gradient(110deg, #4ade80 0%, #22c55e 45%, #15803d 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
         margin-bottom: clamp(4px, 1vh, 8px);
-        filter: drop-shadow(0 0 25px rgba(236, 72, 153, 0.3));
+        filter:
+          drop-shadow(0 1px 0px rgba(15, 23, 42, 0.8))
+          drop-shadow(0 2px 0px rgba(15, 23, 42, 0.9))
+          drop-shadow(0 3px 0px rgba(2, 6, 23, 1))
+          drop-shadow(0 6px 4px rgba(0, 0, 0, 0.35));
         letter-spacing: 3px;
         line-height: 1.1;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
       }
 
       .title-classroom {
-        background: inherit;
+        font-family: "Orbitron", sans-serif;
+        background: linear-gradient(110deg, #fcd34d 0%, #f59e0b 45%, #ea580c 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
       .subtitle {
@@ -286,6 +295,20 @@
         perspective: 1500px;
       }
 
+      .carousel-container::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: -10%;
+        width: 120%;
+        height: 140px;
+        transform: translateY(-50%) rotate(-3deg);
+        background: linear-gradient(90deg, transparent 0%, rgba(74, 222, 128, 0.25) 20%, rgba(234, 179, 8, 0.3) 50%, rgba(22, 163, 74, 0.25) 80%, transparent 100%);
+        filter: blur(45px);
+        z-index: -1;
+        pointer-events: none;
+      }
+
       .game-carousel {
         position: relative;
         width: 100%;
@@ -301,13 +324,28 @@
         --neon-angle: 0deg;
         --neon-speed: 3.5s;
         --inner-speed: 5s;
-        --neon-1: #6366f1;
-        --neon-2: #ec4899;
+        --neon-1: #5350f5;
+        --neon-2: #2cafe0;
         position: absolute;
         width: clamp(280px, 22vw, 380px);
         height: clamp(380px, 55vh, 600px);
         isolation: isolate;
-        background: rgba(255, 255, 255, 0.07);
+        background-color: rgba(255, 255, 255, 0.07);
+        background-image: 
+          repeating-linear-gradient(
+            0deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 20px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(255, 255, 255, 0.03) 0px,
+            rgba(255, 255, 255, 0.03) 1px,
+            transparent 1px,
+            transparent 20px
+          );
         border: 1px solid rgba(255, 255, 255, 0.06);
         border-radius: clamp(16px, 2vw, 24px);
         padding: clamp(14px, 2.5vh, 28px) clamp(12px, 1.5vw, 24px);
@@ -332,7 +370,7 @@
       }
 
       .game-card.active {
-        background: rgba(10, 15, 30, 0.96);
+        background-color: rgba(10, 15, 30, 0.96);
         border-color: rgba(255, 255, 255, 0.25);
       }
 
@@ -350,9 +388,9 @@
         background: linear-gradient(
           90deg,
           transparent 0%,
-          rgba(99, 102, 241, 0.18) 20%,
-          rgba(236, 72, 153, 0.22) 50%,
-          rgba(99, 102, 241, 0.18) 80%,
+          rgba(83, 80, 245, 0.18) 20%,
+          rgba(44, 175, 224, 0.22) 50%,
+          rgba(137, 201, 105, 0.18) 80%,
           transparent 100%
         );
         background-size: 250% 100%;
@@ -395,7 +433,8 @@
         opacity: 0.9;
         box-shadow:
           0 0 6px var(--neon-1),
-          0 0 12px var(--neon-2);
+          0 0 14px var(--neon-2),
+          0 0 2px rgba(255,255,255,0.6);
       }
 
       .game-card > * {
@@ -405,9 +444,9 @@
 
       /* Animation Stagger + per-card neon colors */
       .game-card[data-index="0"] {
-        --glow: rgba(99, 102, 241, 0.3);
-        --neon-1: #6366f1;
-        --neon-2: #a5b4fc;
+        --glow: rgba(83, 80, 245, 0.3);
+        --neon-1: #5350f5;
+        --neon-2: #9e82e6;
         --neon-speed: 3.2s;
         --inner-speed: 4.5s;
       }
@@ -415,18 +454,18 @@
         background: linear-gradient(
           90deg,
           transparent,
-          rgba(99, 102, 241, 0.2) 30%,
-          rgba(165, 180, 252, 0.25) 50%,
-          rgba(99, 102, 241, 0.2) 70%,
+          rgba(83, 80, 245, 0.2) 30%,
+          rgba(158, 130, 230, 0.25) 50%,
+          rgba(83, 80, 245, 0.2) 70%,
           transparent
         );
         background-size: 250% 100%;
       }
 
       .game-card[data-index="1"] {
-        --glow: rgba(168, 85, 247, 0.3);
-        --neon-1: #a855f7;
-        --neon-2: #ec4899;
+        --glow: rgba(44, 175, 224, 0.3);
+        --neon-1: #2cafe0;
+        --neon-2: #5350f5;
         --neon-speed: 3.8s;
         --inner-speed: 5.2s;
       }
@@ -434,9 +473,9 @@
         background: linear-gradient(
           90deg,
           transparent,
-          rgba(168, 85, 247, 0.2) 30%,
-          rgba(236, 72, 153, 0.25) 50%,
-          rgba(168, 85, 247, 0.2) 70%,
+          rgba(44, 175, 224, 0.2) 30%,
+          rgba(83, 80, 245, 0.25) 50%,
+          rgba(44, 175, 224, 0.2) 70%,
           transparent
         );
         background-size: 250% 100%;
@@ -462,9 +501,9 @@
       }
 
       .game-card[data-index="3"] {
-        --glow: rgba(124, 58, 237, 0.3);
-        --neon-1: #7c3aed;
-        --neon-2: #f472b6;
+        --glow: rgba(137, 201, 105, 0.3);
+        --neon-1: #89c969;
+        --neon-2: #2cafe0;
         --neon-speed: 3.5s;
         --inner-speed: 5.5s;
       }
@@ -472,9 +511,9 @@
         background: linear-gradient(
           90deg,
           transparent,
-          rgba(124, 58, 237, 0.2) 30%,
-          rgba(244, 114, 182, 0.25) 50%,
-          rgba(124, 58, 237, 0.2) 70%,
+          rgba(137, 201, 105, 0.2) 30%,
+          rgba(44, 175, 224, 0.25) 50%,
+          rgba(137, 201, 105, 0.2) 70%,
           transparent
         );
         background-size: 250% 100%;
@@ -538,9 +577,9 @@
       }
 
       .game-card[data-index="7"] {
-        --glow: rgba(239, 68, 68, 0.3);
-        --neon-1: #ef4444;
-        --neon-2: #fca5a5;
+        --glow: rgba(200, 168, 75, 0.3);
+        --neon-1: #c8a84b;
+        --neon-2: #89c969;
         --neon-speed: 3.6s;
         --inner-speed: 4.2s;
       }
@@ -548,9 +587,9 @@
         background: linear-gradient(
           90deg,
           transparent,
-          rgba(239, 68, 68, 0.2) 30%,
-          rgba(252, 165, 165, 0.25) 50%,
-          rgba(239, 68, 68, 0.2) 70%,
+          rgba(200, 168, 75, 0.2) 30%,
+          rgba(137, 201, 105, 0.25) 50%,
+          rgba(200, 168, 75, 0.2) 70%,
           transparent
         );
         background-size: 250% 100%;
@@ -605,14 +644,20 @@
         margin-bottom: clamp(6px, 1vh, 10px);
         letter-spacing: 0.5px;
         line-height: 1.2;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
+        text-shadow:
+          0 1px 0 rgba(83, 80, 245, 0.6),
+          0 0 14px rgba(44, 175, 224, 0.3);
       }
 
       .game-card p {
-        color: #a1a1aa;
+        color: #b4bcd0;
         font-size: clamp(0.85rem, 1.1vw, 1.05rem);
         line-height: 1.4;
         margin-bottom: clamp(18px, 3vh, 24px);
         font-weight: 400;
+        -webkit-font-smoothing: antialiased;
       }
 
       /* Carousel Navigation */
@@ -667,16 +712,16 @@
       }
 
       .btn-2 {
-        background: linear-gradient(135deg, #a855f7, #ec4899);
+        background: linear-gradient(135deg, #2cafe0, #5350f5);
       }
 
       .btn-3 {
-        background: linear-gradient(135deg, #0e7490, #00e5ff);
-        color: #000;
+        background: linear-gradient(135deg, #0e7490, #2cafe0);
+        color: #fff;
       }
 
       .btn-4 {
-        background: linear-gradient(135deg, #7c3aed, #ec4899);
+        background: linear-gradient(135deg, #89c969, #2cafe0);
       }
 
       .btn-5 {
@@ -932,34 +977,13 @@
       }
 
       html[data-theme="light"] .title-classroom {
-        background: linear-gradient(105deg, #f97316 0%, #eab308 48%, #65a30d 100%);
+        background: linear-gradient(105deg, #5350f5 0%, #2cafe0 38%, #89c969 68%, #c8a84b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        background-clip: text;
       }
 
-      /* Screen-wide small micro-mesh / CRT scanline overlay matching dark mode strategy */
-      html[data-theme="light"] body::after {
-        content: "";
-        display: block !important;
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        background:
-          linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(18, 16, 16, 0.075) 50%),
-          linear-gradient(
-            90deg,
-            rgba(255, 0, 0, 0.025),
-            rgba(0, 180, 0, 0.012),
-            rgba(0, 100, 255, 0.025)
-          );
-        z-index: 1000;
-        pointer-events: none;
-        background-size:
-          100% 4px,
-          3px 100%;
-        opacity: 0.38;
-      }
+
 
       html[data-theme="light"] .bg-animation {
         opacity: 0.38;
@@ -994,9 +1018,7 @@
         margin-top: 0;
       }
 
-      html[data-theme="light"] .title-glitch {
-        filter: drop-shadow(0 5px 12px rgba(99, 102, 241, 0.14));
-      }
+
 
       /* Inactive cards: clean glassmorphism with 3D depth */
       html[data-theme="light"] .game-card {
@@ -1032,15 +1054,20 @@
       html[data-theme="light"] .game-card h2 {
         font-size: clamp(1.4rem, 2vw, 2rem);
         color: #0f172a;
-        text-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.05);
+        text-shadow:
+          0 1px 0 rgba(83, 80, 245, 0.25),
+          0 0 10px rgba(44, 175, 224, 0.15);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: geometricPrecision;
       }
 
       html[data-theme="light"] .game-card p {
         max-width: 30ch;
         font-size: clamp(0.82rem, 1vw, 0.98rem);
         line-height: 1.45;
-        color: #334155;
-        font-weight: 450;
+        color: #1e3a5f;
+        font-weight: 500;
+        -webkit-font-smoothing: antialiased;
       }
 
       html[data-theme="light"] .game-card:not(.active):hover {
@@ -1486,12 +1513,12 @@
               style="
                 background: linear-gradient(
                   135deg,
-                  var(--primary),
-                  var(--secondary)
+                  #65a30d,
+                  #16a34a
                 );
               "
             >
-              🎴
+              🧩
             </div>
             <div class="card-text">
               <h2>Memory Flip</h2>
@@ -1507,9 +1534,9 @@
           <a href="game-monopoly.html" class="game-card" data-index="1">
             <div
               class="game-icon"
-              style="background: linear-gradient(135deg, #a855f7, #ec4899)"
+              style="background: linear-gradient(135deg, #eab308, #ca8a04)"
             >
-              ❓
+              🎲
             </div>
             <div class="card-text">
               <h2>Monopoly Quiz</h2>
@@ -1543,9 +1570,9 @@
           <a href="game-wordpuzzle.html" class="game-card" data-index="3">
             <div
               class="game-icon"
-              style="background: linear-gradient(135deg, #7c3aed, #ec4899)"
+              style="background: linear-gradient(135deg, #d97706, #b45309)"
             >
-              🔤
+              🌽
             </div>
             <div class="card-text">
               <h2>Word Puzzle</h2>
