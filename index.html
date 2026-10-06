@@ -197,27 +197,40 @@
       font-weight: 700;
     }
 
-    /* ─── Main Content Grid ─── */
+    /* ─── Main Content Carousel ─── */
     .main-content {
       flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 0 clamp(20px, 4vw, 50px);
+      padding: 0;
       z-index: 5;
       min-height: 0;
-      /* Allows flex items to shrink */
+      position: relative;
+      width: 100%;
+      overflow: hidden;
     }
 
-    .game-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: clamp(12px, 2vh, 24px);
+    .carousel-container {
+      position: relative;
       width: 100%;
-      max-width: 1700px;
-      perspective: 1200px;
-      flex-shrink: 1;
+      max-width: 1800px;
+      height: clamp(400px, 60vh, 700px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      perspective: 1500px;
+    }
+
+    .game-carousel {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transform-style: preserve-3d;
     }
 
     /* ─── Card Design ─── */
@@ -227,7 +240,9 @@
       --inner-speed: 5s;
       --neon-1: #6366f1;
       --neon-2: #ec4899;
-      position: relative;
+      position: absolute;
+      width: clamp(280px, 22vw, 380px);
+      height: clamp(380px, 55vh, 600px);
       isolation: isolate;
       background: rgba(255, 255, 255, 0.07);
       border: 1px solid rgba(255, 255, 255, 0.06);
@@ -235,7 +250,7 @@
       padding: clamp(14px, 2.5vh, 28px) clamp(12px, 1.5vw, 24px);
       text-decoration: none;
       color: white;
-      transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+      transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s, filter 0.6s;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -243,10 +258,21 @@
       box-shadow:
         0 15px 35px rgba(0, 0, 0, 0.2),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      opacity: 0;
-      transform: translateY(40px) rotateX(10deg);
-      animation: cardEntrance 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-      overflow: hidden;
+      will-change: transform, opacity;
+    }
+
+    .game-card:not(.active) {
+      cursor: pointer;
+    }
+    
+    .game-card.active {
+      background: rgba(10, 15, 30, 0.96);
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    
+    .game-card:not(.active) .btn-launch {
+      pointer-events: none;
+      opacity: 0.5;
     }
 
     /* Inner blur — color sweep left ↔ right only */
@@ -307,256 +333,194 @@
     }
 
     /* Animation Stagger + per-card neon colors */
-    .game-card:nth-child(1) {
-      animation-delay: 0.2s;
+    .game-card[data-index="0"] {
       --glow: rgba(99, 102, 241, 0.3);
       --neon-1: #6366f1;
       --neon-2: #a5b4fc;
       --neon-speed: 3.2s;
       --inner-speed: 4.5s;
     }
-
-    .game-card:nth-child(1)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(99, 102, 241, 0.2) 30%,
-          rgba(165, 180, 252, 0.25) 50%,
-          rgba(99, 102, 241, 0.2) 70%,
-          transparent);
+    .game-card[data-index="0"]::after {
+      background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2) 30%, rgba(165, 180, 252, 0.25) 50%, rgba(99, 102, 241, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    .game-card:nth-child(2) {
-      animation-delay: 0.3s;
+    .game-card[data-index="1"] {
       --glow: rgba(168, 85, 247, 0.3);
       --neon-1: #a855f7;
       --neon-2: #ec4899;
       --neon-speed: 3.8s;
       --inner-speed: 5.2s;
     }
-
-    .game-card:nth-child(2)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(168, 85, 247, 0.2) 30%,
-          rgba(236, 72, 153, 0.25) 50%,
-          rgba(168, 85, 247, 0.2) 70%,
-          transparent);
+    .game-card[data-index="1"]::after {
+      background: linear-gradient(90deg, transparent, rgba(168, 85, 247, 0.2) 30%, rgba(236, 72, 153, 0.25) 50%, rgba(168, 85, 247, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    .game-card:nth-child(3) {
-      animation-delay: 0.4s;
+    .game-card[data-index="2"] {
       --glow: rgba(14, 116, 144, 0.3);
       --neon-1: #0e7490;
       --neon-2: #22d3ee;
       --neon-speed: 4.1s;
       --inner-speed: 4.8s;
     }
-
-    .game-card:nth-child(3)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(14, 116, 144, 0.2) 30%,
-          rgba(34, 211, 238, 0.25) 50%,
-          rgba(14, 116, 144, 0.2) 70%,
-          transparent);
+    .game-card[data-index="2"]::after {
+      background: linear-gradient(90deg, transparent, rgba(14, 116, 144, 0.2) 30%, rgba(34, 211, 238, 0.25) 50%, rgba(14, 116, 144, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    .game-card:nth-child(4) {
-      animation-delay: 0.5s;
+    .game-card[data-index="3"] {
       --glow: rgba(124, 58, 237, 0.3);
       --neon-1: #7c3aed;
       --neon-2: #f472b6;
       --neon-speed: 3.5s;
       --inner-speed: 5.5s;
     }
-
-    .game-card:nth-child(4)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(124, 58, 237, 0.2) 30%,
-          rgba(244, 114, 182, 0.25) 50%,
-          rgba(124, 58, 237, 0.2) 70%,
-          transparent);
+    .game-card[data-index="3"]::after {
+      background: linear-gradient(90deg, transparent, rgba(124, 58, 237, 0.2) 30%, rgba(244, 114, 182, 0.25) 50%, rgba(124, 58, 237, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    /* Wide card for Presentation */
-    .game-card:nth-child(5) {
-      animation-delay: 0.6s;
-      grid-column: 1 / 3;
-      flex-direction: row;
-      text-align: left;
-      padding: clamp(14px, 2.5vh, 24px) clamp(20px, 2.5vw, 35px);
+    .game-card[data-index="4"] {
       --glow: rgba(91, 33, 182, 0.3);
       --neon-1: #5b21b6;
       --neon-2: #818cf8;
       --neon-speed: 5s;
       --inner-speed: 6s;
     }
-
-    .game-card:nth-child(5)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(91, 33, 182, 0.2) 30%,
-          rgba(129, 140, 248, 0.25) 50%,
-          rgba(91, 33, 182, 0.2) 70%,
-          transparent);
+    .game-card[data-index="4"]::after {
+      background: linear-gradient(90deg, transparent, rgba(91, 33, 182, 0.2) 30%, rgba(129, 140, 248, 0.25) 50%, rgba(91, 33, 182, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    .game-card:nth-child(6) {
-      animation-delay: 0.7s;
+    .game-card[data-index="5"] {
       --glow: rgba(16, 185, 129, 0.3);
       --neon-1: #10b981;
       --neon-2: #34d399;
       --neon-speed: 3.9s;
       --inner-speed: 5s;
     }
-
-    .game-card:nth-child(6)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(16, 185, 129, 0.2) 30%,
-          rgba(52, 211, 153, 0.25) 50%,
-          rgba(16, 185, 129, 0.2) 70%,
-          transparent);
+    .game-card[data-index="5"]::after {
+      background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2) 30%, rgba(52, 211, 153, 0.25) 50%, rgba(16, 185, 129, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    .game-card:nth-child(7) {
-      animation-delay: 0.8s;
+    .game-card[data-index="6"] {
       --glow: rgba(245, 158, 11, 0.3);
       --neon-1: #f59e0b;
       --neon-2: #fb923c;
       --neon-speed: 4.4s;
       --inner-speed: 5.8s;
     }
-
-    .game-card:nth-child(7)::after {
-      background: linear-gradient(90deg,
-          transparent,
-          rgba(245, 158, 11, 0.2) 30%,
-          rgba(251, 146, 60, 0.25) 50%,
-          rgba(245, 158, 11, 0.2) 70%,
-          transparent);
+    .game-card[data-index="6"]::after {
+      background: linear-gradient(90deg, transparent, rgba(245, 158, 11, 0.2) 30%, rgba(251, 146, 60, 0.25) 50%, rgba(245, 158, 11, 0.2) 70%, transparent);
       background-size: 250% 100%;
     }
 
-    /* Hover Effects */
-    .game-card:hover {
-      transform: translateY(-8px) scale(1.02);
-      background: rgba(255, 255, 255, 0.07);
-      border-color: rgba(255, 255, 255, 0.15);
-      box-shadow:
-        0 25px 50px rgba(0, 0, 0, 0.5),
-        0 0 30px var(--glow);
+    .game-card[data-index="7"] {
+      --glow: rgba(239, 68, 68, 0.3);
+      --neon-1: #ef4444;
+      --neon-2: #fca5a5;
+      --neon-speed: 3.6s;
+      --inner-speed: 4.2s;
+    }
+    .game-card[data-index="7"]::after {
+      background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2) 30%, rgba(252, 165, 165, 0.25) 50%, rgba(239, 68, 68, 0.2) 70%, transparent);
+      background-size: 250% 100%;
     }
 
-    .game-card:hover::before {
-      opacity: 1;
-      padding: 3px;
-      box-shadow:
-        0 0 8px var(--neon-1),
-        0 0 18px var(--neon-2),
-        0 0 28px var(--neon-1);
+    /* Gentle shake animation */
+    @keyframes gentleShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-2px) rotate(-0.5deg); }
+      75% { transform: translateX(2px) rotate(0.5deg); }
     }
 
-    .game-card:hover::after {
-      opacity: 0.7;
-      filter: blur(36px);
+    /* Hover Effects (Only for active card) — simple gentle shake */
+    .game-card.active:hover {
+      animation: gentleShake 0.5s ease-in-out;
     }
 
     .game-icon {
-      width: clamp(55px, 9vh, 95px);
-      height: clamp(55px, 9vh, 95px);
+      width: clamp(70px, 12vh, 120px);
+      height: clamp(70px, 12vh, 120px);
       border-radius: clamp(14px, 2vw, 22px);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: clamp(2rem, 4vh, 3.5rem);
+      font-size: clamp(2.5rem, 5vh, 4rem);
       box-shadow:
         0 12px 25px rgba(0, 0, 0, 0.4),
         inset 0 2px 5px rgba(255, 255, 255, 0.3);
-      margin-bottom: clamp(12px, 2vh, 22px);
-      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      margin-bottom: clamp(16px, 3vh, 26px);
       flex-shrink: 0;
-    }
-
-    .game-card:hover .game-icon {
-      transform: scale(1.15) rotate(5deg);
-    }
-
-    /* Layout specific for the wide card */
-    .game-card:nth-child(5) .game-icon {
-      margin-bottom: 0;
-      margin-right: clamp(15px, 2vw, 35px);
-      width: clamp(65px, 10vh, 110px);
-      height: clamp(65px, 10vh, 110px);
-      font-size: clamp(2.5rem, 4.5vh, 4rem);
-    }
-
-    .game-card:nth-child(5) .card-text {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding-right: clamp(10px, 1vw, 20px);
-    }
-
-    .game-card:nth-child(5) .btn-launch {
-      width: auto;
-      min-width: 140px;
-      align-self: center;
-      margin-top: 0;
     }
 
     .card-text {
       display: flex;
       flex-direction: column;
+      align-items: center;
+      justify-content: center;
       flex: 1;
       width: 100%;
     }
 
     .game-card h2 {
-      font-size: clamp(1rem, 1.5vw, 1.5rem);
+      font-size: clamp(1.2rem, 1.8vw, 1.8rem);
       font-weight: 800;
-      margin-bottom: clamp(6px, 1vh, 12px);
+      margin-bottom: clamp(6px, 1vh, 10px);
       letter-spacing: 0.5px;
       line-height: 1.2;
     }
 
     .game-card p {
       color: #a1a1aa;
-      font-size: clamp(0.75rem, 1vw, 0.95rem);
-      line-height: 1.5;
-      flex-grow: 1;
-      margin-bottom: clamp(12px, 2vh, 22px);
+      font-size: clamp(0.85rem, 1.1vw, 1.05rem);
+      line-height: 1.4;
+      margin-bottom: clamp(18px, 3vh, 24px);
       font-weight: 400;
     }
 
+    /* Carousel Navigation */
+    .carousel-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: clamp(50px, 5vw, 70px);
+      height: clamp(50px, 5vw, 70px);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: white;
+      font-size: 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 100;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s;
+    }
+    .carousel-nav:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-50%) scale(1.1);
+      box-shadow: 0 0 20px rgba(255,255,255,0.2);
+    }
+    .carousel-prev { left: clamp(10px, 4vw, 60px); }
+    .carousel-next { right: clamp(10px, 4vw, 60px); }
+
     .btn-launch {
-      width: 100%;
-      padding: clamp(8px, 1.5vh, 14px);
-      border-radius: clamp(8px, 1vw, 12px);
+      width: 85%;
+      padding: clamp(12px, 2vh, 18px);
+      border-radius: clamp(10px, 1.5vw, 16px);
       font-weight: 800;
-      font-size: clamp(0.75rem, 1vw, 0.95rem);
+      font-size: clamp(0.9rem, 1.2vw, 1.15rem);
       letter-spacing: 1px;
       text-transform: uppercase;
-      border: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
       cursor: pointer;
-      transition: all 0.3s ease;
       color: white;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-      margin-top: auto;
-    }
-
-    .game-card:hover .btn-launch {
-      filter: brightness(1.2);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
     }
 
     /* Specific Button Styles */
@@ -733,7 +697,6 @@
         transform: translateX(0);
         animation: slideDown 0.8s ease forwards;
         backdrop-filter: none;
-        /* save GPU */
       }
 
       .header-area {
@@ -741,64 +704,39 @@
         margin-top: 0;
       }
 
-      .game-grid {
-        grid-template-columns: 1fr;
+      .carousel-container {
+        height: 60vh;
       }
 
-      /* ── Scroll Performance: disable expensive per-card effects ── */
+      .game-card {
+        width: 75vw;
+        height: 55vh;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+      }
 
-      /* Disable the continuously-spinning neon border conic-gradient */
+      .carousel-nav {
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+      .carousel-prev { left: 5px; }
+      .carousel-next { right: 5px; }
+
+      /* Disable expensive per-card effects */
       .game-card::before {
         animation: none;
         background: linear-gradient(135deg, var(--neon-1), var(--neon-2));
         opacity: 0.4;
       }
-
-      /* Disable the sweeping inner color wash animation */
       .game-card::after {
         animation: none;
         background-position: 50% 50%;
         filter: blur(24px);
-        /* slightly less blur */
       }
-
-      /* Remove backdrop-filter from cards (very expensive during scroll) */
-      .game-card {
-        backdrop-filter: none;
-        -webkit-backdrop-filter: none;
-        /* Promote each card to its own GPU layer so the browser doesn't
-             repaint neighbours during momentum scroll */
-        transform: translateZ(0);
-        will-change: transform;
-      }
-
-      /* Finished entrance animation: clear will-change to free GPU memory */
-      .game-card {
-        animation-fill-mode: forwards;
-      }
-
-      /* Reduce background circle blur + kill their animation */
       .bg-circle {
         filter: blur(60px);
         animation: none;
-      }
-
-      .game-card:nth-child(5) {
-        flex-direction: column;
-        text-align: center;
-      }
-
-      .game-card:nth-child(5) .game-icon {
-        margin-right: 0;
-        margin-bottom: 22px;
-      }
-
-      .game-card:nth-child(5) .card-text {
-        padding-right: 0;
-      }
-
-      .game-card:nth-child(5) .btn-launch {
-        width: 100%;
       }
 
       .btn-dashboard {
@@ -943,136 +881,201 @@
     <div class="subtitle">Agricultural Learning & Engagement Portal</div>
   </div>
 
-  <!-- Main Content (Game Grid) -->
+  <!-- Main Content (Carousel) -->
   <div class="main-content">
-    <div class="game-grid">
-      <!-- Game 1 -->
-      <a href="game.html" class="game-card">
-        <div class="game-icon" style="
-              background: linear-gradient(
-                135deg,
-                var(--primary),
-                var(--secondary)
-              );
-            ">
-          🎴
-        </div>
-        <div class="card-text">
-          <h2>Memory Flip</h2>
-          <p>
-            Boys vs Girls interactive memory challenge with 30 agricultural
-            tiles.
-          </p>
-          <button class="btn-launch btn-1">Launch Game</button>
-        </div>
-      </a>
+    <div class="carousel-container">
+      <div class="carousel-nav carousel-prev" id="carouselPrev">❮</div>
+      <div class="carousel-nav carousel-next" id="carouselNext">❯</div>
+      <div class="game-carousel" id="gameCarousel">
+        <!-- Game 1 -->
+        <a href="game.html" class="game-card" data-index="0">
+          <div class="game-icon" style="background: linear-gradient(135deg, var(--primary), var(--secondary));">
+            🎴
+          </div>
+          <div class="card-text">
+            <h2>Memory Flip</h2>
+            <p>Boys vs Girls interactive memory challenge with 30 agricultural tiles.</p>
+            <button class="btn-launch btn-1">Launch Game</button>
+          </div>
+        </a>
 
-      <!-- Game 2 -->
-      <a href="game-monopoly.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899)">
-          ❓
-        </div>
-        <div class="card-text">
-          <h2>Monopoly Quiz</h2>
-          <p>
-            Strategic classroom monopoly with Bengali locations and team
-            challenges.
-          </p>
-          <button class="btn-launch btn-2">Launch Game</button>
-        </div>
-      </a>
+        <!-- Game 2 -->
+        <a href="game-monopoly.html" class="game-card" data-index="1">
+          <div class="game-icon" style="background: linear-gradient(135deg, #a855f7, #ec4899)">
+            ❓
+          </div>
+          <div class="card-text">
+            <h2>Monopoly Quiz</h2>
+            <p>Strategic classroom monopoly with Bengali locations and team challenges.</p>
+            <button class="btn-launch btn-2">Launch Game</button>
+          </div>
+        </a>
 
-      <!-- Game 3 -->
-      <a href="game-maze.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #0e7490, #00e5ff)">
-          🗯️
-        </div>
-        <div class="card-text">
-          <h2>Maze Runner</h2>
-          <p>
-            Navigate through futuristic mazes — earn credits with quiz answers
-            to unlock moves.
-          </p>
-          <button class="btn-launch btn-3">Launch Game</button>
-        </div>
-      </a>
+        <!-- Game 3 -->
+        <a href="game-maze.html" class="game-card" data-index="2">
+          <div class="game-icon" style="background: linear-gradient(135deg, #0e7490, #00e5ff)">
+            🗯️
+          </div>
+          <div class="card-text">
+            <h2>Maze Runner</h2>
+            <p>Navigate through futuristic mazes — earn credits with quiz answers to unlock moves.</p>
+            <button class="btn-launch btn-3">Launch Game</button>
+          </div>
+        </a>
 
-      <!-- Game 4 -->
-      <a href="game-wordpuzzle.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #7c3aed, #ec4899)">
-          🔤
-        </div>
-        <div class="card-text">
-          <h2>Word Puzzle</h2>
-          <p>
-            Boys vs Girls colour and fill the shared grid — letters build
-            words on the whiteboard.
-          </p>
-          <button class="btn-launch btn-4">Launch Game</button>
-        </div>
-      </a>
+        <!-- Game 4 -->
+        <a href="game-wordpuzzle.html" class="game-card" data-index="3">
+          <div class="game-icon" style="background: linear-gradient(135deg, #7c3aed, #ec4899)">
+            🔤
+          </div>
+          <div class="card-text">
+            <h2>Word Puzzle</h2>
+            <p>Boys vs Girls colour and fill the shared grid — letters build words on the whiteboard.</p>
+            <button class="btn-launch btn-4">Launch Game</button>
+          </div>
+        </a>
 
-      <!-- Game 5 (Wide) -->
-      <a href="game-presentation.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #5b21b6, #7c3aed)">
-          📽️
-        </div>
-        <div class="card-text">
-          <h2>Presentation Studio</h2>
-          <p>
-            Full-screen PowerPoint viewer with live slide control, instant
-            image sharing from mobile, dynamic tree rendering, and real-time
-            drawing overlays.
-          </p>
-        </div>
-        <button class="btn-launch btn-5">Launch Studio</button>
-      </a>
+        <!-- Game 5 -->
+        <a href="game-presentation.html" class="game-card" data-index="4">
+          <div class="game-icon" style="background: linear-gradient(135deg, #5b21b6, #7c3aed)">
+            📽️
+          </div>
+          <div class="card-text">
+            <h2>Presentation Studio</h2>
+            <p>Full-screen PowerPoint viewer with live slide control, instant image sharing from mobile, dynamic tree rendering, and real-time drawing overlays.</p>
+            <button class="btn-launch btn-5">Launch Studio</button>
+          </div>
+        </a>
 
-      <!-- Game 6 -->
-      <a href="game-questionbank.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #10b981, #059669)">
-          📝
-        </div>
-        <div class="card-text">
-          <h2>Question Bank</h2>
-          <p>
-            Interactive MCQ Quiz projector display with timers and automated
-            marking.
-          </p>
-          <button class="btn-launch btn-6">Launch System</button>
-        </div>
-      </a>
+        <!-- Game 6 -->
+        <a href="game-questionbank.html" class="game-card" data-index="5">
+          <div class="game-icon" style="background: linear-gradient(135deg, #10b981, #059669)">
+            📝
+          </div>
+          <div class="card-text">
+            <h2>Question Bank</h2>
+            <p>Interactive MCQ Quiz projector display with timers and automated marking.</p>
+            <button class="btn-launch btn-6">Launch System</button>
+          </div>
+        </a>
 
-      <!-- Game 7 -->
-      <a href="game-leaderboard.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)">
-          🏆
-        </div>
-        <div class="card-text">
-          <h2>Leaderboard</h2>
-          <p>
-            Real-time student performance leaderboard and rank visualization
-            with live updates.
-          </p>
-          <button class="btn-launch btn-7">Launch System</button>
-        </div>
-      </a>
+        <!-- Game 7 -->
+        <a href="game-leaderboard.html" class="game-card" data-index="6">
+          <div class="game-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)">
+            🏆
+          </div>
+          <div class="card-text">
+            <h2>Leaderboard</h2>
+            <p>Real-time student performance leaderboard and rank visualization with live updates.</p>
+            <button class="btn-launch btn-7">Launch System</button>
+          </div>
+        </a>
 
-      <!-- Game 8 -->
-      <a href="game-blockade.html" class="game-card">
-        <div class="game-icon" style="background: linear-gradient(135deg, #f59e0b, #d97706)">
-          🏰
-        </div>
-        <div class="card-text">
-          <h2>Blockade 3D</h2>
-          <p>
-            A tactical 3D classroom board game.
-          </p>
-          <button class="btn-launch btn-7">Launch Game</button>
-        </div>
-      </a>
+        <!-- Game 8 -->
+        <a href="game-blockade.html" class="game-card" data-index="7">
+          <div class="game-icon" style="background: linear-gradient(135deg, #ef4444, #fca5a5)">
+            🏰
+          </div>
+          <div class="card-text">
+            <h2>Blockade 3D</h2>
+            <p>A tactical 3D classroom board game.</p>
+            <button class="btn-launch btn-7" style="background: linear-gradient(135deg, #ef4444, #dc2626)">Launch Game</button>
+          </div>
+        </a>
+      </div>
     </div>
   </div>
+
+  <!-- Carousel Logic -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cards = document.querySelectorAll('.game-card');
+      const prevBtn = document.getElementById('carouselPrev');
+      const nextBtn = document.getElementById('carouselNext');
+      let activeIndex = Math.floor(cards.length / 2);
+
+      function updateCarousel() {
+        const isMobile = window.innerWidth <= 768;
+        const baseTranslateX = isMobile ? window.innerWidth * 0.35 : 180;
+        const offsetMultiplier = isMobile ? window.innerWidth * 0.25 : 80;
+
+        cards.forEach((card, index) => {
+          const offset = index - activeIndex;
+          const absOffset = Math.abs(offset);
+          
+          if (offset === 0) {
+            card.classList.add('active');
+            card.style.transform = `translateX(0) scale(1) rotateY(0)`;
+            card.style.zIndex = 10;
+            card.style.opacity = 1;
+            card.style.filter = 'blur(0px)';
+          } else {
+            card.classList.remove('active');
+            const direction = offset > 0 ? 1 : -1;
+            const translateX = direction * (baseTranslateX + absOffset * offsetMultiplier);
+            const scale = Math.max(0.6, 1 - absOffset * (isMobile ? 0.2 : 0.15));
+            const rotateY = direction * (isMobile ? -35 : -25);
+            const blur = isMobile ? absOffset * 1 : absOffset * 2;
+            
+            card.style.transform = `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg)`;
+            card.style.zIndex = 10 - absOffset;
+            card.style.opacity = Math.max(0, 1 - absOffset * (isMobile ? 0.4 : 0.3));
+            card.style.filter = `blur(${blur}px)`;
+          }
+        });
+      }
+
+      function goPrev() {
+        if (activeIndex > 0) { activeIndex--; updateCarousel(); }
+      }
+      function goNext() {
+        if (activeIndex < cards.length - 1) { activeIndex++; updateCarousel(); }
+      }
+
+      window.addEventListener('resize', updateCarousel);
+
+      // Button navigation
+      prevBtn.addEventListener('click', goPrev);
+      nextBtn.addEventListener('click', goNext);
+
+      // Keyboard navigation (arrow keys)
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowLeft') { goPrev(); }
+        else if (e.key === 'ArrowRight') { goNext(); }
+      });
+
+      // Touch / swipe navigation
+      let touchStartX = 0;
+      let touchEndX = 0;
+      const carousel = document.getElementById('gameCarousel');
+
+      carousel.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+      }, { passive: true });
+
+      carousel.addEventListener('touchend', (e) => {
+        touchEndX = e.changedTouches[0].screenX;
+        const diff = touchStartX - touchEndX;
+        if (Math.abs(diff) > 50) { // minimum swipe distance
+          if (diff > 0) { goNext(); }  // swipe left → next
+          else { goPrev(); }            // swipe right → prev
+        }
+      }, { passive: true });
+
+      // Allow clicking on side cards to focus them
+      cards.forEach((card, idx) => {
+        card.addEventListener('click', (e) => {
+          if (idx !== activeIndex) {
+            e.preventDefault();
+            activeIndex = idx;
+            updateCarousel();
+          }
+        });
+      });
+
+      updateCarousel();
+    });
+  </script>
 
   <!-- Teacher Dashboard Button -->
   <div class="teacher-central-wrap">
