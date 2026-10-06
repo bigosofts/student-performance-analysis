@@ -509,18 +509,22 @@
               wallEl.className = "blk-mini-wall";
               
               const ownerColor = gameState.players[w.placedBy] ? gameState.players[w.placedBy].color : "#f59e0b";
-              wallEl.style.background = ownerColor;
+              wallEl.style.borderRadius = "2px";
               
               if (w.orientation === "horizontal") {
                 wallEl.style.left = `${pad + w.col * unit}px`;
-                wallEl.style.top = `${pad + (w.row + 1) * unit - gapSize / 2 - 2}px`;
+                wallEl.style.top = `${pad + (w.row + 1) * unit - gapSize / 2 - 3}px`;
                 wallEl.style.width = `${2 * cellW + gapSize}px`;
-                wallEl.style.height = "4px";
+                wallEl.style.height = "6px";
+                wallEl.style.background = ownerColor;
+                wallEl.style.boxShadow = `inset 0 1px 1px rgba(255,255,255,0.6), inset 0 -1px 1px rgba(0,0,0,0.5), 0 2px 6px ${ownerColor}80, 0 3px 6px rgba(0,0,0,0.5)`;
               } else {
-                wallEl.style.left = `${pad + (w.col + 1) * unit - gapSize / 2 - 2}px`;
+                wallEl.style.left = `${pad + (w.col + 1) * unit - gapSize / 2 - 3}px`;
                 wallEl.style.top = `${pad + w.row * unit}px`;
                 wallEl.style.height = `${2 * cellW + gapSize}px`;
-                wallEl.style.width = "4px";
+                wallEl.style.width = "6px";
+                wallEl.style.background = ownerColor;
+                wallEl.style.boxShadow = `inset 1px 0 1px rgba(255,255,255,0.6), inset -1px 0 1px rgba(0,0,0,0.5), 0 2px 6px ${ownerColor}80, 2px 0 6px rgba(0,0,0,0.5)`;
               }
               board.appendChild(wallEl);
             }
