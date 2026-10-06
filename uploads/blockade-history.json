@@ -1,0 +1,166 @@
+[
+  {
+    "sessionId": "blk_1791243703168_gzkmmm",
+    "code": "HR4FFD",
+    "title": "কৃষি পণ্যের তালিকাকরণ",
+    "mode": "two-player",
+    "phase": "cancelled",
+    "players": [
+      {
+        "id": 1,
+        "name": "Red",
+        "color": "#ef4444",
+        "rank": 1,
+        "credits": 3,
+        "wallsRemaining": 1,
+        "studentName": null
+      },
+      {
+        "id": 2,
+        "name": "Blue",
+        "color": "#3b82f6",
+        "rank": 2,
+        "credits": 4,
+        "wallsRemaining": 3,
+        "studentName": null
+      }
+    ],
+    "rankings": [
+      {
+        "playerId": 1,
+        "rank": 1,
+        "name": "Red"
+      },
+      {
+        "playerId": 2,
+        "rank": 2,
+        "name": "Blue"
+      }
+    ],
+    "questionHistory": [
+      {
+        "questionId": "bq_1791243755207",
+        "targetPlayerId": 1,
+        "question": "মালচিং এর মাধ্যমে মাটির কী নিয়ন্ত্রণ করা হয়?",
+        "submittedAnswer": "B",
+        "correctAnswer": "B",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:42:38.206Z"
+      },
+      {
+        "questionId": "bq_1791243763597",
+        "targetPlayerId": 2,
+        "question": "মাটির pH মান কত থাকলে গাছ সহজেই পুষ্টি উপাদান গ্রহণ করতে পারে",
+        "submittedAnswer": "C",
+        "correctAnswer": "C",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:42:45.821Z"
+      },
+      {
+        "questionId": "bq_1791243766613",
+        "targetPlayerId": 2,
+        "question": "রিবনরেটিং কোন ফসলে করা হয়?",
+        "submittedAnswer": "B",
+        "correctAnswer": "B",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:42:47.413Z"
+      },
+      {
+        "questionId": "bq_1791243768406",
+        "targetPlayerId": 2,
+        "question": "খরিপ-২ মৌসুমের সময়কাল কোনটি?",
+        "submittedAnswer": "C",
+        "correctAnswer": "C",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:42:49.285Z"
+      },
+      {
+        "questionId": "bq_1791243780365",
+        "targetPlayerId": 1,
+        "question": "শাকসবজি পচনের প্রধান কারণ কোনটি?",
+        "submittedAnswer": "A",
+        "correctAnswer": "A",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:43:02.853Z"
+      },
+      {
+        "questionId": "bq_1791243783669",
+        "targetPlayerId": 1,
+        "question": "কোনটি কমলার জাত?",
+        "submittedAnswer": "C",
+        "correctAnswer": "C",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:43:04.525Z"
+      },
+      {
+        "questionId": "bq_1791243785285",
+        "targetPlayerId": 1,
+        "question": "একটি কলোনির নেতৃত্ব দিতে কয়টি রাণী মৌমাছি দরকার হয়?",
+        "submittedAnswer": "A",
+        "correctAnswer": "A",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:43:06.029Z"
+      },
+      {
+        "questionId": "bq_1791243789696",
+        "targetPlayerId": 1,
+        "question": "বাংলাদেশে ভূমিক্ষয়ের অন্যতম প্রধান কারণ কী? [রাজউক উত্তরা মডেল কলেজ, ঢাকা]",
+        "submittedAnswer": "B",
+        "correctAnswer": "B",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:43:11.781Z"
+      },
+      {
+        "questionId": "bq_1791243936933",
+        "targetPlayerId": 2,
+        "question": "উদ্দীপকে উল্লিখিত উপাদান ব্যবহার করে ছক্কূ মিয়ার জমির-",
+        "submittedAnswer": "B",
+        "correctAnswer": "B",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:45:38.598Z"
+      },
+      {
+        "questionId": "bq_1791243944517",
+        "targetPlayerId": 2,
+        "question": "আখের Smut রোগের লক্ষণ কোনটি?",
+        "submittedAnswer": "C",
+        "correctAnswer": "C",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:45:46.781Z"
+      },
+      {
+        "questionId": "bq_1791244054607",
+        "targetPlayerId": 1,
+        "question": "রাইজোবিয়াম অণুজীব সার কোন খাদ্যোপাদান সরবরাহের জন্য প্রয়োগ করা হয়?",
+        "submittedAnswer": "D",
+        "correctAnswer": "D",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:47:44.622Z"
+      },
+      {
+        "questionId": "bq_1791244095725",
+        "targetPlayerId": 2,
+        "question": "কোনটি রেশম পোকার খাদ্য?",
+        "submittedAnswer": "D",
+        "correctAnswer": "D",
+        "result": "correct",
+        "creditsAwarded": 5,
+        "timestamp": "2026-10-05T23:48:16.910Z"
+      }
+    ],
+    "wallCount": 16,
+    "createdAt": "2026-10-05T23:41:43.168Z",
+    "completedAt": "2026-10-05T23:48:44.702Z"
+  }
+]

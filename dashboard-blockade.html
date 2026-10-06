@@ -237,7 +237,7 @@
             <div class="q-options" id="blkDashOptions"></div>
             <div id="blkDashAnswer" style="margin-top:10px;font-size:0.85rem;font-weight:800;color:#22c55e"></div>
             <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
-              <button class="blk-btn blk-btn-success blk-btn-sm" onclick="markAnswer(true)">✅ CORRECT (+2)</button>
+              <button class="blk-btn blk-btn-success blk-btn-sm" onclick="markAnswer(true)">✅ CORRECT (+5)</button>
               <button class="blk-btn blk-btn-danger blk-btn-sm" onclick="markAnswer(false)">❌ WRONG (+0)</button>
             </div>
           </div>
@@ -507,6 +507,10 @@
             for (const w of gameState.walls) {
               const wallEl = document.createElement("div");
               wallEl.className = "blk-mini-wall";
+              
+              const ownerColor = gameState.players[w.placedBy] ? gameState.players[w.placedBy].color : "#f59e0b";
+              wallEl.style.background = ownerColor;
+              
               if (w.orientation === "horizontal") {
                 wallEl.style.left = `${pad + w.col * unit}px`;
                 wallEl.style.top = `${pad + (w.row + 1) * unit - gapSize / 2 - 2}px`;

@@ -10,7 +10,7 @@
 
   // ─── Constants ──────────────────────────────────────────────
   const BOARD_SIZE = 9;
-  const CREDITS_PER_CORRECT = 2;
+  const CREDITS_PER_CORRECT = 5;
   const MOVE_COST = 1;
   const WALL_COST = 1;
 
@@ -21,8 +21,8 @@
     4: { name: "Purple", hex: "#a855f7" },
   };
 
-  const TWO_PLAYER_WALLS = 15;
-  const FOUR_PLAYER_WALLS = 10;
+  const TWO_PLAYER_WALLS = 10;
+  const FOUR_PLAYER_WALLS = 5;
 
   // ─── Initial Positions & Goals ──────────────────────────────
   function getInitialPositions(mode) {

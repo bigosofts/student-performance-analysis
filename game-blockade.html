@@ -360,14 +360,21 @@
               const wallEl = document.createElement("div");
               wallEl.className = `blk-wall ${w.orientation}`;
 
+              const ownerColor = gameState.players[w.placedBy] ? gameState.players[w.placedBy].color : "#f59e0b";
+              const darkerColor = lightenColor(ownerColor, -20);
+              
               if (w.orientation === "horizontal") {
                 wallEl.style.left = `${w.col * unit}px`;
                 wallEl.style.top = `${(w.row + 1) * unit - gapSize / 2 - 3}px`;
                 wallEl.style.width = `${2 * cellSize + gapSize}px`;
+                wallEl.style.background = `linear-gradient(90deg, ${ownerColor}, ${darkerColor})`;
+                wallEl.style.boxShadow = `0 0 14px ${ownerColor}80, 0 2px 6px rgba(0,0,0,0.7)`;
               } else {
                 wallEl.style.left = `${(w.col + 1) * unit - gapSize / 2 - 3}px`;
                 wallEl.style.top = `${w.row * unit}px`;
                 wallEl.style.height = `${2 * cellSize + gapSize}px`;
+                wallEl.style.background = `linear-gradient(180deg, ${ownerColor}, ${darkerColor})`;
+                wallEl.style.boxShadow = `0 0 14px ${ownerColor}80, 2px 0 6px rgba(0,0,0,0.7)`;
               }
 
               board.appendChild(wallEl);
@@ -431,7 +438,7 @@
         function showResultBanner(result) {
           const banner = document.createElement("div");
           banner.className = `blk-result-banner ${result}`;
-          banner.textContent = result === "correct" ? "✅ Correct! +2 Credits" : "❌ Incorrect";
+          banner.textContent = result === "correct" ? "✅ Correct! +5 Credits" : "❌ Incorrect";
           document.body.appendChild(banner);
           setTimeout(() => banner.remove(), 2500);
         }
