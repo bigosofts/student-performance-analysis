@@ -51,55 +51,145 @@ function savePresMeta(data) {
   }
 }
 
-// Convert PPTX to PNG images using PowerShell + PowerPoint COM
-function convertPptxToImages(pptxPath, slideDir) {
+// Serialize conversions so uploads cannot create an unbounded number of child processes.
+const MAX_CONCURRENT_CONVERSIONS = 1;
+const CONVERSION_TIMEOUT_MS = 10 * 60 * 1000;
+const PROCESS_KILL_GRACE_MS = 2000;
+let activeConversions = 0;
+let conversionQueue = Promise.resolve();
+let shuttingDown = false;
+let activeConversionChild = null;
+
+function terminateConversionChild(child) {
+  if (!child || child.exitCode !== null || child.signalCode !== null) return;
+
+  // On Linux, detached:true gives the child a process group so PowerShell and
+  // any descendants can be terminated together. Fall back to the child itself.
+  const signalProcess = (signal) => {
+    try {
+      if (process.platform !== "win32" && child.pid) {
+        process.kill(-child.pid, signal);
+      } else {
+        child.kill(signal);
+      }
+    } catch (e) {
+      if (e.code !== "ESRCH") {
+        console.warn("[PRES] Failed to signal conversion process:", e.message);
+      }
+      try {
+        child.kill(signal);
+      } catch (_) {}
+    }
+  };
+
+  signalProcess("SIGTERM");
+  const forceKill = setTimeout(() => {
+    if (child.exitCode === null && child.signalCode === null) {
+      signalProcess("SIGKILL");
+    }
+  }, PROCESS_KILL_GRACE_MS);
+  forceKill.unref();
+}
+
+function runPptxConversion(pptxPath, slideDir) {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(slideDir)) {
       fs.mkdirSync(slideDir, { recursive: true });
     }
-    // PowerShell script that uses PowerPoint COM automation
+    // PowerShell script that uses PowerPoint COM automation. Cleanup runs on
+    // both success and failure so a failed conversion does not leave Office open.
     const psScript = [
       '$ErrorActionPreference = "Stop"',
       `$pptPath = "${pptxPath.replace(/\\/g, "\\\\")}"`,
       `$outDir  = "${slideDir.replace(/\\/g, "\\\\")}"`,
+      "$pptApp = $null",
+      "$pres = $null",
+      "$slides = $null",
+      "$slide = $null",
+      "$count = 0",
       "try {",
       "  Add-Type -AssemblyName Microsoft.Office.Interop.PowerPoint 2>$null",
       "  $pptApp = New-Object -ComObject PowerPoint.Application",
-      "  $pptApp.Visible = [Microsoft.Office.Core.MsoTriState]::msoTrue",
+      "  $pptApp.Visible = [Microsoft.Office.Core.MsoTriState]::msoFalse",
       "  $pres = $pptApp.Presentations.Open($pptPath, $true, $false, $false)",
-      "  $count = $pres.Slides.Count",
+      "  $slides = $pres.Slides",
+      "  $count = $slides.Count",
       "  for ($i = 1; $i -le $count; $i++) {",
-      "    $slide = $pres.Slides.Item($i)",
+      "    $slide = $slides.Item($i)",
       '    $slide.Export("$outDir\\slide_$i.png", "PNG", 1920, 1080)',
+      "    [System.Runtime.InteropServices.Marshal]::ReleaseComObject($slide) | Out-Null",
+      "    $slide = $null",
       "  }",
-      "  $pres.Close()",
-      "  $pptApp.Quit()",
-      "  [System.Runtime.InteropServices.Marshal]::ReleaseComObject($pptApp) | Out-Null",
-      "  [System.GC]::Collect()",
-      "  Write-Output $count",
       "} catch {",
       "  Write-Error $_.Exception.Message",
       "  exit 1",
+      "} finally {",
+      "  if ($slide -ne $null) { [System.Runtime.InteropServices.Marshal]::ReleaseComObject($slide) | Out-Null }",
+      "  if ($pres -ne $null) { try { $pres.Close() } catch { }; [System.Runtime.InteropServices.Marshal]::ReleaseComObject($pres) | Out-Null }",
+      "  if ($slides -ne $null) { [System.Runtime.InteropServices.Marshal]::ReleaseComObject($slides) | Out-Null }",
+      "  if ($pptApp -ne $null) { try { $pptApp.Quit() } catch { }; [System.Runtime.InteropServices.Marshal]::ReleaseComObject($pptApp) | Out-Null }",
+      "  [System.GC]::Collect()",
+      "  [System.GC]::WaitForPendingFinalizers()",
       "}",
+      "if ($?) { Write-Output $count }",
     ].join("\n");
 
-    const ps = spawn("powershell", [
-      "-NoProfile",
-      "-NonInteractive",
-      "-ExecutionPolicy",
-      "Bypass",
-      "-Command",
-      psScript,
-    ]);
+    let ps;
+    try {
+      ps = spawn(
+        "powershell",
+        [
+          "-NoProfile",
+          "-NonInteractive",
+          "-ExecutionPolicy",
+          "Bypass",
+          "-Command",
+          psScript,
+        ],
+        {
+          detached: process.platform !== "win32",
+          stdio: ["ignore", "pipe", "pipe"],
+        },
+      );
+    } catch (err) {
+      reject(err);
+      return;
+    }
+    activeConversionChild = ps;
 
     let stdout = "";
     let stderr = "";
-    ps.stdout.on("data", (d) => (stdout += d.toString()));
-    ps.stderr.on("data", (d) => (stderr += d.toString()));
+    let settled = false;
+    let timedOut = false;
+    const timeout = setTimeout(() => {
+      if (settled) return;
+      timedOut = true;
+      terminateConversionChild(ps);
+    }, CONVERSION_TIMEOUT_MS);
+    timeout.unref();
+
+    ps.stdout.on("data", (d) => {
+      if (stdout.length < 65536)
+        stdout += d.toString().slice(0, 65536 - stdout.length);
+    });
+    ps.stderr.on("data", (d) => {
+      if (stderr.length < 65536)
+        stderr += d.toString().slice(0, 65536 - stderr.length);
+    });
 
     ps.on("close", (code) => {
-      if (code === 0) {
-        const count = parseInt(stdout.trim()) || 0;
+      clearTimeout(timeout);
+      if (activeConversionChild === ps) activeConversionChild = null;
+      if (settled) return;
+      settled = true;
+      if (timedOut) {
+        reject(
+          new Error(
+            `PowerPoint conversion timed out after ${CONVERSION_TIMEOUT_MS / 1000} seconds`,
+          ),
+        );
+      } else if (code === 0) {
+        const count = parseInt(stdout.trim().split(/\r?\n/).pop(), 10) || 0;
         resolve(count);
       } else {
         reject(
@@ -110,9 +200,51 @@ function convertPptxToImages(pptxPath, slideDir) {
       }
     });
 
-    ps.on("error", (err) => reject(err));
+    ps.on("error", (err) => {
+      clearTimeout(timeout);
+      if (activeConversionChild === ps) activeConversionChild = null;
+      if (settled) return;
+      settled = true;
+      reject(err);
+    });
   });
 }
+
+function convertPptxToImages(pptxPath, slideDir) {
+  const queuedConversion = conversionQueue.then(async () => {
+    if (shuttingDown)
+      throw new Error("Server is shutting down; conversion was cancelled");
+    // Kept as an explicit guard alongside the serialized queue.
+    if (activeConversions >= MAX_CONCURRENT_CONVERSIONS) {
+      throw new Error("Presentation conversion capacity is full");
+    }
+    activeConversions++;
+    try {
+      return await runPptxConversion(pptxPath, slideDir);
+    } finally {
+      activeConversions--;
+    }
+  });
+  conversionQueue = queuedConversion.catch(() => {});
+  return queuedConversion;
+}
+
+function stopConversionsOnShutdown() {
+  if (shuttingDown) return;
+  shuttingDown = true;
+  terminateConversionChild(activeConversionChild);
+  const forceShutdown = setTimeout(
+    () => process.exit(1),
+    PROCESS_KILL_GRACE_MS + 1000,
+  );
+  forceShutdown.unref();
+  server.close(() => {
+    clearTimeout(forceShutdown);
+    process.exit(0);
+  });
+}
+process.once("SIGTERM", stopConversionsOnShutdown);
+process.once("SIGINT", stopConversionsOnShutdown);
 
 // Multer for PPTX uploads
 const presStorage = multer.diskStorage({
@@ -279,18 +411,18 @@ app.use(express.json());
 
 app.post("/api/reload-quiz", (req, res) => {
   const game = req.body.game;
-  if (game === 'monopoly') {
+  if (game === "monopoly") {
     initQuizSystem();
-    res.json({ status: 'ok' });
-  } else if (game === 'maze') {
+    res.json({ status: "ok" });
+  } else if (game === "maze") {
     const mazeQuizPath = path.join(uploadsDir, "maze-quiz-questions.xlsx");
     loadMazeQuizFromExcel(mazeQuizPath);
-    res.json({ status: 'ok' });
-  } else if (game === 'blockade') {
+    res.json({ status: "ok" });
+  } else if (game === "blockade") {
     if (global.reloadBlockadeQuiz) global.reloadBlockadeQuiz();
-    res.json({ status: 'ok' });
+    res.json({ status: "ok" });
   } else {
-    res.status(400).json({ error: 'Invalid game parameter' });
+    res.status(400).json({ error: "Invalid game parameter" });
   }
 });
 
@@ -318,7 +450,7 @@ app.post("/upload-quiz", quizUpload.single("quizFile"), (req, res) => {
   if (fs.existsSync(dest)) {
     try {
       fs.unlinkSync(dest);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   // Rename temp to permanent
@@ -420,7 +552,7 @@ app.post("/upload-maze-quiz", mazeQuizUpload.single("quizFile"), (req, res) => {
   if (fs.existsSync(dest)) {
     try {
       fs.unlinkSync(dest);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   fs.renameSync(tempPath, dest);
@@ -547,24 +679,25 @@ io.on("connection", (socket) => {
   // Chrome replaces local IPs with .local mDNS names in WebRTC ICE candidates.
   // Mobile hotspots can't resolve mDNS, so connections fail.
   // The server knows each client's real IP, so we replace .local with the real IP.
-  let rawIp = socket.handshake.address || '';
+  let rawIp = socket.handshake.address || "";
   // Strip IPv6-mapped-IPv4 prefix (e.g. "::ffff:192.168.43.240" → "192.168.43.240")
-  if (rawIp.startsWith('::ffff:')) rawIp = rawIp.slice(7);
+  if (rawIp.startsWith("::ffff:")) rawIp = rawIp.slice(7);
   socket.realIp = rawIp;
   // Send the real IP to the client so it can self-fix candidates too
-  socket.emit('your-ip', { ip: rawIp });
+  socket.emit("your-ip", { ip: rawIp });
 
   // Helper: replace .local mDNS addresses in an ICE candidate string with real IP
   function fixMdnsCandidate(data, senderIp) {
-    if (!data || !data.candidate || !data.candidate.candidate || !senderIp) return data;
+    if (!data || !data.candidate || !data.candidate.candidate || !senderIp)
+      return data;
     const orig = data.candidate.candidate;
     // Match patterns like "abc123-def4-5678.local" in the candidate string
-    if (orig.includes('.local')) {
+    if (orig.includes(".local")) {
       const fixed = orig.replace(/[a-f0-9-]+\.local/gi, senderIp);
       // Return a new object with fixed candidate, preserve everything else
       return {
         ...data,
-        candidate: { ...data.candidate, candidate: fixed, address: senderIp }
+        candidate: { ...data.candidate, candidate: fixed, address: senderIp },
       };
     }
     return data;
@@ -573,10 +706,13 @@ io.on("connection", (socket) => {
   // Helper: replace .local mDNS addresses in SDP offer/answer
   function fixMdnsSdp(data, senderIp) {
     if (!data || !data.sdp || !data.sdp.sdp || !senderIp) return data;
-    if (data.sdp.sdp.includes('.local')) {
+    if (data.sdp.sdp.includes(".local")) {
       return {
         ...data,
-        sdp: { ...data.sdp, sdp: data.sdp.sdp.replace(/[a-f0-9-]+\.local/gi, senderIp) }
+        sdp: {
+          ...data.sdp,
+          sdp: data.sdp.sdp.replace(/[a-f0-9-]+\.local/gi, senderIp),
+        },
       };
     }
     return data;
@@ -587,7 +723,9 @@ io.on("connection", (socket) => {
     if (data && data.deviceId) {
       const roomName = `agent_${data.deviceId}`;
       socket.join(roomName);
-      console.log(`Agent ${data.deviceId} registered and joined room ${roomName}`);
+      console.log(
+        `Agent ${data.deviceId} registered and joined room ${roomName}`,
+      );
     }
   });
 
@@ -702,7 +840,6 @@ io.on("connection", (socket) => {
     io.emit("pres-share-pdf", data);
   });
 
-
   socket.on("pres-minimize-specific", (data) => {
     io.emit("pres-minimize-specific", data);
   });
@@ -746,12 +883,20 @@ io.on("connection", (socket) => {
   socket.on("wb-modify", (data) => socket.broadcast.emit("wb-modify", data));
   socket.on("wb-remove", (data) => socket.broadcast.emit("wb-remove", data));
   socket.on("wb-clear", () => socket.broadcast.emit("wb-clear"));
-  socket.on("wb-modify-batch", (data) => socket.broadcast.emit("wb-modify-batch", data));
+  socket.on("wb-modify-batch", (data) =>
+    socket.broadcast.emit("wb-modify-batch", data),
+  );
   socket.on("wb-grid", (data) => socket.broadcast.emit("wb-grid", data));
-  socket.on("wb-capture-request", () => socket.broadcast.emit("wb-capture-request"));
-  socket.on("wb-capture-response", (data) => socket.broadcast.emit("wb-capture-response", data));
+  socket.on("wb-capture-request", () =>
+    socket.broadcast.emit("wb-capture-request"),
+  );
+  socket.on("wb-capture-response", (data) =>
+    socket.broadcast.emit("wb-capture-response", data),
+  );
 
-  socket.on("leaderboard-show", (data) => socket.broadcast.emit("leaderboard-show", data));
+  socket.on("leaderboard-show", (data) =>
+    socket.broadcast.emit("leaderboard-show", data),
+  );
 
   // ── Screen Share WebRTC Signaling (native WebRTC, no PeerJS) ─
   socket.on("screenshare-start", (data) => {
@@ -765,33 +910,42 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("screenshare-offer", fixMdnsSdp(data, socket.realIp));
   });
   socket.on("screenshare-answer", (data) => {
-    socket.broadcast.emit("screenshare-answer", fixMdnsSdp(data, socket.realIp));
+    socket.broadcast.emit(
+      "screenshare-answer",
+      fixMdnsSdp(data, socket.realIp),
+    );
   });
   socket.on("screenshare-ice", (data) => {
-    socket.broadcast.emit("screenshare-ice", fixMdnsCandidate(data, socket.realIp));
+    socket.broadcast.emit(
+      "screenshare-ice",
+      fixMdnsCandidate(data, socket.realIp),
+    );
   });
-  socket.on('screenshare-stop', () => {
-    socket.broadcast.emit('screenshare-stop');
+  socket.on("screenshare-stop", () => {
+    socket.broadcast.emit("screenshare-stop");
   });
 
   // ── Audio Share WebRTC Signaling ─────────────────────────
-  socket.on('audioshare-start', (data) => {
-    socket.broadcast.emit('audioshare-start', data);
+  socket.on("audioshare-start", (data) => {
+    socket.broadcast.emit("audioshare-start", data);
   });
-  socket.on('audioshare-ready', () => {
-    socket.broadcast.emit('audioshare-ready');
+  socket.on("audioshare-ready", () => {
+    socket.broadcast.emit("audioshare-ready");
   });
-  socket.on('audioshare-offer', (data) => {
-    socket.broadcast.emit('audioshare-offer', fixMdnsSdp(data, socket.realIp));
+  socket.on("audioshare-offer", (data) => {
+    socket.broadcast.emit("audioshare-offer", fixMdnsSdp(data, socket.realIp));
   });
-  socket.on('audioshare-answer', (data) => {
-    socket.broadcast.emit('audioshare-answer', fixMdnsSdp(data, socket.realIp));
+  socket.on("audioshare-answer", (data) => {
+    socket.broadcast.emit("audioshare-answer", fixMdnsSdp(data, socket.realIp));
   });
-  socket.on('audioshare-ice', (data) => {
-    socket.broadcast.emit('audioshare-ice', fixMdnsCandidate(data, socket.realIp));
+  socket.on("audioshare-ice", (data) => {
+    socket.broadcast.emit(
+      "audioshare-ice",
+      fixMdnsCandidate(data, socket.realIp),
+    );
   });
-  socket.on('audioshare-stop', () => {
-    socket.broadcast.emit('audioshare-stop');
+  socket.on("audioshare-stop", () => {
+    socket.broadcast.emit("audioshare-stop");
   });
 
   socket.on("disconnect", () => {
@@ -827,7 +981,7 @@ app.get("/api/presentations", (req, res) => {
 
     res.json({
       items: paginatedItems,
-      pagination: { totalItems, totalPages, currentPage, limit: limitNum }
+      pagination: { totalItems, totalPages, currentPage, limit: limitNum },
     });
   } else {
     res.json(meta);
@@ -1128,13 +1282,13 @@ app.delete("/api/presentation/:filename", (req, res) => {
   // Delete file
   try {
     fs.unlinkSync(path.join(uploadsDir, entry.filename));
-  } catch (e) { }
+  } catch (e) {}
   // Delete slides dir
   try {
     const slideDir = path.join(uploadsDir, entry.slideDirName);
     if (fs.existsSync(slideDir))
       fs.rmSync(slideDir, { recursive: true, force: true });
-  } catch (e) { }
+  } catch (e) {}
 
   meta.splice(idx, 1);
   savePresMeta(meta);
@@ -1181,19 +1335,26 @@ app.get("/api/gallery", (req, res) => {
   if (search) {
     const q = search.toLowerCase();
     gallery = gallery.filter((item) => {
-      const nameMatch = item.itemName && item.itemName.toLowerCase().includes(q);
-      const chapterMatch = item.chapterName && item.chapterName.toLowerCase().includes(q);
+      const nameMatch =
+        item.itemName && item.itemName.toLowerCase().includes(q);
+      const chapterMatch =
+        item.chapterName && item.chapterName.toLowerCase().includes(q);
       return nameMatch || chapterMatch;
     });
   }
 
   if (type === "classboard") {
     gallery = gallery.filter(
-      (item) => item.type === "image" && item.itemName && item.itemName.toLowerCase().startsWith("class")
+      (item) =>
+        item.type === "image" &&
+        item.itemName &&
+        item.itemName.toLowerCase().startsWith("class"),
     );
   } else if (type === "image") {
     gallery = gallery.filter(
-      (item) => item.type === "image" && !(item.itemName && item.itemName.toLowerCase().startsWith("class"))
+      (item) =>
+        item.type === "image" &&
+        !(item.itemName && item.itemName.toLowerCase().startsWith("class")),
     );
   } else if (type) {
     gallery = gallery.filter((item) => item.type === type);
@@ -1209,7 +1370,7 @@ app.get("/api/gallery", (req, res) => {
 
     res.json({
       items: paginatedItems,
-      pagination: { totalItems, totalPages, currentPage, limit: limitNum }
+      pagination: { totalItems, totalPages, currentPage, limit: limitNum },
     });
   } else {
     res.json(gallery);
@@ -1292,7 +1453,7 @@ app.put("/api/gallery/:id", galleryUpload.single("image"), (req, res) => {
     try {
       const oldPath = path.join(__dirname, item.url);
       if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
-    } catch (e) { }
+    } catch (e) {}
     item.url = "/uploads/gallery/" + req.file.filename;
     if (req.body.type) item.type = req.body.type;
   }
@@ -1312,11 +1473,15 @@ app.delete("/api/gallery/:id", (req, res) => {
   const item = gallery[index];
 
   // If it's an image or pdf that was uploaded locally, delete the file
-  if ((item.type === "image" || item.type === "pdf") && item.url && item.url.startsWith("/uploads/gallery/")) {
+  if (
+    (item.type === "image" || item.type === "pdf") &&
+    item.url &&
+    item.url.startsWith("/uploads/gallery/")
+  ) {
     try {
       const filePath = path.join(__dirname, item.url);
       if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-    } catch (e) { }
+    } catch (e) {}
   }
 
   gallery.splice(index, 1);
@@ -1331,13 +1496,13 @@ app.get("/api/view-pdf", (req, res) => {
   if (!fileUrl) return res.status(400).send("No URL");
 
   // Prevent directory traversal
-  const normalizedPath = path.normalize(fileUrl).replace(/^(\.\.[\/\\])+/, '');
+  const normalizedPath = path.normalize(fileUrl).replace(/^(\.\.[\/\\])+/, "");
   const filePath = path.join(__dirname, normalizedPath);
 
   if (!fs.existsSync(filePath)) return res.status(404).send("File not found");
 
   res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", "inline; filename=\"document.pdf\"");
+  res.setHeader("Content-Disposition", 'inline; filename="document.pdf"');
   const stream = fs.createReadStream(filePath);
   stream.pipe(res);
 });
@@ -1346,10 +1511,10 @@ app.get("/api/view-pdf", (req, res) => {
 app.use("/uploads", express.static(uploadsDir));
 
 // Question Bank and Student Performance API
-require('./server-qbank')(app, io, uploadsDir);
+require("./server-qbank")(app, io, uploadsDir);
 
 // Blockade 3D game session handlers
-require('./server-blockade')(io, uploadsDir);
+require("./server-blockade")(io, uploadsDir);
 
 // Initialize quiz systems
 initQuizSystem();
