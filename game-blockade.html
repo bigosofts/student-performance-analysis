@@ -210,6 +210,12 @@
           render();
         });
 
+        socket.on("classroom-navigate", (data) => {
+          if (data && data.url) {
+            window.location.href = data.url;
+          }
+        });
+
         socket.on("blockade:answer-result", (data) => {
           showResultBanner(data.result);
           setTimeout(() => {
