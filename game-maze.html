@@ -118,10 +118,10 @@
     <script src="js/maze.js"></script>
     <script>
       // ── Canvas renderer ───────────────────────────────────────
-      const WALL_COLOR = "#00e5ff";
-      const WALL_GLOW = "rgba(0,229,255,0.4)";
-      const FLOOR_A = "#0f2d1a";
-      const FLOOR_B = "#152e17";
+      const WALL_COLOR = "#334155";
+      const WALL_GLOW = "rgba(51,65,85,0.12)";
+      const FLOOR_A = "#f8fafc";
+      const FLOOR_B = "#e8eef5";
       const PATH_COLOR = "rgba(0,229,255,0.08)"; // solution path tint
       const EXIT_COLOR = "#10b981";
       const START_COLOR = "rgba(99,102,241,0.5)";
@@ -191,19 +191,19 @@
         }
 
         // ── Start & Exit markers ──
-        ctx.fillStyle = "rgba(99,102,241,0.4)";
+        ctx.fillStyle = "rgba(99,102,241,0.2)";
         ctx.fillRect(0, 0, cellPx, cellPx);
-        ctx.fillStyle = "rgba(16,185,129,0.4)";
+        ctx.fillStyle = "rgba(16,185,129,0.2)";
         ctx.fillRect((size - 1) * cellPx, (size - 1) * cellPx, cellPx, cellPx);
 
         // Start label
-        ctx.fillStyle = "#818cf8";
+        ctx.fillStyle = "#4338ca";
         ctx.font = `bold ${Math.max(8, cellPx * 0.28)}px Orbitron,monospace`;
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
         ctx.fillText("S", cellPx / 2, cellPx / 2);
         // End label
-        ctx.fillStyle = "#10b981";
+        ctx.fillStyle = "#047857";
         ctx.fillText("G", (size - 0.5) * cellPx, (size - 0.5) * cellPx);
 
         // ── Walls ──

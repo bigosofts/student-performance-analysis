@@ -8,7 +8,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #020617;
+  background: #edf2f7;
   font-family: "Hind Siliguri", "Outfit", sans-serif;
 }
 
@@ -50,7 +50,7 @@
 /* ===== TEXT STYLES ===== */
 .cell-name {
   font-weight: 700;
-  font-size: 0.6rem;
+  font-size: 0.78rem;
   line-height: 1.2;
   color: #fff;
   word-break: break-word;
@@ -61,7 +61,7 @@
 
 .cell-price {
   font-weight: 700;
-  font-size: 0.55rem;
+  font-size: 0.68rem;
   color: #fde68a;
   white-space: nowrap;
 }
@@ -74,8 +74,8 @@
 }
 
 .cell-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 19px;
+  height: 19px;
   stroke-width: 2;
 }
 
@@ -234,21 +234,21 @@
 }
 
 .cell-corner .cell-name {
-  font-size: 0.6rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #e2e8f0;
   line-height: 1.15;
 }
 
 .cell-corner .cell-desc {
-  font-size: 0.45rem;
+  font-size: 0.55rem;
   color: #94a3b8;
   line-height: 1.1;
 }
 
 .cell-corner .cell-icon svg {
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
 }
 
 /* ===== BOARD CENTER ===== */
@@ -280,12 +280,12 @@
   text-align: center;
 }
 .gov-box .label {
-  font-size: 0.65rem;
+  font-size: 0.78rem;
   color: #64748b;
   letter-spacing: 2px;
 }
 .gov-box .amount {
-  font-size: 1.8rem;
+  font-size: 2.25rem;
   font-weight: 900;
   color: #10b981;
 }
@@ -294,7 +294,7 @@
 .turn-badge {
   padding: 8px 40px;
   border-radius: 50px;
-  font-size: 1.5rem;
+  font-size: 1.85rem;
   font-weight: 900;
   letter-spacing: 3px;
   border: 2px solid rgba(255, 255, 255, 0.15);
@@ -344,7 +344,7 @@
 }
 
 .team-label {
-  font-size: 1.2rem;
+  font-size: 1.45rem;
   font-weight: 900;
 }
 .team-label.boys {
@@ -355,7 +355,7 @@
 }
 
 .team-money {
-  font-size: 1.1rem;
+  font-size: 1.3rem;
   font-weight: 800;
   color: #e2e8f0;
   margin-top: 2px;
@@ -375,14 +375,14 @@
   margin-top: 10px;
 }
 .board-title h1 {
-  font-size: 2.5rem;
+  font-size: 3rem;
   font-weight: 900;
   letter-spacing: 8px;
   color: #fff;
   font-family: "Outfit", sans-serif;
 }
 .board-title p {
-  font-size: 0.7rem;
+  font-size: 0.82rem;
   letter-spacing: 4px;
   color: #64748b;
 }

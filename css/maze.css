@@ -65,7 +65,7 @@ body.dashboard-maze {
 /* ── Game Page Body ────────────────────────────────────── */
 body.game-maze {
   font-family: "Outfit", sans-serif;
-  background: #020617;
+  background: #e8eef5;
   overflow: hidden;
   margin: 0;
   padding: 0;
@@ -279,6 +279,7 @@ body.game-maze {
   position: relative;
   overflow: hidden;
   padding: 10px;
+  background: linear-gradient(145deg, #e8eef5, #f8fafc);
 }
 
 .maze-canvas-wrap {
@@ -291,13 +292,12 @@ body.game-maze {
 .maze-canvas-wrap canvas {
   display: block;
   border-radius: 8px;
-  /* Futuristic neon border */
+  /* Clear slate frame with a restrained teal accent for projection. */
   box-shadow:
-    0 0 0 2px #00e5ff,
-    0 0 15px rgba(0, 229, 255, 0.6),
-    0 0 40px rgba(0, 229, 255, 0.2),
-    inset 0 0 20px rgba(0, 229, 255, 0.05);
-  border: 2px solid rgba(0, 229, 255, 0.8);
+    0 0 0 2px #64748b,
+    0 8px 28px rgba(30, 41, 59, 0.2),
+    inset 0 0 12px rgba(8, 145, 178, 0.08);
+  border: 2px solid #64748b;
 }
 
 /* Turn fade transitions */
