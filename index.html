@@ -5,12 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Agriculture-Interactive ClassRoom</title>
     <script>
-      document.documentElement.dataset.theme = "light";
-      try {
-        if (localStorage.getItem("indexTheme") === "dark") {
-          document.documentElement.dataset.theme = "dark";
-        }
-      } catch (_) {}
+      (() => {
+        const isMobile = window.matchMedia("(max-width: 768px)").matches;
+        let defaultTheme = isMobile ? "dark" : "light";
+        try {
+          const saved = localStorage.getItem("indexTheme");
+          if (saved === "light" || saved === "dark") {
+            defaultTheme = saved;
+          }
+        } catch (_) {}
+        document.documentElement.dataset.theme = defaultTheme;
+      })();
     </script>
     <link rel="stylesheet" href="css/style.css" />
     <style>
