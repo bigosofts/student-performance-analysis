@@ -647,8 +647,8 @@
          Mobile   ≤  600 px
          ════════════════════════════════════════════════════ */
 
-      /* ── Tablet (≤ 900 px) ── */
-      @media (max-width: 900px) {
+      /* ── Tablet & Compact Screens (≤ 900 px width OR ≤ 800 px height) ── */
+      @media (max-width: 900px), (max-height: 800px) {
         .projector-view {
           padding: 20px 28px 18px;
         }
@@ -1101,7 +1101,13 @@
 
       // ── Core render ──────────────────────────────────────────────────────────
       function renderLeaderboard(data, animate, fixedMaxScore = null) {
-        const GAP = 18;
+        let GAP = 18;
+        if (window.innerWidth <= 600) {
+          GAP = 8;
+        } else if (window.innerWidth <= 900 || window.innerHeight <= 800) {
+          GAP = 12;
+        }
+        
         const containerH = lbList.getBoundingClientRect().height;
         const n = data.length;
         const visibleCount = 8; // Exactly 8 items per view
