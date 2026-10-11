@@ -178,7 +178,7 @@
 
           <!-- Progress bar -->
           <div class="maze-stat-label" style="margin-top: 10px">
-            Maze Progress (Solution Path)
+            Maze Progress (To Finish)
           </div>
           <div class="mini-progress-wrap">
             <div
@@ -196,7 +196,7 @@
               margin-top: 3px;
             "
           >
-            0% of solution path
+            0% to finish
           </div>
         </div>
 
@@ -365,7 +365,7 @@
 
           <!-- Progress bar -->
           <div class="maze-stat-label" style="margin-top: 10px">
-            Maze Progress (Solution Path)
+            Maze Progress (To Finish)
           </div>
           <div class="mini-progress-wrap">
             <div
@@ -383,7 +383,7 @@
               margin-top: 3px;
             "
           >
-            0% of solution path
+            0% to finish
           </div>
         </div>
 
@@ -495,6 +495,82 @@
         >
           GAME COMMANDS
         </h2>
+
+        <!-- ── Fair Match Balanced Maze Generator ── -->
+        <div
+          class="glass-card"
+          style="
+            padding: 18px;
+            margin-bottom: 14px;
+            background: rgba(0, 0, 0, 0.35);
+            border: 1px solid rgba(0, 229, 255, 0.35);
+            box-shadow: 0 0 15px rgba(0, 229, 255, 0.1);
+          "
+        >
+          <div
+            class="maze-stat-label"
+            style="margin-bottom: 6px; color: #00e5ff; font-weight: 800;"
+          >
+            ⚖️ FAIR MAZE GENERATOR
+          </div>
+          <p
+            style="
+              font-size: 0.73rem;
+              color: #94a3b8;
+              margin-bottom: 12px;
+              line-height: 1.4;
+            "
+          >
+            Generates <strong>dilemma-rich mazes</strong> with multiple crossroads & deep decoys. Both teams get <strong>equal shortest path lengths</strong>!
+          </p>
+          <div class="maze-size-btns" style="margin-bottom: 10px;">
+            <button
+              class="maze-size-btn active"
+              id="bothSizeBtn20"
+              onclick="selectBothSize(20, this)"
+            >
+              20×20
+            </button>
+            <button
+              class="maze-size-btn"
+              id="bothSizeBtn30"
+              onclick="selectBothSize(30, this)"
+            >
+              30×30
+            </button>
+            <button
+              class="maze-size-btn"
+              id="bothSizeBtn50"
+              onclick="selectBothSize(50, this)"
+            >
+              50×50
+            </button>
+          </div>
+          <button
+            class="btn-primary"
+            style="
+              width: 100%;
+              background: linear-gradient(135deg, #0284c7, #7c3aed);
+              font-family: 'Orbitron', sans-serif;
+              font-size: 0.85rem;
+              letter-spacing: 1px;
+              padding: 12px;
+              box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+            "
+            onclick="handleGenerateBothMazes()"
+          >
+            ⚡ GENERATE BOTH MAZES (EQUAL STEPS)
+          </button>
+          <div
+            id="bothMazeStatus"
+            style="
+              font-size: 0.72rem;
+              margin-top: 8px;
+              text-align: center;
+              font-weight: 700;
+            "
+          ></div>
+        </div>
 
         <!-- ── Session Management ── -->
         <div class="maze-session-section">
@@ -1071,9 +1147,9 @@
         document.getElementById("boysMiniBar").style.width = bPct + "%";
         document.getElementById("girlsMiniBar").style.width = gPct + "%";
         document.getElementById("boysPctText").textContent =
-          bPct + "% of solution path";
+          bPct + "% to finish";
         document.getElementById("girlsPctText").textContent =
-          gPct + "% of solution path";
+          gPct + "% to finish";
 
         // Turn
         const turn = g.currentTurn;
@@ -1085,12 +1161,35 @@
         btnG.classList.toggle("active-turn", turn === "girls");
 
         // Maze status
+        const bSteps =
+          g.boysMaze && g.boysMaze.solutionPath
+            ? g.boysMaze.solutionPath.length - 1
+            : 0;
+        const gSteps =
+          g.girlsMaze && g.girlsMaze.solutionPath
+            ? g.girlsMaze.solutionPath.length - 1
+            : 0;
+        const balanced = g.boysMaze && g.girlsMaze && bSteps === gSteps;
+
         document.getElementById("boysMazeStatus").textContent = g.boysMaze
-          ? `✅ ${g.boysMaze.size}×${g.boysMaze.size} maze ready | Runner: (${g.boysMaze.runnerPos.x},${g.boysMaze.runnerPos.y})`
+          ? `✅ ${g.boysMaze.size}×${g.boysMaze.size} maze • 🎯 ${bSteps} steps${balanced ? " (Balanced ⚖️)" : ""}`
           : "⚠️ No maze generated";
         document.getElementById("girlsMazeStatus").textContent = g.girlsMaze
-          ? `✅ ${g.girlsMaze.size}×${g.girlsMaze.size} maze ready | Runner: (${g.girlsMaze.runnerPos.x},${g.girlsMaze.runnerPos.y})`
+          ? `✅ ${g.girlsMaze.size}×${g.girlsMaze.size} maze • 🎯 ${gSteps} steps${balanced ? " (Balanced ⚖️)" : ""}`
           : "⚠️ No maze generated";
+
+        const bothStatus = document.getElementById("bothMazeStatus");
+        if (bothStatus) {
+          if (balanced && bSteps > 0) {
+            bothStatus.textContent = `⚖️ Both mazes balanced: ${bSteps} steps to finish`;
+            bothStatus.style.color = "#10b981";
+          } else if (g.boysMaze && g.girlsMaze && bSteps !== gSteps) {
+            bothStatus.textContent = `⚠️ Unbalanced: Blue ${bSteps} steps vs Red ${gSteps} steps`;
+            bothStatus.style.color = "#f59e0b";
+          } else {
+            bothStatus.textContent = "";
+          }
+        }
 
         // Photos
         const bImg = document.getElementById("boysImg");
@@ -1132,12 +1231,40 @@
       }
 
       // ── Maze Generation ───────────────────────────────────────
+      let bothSelectedSize = 20;
+
+      function selectBothSize(size, el) {
+        bothSelectedSize = size;
+        boysSelectedSize = size;
+        girlsSelectedSize = size;
+        document
+          .querySelectorAll('[id^="bothSizeBtn"]')
+          .forEach((b) => b.classList.remove("active"));
+        document
+          .querySelectorAll('[id^="boysSizeBtn"]')
+          .forEach((b) =>
+            b.classList.toggle("active", b.id === "boysSizeBtn" + size),
+          );
+        document
+          .querySelectorAll('[id^="girlsSizeBtn"]')
+          .forEach((b) =>
+            b.classList.toggle("active", b.id === "girlsSizeBtn" + size),
+          );
+        if (el) el.classList.add("active");
+      }
+
       function selectBoysSize(size, el) {
         boysSelectedSize = size;
         document
           .querySelectorAll('[id^="boysSizeBtn"]')
           .forEach((b) => b.classList.remove("active"));
         el.classList.add("active");
+        bothSelectedSize = size;
+        document
+          .querySelectorAll('[id^="bothSizeBtn"]')
+          .forEach((b) =>
+            b.classList.toggle("active", b.id === "bothSizeBtn" + size),
+          );
       }
 
       function selectGirlsSize(size, el) {
@@ -1146,20 +1273,41 @@
           .querySelectorAll('[id^="girlsSizeBtn"]')
           .forEach((b) => b.classList.remove("active"));
         el.classList.add("active");
+        bothSelectedSize = size;
+        document
+          .querySelectorAll('[id^="bothSizeBtn"]')
+          .forEach((b) =>
+            b.classList.toggle("active", b.id === "bothSizeBtn" + size),
+          );
       }
 
       function generateMaze(team) {
         const size = team === "boys" ? boysSelectedSize : girlsSelectedSize;
         const statusEl = document.getElementById(team + "MazeStatus");
-        statusEl.textContent = "⏳ Generating maze...";
-        // Small timeout to let UI update
+        statusEl.textContent = "⏳ Generating dilemma maze...";
         setTimeout(() => {
-          MazeGame.generateTeamMaze(team, size);
+          const res = MazeGame.generateTeamMaze(team, size);
+          updateUI();
+          const steps = res.solutionPath ? res.solutionPath.length - 1 : 0;
+          showToast(
+            `✅ ${teamLabelUpper(team)} ${size}×${size} maze ready! (${steps} steps)`,
+          );
+        }, 40);
+      }
+
+      function handleGenerateBothMazes() {
+        const statusEl = document.getElementById("bothMazeStatus");
+        if (statusEl) {
+          statusEl.textContent = "⏳ Generating balanced dilemma mazes...";
+          statusEl.style.color = "#38bdf8";
+        }
+        setTimeout(() => {
+          const res = MazeGame.generateBothTeamMazes(bothSelectedSize);
           updateUI();
           showToast(
-            `✅ ${teamLabelUpper(team)} ${size}×${size} maze generated!`,
+            `✅ Both mazes generated! Equal path: ${res.shortestSteps} steps for each team!`,
           );
-        }, 50);
+        }, 40);
       }
 
       // ── Movement ──────────────────────────────────────────────
