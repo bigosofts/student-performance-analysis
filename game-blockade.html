@@ -242,7 +242,7 @@
         });
 
         socket.on("blockade:answer-result", (data) => {
-          showResultBanner(data.result);
+          showResultBanner(data.result, data.creditsAwarded);
           setTimeout(() => {
             const btns = $("blkOptionGrid").querySelectorAll(".blk-option-btn");
             const letters = ["A", "B", "C", "D"];
@@ -475,10 +475,11 @@
           $("blkWinnerOverlay").style.display = "flex";
         }
 
-        function showResultBanner(result) {
+        function showResultBanner(result, credits) {
           const banner = document.createElement("div");
           banner.className = `blk-result-banner ${result}`;
-          banner.textContent = result === "correct" ? "✅ Correct! +5 Credits" : "❌ Incorrect";
+          const amount = credits !== undefined ? credits : 10;
+          banner.textContent = result === "correct" ? `✅ Correct! +${amount} Credits` : "❌ Incorrect";
           document.body.appendChild(banner);
           setTimeout(() => banner.remove(), 2500);
         }

@@ -354,5 +354,109 @@
     "wallCount": 2,
     "createdAt": "2026-10-11T16:28:34.310Z",
     "completedAt": "2026-10-11T16:32:05.079Z"
+  },
+  {
+    "sessionId": "blk_1791740565119_zbep8f",
+    "code": "VKKNKW",
+    "title": "Blockade 3D",
+    "mode": "two-player",
+    "phase": "completed",
+    "players": [
+      {
+        "id": 1,
+        "name": "Red",
+        "color": "#ef4444",
+        "rank": 1,
+        "credits": 7,
+        "wallsRemaining": 5,
+        "studentName": null
+      },
+      {
+        "id": 2,
+        "name": "Blue",
+        "color": "#3b82f6",
+        "rank": 2,
+        "credits": 8,
+        "wallsRemaining": 2,
+        "studentName": null
+      }
+    ],
+    "rankings": [
+      {
+        "playerId": 1,
+        "rank": 1,
+        "name": "Red"
+      },
+      {
+        "playerId": 2,
+        "rank": 2,
+        "name": "Blue"
+      }
+    ],
+    "questionHistory": [
+      {
+        "questionId": "bq_1791740594437",
+        "targetPlayerId": 1,
+        "question": "শিল্প ফসল কোনটি?",
+        "submittedAnswer": "B",
+        "correctAnswer": "B",
+        "result": "correct",
+        "creditsAwarded": 10,
+        "timestamp": "2026-10-11T17:43:15.974Z"
+      },
+      {
+        "questionId": "bq_1791740600765",
+        "targetPlayerId": 1,
+        "question": "পাটকে মাঠ ফসল বলার কারণ—",
+        "submittedAnswer": "C",
+        "correctAnswer": "C",
+        "result": "correct",
+        "creditsAwarded": 10,
+        "timestamp": "2026-10-11T17:43:21.933Z"
+      },
+      {
+        "questionId": "bq_1791740602693",
+        "targetPlayerId": 1,
+        "question": "নিচের কোনটি দানাজাতীয় ফসল?",
+        "submittedAnswer": "B",
+        "correctAnswer": "B",
+        "result": "correct",
+        "creditsAwarded": 10,
+        "timestamp": "2026-10-11T17:43:23.453Z"
+      },
+      {
+        "questionId": "bq_1791740607260",
+        "targetPlayerId": 2,
+        "question": "একটি কৃষক সভায় অংশগ্রহণকারী সদস্যের সংখ্যা সাধারণত কত?",
+        "submittedAnswer": "D",
+        "correctAnswer": "D",
+        "result": "correct",
+        "creditsAwarded": 10,
+        "timestamp": "2026-10-11T17:43:28.524Z"
+      },
+      {
+        "questionId": "bq_1791740609172",
+        "targetPlayerId": 2,
+        "question": "১ উদ্যান ফসল একে একে উত্তোলন করা হয় কেন?",
+        "submittedAnswer": "D",
+        "correctAnswer": "D",
+        "result": "correct",
+        "creditsAwarded": 10,
+        "timestamp": "2026-10-11T17:43:29.981Z"
+      },
+      {
+        "questionId": "bq_1791740614797",
+        "targetPlayerId": 2,
+        "question": "BRRI এর প্রধান কার্যালয় কোথায় ?",
+        "submittedAnswer": "D",
+        "correctAnswer": "D",
+        "result": "correct",
+        "creditsAwarded": 10,
+        "timestamp": "2026-10-11T17:43:36.172Z"
+      }
+    ],
+    "wallCount": 13,
+    "createdAt": "2026-10-11T17:42:45.119Z",
+    "completedAt": "2026-10-11T17:48:38.031Z"
   }
 ]

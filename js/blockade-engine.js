@@ -10,7 +10,7 @@
 
   // ─── Constants ──────────────────────────────────────────────
   const BOARD_SIZE = 9;
-  const CREDITS_PER_CORRECT = 5;
+  const CREDITS_PER_CORRECT = 10;
   const MOVE_COST = 1;
   const WALL_COST = 1;
 
