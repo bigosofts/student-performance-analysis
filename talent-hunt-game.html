@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#f7f5ff"><title>Talent Hunt · Live Arena</title>
+  <link rel="stylesheet" href="css/style.css"><link rel="stylesheet" href="css/questionbank.css"><link rel="stylesheet" href="css/talent-hunt.css">
+</head>
+<body class="qb-font-bn th-projector-body">
+  <main id="app" class="projector-view th-projector">
+    <header class="th-topbar">
+      <div class="th-brand"><span class="th-brand-mark">✦</span><div><div class="th-eyebrow">LIVE CLASSROOM ARENA</div><h1 id="screenTitle">Talent Hunt</h1></div></div>
+      <div class="th-live-meta"><div id="progressText" class="th-round">READY TO PLAY</div><div class="th-join-code"><span>JOIN CODE</span><b id="screenCode">— — — — —</b></div><div class="th-countdown"><span>TIME</span><b id="screenTimer">—</b></div></div>
+    </header>
+    <div class="th-timer-track"><div id="timerProgress"></div></div>
+    <section class="th-arena">
+      <div class="th-waiting" id="thWaiting" hidden>
+        <div class="th-orbit"><span>✦</span></div><div class="th-eyebrow">THE ARENA IS READY</div><h2>Talent takes the stage.</h2>
+        <p>Waiting for the teacher to launch the next challenge.</p><div class="th-wait-badges"><span>⚡ Live questions</span><span>🏆 Real-time scores</span><span>🎮 Join from any device</span></div>
+      </div>
+      <div class="th-question-card" id="questionCard" hidden>
+        <div class="th-question-cap"><span class="th-sparkle">✦</span><span>YOUR CHALLENGE</span><span class="th-cap-line"></span><span class="th-mode-tag">LIVE</span></div>
+        <div id="question" class="content-area th-content-area"></div>
+        <div id="screenAnswer" class="th-answer-reveal" aria-live="polite"></div>
+      </div>
+      <section class="th-results" id="screenFinal" hidden><div class="th-trophy">🏆</div><div class="th-eyebrow">THE RESULTS ARE IN</div><h2>Champions of the arena</h2><div id="screenScores"></div></section>
+    </section>
+    <footer class="th-footer"><div class="th-footer-label"><span class="th-live-dot"></span> LIVE PLAYERS</div><div id="screenPeople" class="th-player-strip"></div><div class="th-footer-brand">TALENT HUNT <span>✦</span></div></footer>
+  </main>
+  <script src="/socket.io/socket.io.js"></script><script src="js/questionbank.js"></script><script src="js/talent-hunt.js"></script><script>TalentHunt.screen();</script>
+</body></html>
