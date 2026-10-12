@@ -292,8 +292,10 @@ function onWindowResize() {
 
 export function startScreensaver() {
   if (isActive) return;
+  const overlay = document.getElementById("screensaverOverlay");
+  if (!overlay) return;
   isActive = true;
-  document.getElementById("screensaverOverlay").style.display = "block";
+  overlay.style.display = "block";
 
   // Fade in the title panel after a short delay
   setTimeout(() => {
@@ -308,14 +310,15 @@ export function stopScreensaver() {
   if (!isActive) return;
   isActive = false;
   cancelAnimationFrame(animationFrameId);
-  document.getElementById("screensaverOverlay").style.display = "none";
+  const overlay = document.getElementById("screensaverOverlay");
+  if (overlay) overlay.style.display = "none";
   const textEl = document.getElementById("screensaverText");
   if (textEl) textEl.style.opacity = "0";
 }
 
 /**
  * Update the screensaver title overlay with class session info.
- * Called from the socket 'class-session-start' event in index.html.
+ * Called from the projector screensaver module after the class-start socket event.
  * @param {string} subject    - e.g. "Agriculture"
  * @param {string} paper      - e.g. "1st Paper"
  * @param {string} chapter    - e.g. "01"

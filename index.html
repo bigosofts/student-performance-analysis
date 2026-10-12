@@ -1705,7 +1705,9 @@
           top: 50%;
           left: 50%;
           transform: translate(-50%, -50%);
-          background: rgba(192, 227, 207, 0.12);
+          background: rgba(214, 245, 233, 0.17);
+          backdrop-filter: blur(9px) saturate(135%);
+          -webkit-backdrop-filter: blur(9px) saturate(135%);
           padding: clamp(18px, 2.5vh, 30px) clamp(22px, 2.8vw, 42px);
           border-radius: clamp(22px, 2.5vw, 34px);
           border: 1.5px solid rgba(228, 250, 255, 0.62);
@@ -1813,6 +1815,13 @@
         try {
           localStorage.setItem("indexTheme", light ? "light" : "dark");
         } catch (_) { }
+        syncToggle();
+      });
+      document.addEventListener("index-theme-set", (event) => {
+        const theme = event.detail && event.detail.theme;
+        if (theme !== "light" && theme !== "dark") return;
+        document.documentElement.dataset.theme = theme;
+        try { localStorage.setItem("indexTheme", theme); } catch (_) { }
         syncToggle();
       });
     })();
@@ -2303,6 +2312,9 @@
   <script src="/socket.io/socket.io.js"></script>
   <script>
     const socket = io();
+    socket.on("classroom-theme-set", (data) => {
+      document.dispatchEvent(new CustomEvent("index-theme-set", { detail: data }));
+    });
     socket.on("classroom-navigate", (data) => {
       if (data && data.url) {
         if (typeof window.playProjectorTransition === "function") {
@@ -2339,71 +2351,7 @@
       }
     });
   </script>
-  <script type="module">
-    import * as screensaver from "./js/screensaver.js?v=20260628-titlefix";
-
-    let screensaverTimeout = null;
-
-    // Initialize 3D scene (hidden initially)
-    screensaver.initScreensaver("screensaverCanvasContainer");
-
-    socket.on("class-session-start", (data) => {
-      console.log("Class session starting:", data);
-
-      // Update all overlay fields
-      const subject = data.subject || "Agriculture";
-      const paper = data.paper || "";
-      const chapter = data.chapter || "";
-      const chapterName = data.chapterName || "";
-
-      const subjectEl = document.getElementById("ssSubject");
-      const paperEl = document.getElementById("ssPaper");
-      const chNumEl = document.getElementById("ssChapterNum");
-      const chTitleEl = document.getElementById("ssChapterTitle");
-
-      if (subjectEl) subjectEl.innerText = subject;
-      if (paperEl) paperEl.innerText = paper;
-      if (chNumEl) chNumEl.innerText = chapter; // value already includes "Chapter XX"
-      if (chTitleEl) chTitleEl.innerText = chapterName;
-
-      // Also notify the 3D screensaver module (optional 3D overlay)
-      try {
-        screensaver.updateScreensaverTitle?.(
-          subject,
-          paper,
-          chapter,
-          chapterName,
-        );
-      } catch (err) {
-        console.warn("3D screensaver title update failed:", err);
-      }
-
-      // Start 10-second timer
-      clearTimeout(screensaverTimeout);
-      screensaverTimeout = setTimeout(() => {
-        screensaver.startScreensaver();
-      }, 10000);
-    });
-
-    // Stop screensaver on other events
-    const stopEvents = [
-      "pres-open",
-      "classroom-navigate",
-      "pres-share-image",
-      "pres-share-tree",
-      "pres-share-note",
-      "pres-share-video",
-      "pres-share-webpage",
-      "pres-share-pdf",
-    ];
-
-    stopEvents.forEach((evt) => {
-      socket.on(evt, () => {
-        screensaver.stopScreensaver();
-        clearTimeout(screensaverTimeout);
-      });
-    });
-  </script>
+  <script type="module" src="./js/projector-screensaver.js"></script>
   <script src="js/wake-lock.js"></script>
   <script src="js/whiteboard.js"></script>
 

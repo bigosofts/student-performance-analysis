@@ -106,6 +106,27 @@
       .blk-wall-help {
         text-align:center; font-size:0.68rem; color:var(--blk-dim); margin-top:6px;
       }
+      .blk-back-dashboard {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 14px;
+        border: 1px solid rgba(148, 163, 184, .24);
+        border-radius: 12px;
+        color: #e2e8f0;
+        background: rgba(148, 163, 184, .1);
+        font-size: .82rem;
+        font-weight: 800;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .blk-back-dashboard:hover { background: rgba(148, 163, 184, .18); }
+      .blk-dash-header { gap: 10px; flex-wrap: wrap; }
+      @media (max-width: 480px) {
+        .blk-back-dashboard { min-height: 38px; font-size: .75rem; }
+        .blk-dash-header { padding: 14px; }
+      }
     </style>
   </head>
   <body class="blk-dashboard-body">
@@ -114,6 +135,7 @@
       <div class="blk-join-card">
         <h1>🏰 Blockade 3D</h1>
         <p>Enter join code and select your role</p>
+        <a class="blk-back-dashboard" href="dashboard.html" style="width:100%;margin-bottom:16px">← Back to Teacher Central</a>
 
         <input type="text" class="blk-join-input" id="blkCodeInput" placeholder="ABC123" maxlength="6" autocomplete="off" />
 
@@ -154,6 +176,7 @@
       <div class="blk-dash-header">
         <h2>🏰 Blockade 3D</h2>
         <span class="blk-dash-code" id="blkDashCode"></span>
+        <a class="blk-back-dashboard" href="dashboard.html">← Dashboard</a>
       </div>
 
       <!-- Setup Section (admin only, before game starts) -->

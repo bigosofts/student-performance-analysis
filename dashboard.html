@@ -623,6 +623,159 @@
           margin-top: 0;
         }
       }
+
+      /* Light app-drawer visual refresh */
+      :root {
+        color-scheme: light;
+        --dash-ink: #17243b;
+        --dash-muted: #65738a;
+        --dash-surface: #ffffff;
+        --dash-line: #e4eaf2;
+      }
+
+      body {
+        background:
+          radial-gradient(ellipse at 8% 0%, rgba(111, 151, 255, 0.11), transparent 32%),
+          radial-gradient(ellipse at 96% 20%, rgba(103, 205, 180, 0.10), transparent 28%),
+          #f4f7fb;
+        color: var(--dash-ink);
+        height: 100vh;
+        min-height: 100vh;
+        overflow: auto;
+      }
+
+      .bg-animation { opacity: .12; pointer-events: none; }
+      .header-area {
+        width: min(100% - 48px, 1500px);
+        margin: 0 auto;
+        padding: clamp(34px, 5vh, 58px) 0 30px;
+        text-align: left;
+        animation-duration: .65s;
+      }
+      .title-glitch {
+        width: fit-content;
+        font-size: clamp(2rem, 4vw, 3.35rem);
+        letter-spacing: .025em;
+        background: linear-gradient(100deg, #5545bb 0%, #bb3988 55%, #ef715b 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+        filter: none;
+      }
+      .subtitle {
+        color: #758198;
+        font-size: clamp(.72rem, 1vw, .86rem);
+        letter-spacing: .13em;
+      }
+      .theme-switch {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        min-height: 46px;
+        margin-top: 20px;
+        padding: 0 18px;
+        border: 1px solid #dce4ee;
+        border-radius: 999px;
+        background: #fff;
+        color: #34415a;
+        font: 700 .86rem "Inter", sans-serif;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(33, 52, 82, .07);
+        transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+      }
+      .theme-switch:hover { transform: translateY(-2px); border-color: #aab9d0; box-shadow: 0 8px 20px rgba(33, 52, 82, .12); }
+      .theme-switch:focus-visible { outline: 3px solid #7c6ce0; outline-offset: 3px; }
+      .theme-switch-icon { font-size: 1.05rem; }
+      .main-content { width: min(100% - 48px, 1500px); margin: 0 auto; padding: 0 0 44px; }
+      .game-grid {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 16px;
+        perspective: none;
+      }
+      .game-card {
+        position: relative;
+        min-height: 226px;
+        padding: 23px 20px 20px;
+        border: 1px solid var(--dash-line);
+        border-radius: 22px;
+        background: var(--dash-surface);
+        box-shadow: 0 4px 16px rgba(25, 45, 75, .055), 0 1px 2px rgba(25, 45, 75, .04);
+        transform: translateY(18px);
+        transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+      }
+      .game-card:hover {
+        transform: translateY(-4px);
+        border-color: #d1dbea;
+        background: #fff;
+        box-shadow: 0 14px 30px rgba(36, 56, 88, .11);
+      }
+      .game-card:nth-child(5) {
+        grid-column: auto;
+        flex-direction: column;
+        text-align: center;
+        padding: 23px 20px 20px;
+      }
+      .game-icon, .game-card:nth-child(5) .game-icon {
+        width: 64px;
+        height: 64px;
+        margin: 0 0 14px;
+        border: 1px solid color-mix(in srgb, var(--theme-color), white 78%);
+        border-radius: 20px;
+        background: color-mix(in srgb, var(--theme-color), white 91%);
+        font-size: 1.9rem;
+        box-shadow: 0 4px 10px color-mix(in srgb, var(--theme-color), transparent 88%);
+      }
+      .game-card:nth-child(5) .game-icon { margin: 0 0 14px; }
+      .card-text { gap: 0; align-items: center; }
+      .game-card h2 { color: var(--dash-ink); font-size: clamp(1rem, 1.25vw, 1.16rem); margin-bottom: 7px; }
+      .game-card p { color: var(--dash-muted); font-size: .82rem; line-height: 1.5; margin-bottom: 15px; }
+      .game-card:nth-child(5) .card-text { align-items: center; }
+      .status-badge {
+        padding: 6px 11px;
+        border: 1px solid rgba(25, 45, 75, .08);
+        border-radius: 999px;
+        font-size: .64rem;
+        letter-spacing: .045em;
+        box-shadow: 0 2px 5px rgba(25, 45, 75, .08);
+      }
+      .game-card:nth-child(7) .status-badge, .game-card:nth-child(8) .status-badge { color: #07111c; }
+
+      @media (max-width: 1100px) {
+        body { height: auto; min-height: 100vh; }
+        .header-area, .main-content { width: min(100% - 40px, 900px); }
+        .game-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      }
+      @media (max-width: 760px) {
+        .header-area, .main-content { width: min(100% - 32px, 620px); }
+        .game-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+        .game-card, .game-card:nth-child(5) { min-height: 205px; padding: 18px 14px; }
+        .game-icon, .game-card:nth-child(5) .game-icon { width: 56px; height: 56px; border-radius: 18px; font-size: 1.65rem; }
+        .game-card p { font-size: .76rem; }
+      }
+      @media (max-width: 640px) {
+        .header-area { padding: 28px 0 22px; }
+        .title-glitch { font-size: clamp(1.85rem, 8vw, 2.65rem); letter-spacing: 0; }
+        .subtitle { max-width: 100%; line-height: 1.55; letter-spacing: .09em; }
+        .theme-switch { margin-top: 15px; min-height: 42px; font-size: .78rem; }
+        .main-content { padding-bottom: 28px; }
+        .game-grid { gap: 11px; }
+        .game-card, .game-card:nth-child(5) { min-height: 190px; padding: 15px 10px 14px; border-radius: 18px; }
+        .game-icon, .game-card:nth-child(5) .game-icon { width: 50px; height: 50px; margin-bottom: 10px; border-radius: 16px; font-size: 1.45rem; }
+        .game-card h2 { font-size: .9rem; line-height: 1.25; }
+        .game-card p { font-size: .7rem; line-height: 1.4; margin-bottom: 10px; }
+        .status-badge { font-size: .55rem; padding: 5px 8px; }
+      }
+      @media (max-width: 360px) {
+        .header-area, .main-content { width: min(100% - 24px, 620px); }
+        .game-grid { grid-template-columns: 1fr; }
+        .game-card, .game-card:nth-child(5) { min-height: 0; padding: 18px; }
+        .game-icon, .game-card:nth-child(5) .game-icon { margin-bottom: 10px; }
+        .game-card h2 { font-size: 1rem; }
+        .game-card p { font-size: .78rem; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+      }
     </style>
   </head>
 
@@ -640,6 +793,10 @@
       <div class="subtitle">
         Select a game module to manage the classroom flow
       </div>
+      <button class="theme-switch" id="projectorThemeSwitch" type="button" aria-label="Switch projector to dark theme">
+        <span class="theme-switch-icon" aria-hidden="true">🌙</span>
+        <span>Switch projector to dark</span>
+      </button>
     </div>
 
     <!-- Main Content Grid -->
@@ -1024,6 +1181,26 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
       const socket = io();
+
+      const projectorThemeSwitch = document.getElementById('projectorThemeSwitch');
+      let projectorTheme = (() => {
+        try { return localStorage.getItem('indexTheme') || 'light'; }
+        catch (_) { return 'light'; }
+      })();
+
+      function syncProjectorThemeButton() {
+        const nextTheme = projectorTheme === 'light' ? 'dark' : 'light';
+        projectorThemeSwitch.querySelector('.theme-switch-icon').textContent = nextTheme === 'dark' ? '🌙' : '☀️';
+        projectorThemeSwitch.querySelector('span:last-child').textContent = `Switch projector to ${nextTheme}`;
+        projectorThemeSwitch.setAttribute('aria-label', `Switch projector to ${nextTheme} theme`);
+      }
+      syncProjectorThemeButton();
+      projectorThemeSwitch.addEventListener('click', () => {
+        projectorTheme = projectorTheme === 'light' ? 'dark' : 'light';
+        try { localStorage.setItem('indexTheme', projectorTheme); } catch (_) { }
+        syncProjectorThemeButton();
+        socket.emit('classroom-theme-set', { theme: projectorTheme });
+      });
 
       function startClassSession() {
         const subject = document.getElementById('csSubject').value.trim() || 'Agriculture';

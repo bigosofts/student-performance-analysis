@@ -864,6 +864,12 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("classroom-navigate", data);
   });
 
+  socket.on("classroom-theme-set", (data) => {
+    if (data && (data.theme === "light" || data.theme === "dark")) {
+      socket.broadcast.emit("classroom-theme-set", { theme: data.theme });
+    }
+  });
+
   socket.on("pres-aspect-ratio", (data) => {
     socket.broadcast.emit("pres-aspect-ratio", data);
   });
