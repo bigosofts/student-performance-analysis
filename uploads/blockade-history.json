@@ -1,8 +1,8 @@
 [
   {
-    "sessionId": "blk_1791243703168_gzkmmm",
-    "code": "HR4FFD",
-    "title": "কৃষি পণ্যের তালিকাকরণ",
+    "sessionId": "blk_1791812528010_yvfouv",
+    "code": "N85D9E",
+    "title": "Blockade 3D",
     "mode": "two-player",
     "phase": "cancelled",
     "players": [
@@ -10,453 +10,66 @@
         "id": 1,
         "name": "Red",
         "color": "#ef4444",
-        "rank": 1,
-        "credits": 3,
-        "wallsRemaining": 1,
+        "rank": null,
+        "credits": 12,
+        "wallsRemaining": 10,
         "studentName": null
       },
       {
         "id": 2,
         "name": "Blue",
         "color": "#3b82f6",
-        "rank": 2,
-        "credits": 4,
-        "wallsRemaining": 3,
+        "rank": null,
+        "credits": 13,
+        "wallsRemaining": 6,
         "studentName": null
       }
     ],
-    "rankings": [
-      {
-        "playerId": 1,
-        "rank": 1,
-        "name": "Red"
-      },
-      {
-        "playerId": 2,
-        "rank": 2,
-        "name": "Blue"
-      }
-    ],
+    "rankings": [],
     "questionHistory": [
       {
-        "questionId": "bq_1791243755207",
+        "questionId": "bq_1791812614603",
         "targetPlayerId": 1,
-        "question": "মালচিং এর মাধ্যমে মাটির কী নিয়ন্ত্রণ করা হয়?",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:42:38.206Z"
-      },
-      {
-        "questionId": "bq_1791243763597",
-        "targetPlayerId": 2,
-        "question": "মাটির pH মান কত থাকলে গাছ সহজেই পুষ্টি উপাদান গ্রহণ করতে পারে",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:42:45.821Z"
-      },
-      {
-        "questionId": "bq_1791243766613",
-        "targetPlayerId": 2,
-        "question": "রিবনরেটিং কোন ফসলে করা হয়?",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:42:47.413Z"
-      },
-      {
-        "questionId": "bq_1791243768406",
-        "targetPlayerId": 2,
-        "question": "খরিপ-২ মৌসুমের সময়কাল কোনটি?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:42:49.285Z"
-      },
-      {
-        "questionId": "bq_1791243780365",
-        "targetPlayerId": 1,
-        "question": "শাকসবজি পচনের প্রধান কারণ কোনটি?",
-        "submittedAnswer": "A",
-        "correctAnswer": "A",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:43:02.853Z"
-      },
-      {
-        "questionId": "bq_1791243783669",
-        "targetPlayerId": 1,
-        "question": "কোনটি কমলার জাত?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:43:04.525Z"
-      },
-      {
-        "questionId": "bq_1791243785285",
-        "targetPlayerId": 1,
-        "question": "একটি কলোনির নেতৃত্ব দিতে কয়টি রাণী মৌমাছি দরকার হয়?",
-        "submittedAnswer": "A",
-        "correctAnswer": "A",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:43:06.029Z"
-      },
-      {
-        "questionId": "bq_1791243789696",
-        "targetPlayerId": 1,
-        "question": "বাংলাদেশে ভূমিক্ষয়ের অন্যতম প্রধান কারণ কী? [রাজউক উত্তরা মডেল কলেজ, ঢাকা]",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:43:11.781Z"
-      },
-      {
-        "questionId": "bq_1791243936933",
-        "targetPlayerId": 2,
-        "question": "উদ্দীপকে উল্লিখিত উপাদান ব্যবহার করে ছক্কূ মিয়ার জমির-",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:45:38.598Z"
-      },
-      {
-        "questionId": "bq_1791243944517",
-        "targetPlayerId": 2,
-        "question": "আখের Smut রোগের লক্ষণ কোনটি?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:45:46.781Z"
-      },
-      {
-        "questionId": "bq_1791244054607",
-        "targetPlayerId": 1,
-        "question": "রাইজোবিয়াম অণুজীব সার কোন খাদ্যোপাদান সরবরাহের জন্য প্রয়োগ করা হয়?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:47:44.622Z"
-      },
-      {
-        "questionId": "bq_1791244095725",
-        "targetPlayerId": 2,
-        "question": "কোনটি রেশম পোকার খাদ্য?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-05T23:48:16.910Z"
-      }
-    ],
-    "wallCount": 16,
-    "createdAt": "2026-10-05T23:41:43.168Z",
-    "completedAt": "2026-10-05T23:48:44.702Z"
-  },
-  {
-    "sessionId": "blk_1791736106608_f1uh14",
-    "code": "U398SQ",
-    "title": "Blockade 3D",
-    "mode": "four-player",
-    "phase": "cancelled",
-    "players": [
-      {
-        "id": 1,
-        "name": "Red",
-        "color": "#ef4444",
-        "rank": 3,
-        "credits": 9,
-        "wallsRemaining": 5,
-        "studentName": null
-      },
-      {
-        "id": 2,
-        "name": "Blue",
-        "color": "#3b82f6",
-        "rank": 1,
-        "credits": 10,
-        "wallsRemaining": 4,
-        "studentName": null
-      },
-      {
-        "id": 3,
-        "name": "Green",
-        "color": "#22c55e",
-        "rank": 4,
-        "credits": 10,
-        "wallsRemaining": 5,
-        "studentName": null
-      },
-      {
-        "id": 4,
-        "name": "Purple",
-        "color": "#a855f7",
-        "rank": 2,
-        "credits": 10,
-        "wallsRemaining": 4,
-        "studentName": null
-      }
-    ],
-    "rankings": [
-      {
-        "playerId": 2,
-        "rank": 1,
-        "name": "Blue"
-      },
-      {
-        "playerId": 4,
-        "rank": 2,
-        "name": "Purple"
-      },
-      {
-        "playerId": 1,
-        "rank": 3,
-        "name": "Red"
-      },
-      {
-        "playerId": 3,
-        "rank": 4,
-        "name": "Green"
-      }
-    ],
-    "questionHistory": [
-      {
-        "questionId": "bq_1791736167046",
-        "targetPlayerId": 1,
-        "question": "বাংলাদেশে কত প্রকার মসলার চাষ হয়?",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:29:29.215Z"
-      },
-      {
-        "questionId": "bq_1791736173926",
-        "targetPlayerId": 2,
-        "question": "গবেষণার জন্য বৈদেশিক সাহায্য আনয়নের ব্যবস্থা করে কোন প্রতিষ্ঠান?",
-        "submittedAnswer": "A",
-        "correctAnswer": "A",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:29:35.662Z"
-      },
-      {
-        "questionId": "bq_1791736180294",
-        "targetPlayerId": 3,
-        "question": "কৃষক সভার মূল উদ্দেশ্য কী?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:29:41.678Z"
-      },
-      {
-        "questionId": "bq_1791736186734",
-        "targetPlayerId": 4,
-        "question": "কৃষির ক্ষেত্র কতটি?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:29:48.495Z"
-      },
-      {
-        "questionId": "bq_1791736196638",
-        "targetPlayerId": 1,
-        "question": "নদীর প্রবাহ বাধাপ্রাপ্ত হয়ে উৎপন্ন জলাশয়কে কি বলা হয়?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:29:58.278Z"
-      },
-      {
-        "questionId": "bq_1791736199358",
-        "targetPlayerId": 2,
-        "question": "মাঠ ফসলের বৈশিষ্ট্য কোনটি?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:00.214Z"
-      },
-      {
-        "questionId": "bq_1791736204902",
-        "targetPlayerId": 3,
-        "question": "নিচের কোনটি দানাজাতীয় ফসল?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:06.198Z"
-      },
-      {
-        "questionId": "bq_1791736207310",
-        "targetPlayerId": 4,
-        "question": "নিচের কোনটি কৃষি সম্প্রসারণ অধিদপ্তরের ওয়েবসাইট।",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:08.159Z"
-      },
-      {
-        "questionId": "bq_1791736213886",
-        "targetPlayerId": 1,
-        "question": "BARI কোথায় অবস্থিত?",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:14.870Z"
-      },
-      {
-        "questionId": "bq_1791736215494",
-        "targetPlayerId": 2,
-        "question": "কৃষি তথ্য সংস্থা আত্মপ্রকাশ করে কত সালে?",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:16.511Z"
-      },
-      {
-        "questionId": "bq_1791736217223",
-        "targetPlayerId": 3,
-        "question": "পাটকে মাঠ ফসল বলা কারণ-",
-        "submittedAnswer": "C",
-        "correctAnswer": "C",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:18.038Z"
-      },
-      {
-        "questionId": "bq_1791736223038",
-        "targetPlayerId": 4,
-        "question": "স্থানীয় 'কৃষি তথ্য ভাণ্ডার' বলা হয় কাকে?",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 5,
-        "timestamp": "2026-10-11T16:30:24.367Z"
-      }
-    ],
-    "wallCount": 2,
-    "createdAt": "2026-10-11T16:28:34.310Z",
-    "completedAt": "2026-10-11T16:32:05.079Z"
-  },
-  {
-    "sessionId": "blk_1791740565119_zbep8f",
-    "code": "VKKNKW",
-    "title": "Blockade 3D",
-    "mode": "two-player",
-    "phase": "completed",
-    "players": [
-      {
-        "id": 1,
-        "name": "Red",
-        "color": "#ef4444",
-        "rank": 1,
-        "credits": 7,
-        "wallsRemaining": 5,
-        "studentName": null
-      },
-      {
-        "id": 2,
-        "name": "Blue",
-        "color": "#3b82f6",
-        "rank": 2,
-        "credits": 8,
-        "wallsRemaining": 2,
-        "studentName": null
-      }
-    ],
-    "rankings": [
-      {
-        "playerId": 1,
-        "rank": 1,
-        "name": "Red"
-      },
-      {
-        "playerId": 2,
-        "rank": 2,
-        "name": "Blue"
-      }
-    ],
-    "questionHistory": [
-      {
-        "questionId": "bq_1791740594437",
-        "targetPlayerId": 1,
-        "question": "শিল্প ফসল কোনটি?",
+        "question": "মাছ কোন পর্বের অন্তর্গত?",
         "submittedAnswer": "B",
         "correctAnswer": "B",
         "result": "correct",
         "creditsAwarded": 10,
-        "timestamp": "2026-10-11T17:43:15.974Z"
+        "timestamp": "2026-10-12T13:43:36.619Z"
       },
       {
-        "questionId": "bq_1791740600765",
+        "questionId": "bq_1791812622306",
         "targetPlayerId": 1,
         "question": "পাটকে মাঠ ফসল বলার কারণ—",
         "submittedAnswer": "C",
         "correctAnswer": "C",
         "result": "correct",
         "creditsAwarded": 10,
-        "timestamp": "2026-10-11T17:43:21.933Z"
+        "timestamp": "2026-10-12T13:43:43.907Z"
       },
       {
-        "questionId": "bq_1791740602693",
-        "targetPlayerId": 1,
-        "question": "নিচের কোনটি দানাজাতীয় ফসল?",
-        "submittedAnswer": "B",
-        "correctAnswer": "B",
-        "result": "correct",
-        "creditsAwarded": 10,
-        "timestamp": "2026-10-11T17:43:23.453Z"
-      },
-      {
-        "questionId": "bq_1791740607260",
+        "questionId": "bq_1791812657187",
         "targetPlayerId": 2,
-        "question": "একটি কৃষক সভায় অংশগ্রহণকারী সদস্যের সংখ্যা সাধারণত কত?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
+        "question": "নিচের কোনটি কৃষি সম্প্রসারণ প্রতিষ্ঠান।",
+        "submittedAnswer": "A",
+        "correctAnswer": "A",
         "result": "correct",
         "creditsAwarded": 10,
-        "timestamp": "2026-10-11T17:43:28.524Z"
+        "timestamp": "2026-10-12T13:44:18.787Z"
       },
       {
-        "questionId": "bq_1791740609172",
+        "questionId": "bq_1791812659570",
         "targetPlayerId": 2,
-        "question": "১ উদ্যান ফসল একে একে উত্তোলন করা হয় কেন?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
+        "question": "বাংলাদেশ পাট গবেষণা ইনস্টিটিউট কোথায় অবস্থিত?",
+        "submittedAnswer": "A",
+        "correctAnswer": "A",
         "result": "correct",
         "creditsAwarded": 10,
-        "timestamp": "2026-10-11T17:43:29.981Z"
-      },
-      {
-        "questionId": "bq_1791740614797",
-        "targetPlayerId": 2,
-        "question": "BRRI এর প্রধান কার্যালয় কোথায় ?",
-        "submittedAnswer": "D",
-        "correctAnswer": "D",
-        "result": "correct",
-        "creditsAwarded": 10,
-        "timestamp": "2026-10-11T17:43:36.172Z"
+        "timestamp": "2026-10-12T13:44:20.444Z"
       }
     ],
-    "wallCount": 13,
-    "createdAt": "2026-10-11T17:42:45.119Z",
-    "completedAt": "2026-10-11T17:48:38.031Z"
+    "wallCount": 4,
+    "createdAt": "2026-10-12T13:42:08.010Z",
+    "completedAt": "2026-10-12T13:44:58.715Z"
   }
 ]
