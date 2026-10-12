@@ -62,7 +62,7 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     const q = getPrivateQuestion();
     if (!canManage(socket) || !session || session.status !== "playing" || !q || q.judgement) return;
     q.judgement = correct ? "correct" : "wrong";
-    if (correct) session.credits[session.currentTeam] += 20;
+    if (correct) session.credits[session.currentTeam] += 100;
     broadcast();
   };
   const finish = winner => {
