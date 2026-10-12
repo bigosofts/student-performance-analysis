@@ -339,16 +339,8 @@
       isolation: isolate;
       background-color: rgba(255, 255, 255, 0.07);
       background-image:
-        repeating-linear-gradient(0deg,
-          rgba(255, 255, 255, 0.03) 0px,
-          rgba(255, 255, 255, 0.03) 1px,
-          transparent 1px,
-          transparent 20px),
-        repeating-linear-gradient(90deg,
-          rgba(255, 255, 255, 0.03) 0px,
-          rgba(255, 255, 255, 0.03) 1px,
-          transparent 1px,
-          transparent 20px);
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.008) 0 1px, transparent 1px 10px),
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.008) 0 1px, transparent 1px 10px);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: clamp(16px, 2vw, 24px);
       padding: clamp(14px, 2.5vh, 28px) clamp(12px, 1.5vw, 24px);
@@ -2027,7 +2019,6 @@
       function updateCarousel() {
         const isMobile = window.innerWidth <= 768;
         const projectorLayout = window.innerWidth > 768 && window.innerWidth <= 1200;
-        const lightTheme = document.documentElement.dataset.theme === "light";
         const baseTranslateX = isMobile
           ? window.innerWidth * 0.35
           : projectorLayout
@@ -2055,13 +2046,13 @@
               1 - absOffset * (isMobile ? 0.2 : 0.15),
             );
             const rotateY = direction * (isMobile ? -35 : -25);
-            const blur = absOffset * (isMobile ? 1 : lightTheme ? 0.9 : 2);
+            const blur = absOffset * (isMobile ? 1 : 0.9);
 
             card.style.transform = `translateX(${translateX}px) scale(${scale}) rotateY(${rotateY}deg)`;
             card.style.zIndex = 10 - absOffset;
             card.style.opacity = Math.max(
               0,
-              1 - absOffset * (isMobile ? 0.4 : lightTheme ? 0.18 : 0.3),
+              1 - absOffset * (isMobile ? 0.4 : 0.18),
             );
             card.style.filter = `blur(${blur}px)`;
           }
