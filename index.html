@@ -1593,67 +1593,109 @@
 <body>
   <!-- 3D Screensaver Overlay -->
   <style>
+    #screensaverOverlay::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(6, 20, 42, .16), transparent 28%, transparent 65%, rgba(5, 19, 30, .3)), radial-gradient(ellipse at center, transparent 25%, rgba(3, 14, 28, .36) 100%);
+    }
     #screensaverText {
-      font-family: "Inter", sans-serif;
-      width: clamp(260px, 52vw, 700px);
+      font-family: "Hind Siliguri", "Georgia", serif;
+      width: fit-content;
+      max-width: min(88vw, 1040px);
       box-sizing: border-box;
+      z-index: 2;
+      isolation: isolate;
+      backdrop-filter: blur(2px) saturate(150%);
+      -webkit-backdrop-filter: blur(2px) saturate(150%);
+      animation: ss-float 7s ease-in-out infinite;
     }
 
+    @keyframes ss-float { 0%,100% { margin-top: 0; } 50% { margin-top: -12px; } }
+
     #ssSubject {
-      font-size: clamp(0.6rem, 1.2vw, 0.85rem);
-      font-weight: 700;
-      color: #67e8f9;
-      letter-spacing: clamp(2px, 0.4vw, 5px);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+      font-family: Georgia, Garamond, "Times New Roman", serif;
+      font-size: clamp(1rem, 1.7vw, 1.5rem);
+      font-weight: 900;
+      font-style: italic;
+      color: #fff1c9;
+      letter-spacing: clamp(2px, 0.42vw, 7px);
       text-transform: uppercase;
-      margin-bottom: clamp(3px, 0.5vh, 6px);
-      opacity: 0.85;
+      margin-bottom: 2px;
+      opacity: 1;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, .5);
     }
 
     #ssPaper {
-      font-size: clamp(0.8rem, 1.8vw, 1.3rem);
-      font-weight: 700;
-      color: #a78bfa;
-      letter-spacing: clamp(1px, 0.3vw, 2px);
+      font-family: Georgia, Garamond, "Times New Roman", serif;
+      font-size: clamp(0.88rem, 1.3vw, 1.15rem);
+      font-weight: 900;
+      font-style: italic;
+      color: #fff0c4;
+      letter-spacing: clamp(2px, 0.32vw, 5px);
       text-transform: uppercase;
-      margin-bottom: clamp(8px, 1.4vh, 16px);
+      margin-bottom: clamp(8px, 1.25vh, 15px);
     }
 
     .ss-divider {
-      width: clamp(40px, 6vw, 60px);
+      width: clamp(90px, 22vw, 280px);
       height: 2px;
       background: linear-gradient(90deg,
           transparent,
-          rgba(167, 139, 250, 0.7),
+          rgba(255, 240, 194, 0.92),
           transparent);
-      margin: 0 auto clamp(8px, 1.4vh, 16px);
+      margin: 0 auto clamp(10px, 1.6vh, 18px);
     }
 
     #ssChapterNum {
-      font-size: clamp(0.65rem, 1.2vw, 0.9rem);
-      font-weight: 700;
-      color: #94a3b8;
-      letter-spacing: clamp(2px, 0.4vw, 4px);
+      font-family: Georgia, Garamond, "Times New Roman", serif;
+      font-size: clamp(0.75rem, .95vw, .9rem);
+      font-weight: 800;
+      font-style: italic;
+      color: #f0e6cc;
+      letter-spacing: clamp(3px, 0.45vw, 7px);
       text-transform: uppercase;
-      margin-bottom: clamp(5px, 0.9vh, 10px);
+      margin-bottom: clamp(6px, 1vh, 12px);
     }
 
     #ssChapterTitle {
-      font-size: clamp(1.2rem, 3.5vw, 3rem);
-      font-weight: 900;
-      background: linear-gradient(135deg, #f8fafc, #cbd5e1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      display: inline-block;
+      max-width: 100%;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: none;
+      box-shadow: none;
+      font-family: "Hind Siliguri", serif;
+      font-size: clamp(2rem, 4.8vw, 5rem);
+      font-weight: 700;
+      color: #fff0c5;
+      background-image: none;
+      -webkit-text-fill-color: currentColor;
       margin: 0;
-      line-height: 1.25;
+      line-height: 1.2;
+      letter-spacing: .01em;
       word-break: break-word;
+      text-shadow: 0 3px 0 rgba(79, 60, 25, .7), 0 7px 18px rgba(5, 15, 22, .72), 0 0 30px rgba(255, 229, 168, .2);
     }
 
     @media (max-width: 600px) {
       #screensaverText {
-        width: 88vw;
-        padding: 16px 20px 20px !important;
-        bottom: 5% !important;
-        border-radius: 16px !important;
+        width: fit-content;
+        max-width: 88vw;
+        padding: 18px 20px 22px !important;
+        top: 50% !important;
+        bottom: auto !important;
+        transform: translate(-50%, -50%) !important;
+        border-radius: 28px !important;
       }
     }
   </style>
@@ -1668,23 +1710,23 @@
     <div id="screensaverText" style="
           display: block;
           position: absolute;
-          bottom: 7%;
+          top: 50%;
           left: 50%;
-          transform: translateX(-50%);
-          background: rgba(10, 17, 35, 0.75);
-          backdrop-filter: blur(20px);
-          -webkit-backdrop-filter: blur(20px);
-          padding: clamp(18px, 3vh, 34px) clamp(24px, 5vw, 56px)
-            clamp(22px, 3.5vh, 40px);
-          border-radius: clamp(20px, 3vw, 32px);
-          border: 1px solid rgba(255, 255, 255, 0.15);
+          transform: translate(-50%, -50%);
+          background: rgba(192, 227, 207, 0.12);
+          padding: clamp(18px, 2.5vh, 30px) clamp(22px, 2.8vw, 42px);
+          border-radius: clamp(22px, 2.5vw, 34px);
+          border: 1.5px solid rgba(228, 250, 255, 0.62);
           text-align: center;
           color: white;
           opacity: 0;
           transition: opacity 1.2s ease-in-out;
           box-shadow:
-            0 28px 70px rgba(0, 0, 0, 0.65),
-            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            0 0 0 7px rgba(206, 245, 255, 0.08),
+            0 0 0 9px rgba(241, 252, 255, 0.32),
+            0 20px 55px rgba(4, 18, 24, 0.34),
+            inset 0 1px 0 rgba(255, 255, 255, 0.46),
+            inset 0 -18px 50px rgba(222, 250, 255, 0.12);
         ">
       <!-- Subject (Sub) -->
       <div id="ssSubject">Agriculture</div>

@@ -368,49 +368,12 @@
         <!-- Word Input -->
         <div class="wp-word-section">
           <div class="wp-stat-label" style="margin-bottom: 10px">
-            ✏️ Current Word — Click cells below to assign letters
+            ✏️ Direct Cell Entry — Click a cell and type a grapheme
           </div>
-          <div class="wp-word-input-row">
-            <input
-              type="text"
-              id="wordInput"
-              class="wp-word-input"
-              placeholder="Type word..."
-              oninput="handleWordInput(this.value)"
-            />
-            <button
-              class="btn-primary"
-              style="
-                background: #7c3aed;
-                padding: 10px 14px;
-                font-size: 0.82rem;
-              "
-              onclick="resetWordIndex()"
-            >
-              ↺ RESET
-            </button>
-          </div>
-          <div
-            style="
-              display: flex;
-              align-items: center;
-              gap: 8px;
-              flex-wrap: wrap;
-            "
-          >
-            <span class="wp-word-index-badge" id="wordIndexBadge"
-              >Letter 1 of 0</span
-            >
-            <span
-              id="wordProgressDisplay"
-              style="
-                font-size: 0.75rem;
-                color: #94a3b8;
-                font-weight: 700;
-                letter-spacing: 2px;
-              "
-            ></span>
-          </div>
+          <p class="wp-cell-entry-help">The keyboard opens in the selected cell. Type one Bengali character cluster, then press Enter or click another cell to save.</p>
+          <!-- Retained for compatibility with existing saved sessions. -->
+          <input type="hidden" id="wordInput" />
+          <span id="wordIndexBadge" hidden></span><span id="wordProgressDisplay" hidden></span>
         </div>
 
         <!-- Interactive Grid -->
@@ -865,11 +828,41 @@
       }
 
       function handleCellClick(row, col) {
-        WordPuzzle.paintWPCell(row, col);
-        updateDashCell(row, col);
-        updateWordBadge();
-        // Update UI for points/turn (no full rebuild needed)
-        updateStats();
+        const cell = WordPuzzle.game.cells[`${row},${col}`];
+        const editor = document.createElement("input");
+        editor.type = "text";
+        editor.className = "wp-cell-editor";
+        editor.lang = "bn";
+        editor.dir = "auto";
+        editor.autocomplete = "off";
+        editor.spellcheck = false;
+        editor.setAttribute("aria-label", `Type the letter for row ${row + 1}, column ${col + 1}`);
+        editor.value = cell?.letter || "";
+        const target = document.getElementById(`dcell-${row}-${col}`);
+        if (!target) return;
+        target.replaceChildren(editor);
+        editor.addEventListener("click", event => event.stopPropagation());
+        let finished = false;
+        const finish = (save) => {
+          if (finished) return;
+          finished = true;
+          if (save) {
+            const clusters = WordPuzzle.splitWPWord(editor.value.normalize("NFC"));
+            if (clusters.length > 1) showToast("One character cluster per cell. The first cluster was saved.");
+            WordPuzzle.setWPCellLetter(row, col, clusters[0] || "");
+            updateDashCell(row, col);
+            updateStats();
+          } else {
+            updateDashCell(row, col);
+          }
+        };
+        editor.addEventListener("keydown", event => {
+          if (event.key === "Enter") { event.preventDefault(); finish(true); editor.blur(); }
+          if (event.key === "Escape") { event.preventDefault(); finish(false); editor.blur(); }
+        });
+        editor.addEventListener("blur", () => finish(true));
+        editor.focus();
+        editor.select();
       }
 
       // ── UI Update ────────────────────────────────────────
@@ -940,7 +933,7 @@
 
       function updateWordBadge() {
         const g = WordPuzzle.game;
-        const word = g.currentWord.toUpperCase();
+        const word = WordPuzzle.splitWPWord(g.currentWord.toUpperCase());
         const idx = g.currentWordIndex;
 
         document.getElementById("wordIndexBadge").textContent =
@@ -950,15 +943,14 @@
 
         // Show word with used letters highlighted
         if (word.length > 0) {
-          const parts = word
-            .split("")
-            .map((ch, i) =>
-              i < idx
-                ? `<span style="color:#10b981; text-decoration:line-through;">${ch}</span>`
-                : `<span style="color:#f1f5f9;">${ch}</span>`,
-            )
-            .join("");
-          document.getElementById("wordProgressDisplay").innerHTML = parts;
+          const progress = document.getElementById("wordProgressDisplay");
+          progress.replaceChildren(...word.map((cluster, i) => {
+            const span = document.createElement("span");
+            span.textContent = cluster;
+            span.style.color = i < idx ? "#10b981" : "#f1f5f9";
+            if (i < idx) span.style.textDecoration = "line-through";
+            return span;
+          }));
         } else {
           document.getElementById("wordProgressDisplay").textContent = "";
         }
@@ -1022,12 +1014,14 @@
           alert("Enter a valid amount!");
           return;
         }
+        WordPuzzle.addWPPoints(team, amount);
+        updateStats();
         const g = WordPuzzle.game;
         const total = team === "boys" ? g.boysPoints : g.girlsPoints;
         if (dashSocket) {
           dashSocket.emit("wordpuzzle-add-points", { team, amount, total });
         }
-        showToast(`📣 Points modal sent to game page!`);
+        showToast(`📣 ${amount} points added. ${teamLabelUpper(team)} total: ${total}`);
       }
 
       // ── Word ─────────────────────────────────────────────

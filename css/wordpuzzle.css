@@ -212,10 +212,10 @@ body.game-wp {
   border: 2px solid rgba(255, 255, 255, 0.15);
   background: rgba(0, 0, 0, 0.4);
   color: #fff;
-  font-size: 1rem;
+  font-family: "Hind Siliguri", "Outfit", sans-serif;
+  font-size: 1.15rem;
   font-weight: 700;
-  letter-spacing: 2px;
-  text-transform: uppercase;
+  letter-spacing: 0;
   box-sizing: border-box;
   width: 100%;
   transition: border-color 0.2s;
@@ -224,6 +224,33 @@ body.game-wp {
 .wp-word-input:focus {
   outline: none;
   border-color: #7c3aed;
+}
+
+.wp-cell-entry-help {
+  margin: 0;
+  color: #a9b8d0;
+  font-family: "Hind Siliguri", "Outfit", sans-serif;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.wp-cell-editor {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 2px solid #8b5cf6;
+  border-radius: 2px;
+  outline: none;
+  background: transparent;
+  color: #172554;
+  font-family: "Hind Siliguri", sans-serif;
+  font-size: inherit;
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
 }
 
 .wp-word-index-badge {
@@ -273,6 +300,8 @@ body.game-wp {
   align-items: center;
   justify-content: center;
   font-size: 0.55rem;
+  font-family: "Hind Siliguri", sans-serif;
+  line-height: 1.15;
   font-weight: 900;
   color: rgba(0, 0, 0, 0.7);
   transition:
@@ -290,7 +319,9 @@ body.game-wp {
   background: #bfdbfe;
 }
 .wp-dash-cell.painted-girls {
-  background: #fce7f3;
+  background: #f6b0bc;
+  border-color: #a8324c;
+  color: #4a1420;
 }
 
 /* ── Session Section ────────────────────────────────────── */
@@ -529,7 +560,7 @@ body.game-wp {
   justify-content: center;
   font-weight: 900;
   color: #1e293b;
-  font-family: "Orbitron", monospace;
+  font-family: "Hind Siliguri", "Orbitron", sans-serif;
   transition: background 0.3s;
   position: relative;
 }
@@ -545,14 +576,16 @@ body.game-wp {
 }
 
 .wp-game-cell.colored-girls {
-  background: #fce7f3;
-  border-color: #9d174d;
+  background: #f6b0bc;
+  border-color: #a8324c;
+  color: #4a1420;
 }
 
 .wp-game-cell .cell-letter {
   font-size: inherit;
   font-weight: 900;
-  line-height: 1;
+  font-family: "Hind Siliguri", sans-serif;
+  line-height: 1.15;
   pointer-events: none;
 }
 

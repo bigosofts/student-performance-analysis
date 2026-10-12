@@ -275,7 +275,7 @@
         align-items: center;
         justify-content: center;
         font-weight: 900;
-        font-family: "Orbitron", monospace;
+        font-family: "Hind Siliguri", "Orbitron", sans-serif;
         color: #1e293b;
         transition: background 0.4s ease;
       }
@@ -285,12 +285,14 @@
         border-color: #1e40af;
       }
       .wp-game-cell.colored-girls {
-        background: #fce7f3;
-        border-color: #9d174d;
+        background: #f6b0bc;
+        border-color: #a8324c;
+        color: #4a1420;
       }
 
       .wp-game-cell .cell-letter {
-        line-height: 1;
+        font-family: "Hind Siliguri", sans-serif;
+        line-height: 1.15;
         font-weight: 900;
         pointer-events: none;
         animation: letterReveal 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -679,7 +681,7 @@
           if (cell.color === "boys") div.classList.add("colored-boys");
           if (cell.color === "girls") div.classList.add("colored-girls");
 
-          // Only show displayLetter (from previously loaded session)
+          // Show letters explicitly marked for the live game display.
           if (cell.displayLetter) {
             const span = document.createElement("span");
             span.className = "cell-letter";

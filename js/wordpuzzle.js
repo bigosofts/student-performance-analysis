@@ -29,6 +29,25 @@ let wpGame = {
 // ── Socket reference (set by each page) ──────────────────
 let wpSocket = null;
 
+// Keep Bengali conjuncts and other combining sequences together as one tile.
+function splitWPWord(word) {
+  const value = String(word || "");
+  if (typeof Intl !== "undefined" && Intl.Segmenter) {
+    return Array.from(new Intl.Segmenter("bn", { granularity: "grapheme" }).segment(value), part => part.segment);
+  }
+
+  // Fallback for browsers without Intl.Segmenter: attach marks and the
+  // character following a Bengali virama to the current grapheme.
+  const clusters = [];
+  let joinNext = false;
+  for (const character of Array.from(value)) {
+    if (!clusters.length || (!joinNext && !/\p{M}/u.test(character))) clusters.push(character);
+    else clusters[clusters.length - 1] += character;
+    joinNext = character === "\u09cd" || character === "\u200d" || character === "\u200c";
+  }
+  return clusters;
+}
+
 // ── Audio (Web Audio API) ────────────────────────────────
 const WPAudioCtx = window.AudioContext || window.webkitAudioContext;
 let wpAudioCtx = null;
@@ -179,7 +198,7 @@ function addWPPoints(team, amount) {
 function paintWPCell(row, col) {
   const key  = `${row},${col}`;
   const team = wpGame.currentTurn;
-  const word = (wpGame.currentWord || '').toUpperCase();
+  const word = splitWPWord((wpGame.currentWord || '').toUpperCase());
   let letter = null;
 
   if (word.length > 0 && wpGame.currentWordIndex < word.length) {
@@ -194,6 +213,7 @@ function paintWPCell(row, col) {
   wpGame.cells[key].color = team;                        // always repaint
   if (letter !== null) {
     wpGame.cells[key].letter = letter;                   // assign letter only when word has chars left
+    wpGame.cells[key].displayLetter = letter;             // show new assignments on the live game page
   }
 
   playWPPaintSound(team);
@@ -202,8 +222,19 @@ function paintWPCell(row, col) {
 
 // ── Word ──────────────────────────────────────────────────
 function setWPCurrentWord(word) {
-  wpGame.currentWord      = word;
+  wpGame.currentWord      = String(word || '').normalize('NFC');
   wpGame.currentWordIndex = 0;       // reset pointer whenever word changes
+  saveWPGame();
+}
+
+function setWPCellLetter(row, col, letter) {
+  const key = `${row},${col}`;
+  const cluster = String(letter || '').normalize('NFC');
+  const cell = wpGame.cells[key] || { color: null, letter: null, displayLetter: null };
+  cell.color = wpGame.currentTurn;
+  cell.letter = cluster || null;
+  cell.displayLetter = cluster || null;
+  wpGame.cells[key] = cell;
   saveWPGame();
 }
 
@@ -307,10 +338,8 @@ function saveWPSession(sessionName) {
 
 /**
  * Load a saved session.
- * Key behaviour: when loading, all saved cell letters become displayLetters
- * (visible on the game page). Any NEW letter assignments after loading will
- * update `letter` but NOT `displayLetter` — so today's work stays hidden
- * on the projector until tomorrow's session load.
+ * Saved cell letters become displayLetters when a session is loaded, and new
+ * letter assignments are displayed live as soon as the teacher places them.
  */
 function loadWPSession(sessionName) {
   const sessions = getWPSessions();
@@ -369,6 +398,7 @@ function getWPCurrentSessionName() {
 // ── Global Export ─────────────────────────────────────────
 window.WordPuzzle = {
   get game() { return wpGame; },
+  splitWPWord,
   saveWPGame,
   loadWPGame,
   setWPGame,
@@ -379,6 +409,7 @@ window.WordPuzzle = {
   addWPPoints,
   paintWPCell,
   setWPCurrentWord,
+  setWPCellLetter,
   resetWPWordIndex,
   saveWPTeamImage,
   announceWPWinner,
