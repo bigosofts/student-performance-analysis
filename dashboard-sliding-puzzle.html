@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Sliding Puzzle · Teacher Dashboard</title>
+  <script src="js/auth-check.js"></script>
+  <link rel="stylesheet" href="css/sliding-puzzle.css">
+</head>
+<body data-page="teacher">
+  <main class="sp-shell">
+    <header class="sp-header"><div><span class="sp-eyebrow">CLASSROOM ARCADE · TEACHER CONTROL</span><h1>🧩 Sliding Puzzle</h1><p>Answer a CQ question, earn 20 slide credits, and rebuild the picture together.</p></div><nav><a class="sp-button soft" href="dashboard.html">← Teacher Central</a><a class="sp-button bright" id="openProjector" href="game-sliding-puzzle.html" target="_blank">Open projector ↗</a></nav></header>
+    <section class="sp-layout">
+      <section class="sp-panel setup-panel">
+        <div class="sp-step"><b>01</b><div><h2>Build your puzzle</h2><p>Choose the picture and CQ questions for this game.</p></div></div>
+        <div class="team-upload-grid"><label class="upload-zone blue-upload" for="blueImage"><span class="upload-icon">🔵</span><strong>Team Blue picture</strong><small>JPG, PNG or WebP · up to 12 MB</small><img id="bluePreview" alt="Team Blue preview" hidden><span id="blueName" class="image-name">Choose a picture</span></label><label class="upload-zone red-upload" for="redImage"><span class="upload-icon">🔴</span><strong>Team Red picture</strong><small>JPG, PNG or WebP · up to 12 MB</small><img id="redPreview" alt="Team Red preview" hidden><span id="redName" class="image-name">Choose a picture</span></label></div>
+        <input id="blueImage" type="file" accept="image/*" hidden><input id="redImage" type="file" accept="image/*" hidden>
+        <div class="sp-filters"><label>Paper<select id="paper"><option value="All">All Papers</option><option value="1st">1st Paper</option><option value="2nd">2nd Paper</option></select></label><label>Chapter<select id="chapter"><option value="All">All Chapters</option></select></label></div>
+        <button class="sp-button soft full" id="loadQuestions">Load knowledge + understanding</button>
+        <p id="questionStatus" class="sp-status" role="status">Choose filters, then load the matching CQ questions.</p>
+        <div class="question-list" id="questionList"></div>
+        <button class="sp-button bright full start-button" id="createSession">Create live puzzle</button>
+        <p id="setupMessage" class="sp-status" role="status"></p>
+      </section>
+      <section class="sp-panel game-panel" id="gamePanel" hidden>
+        <div class="sp-game-top"><div><span class="sp-eyebrow">LIVE PUZZLE · <span id="gameCode">------</span></span><h2>One board. Two teams. Your classroom.</h2></div><span id="gameStatus" class="live-pill">Live session</span></div>
+        <div class="team-bar">
+          <div class="team-chip blue-team" data-team="blue"><span class="team-dot"></span><div><b>TEAM BLUE</b><small><span data-blue-credit>0</span> credits · <span data-blue-progress>0 / 15 tiles placed</span></small></div></div>
+          <div class="turn-indicator">NOW PLAYING <strong data-turn-name>Team Blue</strong></div>
+          <div class="team-chip red-team" data-team="red"><span class="team-dot"></span><div><b>TEAM RED</b><small><span data-red-credit>0</span> credits · <span data-red-progress>0 / 15 tiles placed</span></small></div></div>
+        </div>
+        <div class="play-layout">
+          <div class="board-wrap"><div id="teacherBoardFlip" class="teacher-board-flip"><div class="teacher-board-inner"><div class="teacher-board-face teacher-board-front"><div id="teacherBoard" class="slide-board" aria-label="Interactive 4 by 4 puzzle"></div></div><div class="teacher-board-face teacher-board-back"><img id="referenceImage" alt="Full picture reference"></div></div></div><button id="toggleReference" class="sp-button soft preview-button" type="button">🖼️ Flip to full picture</button><p id="moveHelp" class="move-help">Earn slide credits, then move any highlighted tile into the empty space.</p></div>
+          <div class="teacher-controls">
+            <div class="control-title"><span>QUESTION <b data-question-count>0 / 0</b></span><h3>CQ checkpoint</h3></div>
+            <div id="teacherQuestion" class="question-card"><div class="empty-question">Ask the first question to Team Blue.</div></div>
+            <div class="judge-row"><button id="markCorrect" class="sp-button correct-button" disabled>✓ Correct · +20</button><button id="markWrong" class="sp-button wrong-button" disabled>✕ Incorrect</button></div>
+            <div class="control-actions"><button id="askQuestion" class="sp-button bright" disabled>Ask next question</button><button id="switchTeam" class="sp-button soft">Switch team</button></div>
+            <button id="toggleQuestion" class="sp-button soft full" disabled>Show projector question</button>
+            <button id="finishGame" class="sp-button end-button">End game &amp; delete picture</button>
+            <button id="resetGame" class="sp-button end-button">Reset game &amp; delete all pictures</button>
+          </div>
+        </div>
+      </section>
+    </section>
+    <section class="no-session" id="noSession"><span>🎮</span><div><b>Build a puzzle to open your live controls</b><p>Your projector will follow this dashboard automatically.</p></div></section>
+  </main>
+  <script src="/socket.io/socket.io.js"></script><script src="js/sliding-puzzle.js"></script>
+</body></html>

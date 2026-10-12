@@ -1513,6 +1513,7 @@ app.use("/uploads", express.static(uploadsDir));
 // Question Bank and Student Performance API
 require("./server-qbank")(app, io, uploadsDir);
 require("./server-talent-hunt")(app, io, uploadsDir);
+require("./server-sliding-puzzle")(app, io, uploadsDir);
 
 // Blockade 3D game session handlers
 require("./server-blockade")(io, uploadsDir);

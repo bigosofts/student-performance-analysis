@@ -585,6 +585,19 @@
       background-size: 250% 100%;
     }
 
+    .game-card[data-index="9"] {
+      --glow: rgba(34, 211, 238, 0.34);
+      --neon-1: #06b6d4;
+      --neon-2: #8b6cff;
+      --neon-speed: 3.8s;
+      --inner-speed: 4.7s;
+    }
+
+    .game-card[data-index="9"]::after {
+      background: linear-gradient(90deg, transparent, rgba(34, 211, 238, 0.22) 32%, rgba(139, 108, 255, 0.28) 52%, rgba(34, 211, 238, 0.2) 72%, transparent);
+      background-size: 250% 100%;
+    }
+
     /* Gentle shake animation */
     @keyframes gentleShake {
 
@@ -1883,6 +1896,11 @@
         <a href="talent-hunt-game.html" class="game-card" data-index="8">
           <div class="game-icon" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">🏅</div>
           <div class="card-text"><h2>Talent Hunt</h2><p>Live team quiz or individual student challenge.</p><button class="btn-launch" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">Start Hunt</button></div>
+        </a>
+
+        <a href="game-sliding-puzzle.html" class="game-card" data-index="9">
+          <div class="game-icon" style="background:linear-gradient(135deg,#06b6d4,#6366f1)">🧩</div>
+          <div class="card-text"><h2>Sliding Puzzle</h2><p>Earn slide credits by answering knowledge questions and complete the picture.</p><button class="btn-launch" style="background:linear-gradient(135deg,#06b6d4,#6366f1)">Play Puzzle</button></div>
         </a>
 
         <!-- Game 6 -->

@@ -15,6 +15,7 @@ uploads/~$*.xlsx
 .well-known/
 .git/
 .talent-hunt-data/
+/uploads/sliding-puzzle/
 tmp/
 .htaccess
 .ftpquota
