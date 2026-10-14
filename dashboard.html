@@ -740,6 +740,61 @@
       }
       .game-card:nth-child(7) .status-badge, .game-card:nth-child(8) .status-badge { color: #07111c; }
 
+      @media (min-width: 1201px) {
+        .header-area, .main-content { width: min(100% - 80px, 1500px); }
+        .header-area { padding-top: clamp(30px, 4vh, 46px); padding-bottom: 26px; }
+        .main-content { padding-bottom: 36px; }
+        .game-grid { gap: 18px; }
+        .game-card {
+          min-height: 218px;
+          padding: 21px 18px 19px;
+          overflow: hidden;
+          border: 1px solid #e3e9f1;
+          border-top: 1px solid #e3e9f1;
+          border-radius: 20px;
+          background: linear-gradient(155deg, #fff 0%, #fbfcfe 100%);
+          box-shadow: 0 5px 16px rgba(28, 45, 76, .045), 0 1px 2px rgba(28, 45, 76, .035);
+          transform: translateY(14px);
+          transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+        }
+        .game-card::before {
+          position: absolute;
+          inset: 0 0 auto;
+          height: 3px;
+          content: "";
+          background: linear-gradient(90deg, color-mix(in srgb, var(--theme-color, #64748b), white 15%), var(--theme-color, #64748b));
+          opacity: .9;
+        }
+        .game-card:hover {
+          transform: translateY(-3px);
+          border-color: color-mix(in srgb, var(--theme-color, #64748b), white 72%);
+          background: #fff;
+          box-shadow: 0 14px 30px rgba(28, 45, 76, .105);
+        }
+        .game-icon, .game-card:nth-child(5) .game-icon {
+          width: 60px;
+          height: 60px;
+          margin: 0 0 13px;
+          border: 1px solid color-mix(in srgb, var(--theme-color, #64748b), white 82%);
+          border-radius: 18px;
+          background: color-mix(in srgb, var(--theme-color, #64748b), white 93%);
+          font-size: 1.8rem;
+          box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-color, #64748b), transparent 90%);
+        }
+        .game-card:nth-child(5) { flex-direction: column; text-align: center; padding: 21px 18px 19px; }
+        .game-card:nth-child(5) .game-icon { margin: 0 0 13px; }
+        .game-card:nth-child(5) .card-text { align-items: center; padding: 0; }
+        .game-card h2 { font-size: 1.08rem; letter-spacing: .01em; }
+        .game-card p { max-width: 31ch; font-size: .8rem; line-height: 1.55; }
+        .status-badge { padding: 6px 11px; font-size: .61rem; letter-spacing: .055em; box-shadow: none; }
+        .game-card:nth-child(8) { --theme-color: #06b6d4; }
+        .game-card:nth-child(9) { --theme-color: #f97316; }
+        .game-card:nth-child(10) { --theme-color: #f59e0b; }
+        .game-card:nth-child(11) { grid-column: 2; --theme-color: #10b981; }
+        .game-card:nth-child(12) { grid-column: 3; --theme-color: #3b82f6; }
+        .game-card:nth-child(13) { grid-column: 4; --theme-color: #0ea5e9; }
+      }
+
       @media (max-width: 1100px) {
         body { height: auto; min-height: 100vh; }
         .header-area, .main-content { width: min(100% - 40px, 900px); }
@@ -753,10 +808,37 @@
         .game-card p { font-size: .76rem; }
       }
       @media (max-width: 640px) {
-        .header-area { padding: 28px 0 22px; }
-        .title-glitch { font-size: clamp(1.85rem, 8vw, 2.65rem); letter-spacing: 0; }
-        .subtitle { max-width: 100%; line-height: 1.55; letter-spacing: .09em; }
-        .theme-switch { margin-top: 15px; min-height: 42px; font-size: .78rem; }
+        .header-area {
+          position: relative;
+          isolation: isolate;
+          width: calc(100% - 24px);
+          margin: 12px auto 22px;
+          padding: 30px 18px 25px;
+          overflow: hidden;
+          border: 1px solid rgba(255, 255, 255, .14);
+          border-radius: 26px;
+          background:
+            radial-gradient(ellipse at 12% 0%, rgba(129, 140, 248, .34), transparent 48%),
+            radial-gradient(ellipse at 100% 100%, rgba(45, 212, 191, .2), transparent 45%),
+            linear-gradient(145deg, #111b36 0%, #202b50 52%, #142d43 100%);
+          box-shadow: 0 18px 38px rgba(25, 38, 71, .2), inset 0 1px 0 rgba(255, 255, 255, .16);
+          text-align: center;
+        }
+        .header-area::before,
+        .header-area::after {
+          position: absolute;
+          z-index: -1;
+          content: "";
+          pointer-events: none;
+          border: 1px solid rgba(255, 255, 255, .09);
+          border-radius: 50%;
+        }
+        .header-area::before { width: 210px; height: 210px; top: -142px; right: -58px; box-shadow: 0 0 0 18px rgba(255, 255, 255, .025), 0 0 0 38px rgba(255, 255, 255, .02); }
+        .header-area::after { width: 140px; height: 140px; bottom: -100px; left: -55px; box-shadow: 0 0 0 15px rgba(255, 255, 255, .025), 0 0 0 32px rgba(255, 255, 255, .02); }
+        .title-glitch { width: 100%; margin-left: auto; margin-right: auto; }
+        .title-glitch { position: relative; font-size: clamp(1.85rem, 8vw, 2.65rem); letter-spacing: 0; line-height: 1.08; text-shadow: 0 4px 24px rgba(169, 110, 255, .18); }
+        .subtitle { position: relative; max-width: 100%; margin-top: 9px; color: rgba(232, 238, 255, .76); line-height: 1.55; letter-spacing: .09em; }
+        .theme-switch { position: relative; display: flex; width: fit-content; margin: 17px auto 0; min-height: 42px; border-color: rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .96); font-size: .78rem; box-shadow: 0 8px 22px rgba(3, 8, 25, .25); }
         .main-content { padding-bottom: 28px; }
         .game-grid { gap: 11px; }
         .game-card, .game-card:nth-child(5) { min-height: 190px; padding: 15px 10px 14px; border-radius: 18px; }
@@ -964,12 +1046,20 @@
             <span class="status-badge" style="background: linear-gradient(135deg, #10b981, #0f766e)">CLOUD BACKUP</span>
           </div>
         </a>
-        <a href="/filemanager.html" class="game-card">
+        <a href="/filemanager.html" class="game-card" onclick="navigateProjector('/filemanager.html', true)">
           <div class="game-icon">🗂️</div>
           <div class="card-text">
-            <h2>Mobile File Manager</h2>
+            <h2>File Manager</h2>
             <p>Open the file manager provided by the mobile app.</p>
             <span class="status-badge" style="background: linear-gradient(135deg, #3b82f6, #2563eb)">MOBILE APP</span>
+          </div>
+        </a>
+        <a href="/screencast.html" class="game-card" onclick="navigateProjector('/screencast.html', true)">
+          <div class="game-icon">📡</div>
+          <div class="card-text">
+            <h2>Screen Cast Page</h2>
+            <p>Open the screen broadcast page provided by the mobile app.</p>
+            <span class="status-badge" style="background: linear-gradient(135deg, #0ea5e9, #2563eb)">MOBILE APP</span>
           </div>
         </a>
       </div>
@@ -1241,7 +1331,7 @@
         if (e.key === 'Enter') startClassSession();
       });
 
-      function navigateProjector(url) {
+      function navigateProjector(url, stayOnDashboard = false) {
         // Grab the click event to prevent immediate navigation
         const e = window.event;
         let targetHref = "";
@@ -1251,7 +1341,7 @@
           const aTag = e.target ? e.target.closest("a") : null;
           if (aTag && aTag.href) {
             e.preventDefault(); // Stop the browser from leaving the page immediately
-            targetHref = aTag.href;
+            if (!stayOnDashboard) targetHref = aTag.href;
           }
         }
 
