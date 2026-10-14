@@ -3,15 +3,15 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#07111f">
+  <meta name="theme-color" content="#f4f7fb">
   <title>Backup Resources | Teacher Central</title>
   <script src="js/auth-check.js"></script>
   <style>
     @import url("assets/fonts/local-fonts.css");
-    :root { color-scheme: dark; --bg:#07111f; --panel:rgba(15,29,49,.76); --line:rgba(148,177,213,.15); --muted:#9fb0c7; --white:#f5f8ff; --mint:#74f0c1; --blue:#8ab7ff; }
+    :root { color-scheme:light; --bg:#f4f7fb; --panel:#fff; --line:#dce4ed; --muted:#5d6b7d; --white:#172638; --mint:#087f5b; --blue:#2563eb; }
     * { box-sizing:border-box }
-    body { margin:0; min-height:100vh; color:var(--white); font-family:Inter,"Segoe UI",sans-serif; background:radial-gradient(ellipse at 14% 0%,rgba(42,91,144,.34),transparent 40%),radial-gradient(ellipse at 92% 25%,rgba(50,124,105,.18),transparent 38%),var(--bg); }
-    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.15; background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px); background-size:48px 48px; mask-image:linear-gradient(to bottom,black,transparent 85%); }
+    body { margin:0; min-height:100vh; color:var(--white); font-family:Inter,"Segoe UI",sans-serif; background:radial-gradient(ellipse at 14% 0%,rgba(37,99,235,.08),transparent 40%),radial-gradient(ellipse at 92% 25%,rgba(8,127,91,.06),transparent 38%),var(--bg); }
+    body:before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.45; background-image:linear-gradient(rgba(23,38,56,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(23,38,56,.025) 1px,transparent 1px); background-size:48px 48px; mask-image:linear-gradient(to bottom,black,transparent 85%); }
     .shell { width:min(1160px,calc(100% - 36px)); margin:auto; padding:30px 0 68px; position:relative; }
     .topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:48px; }
     .brand { color:#dce8f9; text-decoration:none; font-weight:750; letter-spacing:.02em; display:flex; gap:11px; align-items:center; }
@@ -82,6 +82,63 @@
     .notice.error { color:#ffd0cf; border-color:rgba(255,140,140,.24); background:rgba(255,100,100,.06); }
     @media(max-width:760px) { .shell{padding-top:19px}.topbar{margin-bottom:35px}.hero{align-items:flex-start;flex-direction:column}.layout{grid-template-columns:1fr}.shield{white-space:normal}.side-panel{order:2} }
     @media(max-width:520px) { .shell{width:calc(100% - 24px)}.topbar{margin-bottom:30px}.action-panel,.side-panel,.history{padding:18px}.section-heading{align-items:flex-start;flex-direction:column}.drive-card{align-items:flex-start;flex-direction:column}.drive-card .button{width:100%}.history-top{align-items:flex-start;flex-direction:column}.backup-row{align-items:flex-start;flex-direction:column}.backup-row .button{width:100%}.callout-top{align-items:flex-start} }
+    .brand { color:#24364b; }
+    .brand-mark { background:#edf3fb; }
+    .back { color:#526274; background:rgba(255,255,255,.8); }
+    .back:hover { color:#172638; border-color:rgba(37,99,235,.35); }
+    h1 span { background-image:linear-gradient(100deg,#172638 10%,#2563eb 58%,#087f5b); }
+    .shield { color:#526274; background:rgba(255,255,255,.72); }
+    .connection { color:#526274; background:#fff; }
+    .connection.ready { color:#087f5b; background:#effaf5; }
+    .drive-card { border-color:#dce7f3; background:linear-gradient(110deg,#f2f7ff,#f0faf6); }
+    .drive-icon { background:#e8f0fc; }
+    .button-secondary { color:#33465c; background:#fff; border-color:#dce4ed; }
+    .button-secondary:hover { border-color:#a9bdd7; }
+    .button-restore { color:#2455a5; background:#f1f6ff; border-color:#d5e2f6; }
+    .backup-callout { border-color:#cfe9dd; background:radial-gradient(ellipse at 92% 0%,rgba(8,127,91,.07),transparent 48%),#f8fcfa; }
+    .progress-label { color:#526274; }
+    .progress-track { background:#e5ebf2; }
+    .status-message { color:#526274; }
+    .status-message.error { color:#b42318; }
+    .status-message.success { color:#087f5b; }
+    .step { border-color:#edf0f4; }
+    .step-num { color:#2455a5; border-color:#d5e2f6; background:#f1f6ff; }
+    .retention { color:#526274; }
+    .backup-row { border-color:#e5eaf0; background:#fbfcfe; }
+    .origin-pill { color:#2455a5; border-color:#d5e2f6; background:#f5f8fe; }
+    .empty { border-color:#d5dfe9; background:#fbfcfe; }
+    .notice { color:#2455a5; background:#f1f6ff; border-color:#d5e2f6; }
+    .notice.error { color:#b42318; border-color:#f0c9c6; background:#fff5f4; }
+    @media(max-width:760px) {
+      .hero { gap:18px; margin-bottom:24px; }
+      .layout { gap:14px; }
+      .history { margin-top:14px; }
+    }
+    @media(max-width:520px) {
+      .shell { width:calc(100% - 28px); padding-top:14px; padding-bottom:36px; }
+      .topbar { gap:10px; margin-bottom:26px; }
+      .brand { gap:8px; font-size:.9rem; }
+      .brand-mark { width:34px; height:34px; }
+      .back { padding:9px 12px; font-size:.82rem; }
+      h1 { font-size:clamp(2.05rem,11vw,3rem); }
+      .lead { font-size:.94rem; }
+      .shield { padding:10px 12px; }
+      .action-panel,.side-panel,.history { padding:16px; }
+      .connection { max-width:100%; white-space:normal; }
+      .drive-card { padding:14px; }
+      .drive-info { align-items:flex-start; }
+      .drive-info small { line-height:1.45; overflow-wrap:anywhere; }
+      .backup-callout { padding:16px; }
+      .callout-top { gap:10px; }
+      .button { min-height:44px; white-space:normal; text-align:center; }
+      .history-top { gap:12px; }
+      .retention { width:100%; flex-wrap:wrap; }
+      .retention .button { margin-left:auto !important; }
+      .backup-row { padding:13px; }
+      .file-main { width:100%; }
+      .file-name { white-space:normal; overflow-wrap:anywhere; line-height:1.45; }
+      .backup-row .button { width:100%; }
+    }
     @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important}}
   </style>
 </head>
@@ -247,7 +304,9 @@
         while (true) {
           const job = await request(`/api/backups/jobs/${encodeURIComponent(jobId)}`);
           text.textContent = job.phase;
-          pct.textContent = `${job.progress || 0}%`;
+          pct.textContent = job.totalBytes
+            ? `${job.progress || 0}% · ${formatBytes(job.bytes)} / ${formatBytes(job.totalBytes)}`
+            : `${job.progress || 0}%`;
           bar.style.width = `${job.progress || 0}%`;
           if (job.status === 'complete') {
             message.className = 'status-message success';
