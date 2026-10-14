@@ -24,4 +24,9 @@ stderr.log
 server.crt
 server.key
 cgi-bin/
+.env
+# Private Drive tokens and temporary backup/restore archives
+.backup-data/
+.uploads-restore-*/
+.uploads-previous-*/
 

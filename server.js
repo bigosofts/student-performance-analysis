@@ -7,6 +7,7 @@ const fs = require("fs");
 const XLSX = require("xlsx");
 const { spawn } = require("child_process");
 const unzipper = require("unzipper");
+require("dotenv").config({ path: path.join(__dirname, ".env"), quiet: true });
 
 const app = express();
 const server = http.createServer(app);
@@ -408,6 +409,16 @@ app.use(express.static(path.join(__dirname)));
 // Serve uploads folder
 app.use("/uploads", express.static(uploadsDir));
 app.use(express.json());
+
+require("./backup-routes")(app, {
+  uploadsDir,
+  projectDir: __dirname,
+  afterRestore: () => {
+    initQuizSystem();
+    const restoredMazeQuiz = path.join(uploadsDir, "maze-quiz-questions.xlsx");
+    if (fs.existsSync(restoredMazeQuiz)) loadMazeQuizFromExcel(restoredMazeQuiz);
+  },
+});
 
 app.post("/api/reload-quiz", (req, res) => {
   const game = req.body.game;
