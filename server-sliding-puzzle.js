@@ -10,17 +10,26 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
   const creativeFile = path.join(uploadsDir, "creative-questions.xlsx");
   fs.mkdirSync(imageDir, { recursive: true });
   const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 12 * 1024 * 1024 } });
-  let session = null;
-  try { session = JSON.parse(fs.readFileSync(statePath, "utf8")); } catch (_) {}
+  let session = null, savedSessions = {}, activeSessionName = null;
+  try {
+    const stored = JSON.parse(fs.readFileSync(statePath, "utf8"));
+    savedSessions = stored.savedSessions && typeof stored.savedSessions === "object" ? stored.savedSessions : {};
+    activeSessionName = stored.activeSessionName || null;
+    session = stored.session || (stored.id ? { ...stored } : null);
+    if (session) { delete session.savedSessions; delete session.activeSessionName; delete session.session; }
+  } catch (_) {}
 
   const safeImagePath = filename => path.join(imageDir, path.basename(String(filename || "")));
   const removeImage = filename => {
     if (!filename) return;
     try { fs.unlinkSync(safeImagePath(filename)); } catch (_) {}
   };
-  const persist = () => {
-    if (session) fs.writeFileSync(statePath, JSON.stringify(session, null, 2));
-    else { try { fs.unlinkSync(statePath); } catch (_) {} }
+  const persist = () => fs.writeFileSync(statePath, JSON.stringify({ session, savedSessions, activeSessionName }, null, 2));
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const sessionImages = value => (value?.imageFiles || [value?.imageFile, ...Object.values(value?.imageUrls || {}).map(url => path.basename(String(url || "")))]).filter(Boolean);
+  const cleanupUnreferencedImages = () => {
+    const retained = new Set([...sessionImages(session), ...Object.values(savedSessions).flatMap(sessionImages)]);
+    for (const file of fs.readdirSync(imageDir)) if (/^puzzle-[a-f0-9-]+\.jpg$/i.test(file) && !retained.has(file)) removeImage(file);
   };
   const solvedBoard = () => Array.from({ length: 15 }, (_, i) => i + 1).concat(0);
   const shuffleBoard = () => {
@@ -49,13 +58,17 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     const activeBoard = session.boards?.[session.currentTeam] || session.board;
     return {
       id:session.id, status:session.status, imageUrl:session.imageUrls?.[session.currentTeam] || session.imageUrl, imageUrls:session.imageUrls || { blue:session.imageUrl, red:session.imageUrl }, board:activeBoard,
+      boards: session.boards ? { blue: [...session.boards.blue], red: [...session.boards.red] } : { blue: activeBoard, red: activeBoard },
       currentTeam:session.currentTeam, credits:session.credits, questionNumber:session.questionNumber,
       teamProgress:{ blue:boardProgress(session.boards?.blue || activeBoard), red:boardProgress(session.boards?.red || activeBoard) },
       questionCount:session.questions.length, currentQuestion:revealedQuestion, questionVisible:!!session.questionVisible, referenceVisible:!!session.referenceVisible,
       winner:session.winner, result:session.result || null
     };
   };
-  const broadcast = () => { persist(); io.emit("sliding-puzzle:state", publicState()); };
+  const broadcast = () => {
+    if (session && activeSessionName && savedSessions[activeSessionName]) savedSessions[activeSessionName] = clone(session);
+    persist(); io.emit("sliding-puzzle:state", publicState());
+  };
   const getPrivateQuestion = () => session && session.currentQuestion;
   const canManage = socket => socket.data.slidingPuzzleRole === "teacher";
   const judge = (socket, correct) => {
@@ -71,23 +84,61 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     session.questionVisible = false;
     session.winner = winner || null;
     session.result = winner ? `${winner === "blue" ? "Team Blue" : "Team Red"} completed the picture!` : "The puzzle was ended by the teacher.";
-    const oldImages = session.imageFiles || [session.imageFile];
     broadcast();
     // Keep a winner's pictures available for the projector congratulations screen.
     // Teacher end/reset and DELETE remove the files explicitly.
     if (!winner) {
-      oldImages.filter(Boolean).forEach(removeImage);
       session.imageFiles = [];
       session.imageFile = null;
     }
+    cleanupUnreferencedImages();
     persist();
   };
 
-  if (session && session.status === "finished") removeImage(session.imageFile);
-  const retainedImages = session && session.status === "playing" ? (session.imageFiles || [session.imageFile]).filter(Boolean) : [];
-  for (const file of fs.readdirSync(imageDir)) {
-    if (/^puzzle-[a-f0-9-]+\.jpg$/i.test(file) && !retainedImages.includes(file)) removeImage(file);
-  }
+  cleanupUnreferencedImages();
+  app.get("/api/sliding-puzzle/saved-sessions", (_req, res) => res.json({ sessions:savedSessions, activeSessionName }));
+  app.post("/api/sliding-puzzle/saved-sessions/:name", (req, res) => {
+    const name = String(req.params.name || "").trim();
+    const incoming = req.body?.session;
+    const snapshot = incoming ? clone(incoming) : session ? clone(session) : null;
+    if (!name || !snapshot) return res.status(400).json({ error:"A session name and active puzzle are required." });
+    if (incoming && (!snapshot.questions?.length) && session?.questions?.length) snapshot.questions = clone(session.questions);
+    const files = sessionImages(snapshot);
+    if (files.some(file => !/^puzzle-[a-f0-9-]+\.jpg$/i.test(file) || !fs.existsSync(safeImagePath(file)))) {
+      return res.status(400).json({ error:"This saved session's picture files are no longer available. Save the active game to create a fresh session." });
+    }
+    snapshot.imageFiles = [...new Set(files)];
+    if (!snapshot.boards && snapshot.board) snapshot.boards = { blue:[...snapshot.board], red:[...snapshot.board] };
+    savedSessions[name] = snapshot;
+    activeSessionName = name;
+    if (!incoming) session = clone(snapshot);
+    persist();
+    res.json({ sessions:savedSessions, activeSessionName });
+  });
+  app.post("/api/sliding-puzzle/saved-sessions/:name/restore", (req, res) => {
+    const name = String(req.params.name || "").trim(), snapshot = savedSessions[name];
+    if (!snapshot) return res.status(404).json({ error:"Saved session not found." });
+    const missing = sessionImages(snapshot).filter(file => !fs.existsSync(safeImagePath(file)));
+    if (missing.length) return res.status(409).json({ error:"One or more saved session pictures are missing." });
+    session = clone(snapshot);
+    session.boards ||= { blue:[...(session.board || solvedBoard())], red:[...(session.board || solvedBoard())] };
+    session.credits ||= { blue:0, red:0 };
+    session.questions ||= [];
+    session.questionCursor ||= session.questionNumber || 0;
+    session.imageFiles = [...new Set(sessionImages(session))];
+    activeSessionName = name;
+    broadcast();
+    res.json({ state:publicState(), sessions:savedSessions, activeSessionName });
+  });
+  app.delete("/api/sliding-puzzle/saved-sessions/:name", (req, res) => {
+    const name = String(req.params.name || "").trim();
+    if (!savedSessions[name]) return res.status(404).json({ error:"Saved session not found." });
+    delete savedSessions[name];
+    if (activeSessionName === name) { activeSessionName = null; session = null; io.emit("sliding-puzzle:state", null); }
+    cleanupUnreferencedImages();
+    persist();
+    res.json({ sessions:savedSessions, activeSessionName });
+  });
   app.post("/api/sliding-puzzle/sessions", upload.fields([{name:"blueImage",maxCount:1},{name:"redImage",maxCount:1},{name:"image",maxCount:1}]), (req, res) => {
     try {
       const blueFile = req.files?.blueImage?.[0] || req.files?.image?.[0], redFile = req.files?.redImage?.[0] || blueFile;
@@ -105,7 +156,6 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
         return prompt ? { passage:String(record.passage || ""), passage_image:String(record.passage_image || ""), type, prompt, answer:String(record[type === "knowledge" ? "answer_k" : "answer_u"] || "") } : null;
       }).filter(Boolean);
       if (!questions.length) return res.status(400).json({ error:"No knowledge or understanding questions matched the selected filters." });
-      if (session) (session.imageFiles || [session.imageFile]).filter(Boolean).forEach(removeImage);
       const files = { blue:`puzzle-${crypto.randomUUID()}.jpg`, red:`puzzle-${crypto.randomUUID()}.jpg` };
       fs.writeFileSync(path.join(imageDir, files.blue), blueFile.buffer);
       fs.writeFileSync(path.join(imageDir, files.red), redFile.buffer);
@@ -116,6 +166,8 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
         questions,
         questionNumber:0, questionCursor:0, currentQuestion:null, questionVisible:false, winner:null, result:null
       };
+      activeSessionName = null;
+      cleanupUnreferencedImages();
       broadcast();
       res.json({ id:session.id, state:publicState() });
     } catch (err) {
@@ -125,8 +177,7 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
   });
   app.get("/api/sliding-puzzle/current", (_req, res) => session ? res.json(publicState()) : res.status(404).json({ error:"No Sliding Puzzle session is active." }));
   app.delete("/api/sliding-puzzle/current", (_req, res) => {
-    if (session) (session.imageFiles || [session.imageFile]).filter(Boolean).forEach(removeImage);
-    session = null; persist(); broadcast(); res.json({ status:"ok" });
+    session = null; activeSessionName = null; cleanupUnreferencedImages(); persist(); io.emit("sliding-puzzle:state", null); res.json({ status:"ok" });
   });
 
   io.on("connection", socket => {
@@ -181,6 +232,50 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     });
     socket.on("sliding-puzzle:finish", () => {
       if (canManage(socket)) finish(null);
+    });
+    socket.on("sliding-puzzle:restore-session", (data, callback) => {
+      if (!canManage(socket)) return callback && callback({ success: false, error: "Not authorized" });
+      if (!data || !data.session) return callback && callback({ success: false, error: "No session data" });
+      const snap = data.session;
+      const blueB = snap.boards?.blue || snap.board || solvedBoard();
+      const redB = snap.boards?.red || snap.board || solvedBoard();
+      if (!session) {
+        session = {
+          id: snap.id || crypto.randomUUID(),
+          status: snap.status || "playing",
+          imageFiles: snap.imageFiles || [],
+          imageUrls: snap.imageUrls || { blue: snap.imageUrl || "", red: snap.imageUrl || "" },
+          imageFile: snap.imageFile || null,
+          imageUrl: snap.imageUrl || snap.imageUrls?.blue || "",
+          boards: { blue: [...blueB], red: [...redB] },
+          currentTeam: snap.currentTeam || "blue",
+          credits: snap.credits ? { ...snap.credits } : { blue: 0, red: 0 },
+          questions: snap.questions || [],
+          questionNumber: snap.questionNumber || 0,
+          questionCursor: snap.questionCursor || snap.questionNumber || 0,
+          currentQuestion: snap.currentQuestion || null,
+          questionVisible: !!snap.questionVisible,
+          referenceVisible: !!snap.referenceVisible,
+          winner: snap.winner || null,
+          result: snap.result || null,
+        };
+      } else {
+        session.status = snap.status || "playing";
+        if (snap.imageUrls) session.imageUrls = { ...snap.imageUrls };
+        if (snap.imageUrl !== undefined) session.imageUrl = snap.imageUrl;
+        session.boards = { blue: [...blueB], red: [...redB] };
+        if (snap.credits) session.credits = { ...snap.credits };
+        if (snap.currentTeam) session.currentTeam = snap.currentTeam;
+        if (snap.questionNumber !== undefined) session.questionNumber = snap.questionNumber;
+        if (snap.currentQuestion !== undefined) session.currentQuestion = snap.currentQuestion;
+        if (snap.questions && snap.questions.length) session.questions = snap.questions;
+        if (snap.questionVisible !== undefined) session.questionVisible = !!snap.questionVisible;
+        if (snap.referenceVisible !== undefined) session.referenceVisible = !!snap.referenceVisible;
+        session.winner = snap.winner || null;
+        session.result = snap.result || null;
+      }
+      broadcast();
+      callback && callback({ success: true, state: publicState() });
     });
   });
 };

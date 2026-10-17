@@ -544,6 +544,39 @@ module.exports = function (io, uploadsDir) {
       callback && callback({ success: true });
     });
 
+    // ── Restore Session (from browser save) ──────────────────
+    socket.on("blockade:restore-session", (data, callback) => {
+      const info = socketToSession.get(socket.id);
+      if (!info)
+        return callback && callback({ success: false, error: "Not in session" });
+      const state = sessions.get(info.sessionId);
+      if (!state)
+        return callback && callback({ success: false, error: "Session not found" });
+
+      const snap = data && data.session;
+      if (!snap)
+        return callback && callback({ success: false, error: "No session data provided" });
+
+      if (snap.title) state.title = snap.title;
+      if (snap.mode) state.mode = snap.mode;
+      state.phase = snap.phase || "active";
+      state.currentPlayerId = snap.currentPlayerId || 1;
+      if (snap.players) {
+        state.players = JSON.parse(JSON.stringify(snap.players));
+      }
+      state.walls = JSON.parse(JSON.stringify(snap.walls || []));
+      state.rankings = JSON.parse(JSON.stringify(snap.rankings || []));
+      state.questionHistory = JSON.parse(JSON.stringify(snap.questionHistory || []));
+      state.currentQuestion = null;
+      state.updatedAt = new Date().toISOString();
+
+      broadcastState(info.sessionId);
+      broadcastStateToTeacher(info.sessionId);
+
+      console.log(`[Blockade] Session ${info.sessionId} successfully restored to state '${state.title}'`);
+      callback && callback({ success: true, state });
+    });
+
     // ── Assign Player ───────────────────────────────────────
     socket.on("blockade:assign-player", (data) => {
       const info = socketToSession.get(socket.id);

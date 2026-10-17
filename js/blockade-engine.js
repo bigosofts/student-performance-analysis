@@ -567,6 +567,115 @@
     return { valid: true, state: newState };
   }
 
+  // ─── Persistence & Session Management (Browser LocalStorage) ─
+  const BLOCKADE_STORAGE_KEY = "blockade-game-v1";
+  const BLOCKADE_SESSIONS_KEY = "blockade-sessions-v1";
+  const BLOCKADE_CURRENT_SESSION_KEY = "blockade-current-session";
+  let blockadeCurrentSessionName = null;
+
+  function buildBlockadeSessionSnapshot(state) {
+    if (!state) return null;
+    return {
+      title: state.title || "Blockade 3D Match",
+      mode: state.mode || "two-player",
+      phase: state.phase || "active",
+      currentPlayerId: state.currentPlayerId || 1,
+      players: JSON.parse(JSON.stringify(state.players || {})),
+      walls: JSON.parse(JSON.stringify(state.walls || [])),
+      rankings: JSON.parse(JSON.stringify(state.rankings || [])),
+      questionHistory: JSON.parse(JSON.stringify(state.questionHistory || [])),
+      savedAt: new Date().toISOString(),
+    };
+  }
+
+  function getBlockadeSessions() {
+    try {
+      if (typeof localStorage === "undefined") return {};
+      const data = localStorage.getItem(BLOCKADE_SESSIONS_KEY);
+      return data ? JSON.parse(data) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveBlockadeSession(sessionName, state) {
+    if (!sessionName || !sessionName.trim() || !state) return false;
+    sessionName = sessionName.trim();
+    const sessions = getBlockadeSessions();
+    const snap = buildBlockadeSessionSnapshot(state);
+    sessions[sessionName] = snap;
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem(BLOCKADE_SESSIONS_KEY, JSON.stringify(sessions));
+        localStorage.setItem(BLOCKADE_CURRENT_SESSION_KEY, sessionName);
+        localStorage.setItem(BLOCKADE_STORAGE_KEY, JSON.stringify(snap));
+      } catch (e) {}
+    }
+    blockadeCurrentSessionName = sessionName;
+    return true;
+  }
+
+  function loadBlockadeSession(sessionName) {
+    const sessions = getBlockadeSessions();
+    const session = sessions[sessionName];
+    if (!session) return null;
+    blockadeCurrentSessionName = sessionName;
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem(BLOCKADE_CURRENT_SESSION_KEY, sessionName);
+        localStorage.setItem(BLOCKADE_STORAGE_KEY, JSON.stringify(session));
+      } catch (e) {}
+    }
+    return session;
+  }
+
+  function deleteBlockadeSession(sessionName) {
+    const sessions = getBlockadeSessions();
+    delete sessions[sessionName];
+    if (typeof localStorage !== "undefined") {
+      try {
+        localStorage.setItem(BLOCKADE_SESSIONS_KEY, JSON.stringify(sessions));
+        if (blockadeCurrentSessionName === sessionName) {
+          blockadeCurrentSessionName = null;
+          localStorage.removeItem(BLOCKADE_CURRENT_SESSION_KEY);
+        }
+      } catch (e) {}
+    }
+  }
+
+  function getBlockadeCurrentSessionName() {
+    if (!blockadeCurrentSessionName && typeof localStorage !== "undefined") {
+      try {
+        blockadeCurrentSessionName = localStorage.getItem(BLOCKADE_CURRENT_SESSION_KEY) || null;
+      } catch (e) {}
+    }
+    return blockadeCurrentSessionName;
+  }
+
+  function autoSaveBlockade(state) {
+    if (!state || typeof localStorage === "undefined") return;
+    try {
+      const snap = buildBlockadeSessionSnapshot(state);
+      localStorage.setItem(BLOCKADE_STORAGE_KEY, JSON.stringify(snap));
+      const currentName = getBlockadeCurrentSessionName();
+      if (currentName) {
+        const sessions = getBlockadeSessions();
+        sessions[currentName] = snap;
+        localStorage.setItem(BLOCKADE_SESSIONS_KEY, JSON.stringify(sessions));
+      }
+    } catch (e) {}
+  }
+
+  function getBlockadeSavedGame() {
+    try {
+      if (typeof localStorage === "undefined") return null;
+      const data = localStorage.getItem(BLOCKADE_STORAGE_KEY);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
   // ─── Exports ────────────────────────────────────────────────
   exports.BOARD_SIZE = BOARD_SIZE;
   exports.CREDITS_PER_CORRECT = CREDITS_PER_CORRECT;
@@ -592,4 +701,16 @@
   exports.applyMove = applyMove;
   exports.applyWall = applyWall;
   exports.awardCredits = awardCredits;
+
+  exports.BLOCKADE_STORAGE_KEY = BLOCKADE_STORAGE_KEY;
+  exports.BLOCKADE_SESSIONS_KEY = BLOCKADE_SESSIONS_KEY;
+  exports.BLOCKADE_CURRENT_SESSION_KEY = BLOCKADE_CURRENT_SESSION_KEY;
+  exports.buildBlockadeSessionSnapshot = buildBlockadeSessionSnapshot;
+  exports.getBlockadeSessions = getBlockadeSessions;
+  exports.saveBlockadeSession = saveBlockadeSession;
+  exports.loadBlockadeSession = loadBlockadeSession;
+  exports.deleteBlockadeSession = deleteBlockadeSession;
+  exports.getBlockadeCurrentSessionName = getBlockadeCurrentSessionName;
+  exports.autoSaveBlockade = autoSaveBlockade;
+  exports.getBlockadeSavedGame = getBlockadeSavedGame;
 })(typeof module !== "undefined" ? module.exports : (window.BlockadeEngine = {}));
