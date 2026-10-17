@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Sixteen Bead · Teacher Dashboard</title>
+  <script src="js/auth-check.js"></script>
+  <link rel="stylesheet" href="css/sixteen-bead.css">
+</head>
+<body data-page="teacher">
+  <main class="sb-shell">
+    <header class="sb-header">
+      <div>
+        <span class="sb-kicker">CLASSROOM ARCADE · TEACHER CONTROL</span>
+        <h1><span class="sb-title-mark" aria-hidden="true"><svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M8 8h32v32H8zM8 8l32 32M40 8 8 40M24 8v32M8 24h32"/><circle cx="8" cy="8" r="3" fill="#fff7e6"/><circle cx="24" cy="8" r="3" fill="#2563eb"/><circle cx="40" cy="8" r="3" fill="#fff7e6"/><circle cx="8" cy="24" r="3" fill="#dc2626"/><circle cx="24" cy="24" r="3" fill="#fff7e6"/><circle cx="40" cy="24" r="3" fill="#2563eb"/><circle cx="8" cy="40" r="3" fill="#fff7e6"/><circle cx="24" cy="40" r="3" fill="#dc2626"/><circle cx="40" cy="40" r="3" fill="#fff7e6"/></svg></span> Sixteen Bead (ষোল গুটি)</h1>
+        <p>Correct CQ answer awards 10 move credits. One bead move costs 1 credit. Jump to capture!</p>
+      </div>
+      <nav>
+        <a class="sb-button secondary" href="dashboard.html">← Teacher Central</a>
+        <a class="sb-button primary" id="openProjector" href="game-sixteen-bead.html" target="_blank">Open Projector ↗</a>
+      </nav>
+    </header>
+
+    <div class="sb-layout">
+      <!-- Left Column: Match Setup & Session Storage -->
+      <section class="sb-panel sb-setup">
+        <div class="sb-section-title">
+          <span>01</span>
+          <div>
+            <h2>Prepare a Match</h2>
+            <p>Pick CQ filters, load questions, and start a live match.</p>
+          </div>
+        </div>
+
+        <div class="sb-team-photo-setup" aria-label="Upload team pictures">
+          <label class="sb-photo-upload blue" for="blueTeamImage"><span>🔵</span><b>Team Blue picture</b><small>JPG, PNG or WebP · max 12 MB</small><img id="blueTeamPreview" alt="Team Blue picture preview" hidden><em id="blueTeamFileName">Choose a picture</em></label>
+          <label class="sb-photo-upload red" for="redTeamImage"><span>🔴</span><b>Team Red picture</b><small>JPG, PNG or WebP · max 12 MB</small><img id="redTeamPreview" alt="Team Red picture preview" hidden><em id="redTeamFileName">Choose a picture</em></label>
+          <input id="blueTeamImage" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          <input id="redTeamImage" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+        </div>
+
+        <div class="sb-filters">
+          <label>Paper
+            <select id="paper">
+              <option value="All">All Papers</option>
+              <option value="1st">1st Paper</option>
+              <option value="2nd">2nd Paper</option>
+            </select>
+          </label>
+          <label>Chapter
+            <select id="chapter">
+              <option value="All">All Chapters</option>
+            </select>
+          </label>
+        </div>
+
+        <button class="sb-button secondary full" id="loadQuestions">Load Knowledge + Understanding</button>
+        <p id="questionStatus" class="sb-status" role="status">Choose filters, then load matching CQ questions.</p>
+        <div id="questionList" class="sb-question-list"></div>
+
+        <button id="createGame" class="sb-button primary full" disabled>Start New Match</button>
+        <p id="setupMessage" class="sb-status" role="status"></p>
+
+        <!-- Session Management -->
+        <div class="sb-section-title sb-session-title">
+          <span>💾</span>
+          <div>
+            <h2>Session Management</h2>
+            <p>Save and restore ongoing classroom matches.</p>
+          </div>
+        </div>
+
+        <div id="sessionBadge" class="sb-session-badge">No saved session active</div>
+        <select id="sessionDropdown" class="sb-field">
+          <option value="">-- Select a Saved Session --</option>
+        </select>
+
+        <div class="sb-create-session">
+          <input id="newSessionName" class="sb-field" type="text" placeholder="New session name...">
+          <button id="createSession" class="sb-button primary">+ Create</button>
+        </div>
+
+        <div class="sb-session-actions">
+          <button id="saveSession" class="sb-button save">💾 Save Match</button>
+          <button id="deleteSession" class="sb-button delete">🗑 Delete</button>
+        </div>
+      </section>
+
+      <!-- Right Column: Live Game Control Panel -->
+      <section id="gamePanel" class="sb-panel sb-game-panel" hidden>
+        <div class="sb-game-heading">
+          <div>
+            <span class="sb-kicker">LIVE MATCH · CODE <b id="gameCode">------</b></span>
+            <h2>Sixteen Bead Arena</h2>
+          </div>
+          <span id="gameStatus" class="sb-live">Live Match</span>
+        </div>
+
+        <!-- Scorebar with credit & bead counters -->
+        <div class="sb-scorebar">
+          <div class="sb-team-card blue">
+            <img class="sb-team-photo" data-team-photo="blue" alt="Team Blue">
+            <span class="sb-team-title">TEAM BLUE</span>
+            <div class="sb-team-stat"><b data-credit="blue">0</b> <small>credits</small></div>
+            <small class="sb-bead-count"><i data-count="blue">16</i> beads remaining</small>
+          </div>
+          <div class="sb-turn">
+            <span>NOW PLAYING</span>
+            <b data-turn>Team Blue</b>
+          </div>
+          <div class="sb-team-card red">
+            <img class="sb-team-photo" data-team-photo="red" alt="Team Red">
+            <span class="sb-team-title">TEAM RED</span>
+            <div class="sb-team-stat"><b data-credit="red">0</b> <small>credits</small></div>
+            <small class="sb-bead-count"><i data-count="red">16</i> beads remaining</small>
+          </div>
+        </div>
+
+        <!-- Match Column: Board on Left, Quiz Controls on Right -->
+        <div class="sb-match-layout">
+          <div class="sb-board-column">
+            <div id="teacherBoard" class="sb-board-frame teacher-board"></div>
+            <p id="moveHelp" class="sb-help">Ask a CQ question to earn credits, then click a bead to move.</p>
+          </div>
+
+          <aside class="sb-question-controls">
+            <div class="sb-question-head">
+              <span>CQ CHECKPOINT</span>
+              <b id="questionCount">0 / 0</b>
+            </div>
+
+            <div id="teacherQuestion" class="sb-question-card">
+              <p>Ask the first question to Team Blue.</p>
+            </div>
+
+            <div class="sb-judge">
+              <button id="markCorrect" class="sb-button correct" disabled>✓ Correct · +10 Credits</button>
+              <button id="markWrong" class="sb-button incorrect" disabled>✕ Incorrect</button>
+            </div>
+
+            <button id="askQuestion" class="sb-button primary full" disabled>Ask Next Question</button>
+            <button id="switchTeam" class="sb-button secondary full">Switch Turn</button>
+            <button id="toggleQuestion" class="sb-button secondary full" disabled>Show Question on Projector</button>
+            
+            <div class="sb-control-divider"></div>
+            <div class="sb-admin-actions">
+              <button id="endGame" class="sb-button end">End Match</button>
+              <button id="resetGame" class="sb-button delete">Reset Live Match</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </div>
+
+    <!-- Empty State -->
+    <section id="noSession" class="sb-empty">
+      <span>🔴</span>
+      <div>
+        <b>No Live Match in Progress</b>
+        <p>Configure questions on the left and click "Start New Match", or restore a saved session.</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/sixteen-bead.js"></script>
+  <script src="js/pc-control.js"></script>
+  <script src="js/whiteboard.js"></script>
+</body>
+</html>

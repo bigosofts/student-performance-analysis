@@ -27,9 +27,13 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
   const persist = () => fs.writeFileSync(statePath, JSON.stringify({ session, savedSessions, activeSessionName }, null, 2));
   const clone = value => JSON.parse(JSON.stringify(value));
   const sessionImages = value => (value?.imageFiles || [value?.imageFile, ...Object.values(value?.imageUrls || {}).map(url => path.basename(String(url || "")))]).filter(Boolean);
+  const sessionPortraits = value => Object.values(value?.teamPortraitFiles || {}).filter(Boolean);
   const cleanupUnreferencedImages = () => {
-    const retained = new Set([...sessionImages(session), ...Object.values(savedSessions).flatMap(sessionImages)]);
-    for (const file of fs.readdirSync(imageDir)) if (/^puzzle-[a-f0-9-]+\.jpg$/i.test(file) && !retained.has(file)) removeImage(file);
+    const retained = new Set([
+      ...sessionImages(session), ...sessionPortraits(session),
+      ...Object.values(savedSessions).flatMap(value => [...sessionImages(value), ...sessionPortraits(value)])
+    ]);
+    for (const file of fs.readdirSync(imageDir)) if (/^(?:puzzle-[a-f0-9-]+\.jpg|portrait-[a-f0-9-]+\.(?:jpg|png|webp))$/i.test(file) && !retained.has(file)) removeImage(file);
   };
   const solvedBoard = () => Array.from({ length: 15 }, (_, i) => i + 1).concat(0);
   const shuffleBoard = () => {
@@ -57,7 +61,7 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     const revealedQuestion = q && q.judgement ? { ...q } : q ? { passage:q.passage || "", passage_image:q.passage_image || "", type:q.type, prompt:q.prompt, number:q.number, team:q.team, judgement:null } : null;
     const activeBoard = session.boards?.[session.currentTeam] || session.board;
     return {
-      id:session.id, status:session.status, imageUrl:session.imageUrls?.[session.currentTeam] || session.imageUrl, imageUrls:session.imageUrls || { blue:session.imageUrl, red:session.imageUrl }, board:activeBoard,
+      id:session.id, status:session.status, imageUrl:session.imageUrls?.[session.currentTeam] || session.imageUrl, imageUrls:session.imageUrls || { blue:session.imageUrl, red:session.imageUrl }, teamPortraitUrls:session.teamPortraitUrls || {}, teamPortraitFiles:session.teamPortraitFiles || {}, board:activeBoard,
       boards: session.boards ? { blue: [...session.boards.blue], red: [...session.boards.red] } : { blue: activeBoard, red: activeBoard },
       currentTeam:session.currentTeam, credits:session.credits, questionNumber:session.questionNumber,
       teamProgress:{ blue:boardProgress(session.boards?.blue || activeBoard), red:boardProgress(session.boards?.red || activeBoard) },
@@ -107,6 +111,9 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     if (files.some(file => !/^puzzle-[a-f0-9-]+\.jpg$/i.test(file) || !fs.existsSync(safeImagePath(file)))) {
       return res.status(400).json({ error:"This saved session's picture files are no longer available. Save the active game to create a fresh session." });
     }
+    if (sessionPortraits(snapshot).some(file => !/^portrait-[a-f0-9-]+\.(?:jpg|png|webp)$/i.test(file) || !fs.existsSync(safeImagePath(file)))) {
+      return res.status(400).json({ error:"This saved session's team portrait files are no longer available." });
+    }
     snapshot.imageFiles = [...new Set(files)];
     if (!snapshot.boards && snapshot.board) snapshot.boards = { blue:[...snapshot.board], red:[...snapshot.board] };
     savedSessions[name] = snapshot;
@@ -118,7 +125,7 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
   app.post("/api/sliding-puzzle/saved-sessions/:name/restore", (req, res) => {
     const name = String(req.params.name || "").trim(), snapshot = savedSessions[name];
     if (!snapshot) return res.status(404).json({ error:"Saved session not found." });
-    const missing = sessionImages(snapshot).filter(file => !fs.existsSync(safeImagePath(file)));
+    const missing = [...sessionImages(snapshot), ...sessionPortraits(snapshot)].filter(file => !fs.existsSync(safeImagePath(file)));
     if (missing.length) return res.status(409).json({ error:"One or more saved session pictures are missing." });
     session = clone(snapshot);
     session.boards ||= { blue:[...(session.board || solvedBoard())], red:[...(session.board || solvedBoard())] };
@@ -139,7 +146,7 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
     persist();
     res.json({ sessions:savedSessions, activeSessionName });
   });
-  app.post("/api/sliding-puzzle/sessions", upload.fields([{name:"blueImage",maxCount:1},{name:"redImage",maxCount:1},{name:"image",maxCount:1}]), (req, res) => {
+  app.post("/api/sliding-puzzle/sessions", upload.fields([{name:"blueImage",maxCount:1},{name:"redImage",maxCount:1},{name:"image",maxCount:1},{name:"bluePortrait",maxCount:1},{name:"redPortrait",maxCount:1}]), (req, res) => {
     try {
       const blueFile = req.files?.blueImage?.[0] || req.files?.image?.[0], redFile = req.files?.redImage?.[0] || blueFile;
       if (!blueFile || !blueFile.mimetype.startsWith("image/") || !redFile || !redFile.mimetype.startsWith("image/")) return res.status(400).json({ error:"Choose a picture for both teams." });
@@ -156,12 +163,26 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
         return prompt ? { passage:String(record.passage || ""), passage_image:String(record.passage_image || ""), type, prompt, answer:String(record[type === "knowledge" ? "answer_k" : "answer_u"] || "") } : null;
       }).filter(Boolean);
       if (!questions.length) return res.status(400).json({ error:"No knowledge or understanding questions matched the selected filters." });
+      const portraitFiles = { blue:req.files?.bluePortrait?.[0], red:req.files?.redPortrait?.[0] };
+      for (const file of Object.values(portraitFiles)) {
+        if (file && !["image/jpeg", "image/png", "image/webp"].includes(file.mimetype)) return res.status(400).json({ error:"Team portraits must be JPG, PNG, or WebP images." });
+      }
       const files = { blue:`puzzle-${crypto.randomUUID()}.jpg`, red:`puzzle-${crypto.randomUUID()}.jpg` };
       fs.writeFileSync(path.join(imageDir, files.blue), blueFile.buffer);
       fs.writeFileSync(path.join(imageDir, files.red), redFile.buffer);
       const imageUrls = { blue:`/uploads/sliding-puzzle/${files.blue}`, red:`/uploads/sliding-puzzle/${files.red}` };
+      const teamPortraitUrls = {}, teamPortraitFiles = {};
+      for (const team of ["blue", "red"]) {
+        const file = portraitFiles[team];
+        if (!file) continue;
+        const ext = file.mimetype === "image/png" ? "png" : file.mimetype === "image/webp" ? "webp" : "jpg";
+        const filename = `portrait-${crypto.randomUUID()}.${ext}`;
+        fs.writeFileSync(path.join(imageDir, filename), file.buffer);
+        teamPortraitFiles[team] = filename;
+        teamPortraitUrls[team] = `/uploads/sliding-puzzle/${filename}`;
+      }
       session = {
-        id:crypto.randomUUID(), status:"playing", imageFiles:[files.blue,files.red], imageUrls, imageFile:files.blue, imageUrl:imageUrls.blue,
+        id:crypto.randomUUID(), status:"playing", imageFiles:[files.blue,files.red], imageUrls, imageFile:files.blue, imageUrl:imageUrls.blue, teamPortraitUrls, teamPortraitFiles,
         boards:(() => { const firstBoard = shuffleBoard(); return { blue:[...firstBoard], red:[...firstBoard] }; })(), currentTeam:"blue", credits:{blue:0,red:0},
         questions,
         questionNumber:0, questionCursor:0, currentQuestion:null, questionVisible:false, winner:null, result:null
@@ -171,6 +192,7 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
       broadcast();
       res.json({ id:session.id, state:publicState() });
     } catch (err) {
+      cleanupUnreferencedImages();
       console.error("Sliding Puzzle session error:", err);
       res.status(400).json({ error:"Could not create the Sliding Puzzle session." });
     }
@@ -247,6 +269,8 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
           imageUrls: snap.imageUrls || { blue: snap.imageUrl || "", red: snap.imageUrl || "" },
           imageFile: snap.imageFile || null,
           imageUrl: snap.imageUrl || snap.imageUrls?.blue || "",
+          teamPortraitUrls: snap.teamPortraitUrls || {},
+          teamPortraitFiles: snap.teamPortraitFiles || {},
           boards: { blue: [...blueB], red: [...redB] },
           currentTeam: snap.currentTeam || "blue",
           credits: snap.credits ? { ...snap.credits } : { blue: 0, red: 0 },
@@ -263,6 +287,8 @@ module.exports = function mountSlidingPuzzle(app, io, uploadsDir) {
         session.status = snap.status || "playing";
         if (snap.imageUrls) session.imageUrls = { ...snap.imageUrls };
         if (snap.imageUrl !== undefined) session.imageUrl = snap.imageUrl;
+        if (snap.teamPortraitUrls) session.teamPortraitUrls = { ...snap.teamPortraitUrls };
+        if (snap.teamPortraitFiles) session.teamPortraitFiles = { ...snap.teamPortraitFiles };
         session.boards = { blue: [...blueB], red: [...redB] };
         if (snap.credits) session.credits = { ...snap.credits };
         if (snap.currentTeam) session.currentTeam = snap.currentTeam;

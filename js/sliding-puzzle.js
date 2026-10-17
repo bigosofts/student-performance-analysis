@@ -3,7 +3,7 @@
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? "").replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
   const labels = { blue:"Team Blue", red:"Team Red" };
-  let questions = [], selectedImages = { blue:null, red:null }, state = null, teacherAnswer = null, teacherAnswerNumber = 0, projectorSessionId = null;
+  let questions = [], selectedImages = { blue:null, red:null }, selectedPortraits = { blue:null, red:null }, state = null, teacherAnswer = null, teacherAnswerNumber = 0, projectorSessionId = null;
 
   function tileStyle(tile, imageUrl) {
     if (!tile) return "";
@@ -68,6 +68,11 @@
     document.querySelectorAll("[data-red-progress-bar]").forEach(el => el.style.width = `${Math.min(100, (s.teamProgress?.red ?? 0) / 15 * 100)}%`);
     document.querySelectorAll("[data-team]").forEach(el => el.classList.toggle("is-active", el.dataset.team === s.currentTeam));
     document.querySelectorAll("[data-turn-name]").forEach(el => el.textContent = labels[s.currentTeam]);
+    document.querySelectorAll("[data-team-photo]").forEach(img => {
+      const src = s.teamPortraitUrls?.[img.dataset.teamPhoto];
+      img.hidden = !src;
+      if (src && img.dataset.src !== src) { img.src = src; img.dataset.src = src; }
+    });
     document.querySelectorAll("[data-question-count]").forEach(el => el.textContent = `${s.questionNumber} / ${s.questionCount}`);
     if (mode === "teacher") {
       $("referenceImage").src = s.imageUrls?.[s.currentTeam] || s.imageUrl;
@@ -119,6 +124,8 @@
       currentTeam: s.currentTeam || "blue",
       imageUrl: s.imageUrl || "",
       imageUrls: s.imageUrls ? { ...s.imageUrls } : { blue: s.imageUrl || "", red: s.imageUrl || "" },
+      teamPortraitUrls: s.teamPortraitUrls ? { ...s.teamPortraitUrls } : {},
+      teamPortraitFiles: s.teamPortraitFiles ? { ...s.teamPortraitFiles } : {},
       teamProgress: s.teamProgress ? { ...s.teamProgress } : { blue: 0, red: 0 },
       questionNumber: s.questionNumber || 0,
       questionCount: s.questionCount || 0,
@@ -380,6 +387,15 @@
       preview.dataset.objectUrl = URL.createObjectURL(file); preview.src = preview.dataset.objectUrl; preview.hidden = false;
       $(team + "Name").textContent = file.name;
     }));
+    ["blue", "red"].forEach(team => $(team + "Portrait").addEventListener("change", () => {
+      const file = $(team + "Portrait").files[0]; if (!file) return;
+      if (!file.type.startsWith("image/")) { $("setupMessage").textContent = "Choose an image file for the team portrait."; return; }
+      if (file.size > 12 * 1024 * 1024) { $("setupMessage").textContent = "Team portraits must be 12 MB or smaller."; return; }
+      selectedPortraits[team] = file;
+      const preview = $(team + "PortraitPreview"); if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+      preview.dataset.objectUrl = URL.createObjectURL(file); preview.src = preview.dataset.objectUrl; preview.hidden = false;
+      $(team + "PortraitName").textContent = file.name;
+    }));
     $("loadQuestions").addEventListener("click", async () => {
       const params = new URLSearchParams({ paper:$("paper").value, chapter:$("chapter").value, amount:"All" });
       const status = $("questionStatus"); status.textContent = "Loading knowledge and understanding questions…";
@@ -399,6 +415,8 @@
       $("setupMessage").textContent = "Preparing the image and puzzle…";
       try {
         const form = new FormData(); form.append("blueImage", await squareImage(selectedImages.blue), "team-blue.jpg"); form.append("redImage", await squareImage(selectedImages.red), "team-red.jpg"); form.append("questionIds", JSON.stringify(questions.map(q => ({ id:String(q.id), type:q.promptType }))));
+        if (selectedPortraits.blue) form.append("bluePortrait", selectedPortraits.blue);
+        if (selectedPortraits.red) form.append("redPortrait", selectedPortraits.red);
         const response = await fetch("/api/sliding-puzzle/sessions", { method:"POST", body:form });
         const result = await response.json(); if (!response.ok) throw Error(result.error || "Could not create game.");
         $("gamePanel").hidden = false; $("setupMessage").textContent = "Puzzle is live on the projector. Team Blue starts."; syncSPSessions();
@@ -416,7 +434,7 @@
     $("resetGame").addEventListener("click", async () => {
       if (!confirm("Reset the Sliding Puzzle and permanently delete both team pictures?")) return;
       const response = await fetch("/api/sliding-puzzle/current", { method:"DELETE" });
-      if (response.ok) { selectedImages = { blue:null, red:null }; questions = []; $("gamePanel").hidden = true; $("noSession").hidden = false; $("setupMessage").textContent = "Active game reset. Saved sessions and their pictures were kept."; syncSPSessions(); }
+      if (response.ok) { selectedImages = { blue:null, red:null }; selectedPortraits = { blue:null, red:null }; questions = []; $("gamePanel").hidden = true; $("noSession").hidden = false; $("setupMessage").textContent = "Active game reset. Saved sessions and their pictures were kept."; syncSPSessions(); }
       else $("setupMessage").textContent = "Could not reset the game. Please try again.";
     });
     $("openProjector").href = "game-sliding-puzzle.html";

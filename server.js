@@ -1556,6 +1556,7 @@ app.use("/uploads", express.static(uploadsDir));
 require("./server-qbank")(app, io, uploadsDir);
 require("./server-talent-hunt")(app, io, uploadsDir);
 require("./server-sliding-puzzle")(app, io, uploadsDir);
+require("./server-sixteen-bead")(app, io, uploadsDir);
 
 // Blockade 3D game session handlers
 require("./server-blockade")(io, uploadsDir);
@@ -1588,6 +1589,9 @@ server.listen(PORT, "0.0.0.0", () => {
     --------------------------------------
     Word Puzzle Game:      http://localhost:${PORT}/game-wordpuzzle.html
     Word Puzzle Dash:      http://localhost:${PORT}/dashboard-wordpuzzle.html
+    --------------------------------------
+    Sixteen Bead:          http://localhost:${PORT}/game-sixteen-bead.html
+    Sixteen Bead Dash:     http://localhost:${PORT}/dashboard-sixteen-bead.html
     --------------------------------------
     📽️  Presentation Game:  http://localhost:${PORT}/game-presentation.html
     📽️  Presentation Dash:  http://localhost:${PORT}/dashboard-presentation.html

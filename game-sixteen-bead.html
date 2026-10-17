@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#d99b36">
+  <title>Sixteen Bead · Live Classroom Challenge</title>
+  <link rel="stylesheet" href="css/sixteen-bead.css">
+</head>
+<body class="sb-projector" data-page="projector">
+  <main class="sb-projector-shell">
+    <header class="sb-projector-header">
+      <div class="sb-brand-mark" aria-label="Sixteen Bead board">
+        <svg viewBox="0 0 48 48" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M7 7h34v34H7zM7 7l34 34M41 7 7 41M24 7v34M7 24h34" opacity=".78"/>
+          <circle cx="7" cy="7" r="3" fill="#fff7e6"/><circle cx="24" cy="7" r="3" fill="#2563eb"/><circle cx="41" cy="7" r="3" fill="#fff7e6"/>
+          <circle cx="7" cy="24" r="3" fill="#dc2626"/><circle cx="24" cy="24" r="3" fill="#fff7e6"/><circle cx="41" cy="24" r="3" fill="#2563eb"/>
+          <circle cx="7" cy="41" r="3" fill="#fff7e6"/><circle cx="24" cy="41" r="3" fill="#dc2626"/><circle cx="41" cy="41" r="3" fill="#fff7e6"/>
+        </svg>
+      </div>
+      <div>
+        <span class="sb-kicker">LIVE CLASSROOM CHALLENGE</span>
+        <h1>Sixteen Bead</h1>
+      </div>
+      <div class="sb-projector-turn">
+        <span>NOW PLAYING</span>
+        <b data-turn>Team Blue</b>
+      </div>
+    </header>
+
+    <div class="sb-projector-layout">
+      <!-- Team Blue Side Card -->
+      <section class="sb-team-card blue sb-projector-team">
+        <img class="sb-team-photo" data-team-photo="blue" alt="Team Blue">
+        <span class="sb-team-title">TEAM BLUE</span>
+        <div class="sb-team-stat">
+          <b data-credit="blue">0</b>
+          <small>credits</small>
+        </div>
+        <div class="sb-team-beads">
+          <i data-count="blue">16</i> beads left
+        </div>
+        <div class="sb-team-indicator blue">BLUE</div>
+      </section>
+
+      <!-- Center Board Column -->
+      <section class="sb-projector-board-wrap">
+        <div id="gameStatus" class="sb-projector-state">Waiting for teacher to start a match.</div>
+        <div id="gameBoard" class="sb-board-frame projector-board">
+          <div class="sb-board-placeholder">
+            <span>16</span>
+            <b>Board ready</b>
+            <small>Waiting for the teacher to start a match</small>
+          </div>
+        </div>
+        <p id="projectorHelp" class="sb-projector-help">A correct CQ answer earns 10 bead moves.</p>
+      </section>
+
+      <!-- Team Red Side Card -->
+      <section class="sb-team-card red sb-projector-team">
+        <img class="sb-team-photo" data-team-photo="red" alt="Team Red">
+        <span class="sb-team-title">TEAM RED</span>
+        <div class="sb-team-stat">
+          <b data-credit="red">0</b>
+          <small>credits</small>
+        </div>
+        <div class="sb-team-beads">
+          <i data-count="red">16</i> beads left
+        </div>
+        <div class="sb-team-indicator red">RED</div>
+      </section>
+    </div>
+
+    <!-- Winner Celebration Overlay -->
+    <section id="winnerOverlay" class="sb-winner-overlay" hidden>
+      <div class="sb-winner-modal">
+        <span class="sb-trophy">🏆</span>
+        <h2 id="winnerTitle">Team Blue Wins!</h2>
+        <p id="winnerMessage">All opponent beads captured or opponents are blocked.</p>
+        <button id="winnerBack" class="sb-button primary">View Final Board</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Keep the full-screen dialog outside the game shell so its viewport sizing
+       cannot be constrained by the board layout or projector scaling. -->
+  <section id="questionOverlay" class="sb-question-overlay" role="dialog" aria-modal="true" aria-label="Current CQ question" hidden>
+    <article class="sb-question-card-projector">
+      <div class="sb-q-header">
+        <span class="sb-question-icon">✦</span>
+        <div class="sb-q-title"><span class="sb-kicker">CLASSROOM CHALLENGE · <b id="projectorQuestionCount">0 / 0</b></span><h2>Team checkpoint</h2></div>
+        <span id="projectorQuestionTeam" class="sb-question-team">Team Blue</span>
+      </div>
+      <div id="projectorQuestion" class="sb-projector-question"></div>
+      <p class="sb-question-overlay-note">Your teacher controls this question display.</p>
+    </article>
+  </section>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="js/sixteen-bead.js"></script>
+  <script src="js/whiteboard.js"></script>
+  <script type="module" src="./js/projector-screensaver.js"></script>
+</body>
+</html>
