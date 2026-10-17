@@ -6,6 +6,7 @@ const multer = require("multer");
 const fs = require("fs");
 const XLSX = require("xlsx");
 const { spawn } = require("child_process");
+const { Worker, MessageChannel } = require("worker_threads");
 const unzipper = require("unzipper");
 require("dotenv").config({ path: path.join(__dirname, ".env"), quiet: true });
 
@@ -17,6 +18,39 @@ const io = new Server(server, {
   },
   maxHttpBufferSize: 1e7, // 10MB limit for high-res images
 });
+
+const WHITEBOARD_EVENTS = [
+  "wb-open", "wb-close", "wb-state", "wb-pan", "wb-zoom", "wb-bg",
+  "wb-add", "wb-modify", "wb-modify-batch", "wb-remove", "wb-clear",
+  "wb-grid", "wb-capture-request", "wb-capture-response",
+];
+let whiteboardPort = null;
+function startWhiteboardWorker() {
+  const { port1, port2 } = new MessageChannel();
+  const worker = new Worker(path.join(__dirname, "server-whiteboard-worker.js"), {
+    workerData: { port:port2 },
+    transferList: [port2],
+  });
+  whiteboardPort = port1;
+  port1.on("message", (message) => {
+    if (message.type === "emit-to") {
+      io.sockets.sockets.get(message.socketId)?.emit(message.event, message.data);
+    } else if (message.type === "ready") {
+      // Rebuild the worker cache after startup or a crash using live editor canvases.
+      io.sockets.sockets.forEach((socket) => socket.emit("wb-worker-sync-request"));
+    }
+  });
+  port1.start();
+  worker.on("error", (error) => console.error("[Whiteboard Worker]", error));
+  worker.on("exit", (code) => {
+    if (whiteboardPort === port1) whiteboardPort = null;
+    console.error(`[Whiteboard Worker] exited with code ${code}; restarting.`);
+    const restartTimer = setTimeout(() => { whiteboardWorker = startWhiteboardWorker(); }, 1000);
+    restartTimer.unref();
+  });
+  return worker;
+}
+let whiteboardWorker = startWhiteboardWorker();
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, "uploads");
@@ -686,6 +720,19 @@ app.post("/clear-uploads", (req, res) => {
 io.on("connection", (socket) => {
   console.log("A user connected:", socket.id);
 
+  WHITEBOARD_EVENTS.forEach((event) => {
+    socket.on(event, (data) => {
+      // Keep live relay latency low; the worker receives a one-way copy for cache updates.
+      socket.broadcast.emit(event, data);
+      if (whiteboardPort && ["wb-open", "wb-close", "wb-state", "wb-bg", "wb-grid", "wb-add", "wb-modify", "wb-modify-batch", "wb-remove", "wb-clear"].includes(event)) {
+        whiteboardPort.postMessage({ type:"wb-event", event, data });
+      }
+    });
+  });
+  socket.on("wb-sync-request", () => {
+    if (whiteboardPort) whiteboardPort.postMessage({ type:"wb-sync-request", socketId:socket.id });
+  });
+
   // ── Extract client's real IP for mDNS fix ──────────────────
   // Chrome replaces local IPs with .local mDNS names in WebRTC ICE candidates.
   // Mobile hotspots can't resolve mDNS, so connections fail.
@@ -888,28 +935,6 @@ io.on("connection", (socket) => {
   socket.on("pres-slide-count", (data) => {
     socket.broadcast.emit("pres-slide-count", data);
   });
-
-  // ── Whiteboard events ─────────────────────────────────────────
-  socket.on("wb-open", (data) => socket.broadcast.emit("wb-open", data));
-  socket.on("wb-close", () => socket.broadcast.emit("wb-close"));
-  socket.on("wb-state", (data) => socket.broadcast.emit("wb-state", data));
-  socket.on("wb-pan", (data) => socket.broadcast.emit("wb-pan", data));
-  socket.on("wb-zoom", (data) => socket.broadcast.emit("wb-zoom", data));
-  socket.on("wb-bg", (data) => socket.broadcast.emit("wb-bg", data));
-  socket.on("wb-add", (data) => socket.broadcast.emit("wb-add", data));
-  socket.on("wb-modify", (data) => socket.broadcast.emit("wb-modify", data));
-  socket.on("wb-remove", (data) => socket.broadcast.emit("wb-remove", data));
-  socket.on("wb-clear", () => socket.broadcast.emit("wb-clear"));
-  socket.on("wb-modify-batch", (data) =>
-    socket.broadcast.emit("wb-modify-batch", data),
-  );
-  socket.on("wb-grid", (data) => socket.broadcast.emit("wb-grid", data));
-  socket.on("wb-capture-request", () =>
-    socket.broadcast.emit("wb-capture-request"),
-  );
-  socket.on("wb-capture-response", (data) =>
-    socket.broadcast.emit("wb-capture-response", data),
-  );
 
   socket.on("leaderboard-show", (data) =>
     socket.broadcast.emit("leaderboard-show", data),

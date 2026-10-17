@@ -1862,6 +1862,16 @@
       });
 
       if (!isPresenter) {
+        socket?.on("wb-worker-sync-request", () => {
+          socket.emit(overlay.classList.contains("active") ? "wb-open" : "wb-close");
+          socket.emit("wb-state", canvas.toJSON(WB_JSON_PROPS));
+          socket.emit("wb-grid", { visible:gridVisible, opacity:gridOpacity });
+          socket.emit("wb-bg", {
+            alpha:document.getElementById("wb-bg-alpha")?.value ?? 1,
+            dark:isDarkBoard,
+          });
+        });
+
         const btn = document.createElement("button");
         btn.type = "button";
         btn.id = "wb-trigger-btn";
@@ -2031,6 +2041,10 @@
           applyGridStyle();
         }
       });
+      // Request the worker's cached board after every presenter listener is ready.
+      const requestWhiteboardSync = () => socket.emit("wb-sync-request");
+      if (socket.connected) requestWhiteboardSync();
+      socket.on("connect", requestWhiteboardSync);
     }
 
     applyGridStyle();
