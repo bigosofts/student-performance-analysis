@@ -466,6 +466,9 @@ app.post("/api/reload-quiz", (req, res) => {
   } else if (game === "blockade") {
     if (global.reloadBlockadeQuiz) global.reloadBlockadeQuiz();
     res.json({ status: "ok" });
+  } else if (game === "dots") {
+    if (global.reloadDotsQuiz) global.reloadDotsQuiz();
+    res.json({ status: "ok" });
   } else {
     res.status(400).json({ error: "Invalid game parameter" });
   }
@@ -477,6 +480,23 @@ app.post("/upload/:tileId", upload.single("image"), (req, res) => {
 
   const tileId = req.params.tileId;
   const imageUrl = `/uploads/${req.file.filename}`;
+
+  // Keep only the latest profile photo for each Dots & Boxes team.
+  // The uploaded file is already safely stored before older matches are removed.
+  const dotsTeamMatch = /^dots-team-(blue|red|green|golden)$/.exec(tileId);
+  if (dotsTeamMatch) {
+    const prefix = `tile-dots-team-${dotsTeamMatch[1]}-`;
+    fs.readdir(uploadsDir, (err, files) => {
+      if (err) return;
+      for (const file of files) {
+        if (file.startsWith(prefix) && file !== req.file.filename) {
+          fs.unlink(path.join(uploadsDir, file), unlinkErr => {
+            if (unlinkErr) console.error("Failed to remove old Dots & Boxes team photo:", unlinkErr);
+          });
+        }
+      }
+    });
+  }
 
   // Broadcast to all clients
   io.emit("image-updated", { id: tileId, url: imageUrl });
@@ -682,6 +702,13 @@ app.post("/clear-uploads", (req, res) => {
       } else if (game === "wordpuzzle") {
         // Delete tile-wordpuzzle-team-* (team photos)
         if (/^tile-wordpuzzle-team-/.test(file)) {
+          fs.unlink(path.join(uploadsDir, file), (err) => {
+            if (err) console.error(err);
+          });
+        }
+      } else if (game === "dots") {
+        // Delete only Dots & Boxes team profile photos.
+        if (/^tile-dots-team-(blue|red|green|golden)-/.test(file)) {
           fs.unlink(path.join(uploadsDir, file), (err) => {
             if (err) console.error(err);
           });
@@ -1560,6 +1587,7 @@ require("./server-sixteen-bead")(app, io, uploadsDir);
 
 // Blockade 3D game session handlers
 require("./server-blockade")(io, uploadsDir);
+require("./server-dots")(io, uploadsDir);
 
 // Initialize quiz systems
 initQuizSystem();

@@ -333,16 +333,16 @@ module.exports = function (app, io, uploadsDir) {
     const { paper, chapter, boardOnly, importantOnly, amount, topics, game } =
       req.body;
 
-    if (!game || (game !== "monopoly" && game !== "maze" && game !== "blockade")) {
+    if (!game || (game !== "monopoly" && game !== "maze" && game !== "blockade" && game !== "dots")) {
       return res
         .status(400)
-        .json({ error: "Valid game (monopoly, maze, or blockade) is required." });
+        .json({ error: "Valid game (monopoly, maze, blockade, or dots) is required." });
     }
 
     let data = readExcel(mcqFile);
 
-    // Ensure ONLY Type 1 MCQ is included
-    data = data.filter((d) => String(d.type) === "1");
+    // Dots & Boxes supports every MCQ layout; legacy games retain Type 1 only.
+    if (game !== "dots") data = data.filter((d) => String(d.type) === "1");
 
     if (paper && paper !== "All") data = data.filter((d) => d.paper === paper);
     if (chapter && chapter !== "All")
@@ -374,7 +374,21 @@ module.exports = function (app, io, uploadsDir) {
     if (data.length === 0) {
       return res
         .status(404)
-        .json({ error: "No Type 1 MCQs matched the filter criteria." });
+        .json({ error: game === "dots" ? "No MCQs matched the filter criteria." : "No Type 1 MCQs matched the filter criteria." });
+    }
+
+    if (game === "dots") {
+      const targetFilePath = path.join(uploadsDir, "dots-quiz-questions.xlsx");
+      try {
+        const ws = XLSX.utils.json_to_sheet(data);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Quiz Questions");
+        XLSX.writeFile(wb, targetFilePath);
+        return res.json({ status: "ok", count: data.length });
+      } catch (e) {
+        console.error("Error writing Dots export excel:", e);
+        return res.status(500).json({ error: "Failed to write exported game file." });
+      }
     }
 
     // Map to game format: ["Question", "Option A", "Option B", "Option C", "Option D", "Answer"]
