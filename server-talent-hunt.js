@@ -4,9 +4,13 @@ const path = require('path');
 module.exports = function (app, io, uploadsDir) {
   const storeDir = process.env.TALENT_HUNT_DATA_DIR
     ? path.resolve(process.env.TALENT_HUNT_DATA_DIR)
-    : path.join(path.dirname(uploadsDir), '.talent-hunt-data');
+    : path.join(uploadsDir, '.talent-hunt-data');
+  const legacyStorePath = path.join(path.dirname(uploadsDir), '.talent-hunt-data', 'sessions.json');
   if (!fs.existsSync(storeDir)) fs.mkdirSync(storeDir, { recursive: true });
   const storePath = path.join(storeDir, 'sessions.json');
+  if (!fs.existsSync(storePath) && fs.existsSync(legacyStorePath)) {
+    try { fs.copyFileSync(legacyStorePath, storePath); } catch (_) {}
+  }
   let sessions = {};
   try { sessions = JSON.parse(fs.readFileSync(storePath, 'utf8')); } catch (_) {}
   Object.values(sessions).forEach(s => { if (s.status === 'running') { s.status = 'waiting'; s.questionEndsAt = null; s.revealing = false; } });

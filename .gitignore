@@ -14,7 +14,7 @@ uploads/~$*.xlsx
 # Local/server generated files
 .well-known/
 .git/
-.talent-hunt-data/
+uploads/.talent-hunt-data/
 /uploads/sliding-puzzle/
 tmp/
 .htaccess
