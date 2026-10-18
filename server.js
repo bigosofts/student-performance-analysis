@@ -22,7 +22,7 @@ const io = new Server(server, {
 const WHITEBOARD_EVENTS = [
   "wb-open", "wb-close", "wb-state", "wb-pan", "wb-zoom", "wb-bg",
   "wb-add", "wb-modify", "wb-modify-batch", "wb-remove", "wb-clear",
-  "wb-grid", "wb-capture-request", "wb-capture-response",
+  "wb-grid", "wb-capture-request", "wb-capture-response", "wb-clear-snapshot",
 ];
 let whiteboardPort = null;
 function startWhiteboardWorker() {
@@ -751,7 +751,7 @@ io.on("connection", (socket) => {
     socket.on(event, (data) => {
       // Keep live relay latency low; the worker receives a one-way copy for cache updates.
       socket.broadcast.emit(event, data);
-      if (whiteboardPort && ["wb-open", "wb-close", "wb-state", "wb-bg", "wb-grid", "wb-add", "wb-modify", "wb-modify-batch", "wb-remove", "wb-clear"].includes(event)) {
+      if (whiteboardPort && ["wb-open", "wb-close", "wb-state", "wb-bg", "wb-grid", "wb-add", "wb-modify", "wb-modify-batch", "wb-remove", "wb-clear", "wb-capture-response", "wb-clear-snapshot"].includes(event)) {
         whiteboardPort.postMessage({ type:"wb-event", event, data });
       }
     });

@@ -106,7 +106,8 @@
           <div id="wb-canvas-scroll">
             <div id="wb-scroll-spacer">
               <div id="wb-canvas-stack">
-          <canvas id="wb-canvas"></canvas>
+                <img id="wb-snapshot-img" alt="" style="position:absolute; top:0; left:0; width:1920px; height:1080px; z-index:0; pointer-events:none; display:none; object-fit:contain; background:#000;" />
+                <canvas id="wb-canvas"></canvas>
                 <div id="wb-align-grid" aria-hidden="true"></div>
               </div>
             </div>
@@ -121,6 +122,7 @@
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-out" aria-label="Zoom out">−</button>
             <span id="wb-mobile-zoom-label">100%</span>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-zoom-in" aria-label="Zoom in">+</button>
+            <button type="button" class="wb-mobile-toggle" id="wb-mobile-snapshot-btn" title="Capture slide background" aria-label="Capture slide">📸</button>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-minimize-btn" aria-label="Minimize controls">▾</button>
             <button type="button" class="wb-mobile-toggle" id="wb-mobile-tools-toggle" aria-label="Tools">🛠️</button>
           </div>
@@ -140,6 +142,9 @@
               <button class="wb-tool-btn" id="wb-tool-table" title="Insert Table">🗄️</button>
               <button class="wb-tool-btn active" id="wb-tool-grid" title="Toggle alignment grid">⊞</button>
               <button class="wb-tool-btn" id="wb-tool-theme" title="Toggle Dark/Light Board">🌓</button>
+            <div class="wb-separator"></div>
+              <button class="wb-tool-btn" id="wb-tool-snapshot" title="Capture Presentation Screen as Background">📸</button>
+              <button class="wb-tool-btn" id="wb-tool-clear-snapshot" title="Clear Snapshot Background" style="display:none; color:#ef4444;">🚫</button>
             <div class="wb-separator"></div>
               <div class="wb-paging-controls" style="display:flex; align-items:center; gap: 4px;">
                 <button class="wb-tool-btn" id="wb-tool-prev-board" title="Previous Board">◀</button>
@@ -274,14 +279,16 @@
     let undoIndex = -1;
     const WB_JSON_PROPS = ["id", "wbBackground"];
 
-    let boards = [{ json: null, undoHistory: [], undoIndex: -1 }];
+    let boards = [{ json: null, undoHistory: [], undoIndex: -1, snapshotSrc: null }];
     let currentBoardIndex = 0;
 
     function saveCurrentBoard() {
+      const snapImg = document.getElementById("wb-snapshot-img");
       boards[currentBoardIndex] = {
         json: captureCanvasState(),
         undoHistory: [...undoHistory],
         undoIndex: undoIndex,
+        snapshotSrc: snapImg && snapImg.style.display !== "none" ? snapImg.src : null,
       };
     }
 
@@ -301,6 +308,12 @@
       if (label)
         label.innerText = `${currentBoardIndex + 1} / ${boards.length}`;
 
+      if (b.snapshotSrc) {
+        applySnapshotBackground(b.snapshotSrc, false);
+      } else {
+        clearSnapshotBackground(false);
+      }
+
       if (b.json) {
         restoreCanvasState(b.json, true);
       } else {
@@ -311,8 +324,201 @@
 
     function newBoard() {
       saveCurrentBoard();
-      boards.push({ json: null, undoHistory: [], undoIndex: -1 });
+      boards.push({ json: null, undoHistory: [], undoIndex: -1, snapshotSrc: null });
       loadBoard(boards.length - 1);
+    }
+
+    let snapshotTimeoutTimer = null;
+
+    function showWbToast(msg, type = "info") {
+      let toast = document.getElementById("wb-toast-msg");
+      if (!toast) {
+        toast = document.createElement("div");
+        toast.id = "wb-toast-msg";
+        document.body.appendChild(toast);
+      }
+      const bgColors = {
+        info: "rgba(59, 130, 246, 0.95)",
+        success: "rgba(16, 185, 129, 0.95)",
+        warning: "rgba(245, 158, 11, 0.95)",
+        error: "rgba(239, 68, 68, 0.95)",
+      };
+      toast.style.cssText = `
+        position: fixed;
+        top: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-20px);
+        background: ${bgColors[type] || bgColors.info};
+        color: #ffffff;
+        padding: 10px 22px;
+        border-radius: 30px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        font-size: 0.9rem;
+        font-weight: 600;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+        z-index: 100010;
+        pointer-events: none;
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      `;
+      toast.textContent = msg;
+      requestAnimationFrame(() => {
+        toast.style.opacity = "1";
+        toast.style.transform = "translateX(-50%) translateY(0)";
+      });
+      clearTimeout(toast._timer);
+      toast._timer = setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(-50%) translateY(-20px)";
+      }, 3500);
+    }
+
+    function applySnapshotBackground(imgSrc, sync = false) {
+      clearTimeout(snapshotTimeoutTimer);
+      const btn = document.getElementById("wb-tool-snapshot");
+      const mobileBtn = document.getElementById("wb-mobile-snapshot-btn");
+      if (btn) {
+        btn.classList.remove("wb-btn-loading");
+        btn.title = "Update Presentation Slide Snapshot";
+      }
+      if (mobileBtn) mobileBtn.classList.remove("wb-btn-loading");
+
+      const snapshotImg = document.getElementById("wb-snapshot-img");
+      if (snapshotImg && imgSrc) {
+        snapshotImg.src = imgSrc;
+        snapshotImg.style.display = "block";
+        const clearBtn = document.getElementById("wb-tool-clear-snapshot");
+        if (clearBtn && !isPresenter) clearBtn.style.display = "";
+
+        if (boards && boards[currentBoardIndex]) {
+          boards[currentBoardIndex].snapshotSrc = imgSrc;
+        }
+
+        canvas.backgroundColor = "transparent";
+        canvas.renderAll();
+
+        if (!isPresenter) {
+          showWbToast("✅ Slide snapshot set as background! You can annotate now.", "success");
+        }
+      }
+    }
+
+    function clearSnapshotBackground(sync = true) {
+      const snapshotImg = document.getElementById("wb-snapshot-img");
+      if (snapshotImg) {
+        snapshotImg.style.display = "none";
+        snapshotImg.src = "";
+      }
+      const clearBtn = document.getElementById("wb-tool-clear-snapshot");
+      if (clearBtn) clearBtn.style.display = "none";
+      const btn = document.getElementById("wb-tool-snapshot");
+      if (btn) btn.title = "Capture Presentation Screen as Background";
+
+      if (boards && boards[currentBoardIndex]) {
+        boards[currentBoardIndex].snapshotSrc = null;
+      }
+
+      if (!isPresenter) {
+        updateBoardBackground(false);
+        showWbToast("Slide snapshot background removed", "info");
+      } else {
+        canvas.backgroundColor = "transparent";
+        canvas.renderAll();
+      }
+
+      if (sync && socket) {
+        socket.emit("wb-clear-snapshot");
+      }
+    }
+
+    function requestScreenSnapshot() {
+      if (!socket) {
+        showWbToast("⚠️ Socket not connected", "error");
+        return;
+      }
+      const btn = document.getElementById("wb-tool-snapshot");
+      const mobileBtn = document.getElementById("wb-mobile-snapshot-btn");
+      if (btn) {
+        btn.classList.add("wb-btn-loading");
+        btn.title = "Capturing presentation screen...";
+      }
+      if (mobileBtn) mobileBtn.classList.add("wb-btn-loading");
+
+      showWbToast("📸 Capturing game presentation screen...", "info");
+
+      socket.emit("wb-capture-request", { timestamp: Date.now() });
+
+      clearTimeout(snapshotTimeoutTimer);
+      snapshotTimeoutTimer = setTimeout(() => {
+        if (btn) {
+          btn.classList.remove("wb-btn-loading");
+          btn.title = "Capture Presentation Screen as Background";
+        }
+        if (mobileBtn) mobileBtn.classList.remove("wb-btn-loading");
+        showWbToast("⚠️ No response from game screen. Ensure presentation is open on the game screen.", "warning");
+      }, 7000);
+    }
+
+    async function defaultCaptureViewport() {
+      const W = window.innerWidth;
+      const H = window.innerHeight;
+      const fitScale = Math.min(W / 1920, H / 1080);
+      const canvasDisplayWidth = 1920 * fitScale;
+      const canvasDisplayHeight = 1080 * fitScale;
+      const canvasLeft = (W - canvasDisplayWidth) / 2;
+      const canvasTop = (H - canvasDisplayHeight) / 2;
+
+      const offCanvas = document.createElement("canvas");
+      offCanvas.width = 1920;
+      offCanvas.height = 1080;
+      const ctx = offCanvas.getContext("2d");
+      ctx.fillStyle = "#030712";
+      ctx.fillRect(0, 0, 1920, 1080);
+
+      const slideImg = document.getElementById("slideImg");
+      const viewerScreen = document.getElementById("viewerScreen");
+      const isViewerActive = viewerScreen && !viewerScreen.classList.contains("hidden");
+
+      if (isViewerActive && slideImg && slideImg.src && slideImg.style.display !== "none" && slideImg.naturalWidth > 0) {
+        const elW = slideImg.clientWidth || W;
+        const elH = slideImg.clientHeight || H;
+        const elRect = slideImg.getBoundingClientRect();
+        const nw = slideImg.naturalWidth;
+        const nh = slideImg.naturalHeight;
+        const imgScale = Math.min(elW / nw, elH / nh);
+        const renderedW = nw * imgScale;
+        const renderedH = nh * imgScale;
+        const renderedLeft = elRect.left + (elW - renderedW) / 2;
+        const renderedTop = elRect.top + (elH - renderedH) / 2;
+
+        const destX = (renderedLeft - canvasLeft) / fitScale;
+        const destY = (renderedTop - canvasTop) / fitScale;
+        const destW = renderedW / fitScale;
+        const destH = renderedH / fitScale;
+
+        try {
+          ctx.drawImage(slideImg, destX, destY, destW, destH);
+          return offCanvas.toDataURL("image/jpeg", 0.92);
+        } catch (e) {
+          console.warn("Direct slide capture fallback:", e);
+        }
+      }
+
+      if (typeof html2canvas !== "undefined") {
+        const overlay = document.getElementById("whiteboard-overlay");
+        const prevVis = overlay ? overlay.style.visibility : "";
+        if (overlay) overlay.style.visibility = "hidden";
+        try {
+          const captured = await html2canvas(document.body, { useCORS: true, logging: false, backgroundColor: "#030712" });
+          ctx.drawImage(captured, canvasLeft, canvasTop, canvasDisplayWidth, canvasDisplayHeight, 0, 0, 1920, 1080);
+          return offCanvas.toDataURL("image/jpeg", 0.92);
+        } catch (e) {
+          console.error("html2canvas capture error:", e);
+        } finally {
+          if (overlay) overlay.style.visibility = prevVis;
+        }
+      }
+      return offCanvas.toDataURL("image/jpeg", 0.92);
     }
 
     // Disable offscreen caching for every path (massive memory/CPU saver for freehand drawing)
@@ -1782,11 +1988,31 @@
         }
       };
 
+      document.getElementById("wb-tool-snapshot").onclick = requestScreenSnapshot;
+      document.getElementById("wb-tool-clear-snapshot").onclick = () => clearSnapshotBackground(true);
+      document.getElementById("wb-mobile-snapshot-btn")?.addEventListener("click", requestScreenSnapshot);
+
       document.getElementById("wb-tool-save").onclick = () => {
-        const a = document.createElement("a");
-        a.href = canvas.toDataURL({ format: "png" });
-        a.download = "whiteboard.png";
-        a.click();
+        const snapshotImg = document.getElementById("wb-snapshot-img");
+        if (snapshotImg && snapshotImg.style.display !== "none" && snapshotImg.src) {
+          const exportCanvas = document.createElement("canvas");
+          exportCanvas.width = CANVAS_WIDTH;
+          exportCanvas.height = CANVAS_HEIGHT;
+          const eCtx = exportCanvas.getContext("2d");
+          eCtx.fillStyle = "#000000";
+          eCtx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          eCtx.drawImage(snapshotImg, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+          eCtx.drawImage(canvas.lowerCanvasEl, 0, 0);
+          const a = document.createElement("a");
+          a.href = exportCanvas.toDataURL("image/png");
+          a.download = "whiteboard_annotation.png";
+          a.click();
+        } else {
+          const a = document.createElement("a");
+          a.href = canvas.toDataURL({ format: "png" });
+          a.download = "whiteboard.png";
+          a.click();
+        }
       };
 
       document.getElementById("wb-tool-prev-board").onclick = () =>
@@ -1862,6 +2088,12 @@
       });
 
       if (!isPresenter) {
+        socket?.on("wb-capture-response", (data) => {
+          if (data?.image) applySnapshotBackground(data.image, false);
+        });
+        socket?.on("wb-clear-snapshot", () => {
+          clearSnapshotBackground(false);
+        });
         socket?.on("wb-worker-sync-request", () => {
           socket.emit(overlay.classList.contains("active") ? "wb-open" : "wb-close");
           socket.emit("wb-state", canvas.toJSON(WB_JSON_PROPS));
@@ -1870,6 +2102,10 @@
             alpha:document.getElementById("wb-bg-alpha")?.value ?? 1,
             dark:isDarkBoard,
           });
+          const snapshotImg = document.getElementById("wb-snapshot-img");
+          if (snapshotImg && snapshotImg.style.display !== "none" && snapshotImg.src) {
+            socket.emit("wb-capture-response", { image: snapshotImg.src });
+          }
         });
 
         const btn = document.createElement("button");
@@ -2041,6 +2277,28 @@
           applyGridStyle();
         }
       });
+
+      socket.on("wb-capture-request", async () => {
+        const captureFn = window.capturePresentationViewport || defaultCaptureViewport;
+        try {
+          const dataUrl = await captureFn();
+          if (dataUrl) {
+            applySnapshotBackground(dataUrl, false);
+            socket.emit("wb-capture-response", { image: dataUrl });
+          }
+        } catch (err) {
+          console.error("Whiteboard capture failed on presenter:", err);
+        }
+      });
+
+      socket.on("wb-capture-response", (data) => {
+        if (data?.image) applySnapshotBackground(data.image, false);
+      });
+
+      socket.on("wb-clear-snapshot", () => {
+        clearSnapshotBackground(false);
+      });
+
       // Request the worker's cached board after every presenter listener is ready.
       const requestWhiteboardSync = () => socket.emit("wb-sync-request");
       if (socket.connected) requestWhiteboardSync();

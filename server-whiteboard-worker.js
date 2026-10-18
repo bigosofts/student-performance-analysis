@@ -5,6 +5,7 @@ let boardOpen = false;
 let lastBoardState = null;
 let lastGridState = null;
 let lastBgState = null;
+let lastSnapshotBg = null;
 
 port.on("message", (message) => {
   if (message.type === "wb-sync-request") {
@@ -13,6 +14,7 @@ port.on("message", (message) => {
     if (lastBoardState !== null) port.postMessage({ type:"emit-to", socketId, event:"wb-state", data:lastBoardState });
     if (lastGridState !== null) port.postMessage({ type:"emit-to", socketId, event:"wb-grid", data:lastGridState });
     if (lastBgState !== null) port.postMessage({ type:"emit-to", socketId, event:"wb-bg", data:lastBgState });
+    if (lastSnapshotBg !== null) port.postMessage({ type:"emit-to", socketId, event:"wb-capture-response", data:{ image:lastSnapshotBg } });
     return;
   }
 
@@ -33,6 +35,8 @@ port.on("message", (message) => {
     case "wb-clear": lastBoardState = null; break;
     case "wb-grid": lastGridState = data ?? null; break;
     case "wb-bg": lastBgState = data ?? null; break;
+    case "wb-capture-response": lastSnapshotBg = data?.image ?? null; break;
+    case "wb-clear-snapshot": lastSnapshotBg = null; break;
     case "wb-add": updateObject(data); break;
     case "wb-modify": updateObject(data); break;
     case "wb-modify-batch": if (Array.isArray(data)) data.forEach(updateObject); break;

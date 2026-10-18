@@ -2763,7 +2763,119 @@
 
       // Initial load
       setTimeout(loadPresentations, 300);
+
+      // Viewport snapshot capture for Whiteboard annotation
+      window.capturePresentationViewport = async function () {
+        const W = window.innerWidth;
+        const H = window.innerHeight;
+        const fitScale = Math.min(W / 1920, H / 1080);
+        const canvasDisplayWidth = 1920 * fitScale;
+        const canvasDisplayHeight = 1080 * fitScale;
+        const canvasLeft = (W - canvasDisplayWidth) / 2;
+        const canvasTop = (H - canvasDisplayHeight) / 2;
+
+        const offCanvas = document.createElement("canvas");
+        offCanvas.width = 1920;
+        offCanvas.height = 1080;
+        const ctx = offCanvas.getContext("2d");
+        ctx.fillStyle = "#030712";
+        ctx.fillRect(0, 0, 1920, 1080);
+
+        const viewerScreen = document.getElementById("viewerScreen");
+        const isViewerActive = viewerScreen && !viewerScreen.classList.contains("hidden");
+        const slideImg = document.getElementById("slideImg");
+
+        // 1. Check if an active slide image is displayed
+        if (isViewerActive && slideImg && slideImg.src && slideImg.style.display !== "none") {
+          if (!slideImg.complete) {
+            await new Promise((resolve) => {
+              slideImg.addEventListener("load", resolve, { once: true });
+              setTimeout(resolve, 400);
+            });
+          }
+
+          if (slideImg.naturalWidth > 0 && slideImg.naturalHeight > 0) {
+            const elW = slideImg.clientWidth || W;
+            const elH = slideImg.clientHeight || H;
+            const elRect = slideImg.getBoundingClientRect();
+            const nw = slideImg.naturalWidth;
+            const nh = slideImg.naturalHeight;
+            const imgScale = Math.min(elW / nw, elH / nh);
+            const renderedW = nw * imgScale;
+            const renderedH = nh * imgScale;
+            const renderedLeft = elRect.left + (elW - renderedW) / 2;
+            const renderedTop = elRect.top + (elH - renderedH) / 2;
+
+            const destX = (renderedLeft - canvasLeft) / fitScale;
+            const destY = (renderedTop - canvasTop) / fitScale;
+            const destW = renderedW / fitScale;
+            const destH = renderedH / fitScale;
+
+            try {
+              ctx.drawImage(slideImg, destX, destY, destW, destH);
+              return offCanvas.toDataURL("image/jpeg", 0.92);
+            } catch (err) {
+              console.warn("Direct slide capture fallback:", err);
+            }
+          }
+        }
+
+        // 2. Check if a shared modal image is open
+        const openModal = document.querySelector(".share-modal.open");
+        const modalImg = openModal ? openModal.querySelector(".shared-img") : null;
+        if (openModal && modalImg && modalImg.src && modalImg.naturalWidth > 0) {
+          const mElW = modalImg.clientWidth || W;
+          const mElH = modalImg.clientHeight || H;
+          const mRect = modalImg.getBoundingClientRect();
+          const mnw = modalImg.naturalWidth;
+          const mnh = modalImg.naturalHeight;
+          const mScale = Math.min(mElW / mnw, mElH / mnh);
+          const mRenderedW = mnw * mScale;
+          const mRenderedH = mnh * mScale;
+          const mRenderedLeft = mRect.left + (mElW - mRenderedW) / 2;
+          const mRenderedTop = mRect.top + (mElH - mRenderedH) / 2;
+
+          const destX = (mRenderedLeft - canvasLeft) / fitScale;
+          const destY = (mRenderedTop - canvasTop) / fitScale;
+          const destW = mRenderedW / fitScale;
+          const destH = mRenderedH / fitScale;
+
+          try {
+            ctx.drawImage(modalImg, destX, destY, destW, destH);
+            return offCanvas.toDataURL("image/jpeg", 0.92);
+          } catch (err) {
+            console.warn("Direct modal capture fallback:", err);
+          }
+        }
+
+        // 3. Fallback: html2canvas
+        if (typeof html2canvas !== "undefined") {
+          const overlay = document.getElementById("whiteboard-overlay");
+          const prevVis = overlay ? overlay.style.visibility : "";
+          if (overlay) overlay.style.visibility = "hidden";
+          try {
+            const captured = await html2canvas(document.body, {
+              useCORS: true,
+              logging: false,
+              backgroundColor: "#030712",
+            });
+            ctx.drawImage(
+              captured,
+              canvasLeft, canvasTop, canvasDisplayWidth, canvasDisplayHeight,
+              0, 0, 1920, 1080
+            );
+            return offCanvas.toDataURL("image/jpeg", 0.92);
+          } catch (e) {
+            console.error("html2canvas capture error:", e);
+          } finally {
+            if (overlay) overlay.style.visibility = prevVis;
+          }
+        }
+
+        return offCanvas.toDataURL("image/jpeg", 0.92);
+      };
     </script>
+    <script src="assets/vendor/html2canvas.min.js"></script>
     <script src="js/wake-lock.js"></script>
     <script src="js/whiteboard.js"></script>
 
