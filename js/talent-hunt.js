@@ -16,11 +16,105 @@
     const prefix = type === 4 && part === "q2" ? "q2_option_" : "option_";
     return ["a","b","c","d"].map((letter,i) => ({ value:String.fromCharCode(65+i), label:QuestionBank.OPTION_LABELS[i], text:q[prefix+letter] })).filter(x => x.text);
   };
+  const PALETTES = [
+    { gradient: "linear-gradient(90deg, #f59e0b, #fbbf24, #f97316)", color: "#d97706", glow: "rgba(245,158,11,0.35)", accent: "#fef3c7", icon: "👑" },
+    { gradient: "linear-gradient(90deg, #06b6d4, #0ea5e9, #3b82f6)", color: "#0284c7", glow: "rgba(14,165,233,0.35)", accent: "#e0f2fe", icon: "⚡" },
+    { gradient: "linear-gradient(90deg, #10b981, #34d399, #059669)", color: "#059669", glow: "rgba(16,185,129,0.35)", accent: "#dcfce7", icon: "🌟" },
+    { gradient: "linear-gradient(90deg, #8b5cf6, #c084fc, #ec4899)", color: "#7c3aed", glow: "rgba(139,92,246,0.35)", accent: "#f3e8ff", icon: "🔥" },
+    { gradient: "linear-gradient(90deg, #f43f5e, #fb7185, #f97316)", color: "#e11d48", glow: "rgba(244,63,94,0.35)", accent: "#ffe4e6", icon: "🎯" },
+    { gradient: "linear-gradient(90deg, #6366f1, #818cf8, #38bdf8)", color: "#4f46e5", glow: "rgba(99,102,241,0.35)", accent: "#e0e7ff", icon: "🛡️" },
+    { gradient: "linear-gradient(90deg, #14b8a6, #2dd4bf, #06b6d4)", color: "#0f766e", glow: "rgba(20,184,166,0.35)", accent: "#ccfbf1", icon: "💎" },
+    { gradient: "linear-gradient(90deg, #ec4899, #f472b6, #fb7185)", color: "#db2777", glow: "rgba(236,72,153,0.35)", accent: "#fce7f3", icon: "🚀" }
+  ];
+
+  function launchConfetti(container) {
+    if (!container) return;
+    if (container.querySelector(".th-confetti-particle")) return;
+    const colors = ["#f59e0b", "#3b82f6", "#10b981", "#ec4899", "#8b5cf6", "#06b6d4", "#f43f5e", "#eab308"];
+    for (let i = 0; i < 55; i++) {
+      const p = document.createElement("div");
+      p.className = "th-confetti-particle";
+      p.style.left = `${Math.random() * 96 + 2}%`;
+      p.style.top = `${-15 - Math.random() * 25}px`;
+      p.style.backgroundColor = colors[i % colors.length];
+      p.style.animationDelay = `${Math.random() * 1.8}s`;
+      p.style.animationDuration = `${2.4 + Math.random() * 2.2}s`;
+      p.style.width = `${Math.random() * 6 + 8}px`;
+      p.style.height = `${Math.random() * 8 + 12}px`;
+      p.style.transform = `rotate(${Math.random() * 360}deg)`;
+      container.appendChild(p);
+      setTimeout(() => p.remove(), 6000);
+    }
+  }
+
   const scoreRows = s => (s.mode === "teams" ? s.teams.map(t => ({name:t.name,score:t.score})) : s.participants.map(p => ({name:p.name,score:p.score}))).sort((a,b) => b.score-a.score);
   function showScores(target, s) {
     if (!target) return;
+    const rows = scoreRows(s);
+    if (!rows.length) {
+      target.innerHTML = '<p class="muted">No players or teams have joined yet.</p>';
+      return;
+    }
     const maxPoints = Number(s.maxPoints) || s.questions?.length || 0;
-    target.innerHTML = scoreRows(s).map((row,i) => `<div class="score-row"><span>${i+1}. ${esc(row.name)}</span><b>${row.score} / ${maxPoints}</b></div>`).join("") || '<p class="muted">No players have joined yet.</p>';
+    const maxScored = Math.max(...rows.map(r => r.score), 1);
+    const leader = rows[0];
+
+    const winnerBanner = document.getElementById("screenWinnerBanner");
+    if (winnerBanner) {
+      if (s.status === "finished" && leader && leader.score > 0) {
+        winnerBanner.innerHTML = `<span class="th-champ-trophy">🏆</span> <span>Arena Champion: <strong>${esc(leader.name)}</strong> with <strong>${leader.score}</strong> pts!</span>`;
+        winnerBanner.style.display = "inline-flex";
+      } else if (s.status === "finished" && leader) {
+        winnerBanner.innerHTML = `<span class="th-champ-trophy">🤝</span> <span>Match Completed · All teams participated!</span>`;
+        winnerBanner.style.display = "inline-flex";
+      } else {
+        winnerBanner.style.display = "none";
+      }
+    }
+
+    target.innerHTML = `
+      <div class="th-bargraph-list ${rows.length >= 4 ? 'multi-col' : ''}">
+        ${rows.map((row, i) => {
+          const pal = PALETTES[i % PALETTES.length];
+          const isLeader = i === 0 && row.score > 0;
+          const relPct = maxScored > 0 ? (row.score / maxScored) * 100 : 0;
+          const barWidth = row.score === 0 ? 5 : Math.max(12, Math.round(relPct * 0.96));
+          const accuracy = maxPoints > 0 ? Math.round((row.score / maxPoints) * 100) : 0;
+          const rankMedal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `#${i + 1}`;
+          const rankClass = i === 0 ? "rank-1" : i === 1 ? "rank-2" : i === 2 ? "rank-3" : "rank-other";
+
+          return `
+            <div class="th-bar-card ${rankClass}" style="--bar-color: ${pal.color}; --bar-gradient: ${pal.gradient}; --bar-glow: ${pal.glow}; --bar-accent: ${pal.accent}; animation-delay: ${i * 0.08}s;">
+              <div class="th-bar-meta">
+                <div class="th-bar-identity">
+                  <div class="th-rank-pill ${rankClass}">${rankMedal}</div>
+                  <div class="th-team-badge" style="background: ${pal.accent}; color: ${pal.color};">${pal.icon}</div>
+                  <div class="th-team-name-wrap">
+                    <span class="th-team-title">${esc(row.name)}</span>
+                    ${isLeader ? '<span class="th-badge-leader">👑 LEADER</span>' : ''}
+                  </div>
+                </div>
+                <div class="th-bar-score">
+                  <div class="th-score-numbers">
+                    <b class="th-score-big">${row.score}</b>
+                    <span class="th-score-denom">/ ${maxPoints}</span>
+                  </div>
+                  <span class="th-score-badge" style="background: ${pal.accent}; color: ${pal.color};">${row.score} PTS</span>
+                </div>
+              </div>
+              <div class="th-bar-track-container">
+                <div class="th-bar-track">
+                  <div class="th-bar-fill" style="width: ${barWidth}%;">
+                    <div class="th-bar-shimmer"></div>
+                  </div>
+                </div>
+                <span class="th-bar-pct">${accuracy}%</span>
+              </div>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    `;
   }
   function optionHtml(q, part) {
     const opts = answerFields(q, part);
@@ -73,7 +167,11 @@
     const progress=document.getElementById("progressText"); if(progress&&s.questions.length)progress.textContent=`ROUND ${Math.min(s.questionIndex+1,s.questions.length)} / ${s.questions.length}`;
     if(s.status==="finished"){
       const final=document.getElementById("finalScores"); if(final){showScores(final,s);document.getElementById("results").hidden=false;document.getElementById("play").hidden=true;}
-      if(finalScreen){showScores(document.getElementById("screenScores"),s);finalScreen.hidden=false;}
+      if(finalScreen){
+        showScores(document.getElementById("screenScores"),s);
+        finalScreen.hidden=false;
+        launchConfetti(finalScreen);
+      }
     }
   });
   socket.on("th:question", packet => {

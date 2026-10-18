@@ -13,7 +13,10 @@ module.exports = function (app, io, uploadsDir) {
   }
   let sessions = {};
   try { sessions = JSON.parse(fs.readFileSync(storePath, 'utf8')); } catch (_) {}
-  Object.values(sessions).forEach(s => { if (s.status === 'running') { s.status = 'waiting'; s.questionEndsAt = null; s.revealing = false; } });
+  Object.values(sessions).forEach(s => {
+    if (s.status === 'running') { s.status = 'waiting'; s.questionEndsAt = null; s.revealing = false; }
+    Object.values(s.participants || {}).forEach(p => { p.online = false; });
+  });
   const persist = () => fs.writeFileSync(storePath, JSON.stringify(sessions, null, 2));
   const publicSession = (s) => ({ code:s.code, mode:s.mode, teamCount:s.teamCount, timer:s.timer, maxPoints:s.questions.length, status:s.status, questionIndex:s.questionIndex, questions:s.questions.map(({answer,q2_answer,...q})=>q), participants:Object.values(s.participants), teams:s.teams, scores:s.scores });
   const sendState = (s) => io.to(`talent:${s.code}`).emit('th:state', publicSession(s));
@@ -70,6 +73,7 @@ module.exports = function (app, io, uploadsDir) {
       if(role==='teacher' || role==='projector') { socket.join(`talent:${c}`); socket.data.th={code:c,role}; sendState(s); if(s.status==='running')socket.emit('th:question',currentQuestion(s)); return; }
       const clean=String(name||'').trim().slice(0,40); if(!clean){socket.emit('th:error',{message:'Enter your name.'});return;}
       const existing=Object.values(s.participants).find(p=>p.name.toLowerCase()===clean.toLowerCase());
+      if(existing?.online && existing.socketId!==socket.id){socket.emit('th:error',{message:'That name is already in this game. Please use a different name.'});return;}
       const p=existing||{id:socket.id,name:clean,ready:true,score:0,answers:0}; p.socketId=socket.id; p.online=true; s.participants[p.id]=p;
       socket.join(`talent:${c}`); socket.data.th={code:c,role:'student',participantId:p.id}; persist(); sendState(s);
       if(s.status==='running')socket.emit('th:question',currentQuestion(s));

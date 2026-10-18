@@ -22,7 +22,20 @@
         <div id="question" class="content-area th-content-area"></div>
         <div id="screenAnswer" class="th-answer-reveal" aria-live="polite"></div>
       </div>
-      <section class="th-results" id="screenFinal" hidden><div class="th-trophy">🏆</div><div class="th-eyebrow">THE RESULTS ARE IN</div><h2>Champions of the arena</h2><div id="screenScores"></div></section>
+      <section class="th-results" id="screenFinal" hidden>
+        <div class="th-results-heading">
+          <div class="th-trophy-wrap">
+            <div class="th-trophy">🏆</div>
+            <div class="th-trophy-glow"></div>
+          </div>
+          <div class="th-results-title">
+            <div class="th-eyebrow">✦ THE RESULTS ARE IN ✦</div>
+            <h2>Champions of the Arena</h2>
+          </div>
+          <div class="th-champion-banner" id="screenWinnerBanner" style="display: none;"></div>
+        </div>
+        <div id="screenScores"></div>
+      </section>
     </section>
     <footer class="th-footer"><div class="th-footer-label"><span class="th-live-dot"></span> LIVE PLAYERS</div><div id="screenPeople" class="th-player-strip"></div><div class="th-footer-brand">TALENT HUNT <span>✦</span></div></footer>
   </main>
