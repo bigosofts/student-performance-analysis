@@ -1140,8 +1140,12 @@ body {
   .sb-match-layout {
     grid-template-columns: 1fr;
   }
+  .sb-board-frame.teacher-board {
+    height: min(60vh, 580px);
+  }
 }
 
+/* Tablet */
 @media (max-width: 768px) {
   .sb-projector-layout {
     grid-template-columns: 1fr 1fr;
@@ -1160,6 +1164,266 @@ body {
   }
   .sb-board-frame {
     height: min(65vh, 520px);
+  }
+
+  /* Dashboard header: stack vertically */
+  .sb-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .sb-header nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+  .sb-header nav .sb-button {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  /* Scorebar: stack teams vertically */
+  .sb-scorebar {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+    gap: 10px;
+  }
+  .sb-scorebar .sb-turn {
+    grid-column: 1 / -1;
+    order: -1;
+    flex-direction: row;
+    gap: 8px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 8px 14px;
+    background: #f8fafc;
+    justify-content: center;
+  }
+
+  /* Match layout: single column */
+  .sb-match-layout {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  /* Session management: tighter spacing */
+  .sb-create-session {
+    grid-template-columns: 1fr;
+  }
+  .sb-create-session .sb-button {
+    width: 100%;
+  }
+  .sb-session-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* Team photo upload: stack vertically */
+  .sb-team-photo-setup {
+    grid-template-columns: 1fr;
+  }
+
+  /* Admin actions: single column */
+  .sb-admin-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Mobile */
+@media (max-width: 540px) {
+  .sb-shell {
+    padding: 14px 14px 40px;
+  }
+
+  .sb-header {
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .sb-header h1 {
+    font-size: 1.45rem;
+  }
+  .sb-header p {
+    font-size: 0.8rem;
+  }
+  .sb-header nav {
+    gap: 8px;
+  }
+  .sb-header nav .sb-button {
+    font-size: 0.8rem;
+    padding: 9px 12px;
+  }
+
+  .sb-layout {
+    gap: 14px;
+  }
+
+  .sb-panel, .sb-empty {
+    border-radius: 18px;
+  }
+
+  .sb-setup, .sb-game-panel {
+    padding: 16px;
+  }
+
+  .sb-section-title {
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .sb-section-title > span {
+    min-width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+  }
+  .sb-section-title h2 {
+    font-size: 1rem;
+  }
+
+  .sb-filters {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .sb-question-list {
+    max-height: 160px;
+  }
+
+  .sb-button.full {
+    margin-top: 6px;
+  }
+
+  /* Scorebar on small mobile */
+  .sb-scorebar {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .sb-scorebar .sb-turn {
+    order: 0;
+    grid-column: auto;
+  }
+  .sb-scorebar .sb-team-card {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  .sb-scorebar .sb-team-card .sb-team-photo {
+    width: 48px;
+    height: 48px;
+    margin: 0;
+    border-width: 3px;
+  }
+  .sb-scorebar .sb-team-card .sb-team-title {
+    font-size: 0.72rem;
+  }
+  .sb-scorebar .sb-team-card .sb-team-stat b {
+    font-size: 1.6rem;
+  }
+  .sb-scorebar .sb-team-card .sb-team-indicator {
+    display: none;
+  }
+  .sb-scorebar .sb-bead-count {
+    font-size: 0.78rem;
+  }
+
+  /* Match layout */
+  .sb-match-layout {
+    gap: 12px;
+  }
+
+  .sb-board-frame.teacher-board {
+    height: min(55vh, 440px);
+  }
+
+  /* Question controls */
+  .sb-question-controls {
+    padding: 12px;
+    gap: 8px;
+    border-radius: 16px;
+  }
+
+  .sb-judge {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .sb-judge .sb-button {
+    font-size: 0.78rem;
+    padding: 9px 8px;
+  }
+
+  .sb-admin-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .sb-admin-actions .sb-button {
+    font-size: 0.78rem;
+    padding: 9px 8px;
+  }
+
+  /* Session management */
+  .sb-session-actions {
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .sb-session-actions .sb-button {
+    font-size: 0.78rem;
+    padding: 9px 8px;
+  }
+  .sb-session-badge {
+    font-size: 0.72rem;
+    padding: 7px 10px;
+  }
+
+  /* Game heading */
+  .sb-game-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 12px;
+  }
+  .sb-game-heading h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Empty state */
+  .sb-empty {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 18px;
+  }
+
+  /* Photo upload */
+  .sb-photo-upload {
+    min-height: 110px;
+    padding: 10px;
+  }
+  .sb-photo-upload > span {
+    font-size: 18px;
+  }
+  .sb-photo-upload b {
+    font-size: 11px;
+  }
+}
+
+/* Extra-small phones */
+@media (max-width: 380px) {
+  .sb-shell {
+    padding: 10px 10px 32px;
+  }
+  .sb-setup, .sb-game-panel {
+    padding: 12px;
+  }
+  .sb-header h1 {
+    font-size: 1.2rem;
+  }
+  .sb-judge,
+  .sb-admin-actions,
+  .sb-session-actions {
+    grid-template-columns: 1fr;
+  }
+  .sb-board-frame.teacher-board {
+    height: min(48vh, 380px);
   }
 }
 

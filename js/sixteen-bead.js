@@ -220,8 +220,8 @@
     innerFrame.setAttribute("stroke-width", "2");
     boardGroup.appendChild(innerFrame);
 
-    // Subtle Horizontal Plank Lines across the wood
-    for (let py = 160; py <= 660; py += 100) {
+    // Subtle Horizontal Plank Lines across the wood (stop before the bottom edge)
+    for (let py = 160; py <= 560; py += 100) {
       const plankLine = document.createElementNS(svg.namespaceURI, "line");
       plankLine.setAttribute("x1", "26");
       plankLine.setAttribute("y1", py);
@@ -627,6 +627,26 @@
     if (data?.url) window.location.href = data.url;
   });
 
+  // Projector: live image preview before/during a match
+  socket.on("sixteen-bead:team-image-preview", ({ team, url } = {}) => {
+    if (isTeacher) return;
+    document.querySelectorAll(`[data-team-photo="${team}"]`).forEach(img => {
+      img.src = url;
+      img.hidden = false;
+      img.dataset.src = url;
+    });
+  });
+
+  // Teacher: confirmation that server saved the uploaded image
+  socket.on("sixteen-bead:team-image-saved", ({ team, url } = {}) => {
+    if (!isTeacher) return;
+    document.querySelectorAll(`[data-team-photo="${team}"]`).forEach(img => {
+      img.src = url;
+      img.hidden = false;
+      img.dataset.src = url;
+    });
+  });
+
   socket.on("sixteen-bead:question-asked", ({ number } = {}) => {
     if (isTeacher || !Number.isFinite(Number(number))) return;
     projectorQuestionNumberAllowed = Number(number);
@@ -706,6 +726,20 @@
       preview.src = preview.dataset.objectUrl;
       preview.hidden = false;
       $(team + "TeamFileName").textContent = file.name;
+
+      // Immediately push the image to all connected projectors via socket
+      const reader = new FileReader();
+      reader.onload = e => {
+        const dataUrl = e.target.result;
+        socket.emit("sixteen-bead:update-team-image", { team, dataUrl });
+        // Also update the scorebar preview on the teacher page right away
+        document.querySelectorAll(`[data-team-photo="${team}"]`).forEach(img => {
+          img.src = dataUrl;
+          img.hidden = false;
+          img.dataset.src = dataUrl;
+        });
+      };
+      reader.readAsDataURL(file);
     }));
 
     $("createSession").addEventListener("click", async () => {

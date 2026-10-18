@@ -371,14 +371,14 @@ module.exports = function mountSixteenBead(app, io, uploadsDir) {
         teamImages[team] = `/uploads/sixteen-bead/${filename}`;
       }
 
-      // Standard initial setup:
-      // Rows 0..3 (indices 0..15) -> 16 blue beads (top)
-      // Row 4 (indices 16..20) -> empty (middle row)
-      // Rows 5..8 (indices 21..36) -> 16 red beads (bottom)
+      // Standard initial setup – exactly 16 beads per team:
+      // Blue: top triangle (6 pts, y<1) + grid rows y=1 and y=2 (10 pts) = 16
+      // Red : grid rows y=4 and y=5 (10 pts) + bottom triangle (6 pts, y>5) = 16
+      // The middle row (y=3) starts empty so there is always a neutral gap.
       const board = Array(points.length).fill(null);
       points.forEach(({ y }, i) => {
-        if (y <= 3) board[i] = "blue";
-        else if (y >= 5) board[i] = "red";
+        if (y < 1 || y === 1 || y === 2) board[i] = "blue";
+        else if (y === 4 || y === 5 || y > 5) board[i] = "red";
       });
 
       session = {
@@ -534,6 +534,46 @@ module.exports = function mountSixteenBead(app, io, uploadsDir) {
       }
 
       broadcast();
+    });
+
+    // Live team-image update (teacher uploads a picture mid-game or before start)
+    socket.on("sixteen-bead:update-team-image", async ({ team, dataUrl } = {}) => {
+      if (socket.data.sixteenBeadRole !== "teacher") return;
+      if (team !== "blue" && team !== "red") return;
+      if (typeof dataUrl !== "string" || !dataUrl.startsWith("data:image/")) return;
+
+      try {
+        const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp));base64,(.+)$/);
+        if (!match) return;
+        const mime = match[1];
+        const ext = mime === "image/png" ? "png" : mime === "image/webp" ? "webp" : "jpg";
+        const buf = Buffer.from(match[2], "base64");
+        if (buf.length > 12 * 1024 * 1024) return; // 12 MB guard
+        const filename = `team-${crypto.randomUUID()}.${ext}`;
+        fs.writeFileSync(imagePath(filename), buf);
+        const url = `/uploads/sixteen-bead/${filename}`;
+        // Update live session if one exists
+        if (session) {
+          // Remove old file for this team from disk (if different)
+          const oldFile = session.teamImageFiles?.[team];
+          if (oldFile && oldFile !== filename) {
+            try { fs.unlinkSync(imagePath(oldFile)); } catch (_) {}
+          }
+          if (!session.teamImages) session.teamImages = {};
+          if (!session.teamImageFiles) session.teamImageFiles = {};
+          session.teamImages[team] = url;
+          session.teamImageFiles[team] = filename;
+          broadcast();
+        } else {
+          // No active session – just push the URL to all clients so the
+          // projector preview and teacher card update immediately.
+          io.emit("sixteen-bead:team-image-preview", { team, url });
+        }
+        // Echo the URL back to the teacher so they can update their preview
+        socket.emit("sixteen-bead:team-image-saved", { team, url });
+      } catch (err) {
+        console.error("sixteen-bead team image upload error:", err);
+      }
     });
 
     // Switch / Pass turn (always allowed by teacher, or when player chooses to end continuation)
