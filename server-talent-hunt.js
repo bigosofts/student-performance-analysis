@@ -17,8 +17,24 @@ module.exports = function (app, io, uploadsDir) {
     if (s.status === 'running') { s.status = 'waiting'; s.questionEndsAt = null; s.revealing = false; }
     Object.values(s.participants || {}).forEach(p => { p.online = false; });
   });
-  const persist = () => fs.writeFileSync(storePath, JSON.stringify(sessions, null, 2));
-  const publicSession = (s) => ({ code:s.code, mode:s.mode, teamCount:s.teamCount, timer:s.timer, maxPoints:s.questions.length, status:s.status, questionIndex:s.questionIndex, questions:s.questions.map(({answer,q2_answer,...q})=>q), participants:Object.values(s.participants), teams:s.teams, scores:s.scores });
+  const persist = () => {
+    // Strip photos from persisted data to keep file sizes small
+    const stripped = JSON.parse(JSON.stringify(sessions));
+    Object.values(stripped).forEach(s => {
+      Object.values(s.participants || {}).forEach(p => { delete p.photo; });
+    });
+    fs.writeFileSync(storePath, JSON.stringify(stripped, null, 2));
+  };
+  const publicSession = (s) => ({
+    code:s.code, mode:s.mode, teamCount:s.teamCount, timer:s.timer,
+    maxPoints:s.questions.length, status:s.status, questionIndex:s.questionIndex,
+    questions:s.questions.map(({answer,q2_answer,...q})=>q),
+    participants:Object.values(s.participants).map(p => ({
+      id: p.id, name: p.name, ready: p.ready, score: p.score, online: p.online, answers: p.answers,
+      photo: p.photo || null
+    })),
+    teams:s.teams, scores:s.scores
+  });
   const sendState = (s) => io.to(`talent:${s.code}`).emit('th:state', publicSession(s));
   const currentQuestion = (s) => {
     const { answer, q2_answer, ...q } = s.questions[s.questionIndex] || {};
@@ -67,14 +83,21 @@ module.exports = function (app, io, uploadsDir) {
   app.get('/api/talent-hunt/sessions/:code', (req,res)=>{ const s=sessions[String(req.params.code).toUpperCase()]; if(!s)return res.status(404).json({error:'Session not found'}); res.json(publicSession(s)); });
   app.get('/api/talent-hunt/current', (_req,res)=>{ const s=currentCode&&sessions[currentCode]; if(!s || s.status==='finished')return res.status(404).json({error:'No active Talent Hunt'}); res.json({code:s.code,...publicSession(s)}); });
   io.on('connection', socket => {
-    socket.on('th:join', ({code:raw,name,role})=>{
+    socket.on('th:join', ({code:raw,name,role,photo})=>{
       const c=String(raw||'').trim().toUpperCase(), s=sessions[c];
       if(!s || s.status==='finished'){ socket.emit('th:error',{message:'Session code is invalid or the hunt has finished.'}); return; }
       if(role==='teacher' || role==='projector') { socket.join(`talent:${c}`); socket.data.th={code:c,role}; sendState(s); if(s.status==='running')socket.emit('th:question',currentQuestion(s)); return; }
       const clean=String(name||'').trim().slice(0,40); if(!clean){socket.emit('th:error',{message:'Enter your name.'});return;}
       const existing=Object.values(s.participants).find(p=>p.name.toLowerCase()===clean.toLowerCase());
       if(existing?.online && existing.socketId!==socket.id){socket.emit('th:error',{message:'That name is already in this game. Please use a different name.'});return;}
-      const p=existing||{id:socket.id,name:clean,ready:true,score:0,answers:0}; p.socketId=socket.id; p.online=true; s.participants[p.id]=p;
+      const p=existing||{id:socket.id,name:clean,ready:true,score:0,answers:0}; p.socketId=socket.id; p.online=true;
+
+      // Store photo if provided (base64 data URL, max ~500KB)
+      if (photo && typeof photo === 'string' && photo.startsWith('data:image/') && photo.length < 500000) {
+        p.photo = photo;
+      }
+
+      s.participants[p.id]=p;
       socket.join(`talent:${c}`); socket.data.th={code:c,role:'student',participantId:p.id}; persist(); sendState(s);
       if(s.status==='running')socket.emit('th:question',currentQuestion(s));
     });
