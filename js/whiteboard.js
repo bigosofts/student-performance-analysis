@@ -108,6 +108,7 @@
               <div id="wb-canvas-stack">
                 <img id="wb-snapshot-img" alt="" style="position:absolute; top:0; left:0; width:1920px; height:1080px; z-index:0; pointer-events:none; display:none; object-fit:contain; background:#000;" />
                 <canvas id="wb-canvas"></canvas>
+                <canvas id="wb-scratch-canvas" aria-hidden="true"></canvas>
                 <div id="wb-align-grid" aria-hidden="true"></div>
               </div>
             </div>
@@ -525,7 +526,7 @@
     fabric.Object.prototype.objectCaching = false;
 
     const canvas = new fabric.Canvas("wb-canvas", {
-      isDrawingMode: true,
+      isDrawingMode: false,
       selection: false,
       width: CANVAS_WIDTH,
       height: CANVAS_HEIGHT,
@@ -545,6 +546,84 @@
     canvas.freeDrawingBrush.color = "#000000";
     canvas.freeDrawingBrush.width = 5;
     canvas.freeDrawingBrush.decimate = 1.5; // Optimized for performance vs smoothness trade-off
+
+    // Freehand preview is rendered off the UI thread. The visible canvas stays
+    // on the main thread; only transferable ImageBitmaps cross the worker boundary.
+    const scratchCanvas = document.getElementById("wb-scratch-canvas");
+    const scratchCtx = scratchCanvas?.getContext("2d", { alpha: true });
+    const previewStrokes = new Map();
+    let drawWorker = null;
+    if (scratchCanvas) {
+      scratchCanvas.width = CANVAS_WIDTH;
+      scratchCanvas.height = CANVAS_HEIGHT;
+      scratchCanvas.style.width = CANVAS_WIDTH + "px";
+      scratchCanvas.style.height = CANVAS_HEIGHT + "px";
+      if (window.Worker && window.OffscreenCanvas && scratchCtx) {
+        try {
+          drawWorker = new Worker("js/whiteboard-draw-worker.js");
+          drawWorker.onmessage = ({ data }) => {
+            if (data?.type !== "frame" || !data.bitmap || !scratchCtx) return;
+            scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+            scratchCtx.drawImage(data.bitmap, 0, 0);
+            data.bitmap.close?.();
+          };
+          drawWorker.onerror = (error) => {
+            console.warn("Whiteboard draw worker failed; using main-thread preview.", error);
+            drawWorker.terminate();
+            drawWorker = null;
+            redrawFallbackPreview();
+          };
+          drawWorker.postMessage({ type: "init", width: CANVAS_WIDTH, height: CANVAS_HEIGHT });
+        } catch (error) {
+          console.warn("Whiteboard draw worker unavailable; using main-thread preview.", error);
+          drawWorker = null;
+        }
+      }
+    }
+
+    function redrawFallbackPreview() {
+      if (!scratchCtx || drawWorker) return;
+      scratchCtx.clearRect(0, 0, scratchCanvas.width, scratchCanvas.height);
+      for (const stroke of previewStrokes.values()) {
+        const pts = stroke.points;
+        if (!pts.length) continue;
+        scratchCtx.strokeStyle = stroke.color;
+        scratchCtx.fillStyle = stroke.color;
+        scratchCtx.lineWidth = stroke.width;
+        scratchCtx.lineCap = "round";
+        scratchCtx.lineJoin = "round";
+        if (pts.length === 1) {
+          scratchCtx.beginPath();
+          scratchCtx.arc(pts[0].x, pts[0].y, Math.max(0.5, stroke.width / 2), 0, Math.PI * 2);
+          scratchCtx.fill();
+        } else {
+          scratchCtx.beginPath();
+          scratchCtx.moveTo(pts[0].x, pts[0].y);
+          for (let i = 1; i < pts.length; i++) scratchCtx.lineTo(pts[i].x, pts[i].y);
+          scratchCtx.stroke();
+        }
+      }
+    }
+
+    function previewStart(id, color, width, point) {
+      previewStrokes.set(id, { color, width, points: [point] });
+      if (drawWorker) drawWorker.postMessage({ type: "start", id, color, width, x: point.x, y: point.y });
+      else redrawFallbackPreview();
+    }
+
+    function previewPoints(id, points) {
+      const stroke = previewStrokes.get(id);
+      if (!stroke || !points.length) return;
+      for (const point of points) stroke.points.push({ x: point[0], y: point[1] });
+      if (drawWorker) drawWorker.postMessage({ type: "points", id, points });
+      else redrawFallbackPreview();
+    }
+
+    function previewEnd(id) {
+      previewStrokes.delete(id);
+      if (drawWorker) drawWorker.postMessage({ type: "end", id });
+      else redrawFallbackPreview();
+    }
 
     // Optimizing event delivery for modern browsers/webviews
     const upperCanvas = canvas.upperCanvasEl;
@@ -1394,7 +1473,6 @@
     }
 
     function setActiveTool(tool) {
-      if (isPresenter) return;
       currentTool = tool;
       [btnDraw, btnErase, btnSelect].forEach((b) =>
         b.classList.remove("active"),
@@ -1408,7 +1486,13 @@
       if (tool === "draw") btnDraw.classList.add("active");
       if (tool === "erase") btnErase.classList.add("active");
       if (tool === "select") btnSelect.classList.add("active");
-      if (!suppressDraw) canvas.isDrawingMode = tool === "draw";
+      canvas.isDrawingMode = false;
+      if (scratchCanvas) {
+        scratchCanvas.style.pointerEvents =
+          overlay.classList.contains("active") && !suppressDraw && tool === "draw"
+            ? "auto"
+            : "none";
+      }
     }
 
     function getFitScale() {
@@ -1534,7 +1618,7 @@
 
     let modifySyncTimer = null;
     function syncModifiedObject(target) {
-      if (!socket || isPresenter) return;
+      if (!socket) return;
 
       // Debounce modification sync to prevent socket/thread saturation during drags
       clearTimeout(modifySyncTimer);
@@ -1564,7 +1648,7 @@
     }
 
     function syncAdd(obj) {
-      if (socket && !isPresenter && obj.id) {
+      if (socket && obj.id) {
         const objData = obj.toJSON(["id", "wbBackground"]);
         // Convert absolute URLs (localhost or IP addresses) to relative paths for LAN sync
         if (objData.src) {
@@ -1575,7 +1659,7 @@
     }
 
     function syncRemove(obj) {
-      if (socket && !isPresenter && obj.id) {
+      if (socket && obj.id) {
         socket.emit("wb-remove", obj.id);
       }
     }
@@ -1627,6 +1711,9 @@
     function toggleWhiteboard(show) {
       if (show) {
         overlay.classList.add("active");
+        if (scratchCanvas) {
+          scratchCanvas.style.pointerEvents = currentTool === "draw" ? "auto" : "none";
+        }
         document.body.classList.add("wb-active");
         if (triggerBtnRef) triggerBtnRef.classList.add("active");
         if (isMobile() && !isPresenter) {
@@ -1646,6 +1733,7 @@
         }, 300);
       } else {
         overlay.classList.remove("active");
+        if (scratchCanvas) scratchCanvas.style.pointerEvents = "none";
         document.body.classList.remove("wb-active");
         overlay.classList.remove("wb-mobile-ui-hidden");
         overlay.classList.remove("wb-mobile-viewport-fit");
@@ -1751,7 +1839,7 @@
 
         if (objectsToRemove.length > 0) {
           objectsToRemove.forEach((obj) => {
-            if (obj.id && socket && !isPresenter)
+            if (obj.id && socket)
               socket.emit("wb-remove", obj.id);
             canvas.remove(obj);
           });
@@ -1778,7 +1866,8 @@
           return;
         if (e.touches.length >= 2) {
           suppressDraw = true;
-          canvas.isDrawingMode = false;
+          cancelActiveStroke();
+          if (scratchCanvas) scratchCanvas.style.pointerEvents = "none";
           removeAccidentalPinchDot();
           touchStartDist = Math.hypot(
             e.touches[0].clientX - e.touches[1].clientX,
@@ -1811,7 +1900,7 @@
         if (e.touches.length < 2) {
           touchStartDist = 0;
           suppressDraw = false;
-          if (currentTool === "draw") canvas.isDrawingMode = true;
+          if (scratchCanvas) scratchCanvas.style.pointerEvents = currentTool === "draw" ? "auto" : "none";
         }
       };
 
@@ -1849,10 +1938,151 @@
 
     const socket = window.io ? io() : null;
 
+    // The presenter can draw as well; its strokes use the same worker preview
+    // and socket relay as strokes started from the dashboard.
+    btnDraw.onclick = () => setActiveTool("draw");
+    btnErase.onclick = () => setActiveTool("erase");
+    btnSelect.onclick = () => setActiveTool("select");
+    setActiveTool("draw");
+    socket?.on("wb-live-start", (data) => {
+      if (!data?.id) return;
+      previewStart(data.id, data.color || "#000000", data.width || 5, { x: data.x, y: data.y });
+    });
+    socket?.on("wb-live-points", (data) => {
+      if (data?.id && Array.isArray(data.pts)) previewPoints(data.id, data.pts);
+    });
+    socket?.on("wb-live-end", (data) => {
+      if (data?.id) previewEnd(data.id);
+    });
+
+    let activeStroke = null;
+    let strokeFrame = 0;
+    let strokePointBatch = [];
+    function canvasPointFromPointer(event) {
+      const rect = scratchCanvas.getBoundingClientRect();
+      return {
+        x: Math.max(0, Math.min(CANVAS_WIDTH, (event.clientX - rect.left) * CANVAS_WIDTH / (rect.width || 1))),
+        y: Math.max(0, Math.min(CANVAS_HEIGHT, (event.clientY - rect.top) * CANVAS_HEIGHT / (rect.height || 1))),
+      };
+    }
+    function flushStrokePointBatch() {
+      strokeFrame = 0;
+      if (!activeStroke || !strokePointBatch.length) return;
+      const batch = strokePointBatch;
+      strokePointBatch = [];
+      previewPoints(activeStroke.id, batch);
+      socket?.emit("wb-live-points", { id: activeStroke.id, pts: batch });
+    }
+    function queueStrokePoint(point) {
+      const last = activeStroke.points[activeStroke.points.length - 1];
+      const dx = point.x - last.x;
+      const dy = point.y - last.y;
+      if (dx * dx + dy * dy < 2.25) return;
+      activeStroke.points.push(point);
+      strokePointBatch.push([point.x, point.y]);
+      if (!strokeFrame) strokeFrame = requestAnimationFrame(flushStrokePointBatch);
+    }
+    function cancelActiveStroke() {
+      if (!activeStroke) return;
+      if (strokeFrame) cancelAnimationFrame(strokeFrame);
+      strokeFrame = 0;
+      strokePointBatch = [];
+      const id = activeStroke.id;
+      activeStroke = null;
+      previewEnd(id);
+      socket?.emit("wb-live-end", { id });
+    }
+    function beginActiveStroke(event) {
+      if (currentTool !== "draw" || suppressDraw || !overlay.classList.contains("active")) return;
+      if (event.button !== undefined && event.button !== 0) return;
+      event.preventDefault();
+      const point = canvasPointFromPointer(event);
+      const id = newId();
+      const color = hexToRgba(getColor(), getInkOpacity());
+      const width = getStrokeWidth();
+      activeStroke = { id, color, width, points: [point], pointerId: event.pointerId };
+      previewStart(id, color, width, point);
+      socket?.emit("wb-live-start", { id, color, width, x: point.x, y: point.y });
+      scratchCanvas.setPointerCapture?.(event.pointerId);
+      clearTimeout(centerCanvasTimer);
+      scheduleMobileUIHide();
+    }
+    function moveActiveStroke(event) {
+      if (!activeStroke || event.pointerId !== activeStroke.pointerId) return;
+      event.preventDefault();
+      const events = event.getCoalescedEvents ? event.getCoalescedEvents() : [event];
+      for (const item of events) queueStrokePoint(canvasPointFromPointer(item));
+    }
+    function finishActiveStroke(event) {
+      if (!activeStroke || event.pointerId !== activeStroke.pointerId) return;
+      event.preventDefault();
+      queueStrokePoint(canvasPointFromPointer(event));
+      if (strokeFrame) cancelAnimationFrame(strokeFrame);
+      flushStrokePointBatch();
+      const stroke = activeStroke;
+      activeStroke = null;
+      const pathData = stroke.points.length === 1
+        ? `M ${stroke.points[0].x} ${stroke.points[0].y} L ${stroke.points[0].x + 0.1} ${stroke.points[0].y + 0.1}`
+        : `M ${stroke.points.map((point) => `${point.x} ${point.y}`).join(" L ")}`;
+      const path = new fabric.Path(pathData, {
+        fill: null,
+        stroke: stroke.color,
+        strokeWidth: stroke.width,
+        strokeLineCap: "round",
+        strokeLineJoin: "round",
+        strokeUniform: true,
+        selectable: false,
+        evented: false,
+        id: stroke.id,
+      });
+      lastPathTime = Date.now();
+      canvas.add(path);
+      canvas.renderAll();
+      previewEnd(stroke.id);
+      socket?.emit("wb-live-end", { id: stroke.id });
+      socket?.emit("wb-add", path.toJSON(["id"]));
+      recordUndoState();
+
+      // Fabric no longer emits path:created for worker-rendered strokes, so
+      // keep the mobile viewport following the committed path here.
+      if (!isPresenter && isMobile() && scrollEl && !useFitViewport()) {
+        clearTimeout(centerCanvasTimer);
+        centerCanvasTimer = setTimeout(() => {
+          const bounds = path.getBoundingRect();
+          const scale = getMobileScale();
+          const centerX = (bounds.left + bounds.width / 2) * scale;
+          const viewportMidX = scrollEl.clientWidth / 2;
+          const visibleCenterX = centerX - scrollEl.scrollLeft;
+          const maxScrollLeft = Math.max(0, scrollEl.scrollWidth - scrollEl.clientWidth);
+          const rightEdgeX = (bounds.left + bounds.width) * scale;
+          const leftEdgeX = bounds.left * scale;
+          const targetScrollLeft = visibleCenterX < viewportMidX
+            ? Math.max(0, Math.min(maxScrollLeft, rightEdgeX - scrollEl.clientWidth))
+            : Math.max(0, Math.min(maxScrollLeft, leftEdgeX));
+          scrollEl.scrollTo({ left: targetScrollLeft, behavior: "smooth" });
+        }, 1000);
+      }
+    }
+
+    if (scratchCanvas) {
+      scratchCanvas.addEventListener("pointerdown", beginActiveStroke, { passive: false });
+      scratchCanvas.addEventListener("pointermove", moveActiveStroke, { passive: false });
+      scratchCanvas.addEventListener("pointerup", finishActiveStroke, { passive: false });
+      scratchCanvas.addEventListener("pointercancel", cancelActiveStroke);
+    }
+
     if (!isPresenter) {
-      btnDraw.onclick = () => setActiveTool("draw");
-      btnErase.onclick = () => setActiveTool("erase");
-      btnSelect.onclick = () => setActiveTool("select");
+      socket?.on("wb-add", (objData) => {
+        if (!objData) return;
+        fabric.util.enlivenObjects([objData], (objects) => {
+          objects.forEach((object) => {
+            object.selectable = currentTool === "select";
+            object.evented = currentTool === "select" || currentTool === "erase";
+            canvas.add(object);
+          });
+          canvas.requestRenderAll();
+        });
+      });
 
       document.getElementById("wb-color").onchange = (e) => {
         canvas.freeDrawingBrush.color = hexToRgba(
@@ -2188,7 +2418,14 @@
       socket.on("wb-open", () => toggleWhiteboard(true));
       socket.on("wb-close", () => toggleWhiteboard(false));
 
+      canvas.on("object:modified", (opt) => {
+        syncModifiedObject(opt.target);
+        scheduleModifyUndo();
+      });
+
       socket.on("wb-state", (data) => {
+        previewStrokes.clear();
+        drawWorker?.postMessage({ type: "clear" });
         canvas.loadFromJSON(data, () => {
           canvas.getObjects().forEach((o) => {
             o.selectable = false;
@@ -2267,7 +2504,11 @@
         if (obj) canvas.remove(obj);
       });
 
-      socket.on("wb-clear", () => canvas.clear());
+      socket.on("wb-clear", () => {
+        previewStrokes.clear();
+        drawWorker?.postMessage({ type: "clear" });
+        canvas.clear();
+      });
 
       socket.on("wb-grid", (data) => {
         if (data) {

@@ -165,6 +165,22 @@
   height: 1080px !important;
 }
 
+#wb-canvas-stack .canvas-container canvas {
+  width: 1920px !important;
+  height: 1080px !important;
+}
+
+#wb-scratch-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  z-index: 3;
+  pointer-events: none;
+  touch-action: none;
+}
+
 @keyframes wbSpin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
@@ -231,8 +247,7 @@
   overflow: hidden;
 }
 
-.is-presenter #wb-mobile-bar,
-.is-presenter #wb-toolbar {
+.is-presenter #wb-mobile-bar {
   display: none !important;
 }
 /* ── Floating Buttons Container ── */
@@ -426,6 +441,22 @@
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+/* Game-page button rules add horizontal padding to every button. Keep the
+   quick palette buttons circular and their row compact inside the toolbar. */
+#whiteboard-overlay #wb-toolbar .wb-quick-colors .wb-qc-btn {
+  box-sizing: border-box;
+  display: block;
+  flex: 0 0 28px;
+  width: 28px;
+  min-width: 28px;
+  max-width: 28px;
+  height: 28px;
+  min-height: 28px;
+  max-height: 28px;
+  padding: 0 !important;
+  line-height: 1;
+}
+
 .wb-tool-btn {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid transparent;
@@ -497,11 +528,19 @@ input[type="color"].wb-color-picker::-webkit-color-swatch {
 
 input[type="range"].wb-slider {
   -webkit-appearance: none;
+  appearance: none;
   width: 72px;
   height: 4px;
+  min-width: 0;
+  max-width: 72px;
+  padding: 0;
+  margin: 0;
+  border: 0;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 2px;
   outline: none;
+  box-shadow: none;
+  box-sizing: content-box;
 }
 
 input[type="range"].wb-slider::-webkit-slider-thumb {
@@ -718,9 +757,13 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
     overflow-x: auto;
     justify-content: flex-start;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
+    scrollbar-width: none;
     padding-bottom: 4px;
     white-space: nowrap;
+  }
+
+  .is-editor #wb-toolbar .wb-toolbar-primary::-webkit-scrollbar {
+    display: none;
   }
 
   .is-editor #wb-toolbar .wb-tool-btn {
@@ -738,8 +781,19 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
     display: flex;
   }
 
-  .is-editor #wb-toolbar .wb-toolbar-controls {
+  .is-editor #wb-toolbar .wb-toolbar-controls,
+  .is-presenter #wb-toolbar .wb-toolbar-controls {
     flex-wrap: wrap;
+    align-self: center;
+    width: fit-content;
+    max-width: 100%;
+    justify-content: flex-start;
+    overflow: visible;
+    gap: 6px 10px;
+  }
+
+  .wb-control-group {
+    flex-shrink: 0;
   }
 
   .wb-tool-close-main {
@@ -770,6 +824,7 @@ input[type="range"].wb-slider::-webkit-slider-thumb {
 
   input[type="range"].wb-slider {
     width: 56px;
+    max-width: 56px;
   }
 }
 

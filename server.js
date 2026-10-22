@@ -23,6 +23,7 @@ const WHITEBOARD_EVENTS = [
   "wb-open", "wb-close", "wb-state", "wb-pan", "wb-zoom", "wb-bg",
   "wb-add", "wb-modify", "wb-modify-batch", "wb-remove", "wb-clear",
   "wb-grid", "wb-capture-request", "wb-capture-response", "wb-clear-snapshot",
+  "wb-live-start", "wb-live-points", "wb-live-end",
 ];
 let whiteboardPort = null;
 function startWhiteboardWorker() {
