@@ -130,6 +130,12 @@
 
           <button type="button" id="wb-mobile-ui-reveal" class="wb-mobile-ui-reveal" hidden aria-label="Show tools">🛠️ Tools</button>
 
+          <button type="button" id="wb-toolbar-restore-btn" class="wb-toolbar-restore-btn" aria-label="Restore control panel" title="Restore Control Panel (Click to expand)">
+            <span class="wb-restore-icon">✏️</span>
+            <span class="wb-restore-text">Control Panel</span>
+            <span class="wb-restore-arrow">▾</span>
+          </button>
+
           <div id="wb-toolbar">
             <div class="wb-toolbar-row wb-toolbar-primary">
               <button class="wb-tool-btn active" id="wb-tool-draw" title="Draw" data-tool="draw">✏️</button>
@@ -156,7 +162,7 @@
             <div class="wb-separator"></div>
               <button class="wb-tool-btn" id="wb-tool-clear" title="Clear">🗑️</button>
               <button class="wb-tool-btn" id="wb-tool-save" title="Save PNG">💾</button>
-              <button class="wb-tool-btn" id="wb-toolbar-minimize-btn" title="Minimize controls" aria-label="Minimize controls">⤓</button>
+              <button class="wb-tool-btn" id="wb-toolbar-minimize-btn" title="Minimize control panel (auto-minimizes in 5s)" aria-label="Minimize controls">▲</button>
               <button class="wb-tool-btn wb-tool-close-main" id="wb-tool-close" title="Close">❌</button>
             </div>
 
@@ -177,16 +183,16 @@
                 <input type="color" id="wb-color" class="wb-color-picker" value="#000000" title="Color">
             </div>
             <div class="wb-control-group">
-              <span>Size</span>
-              <input type="range" id="wb-size" class="wb-slider" min="1" max="50" value="5">
+              <span title="Pen drawing size">Size</span>
+              <input type="range" id="wb-size" class="wb-slider" min="1" max="50" value="5" title="Pen / Brush drawing size (1 - 50px)">
             </div>
               <div class="wb-control-group">
-                <span>Ink</span>
-                <input type="range" id="wb-ink-depth" class="wb-slider" min="0.1" max="1" step="0.05" value="1" title="Ink depth / opacity">
+                <span title="Ink opacity / transparency">Ink</span>
+                <input type="range" id="wb-ink-depth" class="wb-slider" min="0.1" max="1" step="0.05" value="1" title="Ink opacity / transparency (10% - 100%)">
               </div>
               <div class="wb-control-group">
-                <span>Stroke</span>
-                <input type="range" id="wb-stroke-width" class="wb-slider" min="1" max="30" value="4" title="Shape stroke width">
+                <span title="Shape border thickness">Stroke</span>
+                <input type="range" id="wb-stroke-width" class="wb-slider" min="1" max="30" value="4" title="Shape & arrow border thickness (1 - 30px)">
               </div>
             <div class="wb-separator"></div>
               <div class="wb-control-group">
@@ -657,6 +663,10 @@
     }
     function getInkOpacity() {
       return parseFloat(document.getElementById("wb-ink-depth").value);
+    }
+    function getPenSize() {
+      const el = document.getElementById("wb-size");
+      return el ? parseInt(el.value, 10) || 5 : 5;
     }
     function getStrokeWidth() {
       return parseInt(document.getElementById("wb-stroke-width").value, 10);
@@ -1271,10 +1281,21 @@
       };
     });
 
+    function isAnyPanelOpen() {
+      const panels = overlay.querySelectorAll(".wb-panel");
+      for (let i = 0; i < panels.length; i++) {
+        if (!panels[i].hidden) return true;
+      }
+      return false;
+    }
+
     function closeAllPanels() {
       document.querySelectorAll(".wb-panel").forEach((p) => {
         p.hidden = true;
       });
+      if (isPresenter && !overlay.classList.contains("wb-toolbar-minimized")) {
+        scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+      }
     }
     function togglePanel(id) {
       const panel = document.getElementById(id);
@@ -1282,6 +1303,7 @@
       closeAllPanels();
       if (!wasOpen) {
         panel.hidden = false;
+        clearTimeout(toolbarMinimizeTimer);
         if (isMobile())
           document
             .getElementById("wb-toolbar")
@@ -1292,6 +1314,9 @@
     document.querySelectorAll(".wb-panel-close").forEach((btn) => {
       btn.onclick = () => {
         document.getElementById(btn.dataset.panel).hidden = true;
+        if (isPresenter && !overlay.classList.contains("wb-toolbar-minimized")) {
+          scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+        }
       };
     });
 
@@ -1299,10 +1324,43 @@
     const btnErase = document.getElementById("wb-tool-erase");
     const btnSelect = document.getElementById("wb-tool-select");
 
+    // ── Toolbar Minimization & Auto-minimize ──
+    let toolbarMinimizeTimer = null;
+    const TOOLBAR_AUTO_MINIMIZE_MS = 5000;
+    let isToolbarInteracting = false;
+
+    function setToolbarMinimized(minimized) {
+      clearTimeout(toolbarMinimizeTimer);
+      if (minimized) {
+        overlay.classList.add("wb-toolbar-minimized");
+        closeAllPanels();
+      } else {
+        overlay.classList.remove("wb-toolbar-minimized");
+        if (isPresenter) {
+          scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+        }
+      }
+    }
+
+    function scheduleToolbarAutoMinimize(delayMs) {
+      clearTimeout(toolbarMinimizeTimer);
+      if (!overlay.classList.contains("active")) return;
+      if (overlay.classList.contains("wb-toolbar-minimized")) return;
+      if (isToolbarInteracting || isAnyPanelOpen()) return;
+
+      const ms = typeof delayMs === "number" ? delayMs : TOOLBAR_AUTO_MINIMIZE_MS;
+      toolbarMinimizeTimer = setTimeout(() => {
+        if (!overlay.classList.contains("active")) return;
+        if (isToolbarInteracting || isAnyPanelOpen()) return;
+        setToolbarMinimized(true);
+      }, ms);
+    }
+
     function setMobileUIVisible(visible) {
-      // Allow minimizing/showing the controls on desktop as well
-      // but keep presenter mode locked (presenter shouldn't see editor controls)
-      if (isPresenter) return;
+      if (isPresenter) {
+        setToolbarMinimized(!visible);
+        return;
+      }
       if (visible) {
         overlay.classList.remove("wb-mobile-ui-hidden");
         if (mobileUiReveal) mobileUiReveal.hidden = true;
@@ -1316,12 +1374,20 @@
     }
 
     function showMobileUI() {
-      setMobileUIVisible(true);
+      if (isPresenter) {
+        setToolbarMinimized(false);
+      } else {
+        setMobileUIVisible(true);
+      }
     }
 
     let lastMobileUIHideSchedule = 0;
     function scheduleMobileUIHide() {
-      if (!isMobile() || isPresenter) return;
+      if (isPresenter) {
+        scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+        return;
+      }
+      if (!isMobile()) return;
       const now = Date.now();
       if (now - lastMobileUIHideSchedule < 500) return;
       lastMobileUIHideSchedule = now;
@@ -1716,6 +1782,10 @@
         }
         document.body.classList.add("wb-active");
         if (triggerBtnRef) triggerBtnRef.classList.add("active");
+        overlay.classList.remove("wb-toolbar-minimized");
+        if (isPresenter) {
+          scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+        }
         if (isMobile() && !isPresenter) {
           updateMobileViewportHeight();
           initMobileZoom();
@@ -1736,6 +1806,7 @@
         if (scratchCanvas) scratchCanvas.style.pointerEvents = "none";
         document.body.classList.remove("wb-active");
         overlay.classList.remove("wb-mobile-ui-hidden");
+        overlay.classList.remove("wb-toolbar-minimized");
         overlay.classList.remove("wb-mobile-viewport-fit");
         overlay.style.position = "";
         overlay.style.top = "";
@@ -1744,6 +1815,7 @@
         overlay.style.height = "";
         if (mobileUiReveal) mobileUiReveal.hidden = true;
         clearTimeout(mobileUiHideTimer);
+        clearTimeout(toolbarMinimizeTimer);
         if (triggerBtnRef) triggerBtnRef.classList.remove("active");
       }
     }
@@ -1753,6 +1825,8 @@
       if (!isPresenter) {
         clearTimeout(centerCanvasTimer);
         scheduleMobileUIHide();
+      } else {
+        scheduleToolbarAutoMinimize(2000);
       }
       const evt = opt.e;
       if (suppressDraw || (evt.touches && evt.touches.length >= 2)) return;
@@ -1808,7 +1882,11 @@
     });
 
     canvas.on("mouse:up", function () {
-      if (!isPresenter) scheduleMobileUIHide();
+      if (!isPresenter) {
+        scheduleMobileUIHide();
+      } else {
+        scheduleToolbarAutoMinimize(2000);
+      }
       if (this.isErasing && this.eraserCircle) {
         const radius = this.eraserCircle.radius;
         const center = { x: this.eraserCircle.left, y: this.eraserCircle.top };
@@ -1999,7 +2077,7 @@
       const point = canvasPointFromPointer(event);
       const id = newId();
       const color = hexToRgba(getColor(), getInkOpacity());
-      const width = getStrokeWidth();
+      const width = getPenSize();
       activeStroke = { id, color, width, points: [point], pointerId: event.pointerId };
       previewStart(id, color, width, point);
       socket?.emit("wb-live-start", { id, color, width, x: point.x, y: point.y });
@@ -2042,6 +2120,9 @@
       socket?.emit("wb-live-end", { id: stroke.id });
       socket?.emit("wb-add", path.toJSON(["id"]));
       recordUndoState();
+      if (isPresenter) {
+        scheduleToolbarAutoMinimize(2000);
+      }
 
       // Fabric no longer emits path:created for worker-rendered strokes, so
       // keep the mobile viewport following the committed path here.
@@ -2083,18 +2164,47 @@
           canvas.requestRenderAll();
         });
       });
+    }
 
-      document.getElementById("wb-color").onchange = (e) => {
+    document.getElementById("wb-color").onchange = (e) => {
         canvas.freeDrawingBrush.color = hexToRgba(
           e.target.value,
           getInkOpacity(),
         );
       };
       document.getElementById("wb-size").oninput = (e) => {
-        canvas.freeDrawingBrush.width = parseInt(e.target.value, 10);
+        const val = parseInt(e.target.value, 10) || 5;
+        if (canvas.freeDrawingBrush) canvas.freeDrawingBrush.width = val;
+        const active = canvas.getActiveObject();
+        if (active && !active.wbBackground && (active.type === "path" || active.strokeWidth !== undefined)) {
+          active.set({ strokeWidth: val });
+          canvas.requestRenderAll();
+          syncModifiedObject(active);
+          recordUndoState();
+        }
+      };
+      document.getElementById("wb-stroke-width").oninput = (e) => {
+        const val = parseInt(e.target.value, 10) || 4;
+        const active = canvas.getActiveObject();
+        if (active && !active.wbBackground && active.strokeWidth !== undefined) {
+          active.set({ strokeWidth: val });
+          canvas.requestRenderAll();
+          syncModifiedObject(active);
+          recordUndoState();
+        }
       };
       document.getElementById("wb-ink-depth").oninput = () => {
-        canvas.freeDrawingBrush.color = hexToRgba(getColor(), getInkOpacity());
+        const opacity = getInkOpacity();
+        if (canvas.freeDrawingBrush) {
+          canvas.freeDrawingBrush.color = hexToRgba(getColor(), opacity);
+        }
+        const active = canvas.getActiveObject();
+        if (active && !active.wbBackground) {
+          active.set({ opacity });
+          canvas.requestRenderAll();
+          syncModifiedObject(active);
+          recordUndoState();
+        }
       };
       function updateBoardBackground(sync = true) {
         const alpha = document.getElementById("wb-bg-alpha").value;
@@ -2255,9 +2365,8 @@
 
       const mobileToggle = document.getElementById("wb-mobile-tools-toggle");
       const mobileMinimize = document.getElementById("wb-mobile-minimize-btn");
-      const toolbarMinimize = document.getElementById(
-        "wb-toolbar-minimize-btn",
-      );
+      const toolbarMinimize = document.getElementById("wb-toolbar-minimize-btn");
+      const toolbarRestoreBtn = document.getElementById("wb-toolbar-restore-btn");
       const toolbar = document.getElementById("wb-toolbar");
       if (mobileToggle) {
         mobileToggle.onclick = () => {
@@ -2268,14 +2377,32 @@
       if (mobileMinimize) {
         mobileMinimize.onclick = (e) => {
           e.stopPropagation();
+          setToolbarMinimized(true);
           setMobileUIVisible(false);
         };
       }
       if (toolbarMinimize) {
-        toolbarMinimize.onclick = (e) => {
-          e.stopPropagation();
-          setMobileUIVisible(false);
+        const collapseToolbar = (e) => {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          setToolbarMinimized(true);
         };
+        toolbarMinimize.onclick = collapseToolbar;
+        toolbarMinimize.addEventListener("pointerdown", collapseToolbar);
+      }
+      if (toolbarRestoreBtn) {
+        const expandToolbar = (e) => {
+          if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          setToolbarMinimized(false);
+        };
+        toolbarRestoreBtn.onclick = expandToolbar;
+        toolbarRestoreBtn.addEventListener("pointerdown", expandToolbar);
+        toolbarRestoreBtn.addEventListener("touchstart", expandToolbar, { passive: false });
       }
       document
         .getElementById("wb-mobile-close-btn")
@@ -2305,16 +2432,51 @@
         });
       }
 
-      ["touchstart", "touchmove", "mousedown", "mousemove", "click"].forEach(
-        (evt) => {
-          toolbar?.addEventListener(evt, () => showMobileUI(), {
-            passive: true,
-          });
-        },
-      );
+      if (toolbar) {
+        toolbar.addEventListener("mouseenter", () => {
+          isToolbarInteracting = true;
+          clearTimeout(toolbarMinimizeTimer);
+        });
+        toolbar.addEventListener("mouseleave", () => {
+          isToolbarInteracting = false;
+          if (isPresenter && !overlay.classList.contains("wb-toolbar-minimized")) {
+            scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+          }
+        });
+        ["click", "input", "change"].forEach((evt) => {
+          toolbar.addEventListener(
+            evt,
+            () => {
+              if (isPresenter && !overlay.classList.contains("wb-toolbar-minimized")) {
+                scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+              }
+            },
+            { passive: true },
+          );
+        });
+      }
 
-      overlay.addEventListener("click", () => {
-        if (!isPresenter) scheduleMobileUIHide();
+      document.querySelectorAll(".wb-panel").forEach((panel) => {
+        panel.addEventListener("mouseenter", () => {
+          isToolbarInteracting = true;
+          clearTimeout(toolbarMinimizeTimer);
+        });
+        panel.addEventListener("mouseleave", () => {
+          isToolbarInteracting = false;
+          if (isPresenter && !overlay.classList.contains("wb-toolbar-minimized")) {
+            scheduleToolbarAutoMinimize(TOOLBAR_AUTO_MINIMIZE_MS);
+          }
+        });
+      });
+
+      overlay.addEventListener("click", (e) => {
+        if (!toolbar?.contains(e.target) && !toolbarRestoreBtn?.contains(e.target)) {
+          if (isPresenter) {
+            scheduleToolbarAutoMinimize(2500);
+          } else {
+            scheduleMobileUIHide();
+          }
+        }
       });
 
       if (!isPresenter) {
@@ -2414,7 +2576,8 @@
         syncModifiedObject(opt.target);
         scheduleModifyUndo();
       });
-    } else if (socket) {
+
+      if (isPresenter && socket) {
       socket.on("wb-open", () => toggleWhiteboard(true));
       socket.on("wb-close", () => toggleWhiteboard(false));
 
